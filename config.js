@@ -7,7 +7,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 12,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 3,
+		negativeLevel: 30,
+		nonCombatNegativeLevel: 30,
 		explorationEvents: {
 			'HARVEST_2': 4,
 			'AGAIN': 3,
@@ -22,7 +23,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 8,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 6,
+		negativeLevel: 60,
+		nonCombatNegativeLevel: 60,
 		explorationEvents: {
 			'ACCIDENT_3_5': 4,
 			'FUEL_1': 3,
@@ -37,7 +39,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 8,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 6,
+		negativeLevel: 60,
+		nonCombatNegativeLevel: 60,
 		explorationEvents: {
 			'DISEASE': 4,
 			'HARVEST_2': 3,
@@ -52,7 +55,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 12,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 4,
+		negativeLevel: 40,
+		nonCombatNegativeLevel: 40,
 		explorationEvents: {
 			'NOTHING_TO_REPORT': 5,
 			'TIRED_2': 4,
@@ -66,7 +70,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 12,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 1,
+		negativeLevel: 10,
+		nonCombatNegativeLevel: 10,
 		explorationEvents: {
 			'NOTHING_TO_REPORT': 7,
 			'PROVISION_3': 2,
@@ -80,7 +85,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 2,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 3,
+		negativeLevel: 30,
+		nonCombatNegativeLevel: 30,
 		explorationEvents: {
 			'FUEL_2': 4,
 			'ACCIDENT_3_5': 3,
@@ -95,7 +101,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 2,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 3,
+		negativeLevel: 30,
+		nonCombatNegativeLevel: 13,
 		explorationEvents: {
 			'ARTEFACT': 4,
 			'NOTHING_TO_REPORT': 3,
@@ -110,7 +117,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 1,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 1,
+		negativeLevel: 10,
+		nonCombatNegativeLevel: 0,
 		explorationEvents: {
 			'ARTEFACT': 4,
 			'FUEL_3': 3,
@@ -126,6 +134,7 @@ const PlanetSectorConfigData = [
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
 		negativeLevel: 0,
+		nonCombatNegativeLevel: 0,
 		explorationEvents: {
 			'HARVEST_3': 4,
 			'HARVEST_1': 3,
@@ -139,7 +148,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 4,
 		weightAtPlanetExploration: 10,
 		maxPerPlanet: 1,
-		negativeLevel: 7,
+		negativeLevel: 70,
+		nonCombatNegativeLevel: 63,
 		explorationEvents: {
 			'MUSH_TRAP': 4,
 			'STARMAP': 3,
@@ -154,7 +164,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 4,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 3,
+		negativeLevel: 30,
+		nonCombatNegativeLevel: 22,
 		explorationEvents: {
 			'PROVISION_4': 4,
 			'PROVISION_2': 3,
@@ -169,7 +180,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 2,
 		weightAtPlanetExploration: 6,
 		maxPerPlanet: 4,
-		negativeLevel: 7,
+		negativeLevel: 70,
+		nonCombatNegativeLevel: 50,
 		explorationEvents: {
 			'FIGHT_12': 4,
 			'ACCIDENT_3_5': 3,
@@ -184,7 +196,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 4,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 5,
+		negativeLevel: 50,
+		nonCombatNegativeLevel: 17,
 		explorationEvents: {
 			'FIGHT_12': 4,
 			'PROVISION_2': 3,
@@ -199,7 +212,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 2,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 8,
+		negativeLevel: 80,
+		nonCombatNegativeLevel: 78,
 		explorationEvents: {
 			'ACCIDENT_3_5': 4,
 			'DISEASE': 3,
@@ -214,7 +228,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 4,
 		weightAtPlanetExploration: 6,
 		maxPerPlanet: 1,
-		negativeLevel: 9,
+		negativeLevel: 70,
+		nonCombatNegativeLevel: 57,
 		explorationEvents: {
 			'KILL_RANDOM': 4,
 			'FIGHT_32': 3,
@@ -229,7 +244,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 8,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 6,
+		negativeLevel: 60,
+		nonCombatNegativeLevel: 60,
 		explorationEvents: {
 			'NOTHING_TO_REPORT': 4,
 			'TIRED_2': 3,
@@ -244,7 +260,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 8,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 5,
+		negativeLevel: 50,
+		nonCombatNegativeLevel: 50,
 		explorationEvents: {
 			'TIRED_2': 4,
 			'NOTHING_TO_REPORT': 3,
@@ -259,7 +276,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 8,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 4,
+		negativeLevel: 40,
+		nonCombatNegativeLevel: 40,
 		explorationEvents: {
 			'NOTHING_TO_REPORT': 6,
 			'TIRED_2': 3,
@@ -273,7 +291,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 8,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
-		negativeLevel: 6,
+		negativeLevel: 30,
+		nonCombatNegativeLevel: 30,
 		explorationEvents: {
 			'NOTHING_TO_REPORT': 4,
 			'BACK': 3,
@@ -288,7 +307,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 8,
 		weightAtPlanetExploration: 6,
 		maxPerPlanet: 4,
-		negativeLevel: 3,
+		negativeLevel: 10,
+		nonCombatNegativeLevel: 10,
 		explorationEvents: {
 			'NOTHING_TO_REPORT': 7,
 			'BACK': 2,
@@ -303,6 +323,7 @@ const PlanetSectorConfigData = [
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 2,
 		negativeLevel: 0,
+		nonCombatNegativeLevel: 0,
 		explorationEvents: {
 			'FUEL_3': 4,
 			'FUEL_4': 3,
@@ -318,6 +339,7 @@ const PlanetSectorConfigData = [
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 1,
 		negativeLevel: 0,
+		nonCombatNegativeLevel: 0,
 		explorationEvents: {
 			'OXYGEN_24': 4,
 			'OXYGEN_16': 3,
@@ -332,7 +354,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 0,
 		weightAtPlanetExploration: 0,
 		maxPerPlanet: 1,
-		negativeLevel: 6,
+		negativeLevel: 60,
+		nonCombatNegativeLevel: 60,
 		explorationEvents: {
 			'NOTHING_TO_REPORT': 4,
 			'TIRED_2': 3,
@@ -347,7 +370,8 @@ const PlanetSectorConfigData = [
 		weightAtPlanetAnalysis: 0,
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 15,
-		negativeLevel: 1,
+		negativeLevel: 10,
+		nonCombatNegativeLevel: 10,
 		explorationEvents: {
 			'FIND_LOST': 7,
 			'AGAIN': 2,
@@ -477,7 +501,6 @@ const NegativeEvents = [
 	'FIGHT_8_10_12_15_18_32',
 	'ITEM_LOST',
 	'KILL_RANDOM',
-	'BACK',
 	'KILL_ALL',
 	'KILL_LOST',
 	'MUSH_TRAP'

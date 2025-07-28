@@ -6,7 +6,57 @@ class UIManager {
     }
 
     /**
-     * Creates the main expedition simulator panel
+       /**
+     * Checks if a sector has fight events
+     * @param {string} sectorName - Name of the sector
+     * @returns {boolean} - True if sector has fight events
+     */
+    hasFightEvents(sectorName) {
+        const sectorsWithFight = ['RUINS', 'WRECK', 'CRISTAL_FIELD', 'RUMINANT', 'PREDATOR', 'INTELLIGENT', 'INSECT', 'MANKAROG'];
+        return sectorsWithFight.includes(sectorName);
+    }
+
+    /**
+     * Gets the negative level for a sector
+     * @param {string} sectorName - Name of the sector
+     * @returns {number} - Negative level of the sector
+     */
+    getSectorNegativeLevel(sectorName) {
+        const sectorConfig = PlanetSectorConfigData.find(s => s.sectorName === sectorName);
+        if (!sectorConfig) return 0;
+        
+        // Check if both traitor and diplomacy toggles are active
+        const isDiplomacyActive = document.body.classList.contains('diplomacy-active');
+        const isTraitorActive = document.body.classList.contains('traitor-active');
+        
+        // If both are active, use non-combat negative level
+        if (isDiplomacyActive && isTraitorActive) {
+            return sectorConfig.nonCombatNegativeLevel;
+        }
+        
+        return sectorConfig.negativeLevel;
+    }
+
+    /**
+     * Gets the appropriate traitor icon based on negative level
+     * @param {number} negativeLevel - The negative level value (percentage)
+     * @returns {string|null} - Icon filename or null if no icon needed
+     */
+    getTraitorIcon(negativeLevel) {
+        if (negativeLevel === 0) {
+            return null; // No icon for level 0
+        } else if (negativeLevel >= 1 && negativeLevel <= 30) {
+            return 'traitor.png'; // Level 1
+        } else if (negativeLevel >= 31 && negativeLevel <= 60) {
+            return 'traitor level2.png'; // Level 2
+        } else if (negativeLevel >= 61) {
+            return 'traitor level3.png'; // Level 3
+        }
+        return null;
+    }
+
+    /**
+     * Creates a sector element for the gridthe main expedition simulator panel
      * @returns {HTMLElement} - The created panel element
      */
     createPanel() {
@@ -38,9 +88,14 @@ class UIManager {
                     <div class="section-selector">
                         <div class="sectors-header">
                             <h4>Available Sectors</h4>
-                            <button id="sectors-toggle-btn" class="sectors-toggle-btn" data-active="false">
-                                <img src="${getResourceURL('abilities/traitor.png')}" alt="Toggle" />
-                            </button>
+                            <div class="sectors-buttons">
+                                <button id="sectors-toggle-btn" class="sectors-toggle-btn" data-active="false">
+                                    <img src="${getResourceURL('abilities/traitor.png')}" alt="Toggle Traitor" />
+                                </button>
+                                <button id="diplomacy-toggle-btn" class="diplomacy-toggle-btn" data-active="false">
+                                    <img src="${getResourceURL('abilities/diplomacy.png')}" alt="Toggle Diplomacy" />
+                                </button>
+                            </div>
                         </div>
                         <div class="sector-grid" id="sector-grid"></div>
                     </div>
@@ -155,8 +210,31 @@ class UIManager {
         img.src = getResourceURL(`astro/${sectorName.toLowerCase()}.png`);
         img.alt = sectorName;
         img.title = formatSectorName(sectorName);
+        img.className = 'sector-main-img';
         
         sectorDiv.appendChild(img);
+        
+        // Add fight icon if sector has fight events
+        if (this.hasFightEvents(sectorName)) {
+            const fightImg = document.createElement('img');
+            fightImg.src = getResourceURL('others/fight.png');
+            fightImg.alt = 'Fight';
+            fightImg.className = 'fight-icon';
+            sectorDiv.appendChild(fightImg);
+        }
+        
+        // Add negative level icon if applicable
+        const negativeLevel = this.getSectorNegativeLevel(sectorName);
+        const traitorIcon = this.getTraitorIcon(negativeLevel);
+        if (traitorIcon) {
+            const negativeImg = document.createElement('img');
+            negativeImg.src = getResourceURL(`abilities/${traitorIcon}`);
+            negativeImg.alt = `Negative Level ${negativeLevel}`;
+            negativeImg.className = 'negative-level-icon';
+            negativeImg.title = `Negative Level: ${negativeLevel}`;
+            sectorDiv.appendChild(negativeImg);
+        }
+        
         sectorDiv.addEventListener('click', () => onSectorClick(sectorName));
         
         return sectorDiv;
@@ -199,6 +277,28 @@ class UIManager {
         img.alt = sectorName;
         
         sectorDiv.appendChild(img);
+        
+        // Add fight icon if sector has fight events
+        if (this.hasFightEvents(sectorName)) {
+            const fightImg = document.createElement('img');
+            fightImg.src = getResourceURL('others/fight.png');
+            fightImg.alt = 'Fight';
+            fightImg.className = 'fight-icon';
+            sectorDiv.appendChild(fightImg);
+        }
+        
+        // Add negative level icon if applicable
+        const negativeLevel = this.getSectorNegativeLevel(sectorName);
+        const traitorIcon = this.getTraitorIcon(negativeLevel);
+        if (traitorIcon) {
+            const negativeImg = document.createElement('img');
+            negativeImg.src = getResourceURL(`abilities/${traitorIcon}`);
+            negativeImg.alt = `Negative Level ${negativeLevel}`;
+            negativeImg.className = 'negative-level-icon';
+            negativeImg.title = `Negative Level: ${negativeLevel}`;
+            sectorDiv.appendChild(negativeImg);
+        }
+        
         sectorDiv.addEventListener('click', () => onRemoveClick(index));
         
         return sectorDiv;
@@ -239,6 +339,53 @@ class UIManager {
     updateProbabilityDisplay(htmlContent) {
         const probContent = document.getElementById('prob-content');
         probContent.innerHTML = htmlContent;
+    }
+
+    /**
+     * Refreshes all negative level icons based on current toggle states
+     */
+    refreshNegativeLevelIcons() {
+        // Refresh icons in the main sector grid
+        const sectorItems = document.querySelectorAll('#sector-grid .sector-item');
+        sectorItems.forEach(sectorDiv => {
+            const sectorName = sectorDiv.dataset.sector;
+            this.updateNegativeLevelIcon(sectorDiv, sectorName);
+        });
+
+        // Refresh icons in the selected sectors grid
+        const selectedItems = document.querySelectorAll('#selected-grid .selected-sector-item');
+        selectedItems.forEach(sectorDiv => {
+            const img = sectorDiv.querySelector('img');
+            if (img && img.alt) {
+                const sectorName = img.alt.toUpperCase();
+                this.updateNegativeLevelIcon(sectorDiv, sectorName);
+            }
+        });
+    }
+
+    /**
+     * Updates the negative level icon for a specific sector element
+     * @param {HTMLElement} sectorDiv - The sector div element
+     * @param {string} sectorName - The sector name
+     */
+    updateNegativeLevelIcon(sectorDiv, sectorName) {
+        // Remove existing negative level icon
+        const existingIcon = sectorDiv.querySelector('.negative-level-icon');
+        if (existingIcon) {
+            existingIcon.remove();
+        }
+
+        // Add new negative level icon based on current state
+        const negativeLevel = this.getSectorNegativeLevel(sectorName);
+        const traitorIcon = this.getTraitorIcon(negativeLevel);
+        if (traitorIcon) {
+            const negativeImg = document.createElement('img');
+            negativeImg.src = getResourceURL(`abilities/${traitorIcon}`);
+            negativeImg.alt = `Negative Level ${negativeLevel}`;
+            negativeImg.className = 'negative-level-icon';
+            negativeImg.title = `Negative Level: ${negativeLevel}`;
+            sectorDiv.appendChild(negativeImg);
+        }
     }
 
     /**

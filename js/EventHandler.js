@@ -14,6 +14,7 @@ class EventHandler {
         this.attachClearAllListener();
         this.attachDebugPlanetListeners();
         this.attachSectorsToggleListener();
+        this.attachDiplomacyToggleListener();
     }
 
     /**
@@ -150,8 +151,50 @@ class EventHandler {
                 const newState = !currentState;
                 sectorsToggleButton.setAttribute('data-active', newState);
                 
-                // TODO: Add specific functionality for what the toggle should control
-                console.log('Sectors toggle state:', newState ? 'ON' : 'OFF');
+                // Toggle traitor mode - controls negative level icons visibility
+                if (newState) {
+                    document.body.classList.add('traitor-active');
+                    console.log('Traitor toggle state: ON');
+                    console.log('Negative level icons: VISIBLE');
+                } else {
+                    document.body.classList.remove('traitor-active');
+                    console.log('Traitor toggle state: OFF');
+                    console.log('Negative level icons: HIDDEN');
+                }
+
+                // Refresh negative level icons to reflect current toggle states
+                if (this.uiManager) {
+                    this.uiManager.refreshNegativeLevelIcons();
+                }
+            });
+        }
+    }
+
+    /**
+     * Attaches the diplomacy toggle button listener
+     */
+    attachDiplomacyToggleListener() {
+        const diplomacyToggleButton = document.getElementById('diplomacy-toggle-btn');
+        if (diplomacyToggleButton) {
+            diplomacyToggleButton.addEventListener('click', () => {
+                const currentState = diplomacyToggleButton.getAttribute('data-active') === 'true';
+                const newState = !currentState;
+                diplomacyToggleButton.setAttribute('data-active', newState);
+                
+                // Toggle fight icons visibility
+                if (newState) {
+                    document.body.classList.add('diplomacy-active');
+                } else {
+                    document.body.classList.remove('diplomacy-active');
+                }
+                
+                console.log('Diplomacy toggle state:', newState ? 'ON' : 'OFF');
+                console.log('Fight icons:', newState ? 'HIDDEN' : 'VISIBLE');
+
+                // Refresh negative level icons to reflect current toggle states
+                if (this.uiManager) {
+                    this.uiManager.refreshNegativeLevelIcons();
+                }
             });
         }
     }
