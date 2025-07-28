@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Expedition Simulator",
+  "version": "1.0",
+  "description": "Simulate planet expeditions and calculate event probabilities",
+  "permissions": [
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://emush.eternaltwin.org/game*"],
+      "js": [
+        "config.js",
+        "js/utils.js",
+        "js/SectorManager.js",
+        "js/UIManager.js",
+        "js/PlayerManager.js",
+        "js/FightHandler.js",
+        "js/ResourceHandler.js",
+        "js/EventScenarioHandler.js",
+        "js/EventDamageHandler.js",
+        "js/ProbabilityCalculator.js",
+        "js/EventHandler.js",
+        "js/ExpeditionSimulator.js",
+        "content.js"
+      ],
+      "css": ["styles.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["astro/*", "*.png", "*.jpg", "*.gif"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Expedition Simulator"
+  }
+}
