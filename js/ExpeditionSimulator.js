@@ -11,8 +11,16 @@ class ExpeditionSimulator {
             
             this.sectorManager = new SectorManager();
             this.uiManager = new UIManager();
-            this.playerManager = new PlayerManager();
             this.probabilityCalculator = new ProbabilityCalculator();
+            
+            // Create callback for player updates
+            const onPlayerUpdate = () => {
+                if (this.eventHandler) {
+                    this.eventHandler.updateProbabilityDisplay();
+                }
+            };
+            
+            this.playerManager = new PlayerManager(onPlayerUpdate);
             this.eventHandler = null; // Will be initialized after UI creation
             
             this.init();
@@ -46,7 +54,8 @@ class ExpeditionSimulator {
         this.eventHandler = new EventHandler(
             this.sectorManager,
             this.uiManager,
-            this.probabilityCalculator
+            this.probabilityCalculator,
+            this.playerManager
         );
         
         this.eventHandler.attachEventListeners();

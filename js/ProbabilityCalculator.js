@@ -11,21 +11,316 @@ class ProbabilityCalculator {
 
     /**
      * Calculates probabilities for the selected sectors
-     * @param {Array<string>} selectedSectors - Array of selected sector names
+     * @param {Array<string>|Array<Object>} selectedSectors - Array of selected sector names or {id, name} objects
+     * @param {Array<Object>} players - Array of player objects with abilities and items
      * @returns {string} - HTML string with probability results
      */
-    calculateProbabilities(selectedSectors) {
+    calculateProbabilities(selectedSectors, players = []) {
         if (selectedSectors.length === 0) {
             return 'Select sectors to see expected outcomes';
         }
 
         const outcomes = this.initializeOutcomes();
-        this.calculateSectorOutcomes(selectedSectors, outcomes);
         
-        // Store selectedSectors for resource calculations
-        outcomes.selectedSectors = selectedSectors;
+        // Apply ability and item modifications to sector data
+        const modifiedSectorData = this.applyAbilityAndItemModifications(selectedSectors, players);
+        
+        this.calculateSectorOutcomes(outcomes, modifiedSectorData);
+        
+        // Store modified sector data for all calculations
+        outcomes.modifiedSectorData = modifiedSectorData;
         
         return this.generateProbabilityHTML(outcomes);
+    }
+
+    /**
+     * Applies ability and item modifications to sector data
+     * @param {Array<string>|Array<Object>} selectedSectors - Selected sectors (array of names or array of {id, name} objects)
+     * @param {Array<Object>} players - Player objects with abilities and items
+     * @returns {Map<string, Object>} - Modified sector data keyed by "sectorName_id"
+     */
+    applyAbilityAndItemModifications(selectedSectors, players) {
+        const modifiedData = new Map();
+        
+        // Collect all active abilities and items from players
+        const activeAbilities = this.collectActiveAbilities(players);
+        const activeItems = this.collectActiveItems(players);
+        
+        // Handle both old format (array of strings) and new format (array of {id, name} objects)
+        const sectorsWithIds = selectedSectors.map((sector, index) => {
+            if (typeof sector === 'string') {
+                // Legacy format - create temporary ID
+                return { id: index, name: sector };
+            } else {
+                // New format - sector already has {id, name}
+                return sector;
+            }
+        });
+        
+        sectorsWithIds.forEach(sector => {
+            const originalSector = PlanetSectorConfigData.find(s => s.sectorName === sector.name);
+            if (!originalSector) return;
+            
+            // Deep copy the sector data
+            const modifiedSector = JSON.parse(JSON.stringify(originalSector));
+            
+            // Apply ability modifications
+            this.applyAbilityModifications(modifiedSector, activeAbilities, sector.name);
+            
+            // Apply item modifications
+            this.applyItemModifications(modifiedSector, activeItems, sector.name);
+            
+            // Use sector ID to create unique keys that persist through modifications
+            modifiedData.set(`${sector.name}_${sector.id}`, modifiedSector);
+        });
+        
+        return modifiedData;
+    }
+
+    /**
+     * Collects all active abilities from players
+     * @param {Array<Object>} players - Player objects
+     * @returns {Set<string>} - Set of active ability names
+     */
+    collectActiveAbilities(players) {
+        const abilities = new Set();
+        players.forEach(player => {
+            if (player.abilities && Array.isArray(player.abilities)) {
+                player.abilities.forEach(ability => {
+                    if (ability) { // Check if ability is not null
+                        // Remove .png extension if present
+                        const abilityName = ability.replace('.png', '');
+                        abilities.add(abilityName);
+                    }
+                });
+            }
+        });
+        return abilities;
+    }
+
+    /**
+     * Collects all active items from players
+     * @param {Array<Object>} players - Player objects
+     * @returns {Array<string>} - Array of active item names
+     */
+    collectActiveItems(players) {
+        const items = [];
+        players.forEach(player => {
+            if (player.items && Array.isArray(player.items)) {
+                player.items.forEach(item => {
+                    if (item) { // Check if item is not null
+                        // Remove .jpg extension if present
+                        const itemName = item.replace('.jpg', '');
+                        items.push(itemName);
+                    }
+                });
+            }
+        });
+        return items;
+    }
+
+    /**
+     * Applies ability modifications to sector data
+     * @param {Object} sectorData - Sector data to modify
+     * @param {Set<string>} activeAbilities - Active abilities
+     * @param {string} sectorName - Current sector name
+     */
+    applyAbilityModifications(sectorData, activeAbilities, sectorName) {
+        activeAbilities.forEach(ability => {
+            const abilityConfig = AbilityEffects[ability];
+            if (!abilityConfig || !abilityConfig.effects) return;
+            
+            const effects = abilityConfig.effects;
+            
+            // Remove combat events (Diplomacy ability)
+            if (effects.removeCombatEvents) {
+                this.removeCombatEvents(sectorData);
+            }
+            
+            // Double negative events (Traitor ability)
+            if (effects.doubleNegativeEvents) {
+                this.doubleNegativeEvents(sectorData);
+            }
+            
+            // Increase fruit gains (Botanic ability)
+            if (effects.fruitBonus) {
+                this.applyFruitBonus(sectorData, effects.fruitBonus);
+            }
+            
+            // Sector-specific modifications (Pilot ability)
+            if (effects.sectorModifications && effects.sectorModifications[sectorName]) {
+                this.applySectorModifications(sectorData, effects.sectorModifications[sectorName]);
+            }
+        });
+    }
+
+    /**
+     * Applies item modifications to sector data
+     * @param {Object} sectorData - Sector data to modify
+     * @param {Array<string>} activeItems - Active items
+     * @param {string} sectorName - Current sector name
+     */
+    applyItemModifications(sectorData, activeItems, sectorName) {
+        activeItems.forEach(item => {
+            const itemConfig = ItemEffects[item];
+            if (!itemConfig || !itemConfig.effects) return;
+            
+            const effects = itemConfig.effects;
+            
+            // Remove combat events (White Flag)
+            if (effects.removeCombatEvents) {
+                this.removeCombatEvents(sectorData);
+            }
+            
+            // Remove specific events (Quad Compass)
+            if (effects.removeEvents) {
+                this.removeSpecificEvents(sectorData, effects.removeEvents);
+            }
+            
+            // Double fuel gains (Driller)
+            if (effects.doubleFuelGains) {
+                this.applyFuelDoubling(sectorData);
+            }
+            
+            // Sector-specific event bonuses (Trad Module)
+            if (effects.sectorEventBonus && effects.sectorEventBonus[sectorName]) {
+                this.applySectorEventBonus(sectorData, effects.sectorEventBonus[sectorName]);
+            }
+        });
+    }
+
+    /**
+     * Removes combat events from sector data
+     * @param {Object} sectorData - Sector data to modify
+     */
+    removeCombatEvents(sectorData) {
+        const combatEvents = Object.keys(sectorData.explorationEvents).filter(event => 
+            event.includes('FIGHT_')
+        );
+        
+        combatEvents.forEach(event => {
+            delete sectorData.explorationEvents[event];
+        });
+        
+        // Recalculate probabilities after removing combat events
+        this.normalizeEventWeights(sectorData);
+    }
+
+    /**
+     * Doubles the weight of negative events
+     * @param {Object} sectorData - Sector data to modify
+     */
+    doubleNegativeEvents(sectorData) {
+        Object.keys(sectorData.explorationEvents).forEach(event => {
+            if (NegativeEvents.includes(event)) {
+                sectorData.explorationEvents[event] *= 2;
+            }
+        });
+        
+        // Renormalize weights after doubling negative events
+        this.normalizeEventWeights(sectorData);
+    }
+
+    /**
+     * Removes specific events from sector data
+     * @param {Object} sectorData - Sector data to modify
+     * @param {Array<string>} eventsToRemove - Events to remove
+     */
+    removeSpecificEvents(sectorData, eventsToRemove) {
+        eventsToRemove.forEach(event => {
+            if (sectorData.explorationEvents[event]) {
+                delete sectorData.explorationEvents[event];
+            }
+        });
+        
+        // Renormalize remaining events
+        this.normalizeEventWeights(sectorData);
+    }
+
+    /**
+     * Applies sector-specific modifications
+     * @param {Object} sectorData - Sector data to modify
+     * @param {Object} modifications - Modifications to apply
+     */
+    applySectorModifications(sectorData, modifications) {
+        if (modifications.removeEvents) {
+            this.removeSpecificEvents(sectorData, modifications.removeEvents);
+        }
+    }
+
+    /**
+     * Applies sector-specific event bonuses
+     * @param {Object} sectorData - Sector data to modify
+     * @param {Object} eventBonuses - Event bonuses to apply
+     */
+    applySectorEventBonus(sectorData, eventBonuses) {
+        Object.entries(eventBonuses).forEach(([event, multiplier]) => {
+            if (sectorData.explorationEvents[event]) {
+                sectorData.explorationEvents[event] *= multiplier;
+            }
+        });
+    }
+
+    /**
+     * Applies fruit bonus to harvest events
+     * @param {Object} sectorData - Sector data to modify
+     * @param {number} bonus - Bonus amount to add to fruit gains
+     */
+    applyFruitBonus(sectorData, bonus) {
+        // Create new harvest events with increased amounts
+        const newEvents = {};
+        
+        Object.entries(sectorData.explorationEvents).forEach(([event, weight]) => {
+            if (event.startsWith('HARVEST_')) {
+                const originalAmount = parseInt(event.split('_')[1]);
+                const newAmount = originalAmount + bonus;
+                const newEventName = `HARVEST_${newAmount}`;
+                newEvents[newEventName] = weight;
+            } else {
+                newEvents[event] = weight;
+            }
+        });
+        
+        sectorData.explorationEvents = newEvents;
+    }
+
+    /**
+     * Doubles fuel gains from fuel events
+     * @param {Object} sectorData - Sector data to modify
+     */
+    applyFuelDoubling(sectorData) {
+        // Create new fuel events with doubled amounts
+        const newEvents = {};
+        
+        Object.entries(sectorData.explorationEvents).forEach(([event, weight]) => {
+            if (event.startsWith('FUEL_')) {
+                const originalAmount = parseInt(event.split('_')[1]);
+                const newAmount = originalAmount * 2;
+                const newEventName = `FUEL_${newAmount}`;
+                newEvents[newEventName] = weight;
+            } else {
+                newEvents[event] = weight;
+            }
+        });
+        
+        sectorData.explorationEvents = newEvents;
+    }
+
+    /**
+     * Normalizes event weights after modifications
+     * @param {Object} sectorData - Sector data to normalize
+     */
+    normalizeEventWeights(sectorData) {
+        // Get current total weight
+        const currentTotal = Object.values(sectorData.explorationEvents).reduce((a, b) => a + b, 0);
+        
+        // If there are remaining events, normalize them back to the original scale
+        if (currentTotal > 0) {
+            const scaleFactor = 100 / currentTotal; // Scale back to 100 (typical total)
+            Object.keys(sectorData.explorationEvents).forEach(event => {
+                sectorData.explorationEvents[event] *= scaleFactor;
+            });
+        }
     }
 
     /**
@@ -64,12 +359,11 @@ class ProbabilityCalculator {
 
     /**
      * Calculates outcomes for each sector
-     * @param {Array<string>} selectedSectors - Selected sectors
      * @param {Object} outcomes - Outcomes object to populate
+     * @param {Map<string, Object>} sectorDataMap - Map of sector name to sector data objects
      */
-    calculateSectorOutcomes(selectedSectors, outcomes) {
-        selectedSectors.forEach(sectorName => {
-            const sectorData = PlanetSectorConfigData.find(s => s.sectorName === sectorName);
+    calculateSectorOutcomes(outcomes, sectorDataMap) {
+        sectorDataMap.forEach((sectorData, sectorName) => {
             if (!sectorData) return;
 
             const totalWeight = Object.values(sectorData.explorationEvents).reduce((a, b) => a + b, 0);
@@ -181,13 +475,11 @@ class ProbabilityCalculator {
      * @returns {string} - HTML string
      */
     generateProbabilityHTML(outcomes) {
-        // Pass selectedSectors to resources for proper calculation
-        outcomes.resources.selectedSectors = outcomes.selectedSectors;
-        
-        // Pass selectedSectors to events for scenario calculations
-        outcomes.risks.selectedSectors = outcomes.selectedSectors;
-        outcomes.setbacks.selectedSectors = outcomes.selectedSectors;
-        outcomes.special.selectedSectors = outcomes.selectedSectors;
+        // Pass modified sector data to all sections for calculations
+        outcomes.resources.modifiedSectorData = outcomes.modifiedSectorData;
+        outcomes.risks.modifiedSectorData = outcomes.modifiedSectorData;
+        outcomes.setbacks.modifiedSectorData = outcomes.modifiedSectorData;
+        outcomes.special.modifiedSectorData = outcomes.modifiedSectorData;
         
         return `
             ${this.generateResourcesHTML(outcomes.resources)}
@@ -205,8 +497,8 @@ class ProbabilityCalculator {
      * @returns {string} - HTML string
      */
     generateResourcesHTML(resources) {
-        // Use the new resource handler method that correctly handles sector-based calculations
-        const scenarios = this.resourceHandler.calculateResourceScenariosFromSectors(resources.selectedSectors || []);
+        // Use modified sector data with the existing method name
+        const scenarios = this.resourceHandler.calculateResourceScenariosFromSectors(resources.modifiedSectorData);
         
         // Helper function to format numbers (remove .0 for whole numbers)
         const formatNumber = (num) => {
@@ -511,11 +803,11 @@ class ProbabilityCalculator {
      * @returns {string} - HTML string
      */
     generateEventsHTML(risks, setbacks, special) {
-        // Get the selected sectors from the outcomes that were passed through
-        const selectedSectors = risks.selectedSectors || setbacks.selectedSectors || special.selectedSectors || [];
+        // Get the modified sector data that was passed through
+        const modifiedSectorData = risks.modifiedSectorData || setbacks.modifiedSectorData || special.modifiedSectorData;
         
-        // Use the event scenario handler to calculate pessimist/average/optimist scenarios
-        const scenarios = this.eventScenarioHandler.calculateEventScenariosFromSectors(selectedSectors);
+        // Use the event scenario handler to calculate pessimist/average/optimist scenarios from modified data
+        const scenarios = this.eventScenarioHandler.calculateEventScenariosFromSectors(modifiedSectorData);
         
         // Helper function to format numbers (remove .0 for whole numbers)
         const formatNumber = (num) => {

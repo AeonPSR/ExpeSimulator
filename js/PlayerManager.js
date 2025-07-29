@@ -1,11 +1,12 @@
 // Player Manager - Handles player profiles and management
 
 class PlayerManager {
-    constructor() {
+    constructor(onPlayerUpdateCallback = null) {
         this.players = [];
         this.nextPlayerId = 1;
         this.toggleState = false; // Toggle button state
         this.currentMode = 'icarus'; // Mode button state: 'patrol' or 'icarus' (default: icarus)
+        this.onPlayerUpdateCallback = onPlayerUpdateCallback;
         this.availableCharacters = [
             'andie.png', 'chao.png', 'chun.png', 'derek.png', 'eleesha.png',
             'finola.png', 'frieda.png', 'gioele.png', 'hua.png', 'ian.png',
@@ -74,6 +75,9 @@ class PlayerManager {
         
         // Update add button visibility/state if needed
         this.updateAddButtonState();
+        
+        // Trigger update callback
+        this.triggerPlayerUpdate();
     }
 
     /**
@@ -148,6 +152,9 @@ class PlayerManager {
             if (avatarElement) {
                 avatarElement.src = getResourceURL(`characters/${avatarFile}`);
             }
+            
+            // Trigger update callback (though avatar changes don't affect probabilities, keeping consistent)
+            this.triggerPlayerUpdate();
         }
     }
 
@@ -285,6 +292,9 @@ class PlayerManager {
         
         // Update add button visibility/state
         this.updateAddButtonState();
+        
+        // Trigger update callback
+        this.triggerPlayerUpdate();
     }
 
     /**
@@ -435,6 +445,9 @@ class PlayerManager {
                     abilitySlot.innerHTML = '';
                 }
             }
+            
+            // Trigger update callback
+            this.triggerPlayerUpdate();
         }
     }
 
@@ -535,6 +548,9 @@ class PlayerManager {
                     itemSlot.innerHTML = '';
                 }
             }
+            
+            // Trigger update callback
+            this.triggerPlayerUpdate();
         }
     }
 
@@ -587,6 +603,15 @@ class PlayerManager {
                     img.alt = this.currentMode.charAt(0).toUpperCase() + this.currentMode.slice(1);
                 }
             });
+        }
+    }
+    
+    /**
+     * Trigger update callback when players change
+     */
+    triggerPlayerUpdate() {
+        if (this.onPlayerUpdateCallback && typeof this.onPlayerUpdateCallback === 'function') {
+            this.onPlayerUpdateCallback();
         }
     }
 }

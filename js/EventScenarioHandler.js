@@ -6,11 +6,11 @@ class EventScenarioHandler {
     }
 
     /**
-     * Calculates event scenarios for selected sectors
-     * @param {Array<string>} selectedSectors - Array of selected sector names
+     * Calculates event scenarios for selected sectors or modified sector data
+     * @param {Array<string>|Map<string, Object>} selectedSectorsOrModifiedData - Array of selected sector names OR Map of modified sector data
      * @returns {Object} - Complete event calculation results
      */
-    calculateEventScenariosFromSectors(selectedSectors) {
+    calculateEventScenariosFromSectors(selectedSectorsOrModifiedData) {
         const results = {
             playerLoss: { pessimist: 0, average: 0, optimist: 0 },
             rerolls: { pessimist: 0, average: 0, optimist: 0 },
@@ -23,17 +23,32 @@ class EventScenarioHandler {
             killOne: { pessimist: 0, average: 0, optimist: 0 }
         };
 
-        // Group sectors by type to calculate event scenarios correctly
-        const sectorsByType = {};
-        selectedSectors.forEach(sectorName => {
-            const sectorData = PlanetSectorConfigData.find(s => s.sectorName === sectorName);
-            if (!sectorData) return;
+        // Handle both old (array of sector names) and new (Map of modified data) input formats
+        let sectorsByType = {};
+        
+        if (selectedSectorsOrModifiedData instanceof Map) {
+            // New format: use modified sector data directly
+            selectedSectorsOrModifiedData.forEach((sectorData, key) => {
+                // Extract the original sector name from indexed keys like "INTELLIGENT_0", "INTELLIGENT_1", etc.
+                const sectorName = key.includes('_') ? key.substring(0, key.lastIndexOf('_')) : key;
+                
+                if (!sectorsByType[sectorName]) {
+                    sectorsByType[sectorName] = [];
+                }
+                sectorsByType[sectorName].push(sectorData);
+            });
+        } else {
+            // Legacy format: look up sector data from PlanetSectorConfigData
+            selectedSectorsOrModifiedData.forEach(sectorName => {
+                const sectorData = PlanetSectorConfigData.find(s => s.sectorName === sectorName);
+                if (!sectorData) return;
 
-            if (!sectorsByType[sectorName]) {
-                sectorsByType[sectorName] = [];
-            }
-            sectorsByType[sectorName].push(sectorData);
-        });
+                if (!sectorsByType[sectorName]) {
+                    sectorsByType[sectorName] = [];
+                }
+                sectorsByType[sectorName].push(sectorData);
+            });
+        }
 
         // Calculate event scenarios for each sector type
         Object.values(sectorsByType).forEach(sectors => {

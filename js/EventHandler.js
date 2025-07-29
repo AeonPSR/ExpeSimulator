@@ -1,10 +1,11 @@
 // Event Handler - Manages all event listeners and user interactions
 
 class EventHandler {
-    constructor(sectorManager, uiManager, probabilityCalculator) {
+    constructor(sectorManager, uiManager, probabilityCalculator, playerManager) {
         this.sectorManager = sectorManager;
         this.uiManager = uiManager;
         this.probabilityCalculator = probabilityCalculator;
+        this.playerManager = playerManager;
     }
 
     /**
@@ -86,8 +87,9 @@ class EventHandler {
      * Updates the probability display
      */
     updateProbabilityDisplay() {
-        const selectedSectors = this.sectorManager.getSelectedSectors();
-        const htmlContent = this.probabilityCalculator.calculateProbabilities(selectedSectors);
+        const selectedSectors = this.sectorManager.getSelectedSectorsWithIds();
+        const players = this.playerManager ? this.playerManager.getPlayers() : [];
+        const htmlContent = this.probabilityCalculator.calculateProbabilities(selectedSectors, players);
         this.uiManager.updateProbabilityDisplay(htmlContent);
     }
 
@@ -113,6 +115,7 @@ class EventHandler {
         const cutsButton = document.getElementById('debug-cuts');
         const polyphemusButton = document.getElementById('debug-polyphemus');
         const museumButton = document.getElementById('debug-museum');
+        const americasDreamButton = document.getElementById('debug-americas-dream');
 
         if (rockyButton) {
             rockyButton.addEventListener('click', () => this.loadDebugPlanet('rocky'));
@@ -137,6 +140,9 @@ class EventHandler {
         }
         if (museumButton) {
             museumButton.addEventListener('click', () => this.loadDebugPlanet('museum'));
+        }
+        if (americasDreamButton) {
+            americasDreamButton.addEventListener('click', () => this.loadDebugPlanet('americas_dream'));
         }
     }
 
@@ -271,6 +277,14 @@ class EventHandler {
                           'RUINS', 'RUINS', 'RUINS', 'RUINS',
                           'INTELLIGENT', 'INTELLIGENT', 'INTELLIGENT', 'INTELLIGENT',
                           'MANKAROG', 'CRISTAL_FIELD'];
+                break;
+                
+            case 'americas_dream':
+                // America's Dream - 2 hydro, 4 wrecks, 4 caves, 4 mountains
+                sectors = ['LANDING', 'HYDROCARBON', 'HYDROCARBON',
+                          'WRECK', 'WRECK', 'WRECK', 'WRECK',
+                          'CAVE', 'CAVE', 'CAVE', 'CAVE',
+                          'MOUNTAIN', 'MOUNTAIN', 'MOUNTAIN', 'MOUNTAIN'];
                 break;
         }
 

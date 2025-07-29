@@ -523,70 +523,79 @@ const ItemEffects = {
 		name: 'Blaster',
 		description: 'Energy weapon for combat situations',
 		effects: {
-			// TODO: Define specific effects
+			combatPowerBonus: 1
 		}
 	},
 	'driller': {
 		name: 'Driller',
 		description: 'Improves resource extraction in caves and mountains',
 		effects: {
-			// TODO: Define specific effects
+			doubleFuelGains: true
 		}
 	},
 	'echo_sounder': {
 		name: 'Echo Sounder',
 		description: 'Helps detect hidden passages and dangers',
 		effects: {
-			// TODO: Define specific effects
+			sectorDiscoveryBonus: {
+				'HYDROCARBON': 4
+			}
 		}
 	},
 	'grenade': {
 		name: 'Grenade',
 		description: 'Explosive device for combat or clearing obstacles',
 		effects: {
-			// TODO: Define specific effects
+			combatPowerBonus: 3,
+			singleUse: true
 		}
 	},
 	'heat_seeker': {
 		name: 'Heat Seeker',
 		description: 'Thermal detection device',
 		effects: {
-			// TODO: Define specific effects
+			sectorDiscoveryBonus: {
+				'RUMINANT': 4,
+				'MANKAROG': 4,
+				'INSECT': 4,
+				'PREDATOR': 4,
+				'INTELLIGENT': 4
+			}
 		}
 	},
 	'knife': {
 		name: 'Knife',
 		description: 'Close combat weapon and utility tool',
 		effects: {
-			// TODO: Define specific effects
+			combatPowerBonus: 1
 		}
 	},
 	'machine_gun': {
 		name: 'Machine Gun',
 		description: 'Heavy automatic weapon for combat',
 		effects: {
-			// TODO: Define specific effects
+			combatPowerBonus: 2
 		}
 	},
 	'missile_launcher': {
 		name: 'Missile Launcher',
 		description: 'Heavy ranged weapon system',
 		effects: {
-			// TODO: Define specific effects
+			combatPowerBonus: 3
 		}
 	},
 	'natamy_riffle': {
 		name: 'Natamy Riffle',
 		description: 'Specialized rifle weapon',
 		effects: {
-			// TODO: Define specific effects
+			combatPowerBonus: 1
 		}
 	},
 	'plastenite_armor': {
 		name: 'Plastenite Armor',
 		description: 'Reduces damage taken from various sources',
 		effects: {
-			// TODO: Define specific effects
+			fightDamageReduction: 1
 		}
 	},
 	'postit': {
@@ -600,42 +609,51 @@ const ItemEffects = {
 		name: 'Quad Compass',
 		description: 'Advanced navigation device, reduces chance of getting lost',
 		effects: {
-			// TODO: Define specific effects
+			removeEvents: ['AGAIN'],
+			immuneToEvents: ['PLAYER_LOST']
 		}
 	},
 	'rope': {
 		name: 'Rope',
 		description: 'Prevents falling accidents in difficult terrain',
 		effects: {
-			// TODO: Define specific effects
+			sectorSpecificImmunity: {
+				'SEISMIC_ACTIVITY': ['ACCIDENT_3_5'],
+				'CAVE': ['ACCIDENT_3_5'],
+				'MOUNTAIN': ['ACCIDENT_3_5']
+			}
 		}
 	},
 	'sniper_riffle': {
 		name: 'Sniper Riffle',
 		description: 'Long-range precision weapon',
 		effects: {
-			// TODO: Define specific effects
+			combatPowerBonus: 1
 		}
 	},
 	'space_suit': {
 		name: 'Space Suit',
 		description: 'Protects against environmental hazards',
 		effects: {
-			// TODO: Define specific effects
+			allowExplorationWithoutOxygen: true
 		}
 	},
 	'trad_module': {
 		name: 'Trad Module',
 		description: 'Translation/communication device',
 		effects: {
-			// TODO: Define specific effects
+			sectorEventBonus: {
+				'INTELLIGENT': {
+					'ARTEFACT': 2
+				}
+			}
 		}
 	},
 	'white_flag': {
 		name: 'White Flag',
 		description: 'Diplomatic tool for peaceful interactions',
 		effects: {
-			// TODO: Define specific effects
+			removeCombatEvents: true
 		}
 	}
 };

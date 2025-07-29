@@ -111,13 +111,14 @@ class UIManager {
                                 <button id="debug-vie" class="debug-btn">Vie Heureuse</button>
                             </div>
                             <div class="debug-row">
-                                <button id="debug-loss" class="debug-btn">Loss</button>
+                                <button id="debug-loss" class="debug-btn">,̶ ̶'̶ ̶,̶ ̶|̶ ̶,̶'̶_̶'̶</button>
                                 <button id="debug-nurgle" class="debug-btn">Nurgle's Throne</button>
                                 <button id="debug-cuts" class="debug-btn">Thousands Cuts</button>
                             </div>
                             <div class="debug-row">
                                 <button id="debug-polyphemus" class="debug-btn">Polyphemus</button>
                                 <button id="debug-museum" class="debug-btn">Museum</button>
+                                <button id="debug-americas-dream" class="debug-btn">America's Dream</button>
                             </div>
                         </div>
                     </div>
