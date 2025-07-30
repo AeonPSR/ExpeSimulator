@@ -58,6 +58,7 @@ class EventHandler {
         this.updateSelectedDisplay();
         this.updateSectorAvailability();
         this.updateProbabilityDisplay();
+        this.updateExpeditionResults();
     }
 
     /**
@@ -91,6 +92,18 @@ class EventHandler {
         const players = this.playerManager ? this.playerManager.getPlayers() : [];
         const htmlContent = this.probabilityCalculator.calculateProbabilities(selectedSectors, players);
         this.uiManager.updateProbabilityDisplay(htmlContent);
+    }
+
+    /**
+     * Updates the expedition results display
+     */
+    updateExpeditionResults() {
+        if (this.playerManager) {
+            const resultsContent = this.playerManager.renderExpeditionResults();
+            const legendContent = this.playerManager.renderExpeditionLegend();
+            this.uiManager.updateExpeditionResults(resultsContent);
+            this.uiManager.updateExpeditionLegend(legendContent);
+        }
     }
 
     /**

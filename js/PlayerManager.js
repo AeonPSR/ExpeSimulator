@@ -602,10 +602,91 @@ class PlayerManager {
                     img.src = getResourceURL(`others/${imageName}`);
                     img.alt = this.currentMode.charAt(0).toUpperCase() + this.currentMode.slice(1);
                 }
+                
+                // Update fighting power display
+                this.updateFightingPowerDisplay();
             });
         }
     }
     
+    /**
+     * Calculate the party's total fighting power
+     * @returns {number} - Total fighting power
+     */
+    calculateFightingPower() {
+        let fightingPower = 0;
+        
+        // Base power: number of players in expedition
+        fightingPower += this.players.length;
+        
+        // Add weapon powers
+        this.players.forEach(player => {
+            player.items.forEach(item => {
+                if (item) {
+                    fightingPower += this.getWeaponPower(item);
+                }
+            });
+            
+            // Add skill powers (pass player object for equipment checks)
+            player.abilities.forEach(ability => {
+                if (ability) {
+                    fightingPower += this.getAbilityPower(ability, player);
+                }
+            });
+        });
+        
+        return fightingPower;
+    }
+
+    /**
+     * Get fighting power bonus from a weapon
+     * @param {string} weaponFile - Weapon filename
+     * @returns {number} - Power bonus from weapon
+     */
+    getWeaponPower(weaponFile) {
+        // Remove file extension to get the item key
+        const itemKey = weaponFile.replace(/\.(jpg|png)$/, '');
+        
+        // Look up the item in the config
+        const itemConfig = ItemEffects[itemKey];
+        if (itemConfig && itemConfig.effects && itemConfig.effects.combatPowerBonus) {
+            return itemConfig.effects.combatPowerBonus;
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Get fighting power bonus from an ability
+     * @param {string} abilityFile - Ability filename
+     * @param {Object} player - Player object to check for equipment requirements
+     * @returns {number} - Power bonus from ability
+     */
+    getAbilityPower(abilityFile, player) {
+        // Remove file extension to get the ability key
+        const abilityKey = abilityFile.replace(/\.(jpg|png)$/, '');
+        
+        // Look up the ability in the config
+        const abilityConfig = AbilityEffects[abilityKey];
+        if (!abilityConfig || !abilityConfig.effects) {
+            return 0;
+        }
+        
+        // Handle gunman ability - only gives bonus if player has a firearm
+        if (abilityKey === 'gunman') {
+            const effects = abilityConfig.effects;
+            if (effects.requiresGun && effects.gunTypes) {
+                // Convert gun types to include file extensions
+                const gunTypes = effects.gunTypes.map(gun => gun + '.jpg');
+                const hasFirearm = player.items.some(item => item && gunTypes.includes(item));
+                return hasFirearm ? (effects.combatPowerBonus || 0) : 0;
+            }
+        }
+        
+        // For other abilities, return combat power bonus if any
+        return abilityConfig.effects.combatPowerBonus || 0;
+    }
+
     /**
      * Trigger update callback when players change
      */
@@ -613,5 +694,106 @@ class PlayerManager {
         if (this.onPlayerUpdateCallback && typeof this.onPlayerUpdateCallback === 'function') {
             this.onPlayerUpdateCallback();
         }
+        
+        // Update fighting power display
+        this.updateFightingPowerDisplay();
+    }
+
+    /**
+     * Update the fighting power display
+     */
+    updateFightingPowerDisplay() {
+        const fightingPower = this.calculateFightingPower();
+        const fightingPowerValue = document.getElementById('fighting-power-value');
+        if (fightingPowerValue) {
+            fightingPowerValue.textContent = fightingPower;
+        }
+    }
+
+    /**
+     * Render expedition results showing final player health
+     * @returns {string} - HTML string for expedition results
+     */
+    renderExpeditionResults() {
+        if (this.players.length === 0) {
+            return '<div style="text-align: center; color: #95a5a6; font-style: italic;">Add players to see expedition results</div>';
+        }
+
+        const resultsHTML = this.players.map(player => {
+            // Calculate health for four scenarios
+            // For now, just simulate different outcomes based on current health
+            // Later this will be calculated based on expedition events
+            const pessimistHealth = Math.max(0, player.health - 6); // Worst case
+            const averageHealth = Math.max(0, player.health - 3);   // Average case
+            const optimistHealth = Math.max(0, player.health - 1);  // Best case
+            const worstHealth = Math.max(0, player.health - 10);    // Absolute worst case
+            
+            // Function to determine health class
+            const getHealthClass = (health) => {
+                if (health <= 0) return 'health-dead';
+                if (health <= 3) return 'health-critical';
+                if (health <= 6) return 'health-low';
+                if (health <= 10) return 'health-medium';
+                return 'health-high';
+            };
+
+            return `
+                <div class="expedition-result-card">
+                    <div class="expedition-result-avatar">
+                        <img src="${getResourceURL(`characters/${player.avatar}`)}" alt="Player Avatar" />
+                    </div>
+                    <div class="expedition-result-health-container">
+                        <div class="expedition-result-health worst ${getHealthClass(worstHealth)}">
+                            ${worstHealth}
+                            <img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />
+                        </div>
+                        <div class="expedition-result-health pessimist ${getHealthClass(pessimistHealth)}">
+                            ${pessimistHealth}
+                            <img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />
+                        </div>
+                        <div class="expedition-result-health average ${getHealthClass(averageHealth)}">
+                            ${averageHealth}
+                            <img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />
+                        </div>
+                        <div class="expedition-result-health optimist ${getHealthClass(optimistHealth)}">
+                            ${optimistHealth}
+                            <img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return resultsHTML;
+    }
+
+    /**
+     * Generates the expedition results legend HTML
+     * @returns {string} - HTML string for the legend
+     */
+    renderExpeditionLegend() {
+        return `
+            <div class="expedition-legend">
+                <h5>Health Scenarios</h5>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color worst"></div>
+                        <div class="legend-text">Worst</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color pessimist"></div>
+                        <div class="legend-text">Pessimist</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color average"></div>
+                        <div class="legend-text">Average</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color optimist"></div>
+                        <div class="legend-text">Optimist</div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }

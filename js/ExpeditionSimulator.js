@@ -17,6 +17,7 @@ class ExpeditionSimulator {
             const onPlayerUpdate = () => {
                 if (this.eventHandler) {
                     this.eventHandler.updateProbabilityDisplay();
+                    this.eventHandler.updateExpeditionResults();
                 }
             };
             

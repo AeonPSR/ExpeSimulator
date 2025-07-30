@@ -8,16 +8,17 @@ class FightHandler {
     /**
      * Processes fight events and groups them by damage type
      * @param {Object} fightBreakdown - Fight breakdown from outcomes
+     * @param {number} fightingPower - Team's fighting power to reduce damage
      * @returns {Object} - Processed fight data
      */
-    processFightBreakdown(fightBreakdown) {
+    processFightBreakdown(fightBreakdown, fightingPower = 0) {
         const processedFights = {};
         
         Object.entries(fightBreakdown).forEach(([damageKey, probabilities]) => {
             processedFights[damageKey] = {
                 sectorCount: probabilities.length,
                 probability: probabilities[0], // Assuming all probabilities are the same
-                damageValues: this.getDamageValues(damageKey)
+                damageValues: this.getDamageValues(damageKey, fightingPower)
             };
         });
         
@@ -78,14 +79,17 @@ class FightHandler {
     }
 
     /**
-     * Gets appropriate damage values for different scenarios
+     * Gets appropriate damage values for different scenarios, applying fighting power reduction
      * @param {string} damageKey - The damage key (e.g., "12" or "Variable (8/10/12/15/18/32)")
+     * @param {number} fightingPower - Team's fighting power to reduce damage
      * @returns {Object} - Damage values for different scenarios
      */
-    getDamageValues(damageKey) {
+    getDamageValues(damageKey, fightingPower = 0) {
+        let baseDamage;
+        
         if (damageKey === 'Variable (8/10/12/15/18/32)') {
             // Variable damage fight: use different values for different scenarios
-            return {
+            baseDamage = {
                 optimist: 8,    // Best case: minimum damage
                 average: 17.5,  // Average case: mathematical expectation
                 pessimist: 25,  // Pessimist case: higher than average (roughly 75th percentile)
@@ -94,21 +98,30 @@ class FightHandler {
         } else {
             // Fixed damage fight: same value for all scenarios
             const fixedDamage = parseInt(damageKey);
-            return {
+            baseDamage = {
                 optimist: fixedDamage,
                 average: fixedDamage,
                 pessimist: fixedDamage,
                 worstCase: fixedDamage
             };
         }
+        
+        // Apply fighting power as damage reduction (damage - fighting power, minimum 0)
+        return {
+            optimist: Math.max(0, baseDamage.optimist - fightingPower),
+            average: Math.max(0, baseDamage.average - fightingPower),
+            pessimist: Math.max(0, baseDamage.pessimist - fightingPower),
+            worstCase: Math.max(0, baseDamage.worstCase - fightingPower)
+        };
     }
 
     /**
      * Calculates combat damage scenarios for all fight types
      * @param {Object} fightBreakdown - Fight breakdown data
+     * @param {number} fightingPower - Team's fighting power to reduce damage
      * @returns {Object} - Complete damage calculation results
      */
-    calculateCombatDamageScenarios(fightBreakdown) {
+    calculateCombatDamageScenarios(fightBreakdown, fightingPower = 0) {
         let totalAverageDamage = 0;
         let totalOptimistDamage = 0;
         let totalPessimistDamage = 0;
@@ -122,7 +135,7 @@ class FightHandler {
                 const roundedFights = Math.round(expectedFights);
                 
                 // Get damage values for different scenarios
-                const damageValues = this.getDamageValues(damage);
+                const damageValues = this.getDamageValues(damage, fightingPower);
                 
                 // Calculate different scenarios using binomial distribution
                 const scenarios = this.calculateDamageScenarios(n, p);

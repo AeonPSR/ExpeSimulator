@@ -99,7 +99,8 @@
 
 .section-selector h4,
 .selected-sectors h4,
-.probability-display h4 {
+.probability-display h4,
+.expedition-results h4 {
 	margin: 0 0 15px 0;
 	font-size: 16px;
 	color: #3498db;
@@ -434,6 +435,197 @@ body:not(.traitor-active) .negative-level-icon {
 .prob-content::-webkit-scrollbar-thumb {
 	background: #3498db;
 	border-radius: 3px;
+}
+
+.results-content {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	padding: 15px;
+	max-height: 300px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.results-content::-webkit-scrollbar {
+	width: 6px;
+}
+
+.results-content::-webkit-scrollbar-thumb {
+	background: #3498db;
+	border-radius: 3px;
+}
+
+.expedition-results {
+	margin-top: 20px;
+}
+
+/* Expedition results player profile styling */
+.expedition-result-card {
+	display: flex;
+	background: rgba(0, 0, 0, 0.2);
+	border: 2px solid #e67e22 !important;
+	border-radius: 8px;
+	padding: 10px;
+	gap: 10px;
+	position: relative;
+	flex-direction: column;
+	align-items: center;
+	width: calc(25% - 11.25px);
+	margin-bottom: 5px;
+	box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
+}
+
+.expedition-result-avatar {
+	width: 42px;
+	height: 60px;
+	border-radius: 4px;
+	border: 2px solid rgb(230, 126, 34);
+	flex-shrink: 0;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.expedition-result-avatar img {
+	width: auto;
+	height: 100%;
+	object-fit: cover;
+}
+
+.expedition-result-health {
+	width: 42px;
+	height: 40px;
+	border: 2px solid #e74c3c;
+	border-radius: 4px;
+	background: rgba(231, 76, 60, 0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 15px;
+	font-weight: 600;
+	color: #fff;
+	flex-direction: column;
+}
+
+.expedition-result-health-container {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	align-items: center;
+}
+
+/* Scenario-based health counter colors */
+.expedition-result-health.pessimist {
+	border-color: #e74c3c;
+	background: rgba(231, 76, 60, 0.3);
+}
+
+.expedition-result-health.average {
+	border-color: #f39c12;
+	background: rgba(243, 156, 18, 0.3);
+}
+
+.expedition-result-health.optimist {
+	border-color: #2ecc71;
+	background: rgba(46, 204, 113, 0.3);
+}
+
+.expedition-result-health.worst {
+	border-color: #e67e22;
+	background: rgba(44, 62, 80, 0.4);
+}
+
+/* Health status colors for expedition results */
+.expedition-result-health.health-critical {
+	color: #e74c3c !important;
+}
+
+.expedition-result-health.health-low {
+	color: #f39c12 !important;
+}
+
+.expedition-result-health.health-medium {
+	color: #f1c40f !important;
+}
+
+.expedition-result-health.health-high {
+	color: #2ecc71 !important;
+}
+
+.expedition-result-health.health-dead {
+	color: #95a5a6 !important;
+	text-decoration: line-through;
+}
+
+/* Expedition results legend */
+.expedition-legend {
+	margin-top: 15px;
+	padding: 10px;
+	background: rgba(0, 0, 0, 0.1);
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.expedition-legend h5 {
+	margin: 0 0 8px 0;
+	font-size: 12px;
+	color: #bdc3c7;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	text-align: center;
+}
+
+.legend-items {
+	display: flex;
+	justify-content: space-between;
+	gap: 5px;
+}
+
+.legend-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+}
+
+.legend-color {
+	width: 20px;
+	height: 15px;
+	border: 2px solid;
+	border-radius: 3px;
+	margin-bottom: 3px;
+}
+
+.legend-color.pessimist {
+	border-color: #e74c3c;
+	background: rgba(231, 76, 60, 0.3);
+}
+
+.legend-color.average {
+	border-color: #f39c12;
+	background: rgba(243, 156, 18, 0.3);
+}
+
+.legend-color.optimist {
+	border-color: #2ecc71;
+	background: rgba(46, 204, 113, 0.3);
+}
+
+.legend-color.worst {
+	border-color: #e67e22;
+	background: rgba(44, 62, 80, 0.4);
+}
+
+.legend-text {
+	font-size: 9px;
+	color: #95a5a6;
+	text-align: center;
+	font-weight: 500;
 }
 
 .outcome-category {
@@ -777,7 +969,7 @@ body:not(.traitor-active) .negative-level-icon {
 	align-items: center;
 	flex-direction: row;
     margin-left: 5px;
-    gap: 0px;
+    gap: 5px;
 }
 
 .players-mode-btn {
@@ -816,6 +1008,41 @@ body:not(.traitor-active) .negative-level-icon {
 	background: rgba(230, 126, 34, 0.5);
 }
 
+.fighting-power-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	margin-left: 5px;
+	font-size: 14px;
+	font-weight: bold;
+	color: #ecf0f1;
+}
+
+.fighting-power-btn .fight-power-icon {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	bottom: -5px;
+	left: -5px;
+	pointer-events: none;
+	z-index: 2;
+	border-radius: 0;
+	object-fit: contain;
+}
+
+.fighting-power-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
 .players-toggle-btn {
 	width: 40px;
 	height: 40px;
@@ -827,7 +1054,6 @@ body:not(.traitor-active) .negative-level-icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-left: 5px;
 	position: relative;
 }
 
@@ -902,7 +1128,7 @@ body:not(.traitor-active) .negative-level-icon {
 .players-container {
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 10px;
 }
 
 .add-player-btn {
