@@ -11,8 +11,10 @@ Chromee web extension for simulating planet expeditions with combat mechanics an
 
 ## TODO
 
-- [ ] **Player HP End-Game Calculation**: Calculate final player HP based on different damage scenarios
-- [ ] **Planet Import System**: Import planet configurations from Astro chat or console
-- [ ] **Scenario Export**: Export calculated scenarios for copy-paste into game chat
-- [ ] **Landing Help Project Integration**: Integrate landing assistance project functionality
-- [ ] **Sector Count Tracking**: Track number of sectors visited per exploration session
+
+- **Landing Help Project Integration**: Integrate landing assistance project functionality
+- **Player HP End-Game Calculation**: Calculate final player HP based on different damage scenarios
+- Finishing integrating all items and abilities. We're basically missing stuff with personal effects, such has ropes and survival.
+- **Planet Import System**: Import planet configurations from Astro chat or console
+- **Scenario Export**: Export calculated scenarios for copy-paste into game chat
+- **Sector Count **: Integrate the number of sectors explored during an expedition.
