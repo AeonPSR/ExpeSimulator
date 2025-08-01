@@ -13,15 +13,17 @@ class ProbabilityCalculator {
      * Calculates probabilities for the selected sectors
      * @param {Array<string>|Array<Object>} selectedSectors - Array of selected sector names or {id, name} objects
      * @param {Array<Object>} players - Array of player objects with abilities and items
+     * @param {Object} playerManager - The player manager instance for grenade consumption
      * @returns {string} - HTML string with probability results
      */
-    calculateProbabilities(selectedSectors, players = []) {
+    calculateProbabilities(selectedSectors, players = [], playerManager = null) {
         if (selectedSectors.length === 0) {
             return 'Select sectors to see expected outcomes';
         }
 
-        // Store players data for fighting power calculations
+        // Store players data and playerManager for fighting power calculations
         this.players = players;
+        this.playerManager = playerManager;
 
         const outcomes = this.initializeOutcomes();
         
@@ -674,11 +676,11 @@ class ProbabilityCalculator {
      * @returns {string} - HTML for damage scenarios
      */
     calculateCombatDamageScenarios(fightBreakdown) {
-        // Calculate team fighting power for damage reduction
-        const fightingPower = this.calculateTeamFightingPower();
+        // Calculate team fighting power for damage reduction using PlayerManager
+        const fightingPower = this.playerManager.calculateFightingPower();
         
-        // Use the fight handler to calculate damage scenarios with fighting power
-        const results = this.fightHandler.calculateCombatDamageScenarios(fightBreakdown, fightingPower);
+        // Use the fight handler to calculate damage scenarios with fighting power and playerManager
+        const results = this.fightHandler.calculateCombatDamageScenarios(fightBreakdown, fightingPower, this.playerManager);
         
         const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
         
@@ -900,92 +902,5 @@ class ProbabilityCalculator {
      */
     getSectorClickHandler() {
         return (sectorName) => this.handleAddSector(sectorName);
-    }
-
-    /**
-     * Calculate team fighting power for damage reduction
-     * @returns {number} - Total fighting power
-     */
-    calculateTeamFightingPower() {
-        if (!this.players || this.players.length === 0) {
-            return 0;
-        }
-
-        let fightingPower = 0;
-        
-        // Base power: number of players in expedition
-        fightingPower += this.players.length;
-        
-        // Add weapon powers and ability powers
-        this.players.forEach(player => {
-            // Add weapon powers
-            if (player.items) {
-                player.items.forEach(item => {
-                    if (item) {
-                        fightingPower += this.getWeaponPower(item);
-                    }
-                });
-            }
-            
-            // Add ability powers
-            if (player.abilities) {
-                player.abilities.forEach(ability => {
-                    if (ability) {
-                        fightingPower += this.getAbilityPower(ability, player);
-                    }
-                });
-            }
-        });
-        
-        return fightingPower;
-    }
-
-    /**
-     * Get fighting power bonus from a weapon (using config data)
-     * @param {string} weaponFile - Weapon filename
-     * @returns {number} - Power bonus from weapon
-     */
-    getWeaponPower(weaponFile) {
-        // Remove file extension to get the item key
-        const itemKey = weaponFile.replace(/\.(jpg|png)$/, '');
-        
-        // Look up the item in the config
-        const itemConfig = ItemEffects[itemKey];
-        if (itemConfig && itemConfig.effects && itemConfig.effects.combatPowerBonus) {
-            return itemConfig.effects.combatPowerBonus;
-        }
-        
-        return 0;
-    }
-
-    /**
-     * Get fighting power bonus from an ability (using config data)
-     * @param {string} abilityFile - Ability filename
-     * @param {Object} player - Player object to check for equipment requirements
-     * @returns {number} - Power bonus from ability
-     */
-    getAbilityPower(abilityFile, player) {
-        // Remove file extension to get the ability key
-        const abilityKey = abilityFile.replace(/\.(jpg|png)$/, '');
-        
-        // Look up the ability in the config
-        const abilityConfig = AbilityEffects[abilityKey];
-        if (!abilityConfig || !abilityConfig.effects) {
-            return 0;
-        }
-        
-        // Handle gunman ability - only gives bonus if player has a firearm
-        if (abilityKey === 'gunman') {
-            const effects = abilityConfig.effects;
-            if (effects.requiresGun && effects.gunTypes) {
-                // Convert gun types to include file extensions
-                const gunTypes = effects.gunTypes.map(gun => gun + '.jpg');
-                const hasFirearm = player.items && player.items.some(item => item && gunTypes.includes(item));
-                return hasFirearm ? (effects.combatPowerBonus || 0) : 0;
-            }
-        }
-        
-        // For other abilities, return combat power bonus if any
-        return abilityConfig.effects.combatPowerBonus || 0;
     }
 }

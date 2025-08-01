@@ -537,6 +537,7 @@ class PlayerManager {
     updatePlayerItem(playerId, slotIndex, itemFile) {
         const player = this.players.find(p => p.id === playerId);
         if (player) {
+            const oldItemFile = player.items[slotIndex];
             player.items[slotIndex] = itemFile;
             
             // Update the item slot in the UI
@@ -552,6 +553,25 @@ class PlayerManager {
             // Trigger update callback
             this.triggerPlayerUpdate();
         }
+    }
+
+    /**
+     * Consume/use a single-use item
+     * @param {number} playerId - Player ID
+     * @param {number} slotIndex - Item slot index
+     */
+    consumeItem(playerId, slotIndex) {
+        const player = this.players.find(p => p.id === playerId);
+        if (!player) return;
+
+        const itemFile = player.items[slotIndex];
+        if (!itemFile) return;
+
+        const itemConfig = ItemEffects[itemFile.replace(/\.(jpg|png)$/, '')];
+        if (!itemConfig || !itemConfig.effects.singleUse) return;
+
+        // Remove the item from inventory after use
+        this.updatePlayerItem(playerId, slotIndex, null);
     }
 
     /**
@@ -580,6 +600,14 @@ class PlayerManager {
             toggleBtn.addEventListener('click', () => {
                 this.toggleState = !this.toggleState;
                 toggleBtn.setAttribute('data-active', this.toggleState.toString());
+                
+                // Update fighting power display immediately
+                this.updateFightingPowerDisplay();
+                
+                // Trigger callback for other updates
+                if (this.onPlayerUpdateCallback) {
+                    this.onPlayerUpdateCallback();
+                }
             });
         }
     }
@@ -611,6 +639,7 @@ class PlayerManager {
     
     /**
      * Calculate the party's total fighting power
+     * @param {number} requiredPower - The power required to win the combat (if provided)
      * @returns {number} - Total fighting power
      */
     calculateFightingPower() {
@@ -619,15 +648,19 @@ class PlayerManager {
         // Base power: number of players in expedition
         fightingPower += this.players.length;
         
-        // Add weapon powers
+        // Add power from permanent items and abilities
         this.players.forEach(player => {
-            player.items.forEach(item => {
+            // Add non-grenade item powers
+            player.items.forEach((item) => {
                 if (item) {
-                    fightingPower += this.getWeaponPower(item);
+                    const itemKey = item.replace(/\.(jpg|png)$/, '');
+                    if (itemKey !== 'grenade') {
+                        fightingPower += this.getWeaponPower(item);
+                    }
                 }
             });
             
-            // Add skill powers (pass player object for equipment checks)
+            // Add ability powers for this player
             player.abilities.forEach(ability => {
                 if (ability) {
                     fightingPower += this.getAbilityPower(ability, player);
@@ -649,11 +682,20 @@ class PlayerManager {
         
         // Look up the item in the config
         const itemConfig = ItemEffects[itemKey];
+        let basePower = 0;
         if (itemConfig && itemConfig.effects && itemConfig.effects.combatPowerBonus) {
-            return itemConfig.effects.combatPowerBonus;
+            basePower = itemConfig.effects.combatPowerBonus;
         }
         
-        return 0;
+        // Apply Centauri base effect for blasters when toggle is active
+        if (this.toggleState && itemKey === 'blaster') {
+            const centauriEffect = BaseEffects['centauri'];
+            if (centauriEffect && centauriEffect.effects && centauriEffect.effects.blasterCombatBonus) {
+                basePower += centauriEffect.effects.blasterCombatBonus;
+            }
+        }
+        
+        return basePower;
     }
 
     /**
@@ -688,6 +730,25 @@ class PlayerManager {
     }
 
     /**
+     * Get the total number of grenades in the team
+     * @returns {number} - Number of grenades available
+     */
+    getGrenadeCount() {
+        let grenadeCount = 0;
+        this.players.forEach(player => {
+            player.items.forEach(item => {
+                if (item) {
+                    const itemKey = item.replace(/\.(jpg|png)$/, '');
+                    if (itemKey === 'grenade') {
+                        grenadeCount++;
+                    }
+                }
+            });
+        });
+        return grenadeCount;
+    }
+
+    /**
      * Trigger update callback when players change
      */
     triggerPlayerUpdate() {
@@ -703,10 +764,17 @@ class PlayerManager {
      * Update the fighting power display
      */
     updateFightingPowerDisplay() {
-        const fightingPower = this.calculateFightingPower();
+        const basePower = this.calculateFightingPower();
+        
+        // Create a display power that includes grenade bonus for preview
+        let displayPower = basePower;
+        if (this.getGrenadeCount() > 0) {
+            displayPower += 3;
+        }
+        
         const fightingPowerValue = document.getElementById('fighting-power-value');
         if (fightingPowerValue) {
-            fightingPowerValue.textContent = fightingPower;
+            fightingPowerValue.textContent = displayPower;
         }
     }
 

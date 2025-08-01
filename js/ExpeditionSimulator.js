@@ -86,6 +86,28 @@ class ExpeditionSimulator {
                 event.stopPropagation();
             });
         }
+        
+        // Also prevent clicks on any modal popups from propagating
+        document.addEventListener('click', (event) => {
+            const modal = event.target.closest('.character-selection-modal');
+            if (modal) {
+                event.stopPropagation();
+            }
+        });
+        
+        document.addEventListener('mousedown', (event) => {
+            const modal = event.target.closest('.character-selection-modal');
+            if (modal) {
+                event.stopPropagation();
+            }
+        });
+        
+        document.addEventListener('mouseup', (event) => {
+            const modal = event.target.closest('.character-selection-modal');
+            if (modal) {
+                event.stopPropagation();
+            }
+        });
     }
 
     /**

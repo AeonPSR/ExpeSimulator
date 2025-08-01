@@ -90,7 +90,7 @@ class EventHandler {
     updateProbabilityDisplay() {
         const selectedSectors = this.sectorManager.getSelectedSectorsWithIds();
         const players = this.playerManager ? this.playerManager.getPlayers() : [];
-        const htmlContent = this.probabilityCalculator.calculateProbabilities(selectedSectors, players);
+        const htmlContent = this.probabilityCalculator.calculateProbabilities(selectedSectors, players, this.playerManager);
         this.uiManager.updateProbabilityDisplay(htmlContent);
     }
 
