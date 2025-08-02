@@ -28,7 +28,7 @@ class ProbabilityCalculator {
         const outcomes = this.initializeOutcomes();
         
         // Apply ability and item modifications to sector data
-        const modifiedSectorData = this.applyAbilityAndItemModifications(selectedSectors, players);
+        const modifiedSectorData = this.applyAbilityAndItemModifications(selectedSectors, players, playerManager);
         
         this.calculateSectorOutcomes(outcomes, modifiedSectorData);
         
@@ -42,9 +42,10 @@ class ProbabilityCalculator {
      * Applies ability and item modifications to sector data
      * @param {Array<string>|Array<Object>} selectedSectors - Selected sectors (array of names or array of {id, name} objects)
      * @param {Array<Object>} players - Player objects with abilities and items
+     * @param {Object} playerManager - The player manager instance to check for active projects
      * @returns {Map<string, Object>} - Modified sector data keyed by "sectorName_id"
      */
-    applyAbilityAndItemModifications(selectedSectors, players) {
+    applyAbilityAndItemModifications(selectedSectors, players, playerManager) {
         const modifiedData = new Map();
         
         // Collect all active abilities and items from players
@@ -75,11 +76,52 @@ class ProbabilityCalculator {
             // Apply item modifications
             this.applyItemModifications(modifiedSector, activeItems, sector.name);
             
+            // Apply project modifications if playerManager is available
+            if (playerManager) {
+                this.applyProjectModifications(modifiedSector, playerManager, sector.name);
+            }
+            
             // Use sector ID to create unique keys that persist through modifications
             modifiedData.set(`${sector.name}_${sector.id}`, modifiedSector);
         });
         
         return modifiedData;
+    }
+    
+    /**
+     * Applies project modifications to sector data based on active projects
+     * @param {Object} sectorData - The sector data to modify
+     * @param {Object} playerManager - The player manager instance with project states
+     * @param {string} sectorName - The name of the sector
+     */
+    applyProjectModifications(sectorData, playerManager, sectorName) {
+        // Check if antigrav propeller is active
+        if (playerManager.antigravPropellerState) {
+            const projectConfig = ProjectEffects['antigrav_propeller'];
+            if (!projectConfig || !projectConfig.effects) return;
+            
+            const effects = projectConfig.effects;
+            
+            // Apply sector event modifier if available for this sector
+            if (effects.sectorEventModifier && effects.sectorEventModifier[sectorName]) {
+                const eventModifiers = effects.sectorEventModifier[sectorName];
+                
+                // Apply each event modifier
+                for (const eventName in eventModifiers) {
+                    if (sectorData.explorationEvents[eventName]) {
+                        // Store original weight for logging
+                        const originalWeight = sectorData.explorationEvents[eventName];
+                        
+                        // Multiply the weight by the modifier value
+                        const modifier = eventModifiers[eventName];
+                        sectorData.explorationEvents[eventName] *= modifier;
+                        
+                        // Log the modification
+                        console.log(`[Project] Antigrav Propeller: Modified ${sectorName} event ${eventName} weight from ${originalWeight} to ${sectorData.explorationEvents[eventName]}`);
+                    }
+                }
+            }
+        }
     }
 
     /**

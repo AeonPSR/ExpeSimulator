@@ -4,6 +4,16 @@ class FightHandler {
     constructor() {
         // Initialize any needed state
     }
+    
+    /**
+     * Apply fighting power reduction to damage
+     * @param {number} damage - Raw damage amount
+     * @param {number} fightingPower - Fighting power to reduce damage
+     * @returns {number} - Damage after reduction (minimum 0)
+     */
+    applyFightingPowerReduction(damage, fightingPower) {
+        return Math.max(0, damage - fightingPower);
+    }
 
     /**
      * Processes fight events and groups them by damage type
@@ -114,12 +124,12 @@ class FightHandler {
         // For each scenario, create a separate calculation with its own inventory
         for (const scenario of scenarios) {
             // Start with base damage without grenade
-            damages[scenario] = Math.max(0, baseDamage[scenario] - fightingPower);
+            damages[scenario] = this.applyFightingPowerReduction(baseDamage[scenario], fightingPower);
             
             // Check if we can use a grenade for this scenario
             if (playerManager && playerManager.getGrenadeCount() > 0 && damages[scenario] > 0) {
                 // Calculate potential damage with grenade
-                const damageWithGrenade = Math.max(0, baseDamage[scenario] - (fightingPower + 3));
+                const damageWithGrenade = this.applyFightingPowerReduction(baseDamage[scenario], fightingPower + 3);
                 
                 // If using a grenade would help, simulate using it in this scenario
                 if (damageWithGrenade < damages[scenario]) {
@@ -162,6 +172,15 @@ class FightHandler {
         let totalOptimistDamage = 0;
         let totalPessimistDamage = 0;
         let totalWorstCaseDamage = 0;
+        
+        // Per-player damage information
+        const playerCount = playerManager ? playerManager.players.filter(p => p !== null).length : 1;
+        let perPlayerDamage = {
+            optimist: Array(playerCount).fill(0),
+            average: Array(playerCount).fill(0),
+            pessimist: Array(playerCount).fill(0),
+            worstCase: Array(playerCount).fill(0)
+        };
 
         const damageCalculations = Object.entries(fightBreakdown)
             .map(([damageKey, probabilities]) => {
@@ -180,6 +199,12 @@ class FightHandler {
                 const averageDamage = this.calculateSequentialDamage(expectedFights, baseDamage, fightingPower, playerManager);
                 const pessimistDamage = this.calculateSequentialDamage(fightScenarios.pessimist, baseDamage, fightingPower, playerManager);
                 const worstCaseDamage = this.calculateSequentialDamage(fightScenarios.worstCase, baseDamage, fightingPower, playerManager);
+                
+                // Distribute damage among players for each scenario
+                this.distributePlayerDamage(optimistDamage, perPlayerDamage.optimist);
+                this.distributePlayerDamage(averageDamage, perPlayerDamage.average);
+                this.distributePlayerDamage(pessimistDamage, perPlayerDamage.pessimist);
+                this.distributePlayerDamage(worstCaseDamage, perPlayerDamage.worstCase);
                 
                 totalOptimistDamage += optimistDamage;
                 totalAverageDamage += averageDamage;
@@ -207,8 +232,38 @@ class FightHandler {
             totalWorstCaseDamage,
             combinedOptimistProb,
             combinedPessimistProb,
-            combinedWorstCaseProb
+            combinedWorstCaseProb,
+            perPlayerDamage
         };
+    }
+    
+    /**
+     * Distributes total damage among players
+     * @param {number} totalDamage - Total damage to distribute
+     * @param {Array<number>} playerDamageArray - Array to update with per-player damage
+     */
+    distributePlayerDamage(totalDamage, playerDamageArray) {
+        const playerCount = playerDamageArray.length;
+        if (playerCount === 0) return;
+        
+        // If there are no players, don't distribute damage
+        if (playerCount === 0) return;
+        
+        // Calculate base damage per player (integer division)
+        const baseDamagePerPlayer = Math.floor(totalDamage / playerCount);
+        
+        // Calculate remainder damage to distribute
+        const remainderDamage = totalDamage - (baseDamagePerPlayer * playerCount);
+        
+        // Distribute base damage to all players
+        for (let i = 0; i < playerCount; i++) {
+            playerDamageArray[i] += baseDamagePerPlayer;
+        }
+        
+        // Distribute remainder damage (1 point each to the first remainderDamage players)
+        for (let i = 0; i < remainderDamage; i++) {
+            playerDamageArray[i % playerCount]++;
+        }
     }
 
     /**
@@ -230,14 +285,18 @@ class FightHandler {
             let damage = damagePerFight;
             
             // Apply fighting power reduction
-            damage = Math.max(0, damage - fightingPower);
+            damage = this.applyFightingPowerReduction(damage, fightingPower);
             
             // Apply grenade reduction if available and beneficial
             if (remainingGrenades > 0 && damage > 0) {
-                damage = Math.max(0, damage - 3);
-                remainingGrenades--;
+                const damageWithGrenade = this.applyFightingPowerReduction(damagePerFight, fightingPower + 3);
+                if (damageWithGrenade < damage) {
+                    damage = damageWithGrenade;
+                    remainingGrenades--;
+                }
             }
             
+            // Add the distributed damage to the total
             totalDamage += damage;
         }
         

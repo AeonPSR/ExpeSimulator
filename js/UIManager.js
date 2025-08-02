@@ -133,6 +133,9 @@ class UIManager {
 								<button id="players-mode-btn" class="players-mode-btn" data-mode="icarus">
 									<img src="${getResourceURL('others/icarus_access.png')}" alt="Mode" />
 								</button>
+								<button id="antigrav-propeller-btn" class="antigrav-propeller-btn" data-active="false">
+									<img src="${getResourceURL('others/icarus_antigrav_propeller.png')}" alt="Antigrav Propeller" />
+								</button>
 								<button id="players-toggle-btn" class="players-toggle-btn" data-active="false">
 									<img src="${getResourceURL('others/base03.png')}" alt="Toggle" />
 								</button>

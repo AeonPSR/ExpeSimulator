@@ -657,3 +657,18 @@ const ItemEffects = {
 		}
 	}
 };
+
+// Projects Effects Configuration
+const ProjectEffects = {
+	'antigrav_propeller': {
+		name: 'Antigrav Propeller',
+		description: 'Makes landing safer by increasing likelihood of successful touchdown',
+		effects: {
+			sectorEventModifier: {
+				'LANDING': {
+					'NOTHING_TO_REPORT': 2 // Doubles the weight of the "Nothing" event in the Landing sector
+				}
+			}
+		}
+	}
+};

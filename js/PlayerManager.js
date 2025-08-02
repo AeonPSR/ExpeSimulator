@@ -5,6 +5,7 @@ class PlayerManager {
         this.players = [];
         this.nextPlayerId = 1;
         this.toggleState = false; // Toggle button state
+        this.antigravPropellerState = false; // Antigrav propeller button state
         this.currentMode = 'icarus'; // Mode button state: 'patrol' or 'icarus' (default: icarus)
         this.onPlayerUpdateCallback = onPlayerUpdateCallback;
         this.availableCharacters = [
@@ -46,6 +47,9 @@ class PlayerManager {
         
         // Initialize toggle button
         this.initializeToggle();
+        
+        // Initialize antigrav propeller button
+        this.initializeAntigravPropeller();
         
         // Initialize mode button
         this.initializeModeButton();
@@ -613,6 +617,27 @@ class PlayerManager {
     }
 
     /**
+     * Initialize antigrav propeller button functionality
+     */
+    initializeAntigravPropeller() {
+        const antigravBtn = document.querySelector('.antigrav-propeller-btn');
+        if (antigravBtn) {
+            antigravBtn.addEventListener('click', () => {
+                this.antigravPropellerState = !this.antigravPropellerState;
+                antigravBtn.setAttribute('data-active', this.antigravPropellerState.toString());
+                
+                // Update fighting power display immediately
+                this.updateFightingPowerDisplay();
+                
+                // Trigger callback for other updates
+                if (this.onPlayerUpdateCallback) {
+                    this.onPlayerUpdateCallback();
+                }
+            });
+        }
+    }
+
+    /**
      * Initialize mode button functionality
      */
     initializeModeButton() {
@@ -768,6 +793,8 @@ class PlayerManager {
         
         // Create a display power that includes grenade bonus for preview
         let displayPower = basePower;
+        
+        // Add grenade bonus if available
         if (this.getGrenadeCount() > 0) {
             displayPower += 3;
         }
