@@ -7,6 +7,15 @@ class ProbabilityCalculator {
         this.resourceHandler = new ResourceHandler();
         this.eventScenarioHandler = new EventScenarioHandler();
         this.eventDamageHandler = new EventDamageHandler();
+        this.sectorManager = null; // Will be set by EventHandler
+    }
+
+    /**
+     * Sets the sector manager reference
+     * @param {Object} sectorManager - The sector manager instance
+     */
+    setSectorManager(sectorManager) {
+        this.sectorManager = sectorManager;
     }
 
     /**
@@ -395,7 +404,11 @@ class ProbabilityCalculator {
                 // Track damage events for detailed calculations
                 damageBreakdown: {
                     singleDamage: [],
-                    groupDamageOther: []
+                    groupDamageOther: [],
+                    // Individual event types for proper display
+                    TIRED_2: [],
+                    ACCIDENT_3_5: [],
+                    DISASTER_3_5: []
                 }
             },
             risks: { playerLoss: 0, killLost: 0, killAll: 0, killOne: 0 },
@@ -478,13 +491,20 @@ class ProbabilityCalculator {
             outcomes.combat.fightBreakdown[damageKey].push(probability);
         }
         
-        // Other damages
-        else if (event === 'ACCIDENT_3_5') {
-            outcomes.damages.singleDamage += probability;
-            outcomes.damages.damageBreakdown.singleDamage.push(probability);
-        } else if (event === 'TIRED_2' || event === 'DISASTER_3_5') {
-            outcomes.damages.groupDamageOther += probability;
-            outcomes.damages.damageBreakdown.groupDamageOther.push(probability);
+        // Other damages - keep each event type separate
+        else if (event === 'ACCIDENT_3_5' || event === 'TIRED_2' || event === 'DISASTER_3_5') {
+            // Initialize the event type in damageBreakdown if it doesn't exist
+            if (!outcomes.damages.damageBreakdown[event]) {
+                outcomes.damages.damageBreakdown[event] = [];
+            }
+            outcomes.damages.damageBreakdown[event].push(probability);
+            
+            // Also maintain legacy totals for backward compatibility
+            if (event === 'ACCIDENT_3_5') {
+                outcomes.damages.singleDamage += probability;
+            } else if (event === 'TIRED_2' || event === 'DISASTER_3_5') {
+                outcomes.damages.groupDamageOther += probability;
+            }
         }
         
         // Risks
@@ -724,6 +744,11 @@ class ProbabilityCalculator {
         // Use the fight handler to calculate damage scenarios with fighting power and playerManager
         const results = this.fightHandler.calculateCombatDamageScenarios(fightBreakdown, fightingPower, this.playerManager);
         
+        // Store the combat damage results in the player manager for HP preview
+        if (this.playerManager && typeof this.playerManager.storeCombatDamage === 'function') {
+            this.playerManager.storeCombatDamage(results);
+        }
+        
         const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
         
         return `
@@ -752,8 +777,9 @@ class ProbabilityCalculator {
      * @returns {string} - HTML string
      */
     generateEventRisksHTML(damages) {
-        const hasEventDamage = damages.damageBreakdown.singleDamage.length > 0 || 
-                              damages.damageBreakdown.groupDamageOther.length > 0;
+        const hasEventDamage = damages.damageBreakdown.TIRED_2?.length > 0 ||
+                              damages.damageBreakdown.ACCIDENT_3_5?.length > 0 ||
+                              damages.damageBreakdown.DISASTER_3_5?.length > 0;
         
         if (!hasEventDamage) {
             return `
@@ -768,7 +794,7 @@ class ProbabilityCalculator {
         
         const eventEntries = Object.entries(risks)
             .map(([eventType, riskData]) => {
-                const eventName = eventType === 'singleDamage' ? 'Single Target Damage (3-5 HP)' : 'Group Damage (2 HP to all)';
+                const eventName = riskData.displayName || eventType;
                 
                 return `<div class="outcome-item">
                     <span>${eventName}:</span>
@@ -794,8 +820,9 @@ class ProbabilityCalculator {
      * @returns {string} - HTML string
      */
     generateEventDamagesHTML(damages, risks) {
-        const hasEventDamage = damages.damageBreakdown.singleDamage.length > 0 || 
-                              damages.damageBreakdown.groupDamageOther.length > 0;
+        const hasEventDamage = damages.damageBreakdown.TIRED_2?.length > 0 ||
+                              damages.damageBreakdown.ACCIDENT_3_5?.length > 0 ||
+                              damages.damageBreakdown.DISASTER_3_5?.length > 0;
         
         if (!hasEventDamage) {
             return `
@@ -821,7 +848,32 @@ class ProbabilityCalculator {
      */
     calculateEventDamageScenarios(damageBreakdown) {
         // Use the event damage handler to calculate damage scenarios
-        const results = this.eventDamageHandler.calculateEventDamageScenarios(damageBreakdown);
+        // Pass the selected sectors from the sectorManager to initialize damage values
+        const selectedSectorNames = this.sectorManager ? this.sectorManager.getSelectedSectors() : null;
+        console.log("DEBUG: selectedSectorNames from sectorManager:", selectedSectorNames);
+        
+        // Convert sector names to full sector configuration objects
+        let selectedSectors = null;
+        if (selectedSectorNames && Array.isArray(selectedSectorNames)) {
+            selectedSectors = selectedSectorNames.map(sectorName => {
+                console.log("DEBUG: Processing sector name:", sectorName);
+                // Extract the actual sector name from names like "COLD_default"
+                const actualSectorName = sectorName.replace('_default', '');
+                console.log("DEBUG: Actual sector name:", actualSectorName);
+                const foundSector = PlanetSectorConfigData.find(s => s.sectorName === actualSectorName);
+                console.log("DEBUG: Found sector:", foundSector);
+                return foundSector;
+            }).filter(sector => sector !== undefined); // Remove any sectors not found
+            
+            console.log("DEBUG: Final selectedSectors array:", selectedSectors);
+        }
+        
+        const results = this.eventDamageHandler.calculateEventDamageScenarios(damageBreakdown, 0, this.playerManager, this.sectorManager);
+        
+        // Store the event damage results in the player manager for HP preview
+        if (this.playerManager && typeof this.playerManager.storeEventDamage === 'function') {
+            this.playerManager.storeEventDamage(results);
+        }
         
         const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
         

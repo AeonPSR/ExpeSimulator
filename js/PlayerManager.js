@@ -8,6 +8,27 @@ class PlayerManager {
         this.antigravPropellerState = false; // Antigrav propeller button state
         this.currentMode = 'icarus'; // Mode button state: 'patrol' or 'icarus' (default: icarus)
         this.onPlayerUpdateCallback = onPlayerUpdateCallback;
+        this.combatDamage = {
+            optimist: [],
+            average: [],
+            pessimist: [],
+            worstCase: []
+        };
+        this.eventDamage = {
+            optimist: 0,
+            average: 0,
+            pessimist: 0,
+            worstCase: 0
+        };
+        // Track damage sources count per player
+        this.damageSources = {
+            optimist: [],
+            average: [],
+            pessimist: [],
+            worstCase: []
+        };
+        // Create an instance of FightHandler for damage distribution
+        this.fightHandler = new FightHandler();
         this.availableCharacters = [
             'andie.png', 'chao.png', 'chun.png', 'derek.png', 'eleesha.png',
             'finola.png', 'frieda.png', 'gioele.png', 'hua.png', 'ian.png',
@@ -695,6 +716,141 @@ class PlayerManager {
         
         return fightingPower;
     }
+    
+    /**
+     * Stores the combat damage results for player HP preview
+     * @param {Object} combatResults - Results from FightHandler.calculateCombatDamageScenarios
+     */
+    storeCombatDamage(combatResults) {
+        if (!combatResults || !combatResults.perPlayerDamage) return;
+        
+        this.combatDamage = combatResults.perPlayerDamage;
+        
+        // Track combat damage as a source for each player who receives damage
+        this.trackDamageSources('combat', combatResults.perPlayerDamage);
+    }
+    
+    /**
+     * Stores the event damage results for player HP preview
+     * @param {Object} eventResults - Results from EventDamageHandler.calculateEventDamageScenarios
+     */
+    storeEventDamage(eventResults) {
+        if (!eventResults) return;
+        
+        this.eventDamage.optimist = eventResults.totalOptimistDamage || 0;
+        this.eventDamage.average = eventResults.totalAverageDamage || 0;
+        this.eventDamage.pessimist = eventResults.totalPessimistDamage || 0;
+        this.eventDamage.worstCase = eventResults.totalWorstCaseDamage || 0;
+        
+        // If there's any event damage, track it as a source (will be properly distributed later)
+        if (eventResults.totalOptimistDamage > 0 || 
+            eventResults.totalAverageDamage > 0 || 
+            eventResults.totalPessimistDamage > 0 || 
+            eventResults.totalWorstCaseDamage > 0) {
+            this.trackEventDamageSources(eventResults);
+        }
+    }
+    
+    /**
+     * Tracks damage sources for all players
+     * @param {string} sourceType - Type of damage source (e.g., 'combat', 'event')
+     * @param {Object} perPlayerDamage - Per-player damage object with optimist, average, etc. arrays
+     * @private
+     */
+    trackDamageSources(sourceType, perPlayerDamage) {
+        // Initialize damage sources arrays if needed
+        if (this.damageSources.optimist.length !== this.players.length) {
+            this.resetDamageSources();
+        }
+        
+        // For each player, increment source count if they received damage
+        this.players.forEach((player, index) => {
+            // Check each scenario
+            ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
+                if (perPlayerDamage[scenario] && 
+                    perPlayerDamage[scenario].length > index && 
+                    perPlayerDamage[scenario][index] > 0) {
+                    this.damageSources[scenario][index]++;
+                }
+            });
+        });
+    }
+    
+    /**
+     * Tracks event damage sources that will be distributed among players
+     * @param {Object} eventResults - Event damage results
+     * @private
+     */
+    trackEventDamageSources(eventResults) {
+        // For event damage, we need to know how many sources affected each player
+        // This depends on event types from eventResults.damageCalculations if available
+        
+        // Simple approach: if there's any damage in a scenario, count it as one source for all players
+        const playerCount = this.players.length;
+        
+        // Initialize damage sources arrays if needed
+        if (this.damageSources.optimist.length !== playerCount) {
+            this.resetDamageSources();
+        }
+        
+        // Count event damage as one source per scenario with damage
+        if (eventResults.totalOptimistDamage > 0) {
+            for (let i = 0; i < playerCount; i++) {
+                this.damageSources.optimist[i]++;
+            }
+        }
+        
+        if (eventResults.totalAverageDamage > 0) {
+            for (let i = 0; i < playerCount; i++) {
+                this.damageSources.average[i]++;
+            }
+        }
+        
+        if (eventResults.totalPessimistDamage > 0) {
+            for (let i = 0; i < playerCount; i++) {
+                this.damageSources.pessimist[i]++;
+            }
+        }
+        
+        if (eventResults.totalWorstCaseDamage > 0) {
+            for (let i = 0; i < playerCount; i++) {
+                this.damageSources.worstCase[i]++;
+            }
+        }
+    }
+    
+    /**
+     * Resets the damage sources tracking arrays
+     * @private
+     */
+    resetDamageSources() {
+        const playerCount = this.players.length;
+        this.damageSources = {
+            optimist: Array(playerCount).fill(0),
+            average: Array(playerCount).fill(0),
+            pessimist: Array(playerCount).fill(0),
+            worstCase: Array(playerCount).fill(0)
+        };
+    }
+
+    /**
+     * Get the number of damage sources affecting a player in each scenario
+     * @param {number} playerIndex - Index of the player
+     * @returns {Object} - Object with damage source counts for each scenario
+     */
+    getPlayerDamageSources(playerIndex) {
+        if (playerIndex < 0 || playerIndex >= this.players.length || 
+            this.damageSources.optimist.length <= playerIndex) {
+            return { optimist: 0, average: 0, pessimist: 0, worstCase: 0 };
+        }
+        
+        return {
+            optimist: this.damageSources.optimist[playerIndex],
+            average: this.damageSources.average[playerIndex],
+            pessimist: this.damageSources.pessimist[playerIndex],
+            worstCase: this.damageSources.worstCase[playerIndex]
+        };
+    }
 
     /**
      * Get fighting power bonus from a weapon
@@ -814,14 +970,63 @@ class PlayerManager {
             return '<div style="text-align: center; color: #95a5a6; font-style: italic;">Add players to see expedition results</div>';
         }
 
-        const resultsHTML = this.players.map(player => {
-            // Calculate health for four scenarios
-            // For now, just simulate different outcomes based on current health
-            // Later this will be calculated based on expedition events
-            const pessimistHealth = Math.max(0, player.health - 6); // Worst case
-            const averageHealth = Math.max(0, player.health - 3);   // Average case
-            const optimistHealth = Math.max(0, player.health - 1);  // Best case
-            const worstHealth = Math.max(0, player.health - 10);    // Absolute worst case
+        // Reset damage sources before calculating new ones
+        this.resetDamageSources();
+
+        const resultsHTML = this.players.map((player, index) => {
+            // Use real calculated combat damage if available, otherwise use no damage
+            let optimistDamage = 0;
+            let averageDamage = 0;
+            let pessimistDamage = 0;
+            let worstCaseDamage = 0;
+            
+            // If we have combat damage data, use it instead of default values
+            if (this.combatDamage && this.combatDamage.optimist && this.combatDamage.optimist.length > index) {
+                optimistDamage = this.combatDamage.optimist[index];
+                averageDamage = this.combatDamage.average[index];
+                pessimistDamage = this.combatDamage.pessimist[index];
+                worstCaseDamage = this.combatDamage.worstCase[index];
+                
+                // Track combat damage sources
+                if (optimistDamage > 0) this.damageSources.optimist[index]++;
+                if (averageDamage > 0) this.damageSources.average[index]++;
+                if (pessimistDamage > 0) this.damageSources.pessimist[index]++;
+                if (worstCaseDamage > 0) this.damageSources.worstCase[index]++;
+            }
+            
+            // Add event damage (distributed evenly among players)
+            const playerCount = this.players.filter(p => p !== null).length;
+            if (playerCount > 0 && this.eventDamage) {
+                // Create temporary arrays for event damage distribution
+                const optimistEventDamage = Array(playerCount).fill(0);
+                const averageEventDamage = Array(playerCount).fill(0);
+                const pessimistEventDamage = Array(playerCount).fill(0);
+                const worstCaseEventDamage = Array(playerCount).fill(0);
+                
+                // Use FightHandler's distributePlayerDamage for even distribution with remainder
+                this.fightHandler.distributePlayerDamage(this.eventDamage.optimist, optimistEventDamage);
+                this.fightHandler.distributePlayerDamage(this.eventDamage.average, averageEventDamage);
+                this.fightHandler.distributePlayerDamage(this.eventDamage.pessimist, pessimistEventDamage);
+                this.fightHandler.distributePlayerDamage(this.eventDamage.worstCase, worstCaseEventDamage);
+                
+                // Add distributed event damage to this player's combat damage
+                optimistDamage += optimistEventDamage[index];
+                averageDamage += averageEventDamage[index];
+                pessimistDamage += pessimistEventDamage[index];
+                worstCaseDamage += worstCaseEventDamage[index];
+                
+                // Track event damage sources
+                if (optimistEventDamage[index] > 0) this.damageSources.optimist[index]++;
+                if (averageEventDamage[index] > 0) this.damageSources.average[index]++;
+                if (pessimistEventDamage[index] > 0) this.damageSources.pessimist[index]++;
+                if (worstCaseEventDamage[index] > 0) this.damageSources.worstCase[index]++;
+            }
+            
+            // Calculate final health by subtracting damage from current health
+            const optimistHealth = Math.max(0, player.health - optimistDamage);
+            const averageHealth = Math.max(0, player.health - averageDamage);
+            const pessimistHealth = Math.max(0, player.health - pessimistDamage);
+            const worstHealth = Math.max(0, player.health - worstCaseDamage);
             
             // Function to determine health class
             const getHealthClass = (health) => {
@@ -839,20 +1044,24 @@ class PlayerManager {
                     </div>
                     <div class="expedition-result-health-container">
                         <div class="expedition-result-health worst ${getHealthClass(worstHealth)}">
-                            ${worstHealth}
-                            <img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />
+                            ${worstHealth > 0 ? 
+                                `${worstHealth}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />` : 
+                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`}
                         </div>
                         <div class="expedition-result-health pessimist ${getHealthClass(pessimistHealth)}">
-                            ${pessimistHealth}
-                            <img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />
+                            ${pessimistHealth > 0 ? 
+                                `${pessimistHealth}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />` : 
+                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`}
                         </div>
                         <div class="expedition-result-health average ${getHealthClass(averageHealth)}">
-                            ${averageHealth}
-                            <img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />
+                            ${averageHealth > 0 ? 
+                                `${averageHealth}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />` : 
+                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`}
                         </div>
                         <div class="expedition-result-health optimist ${getHealthClass(optimistHealth)}">
-                            ${optimistHealth}
-                            <img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />
+                            ${optimistHealth > 0 ? 
+                                `${optimistHealth}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />` : 
+                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`}
                         </div>
                     </div>
                 </div>

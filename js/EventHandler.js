@@ -6,6 +6,9 @@ class EventHandler {
         this.uiManager = uiManager;
         this.probabilityCalculator = probabilityCalculator;
         this.playerManager = playerManager;
+        
+        // Set the sectorManager reference in probabilityCalculator
+        this.probabilityCalculator.setSectorManager(sectorManager);
     }
 
     /**
