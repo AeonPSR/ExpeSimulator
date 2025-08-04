@@ -173,13 +173,12 @@ class FightHandler {
         let totalPessimistDamage = 0;
         let totalWorstCaseDamage = 0;
         
-        // Per-player damage information
-        const playerCount = playerManager ? playerManager.players.filter(p => p !== null).length : 1;
-        let perPlayerDamage = {
-            optimist: Array(playerCount).fill(0),
-            average: Array(playerCount).fill(0),
-            pessimist: Array(playerCount).fill(0),
-            worstCase: Array(playerCount).fill(0)
+        // Initialize damage instances tracking
+        const damageInstances = {
+            optimist: [],
+            average: [],
+            pessimist: [],
+            worstCase: []
         };
 
         const damageCalculations = Object.entries(fightBreakdown)
@@ -200,11 +199,35 @@ class FightHandler {
                 const pessimistDamage = this.calculateSequentialDamage(fightScenarios.pessimist, baseDamage, fightingPower, playerManager);
                 const worstCaseDamage = this.calculateSequentialDamage(fightScenarios.worstCase, baseDamage, fightingPower, playerManager);
                 
-                // Distribute damage among players for each scenario
-                this.distributePlayerDamage(optimistDamage, perPlayerDamage.optimist);
-                this.distributePlayerDamage(averageDamage, perPlayerDamage.average);
-                this.distributePlayerDamage(pessimistDamage, perPlayerDamage.pessimist);
-                this.distributePlayerDamage(worstCaseDamage, perPlayerDamage.worstCase);
+                // Collect damage instances for each scenario (skip if no fights occur)
+                if (fightScenarios.optimist > 0) {
+                    damageInstances.optimist.push({
+                        type: damageKey,
+                        count: fightScenarios.optimist,
+                        damagePerInstance: optimistDamage / fightScenarios.optimist
+                    });
+                }
+                if (expectedFights > 0) {
+                    damageInstances.average.push({
+                        type: damageKey,
+                        count: expectedFights,
+                        damagePerInstance: averageDamage / expectedFights
+                    });
+                }
+                if (fightScenarios.pessimist > 0) {
+                    damageInstances.pessimist.push({
+                        type: damageKey,
+                        count: fightScenarios.pessimist,
+                        damagePerInstance: pessimistDamage / fightScenarios.pessimist
+                    });
+                }
+                if (fightScenarios.worstCase > 0) {
+                    damageInstances.worstCase.push({
+                        type: damageKey,
+                        count: fightScenarios.worstCase,
+                        damagePerInstance: worstCaseDamage / fightScenarios.worstCase
+                    });
+                }
                 
                 totalOptimistDamage += optimistDamage;
                 totalAverageDamage += averageDamage;
@@ -225,6 +248,22 @@ class FightHandler {
             combinedWorstCaseProb *= calc.worstCaseProb;
         });
 
+        // Log damage instances for each scenario
+        console.log('=== COMBAT DAMAGE INSTANCES BREAKDOWN ===');
+        ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
+            console.log(`\n${scenario.toUpperCase()} Scenario:`);
+            if (damageInstances[scenario].length === 0) {
+                console.log('  No combat events');
+            } else {
+                damageInstances[scenario].forEach(instance => {
+                    console.log(`  ${instance.count}x ${instance.type} (${instance.damagePerInstance} damage each) = ${instance.count * instance.damagePerInstance} total`);
+                });
+                const scenarioTotal = damageInstances[scenario].reduce((sum, instance) => sum + (instance.count * instance.damagePerInstance), 0);
+                console.log(`  TOTAL: ${scenarioTotal} damage`);
+            }
+        });
+        console.log('==========================================\n');
+
         return {
             totalAverageDamage,
             totalOptimistDamage,
@@ -233,39 +272,10 @@ class FightHandler {
             combinedOptimistProb,
             combinedPessimistProb,
             combinedWorstCaseProb,
-            perPlayerDamage
+            damageInstances
         };
     }
     
-    /**
-     * Distributes total damage among players
-     * @param {number} totalDamage - Total damage to distribute
-     * @param {Array<number>} playerDamageArray - Array to update with per-player damage
-     */
-    distributePlayerDamage(totalDamage, playerDamageArray) {
-        const playerCount = playerDamageArray.length;
-        if (playerCount === 0) return;
-        
-        // If there are no players, don't distribute damage
-        if (playerCount === 0) return;
-        
-        // Calculate base damage per player (integer division)
-        const baseDamagePerPlayer = Math.floor(totalDamage / playerCount);
-        
-        // Calculate remainder damage to distribute
-        const remainderDamage = totalDamage - (baseDamagePerPlayer * playerCount);
-        
-        // Distribute base damage to all players
-        for (let i = 0; i < playerCount; i++) {
-            playerDamageArray[i] += baseDamagePerPlayer;
-        }
-        
-        // Distribute remainder damage (1 point each to the first remainderDamage players)
-        for (let i = 0; i < remainderDamage; i++) {
-            playerDamageArray[i % playerCount]++;
-        }
-    }
-
     /**
      * Calculate damage for a specific number of fights using sequential grenade consumption
      * @param {number} numFights - Number of fights to process

@@ -868,7 +868,7 @@ class ProbabilityCalculator {
             console.log("DEBUG: Final selectedSectors array:", selectedSectors);
         }
         
-        const results = this.eventDamageHandler.calculateEventDamageScenarios(damageBreakdown, 0, this.playerManager, this.sectorManager);
+        const results = this.eventDamageHandler.calculateEventDamageScenarios(damageBreakdown, this.playerManager, this.sectorManager);
         
         // Store the event damage results in the player manager for HP preview
         if (this.playerManager && typeof this.playerManager.storeEventDamage === 'function') {

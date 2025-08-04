@@ -5,31 +5,22 @@ class EventDamageHandler {
         // Initialize any needed state
     }
     
-    /**
-     * Apply fighting power reduction to damage
-     * @param {number} damage - Raw damage amount
-     * @param {number} fightingPower - Fighting power to reduce damage
-     * @returns {number} - Damage after reduction (minimum 0)
-     */
-    applyFightingPowerReduction(damage, fightingPower) {
-        return Math.max(0, damage - fightingPower);
-    }
+
 
     /**
      * Processes event damage and groups them by damage type
      * @param {Object} eventBreakdown - Event breakdown from outcomes
-     * @param {number} fightingPower - Team's fighting power to reduce damage
      * @param {Object} playerManager - The player manager instance for grenade consumption
      * @returns {Object} - Processed event data
      */
-    processEventBreakdown(eventBreakdown, fightingPower = 0, playerManager = null) {
+    processEventBreakdown(eventBreakdown, playerManager = null) {
         const processedEvents = {};
         
         Object.entries(eventBreakdown).forEach(([damageKey, probabilities]) => {
             processedEvents[damageKey] = {
                 sectorCount: probabilities.length,
                 probability: probabilities[0], // Assuming all probabilities are the same
-                damageValues: this.getDamageValues(damageKey, fightingPower, playerManager)
+                damageValues: this.getDamageValues(damageKey, playerManager)
             };
         });
         
@@ -90,13 +81,12 @@ class EventDamageHandler {
     }
 
     /**
-     * Gets appropriate damage values for different scenarios, applying fighting power reduction
+     * Gets appropriate damage values for different scenarios
      * @param {string} damageKey - The damage key (e.g., "TIRED_2", "ACCIDENT_3_5", "DISASTER_3_5", or multi-event sectors)
-     * @param {number} fightingPower - Team's fighting power to reduce damage
      * @param {Object} playerManager - The player manager instance to check for grenades
      * @returns {Object} - Damage values for different scenarios
      */
-    getDamageValues(damageKey, fightingPower = 0, playerManager = null) {
+    getDamageValues(damageKey, playerManager = null) {
         let baseDamage;
         
         // Handle multi-event sectors with scenario-based event selection
@@ -140,15 +130,14 @@ class EventDamageHandler {
         const scenarios = ['optimist', 'average', 'pessimist', 'worstCase'];
         const damages = {};
         
-        // For each scenario, create a separate calculation with its own inventory
+        // For each scenario, use base damage values
         for (const scenario of scenarios) {
-            // Start with base damage without grenade
-            damages[scenario] = this.applyFightingPowerReduction(baseDamage[scenario], fightingPower);
+            damages[scenario] = baseDamage[scenario];
             
             // Check if we can use a grenade for this scenario
             if (playerManager && playerManager.getGrenadeCount() > 0 && damages[scenario] > 0) {
-                // Calculate potential damage with grenade
-                const damageWithGrenade = this.applyFightingPowerReduction(baseDamage[scenario], fightingPower + 3);
+                // Calculate potential damage with grenade (reduces damage by 3)
+                const damageWithGrenade = Math.max(0, baseDamage[scenario] - 3);
                 
                 // If using a grenade would help, simulate using it in this scenario
                 if (damageWithGrenade < damages[scenario]) {
@@ -182,30 +171,32 @@ class EventDamageHandler {
     /**
      * Calculates event damage scenarios for all event types using sequential grenade consumption
      * @param {Object} eventBreakdown - Event breakdown data
-     * @param {number} fightingPower - Team's fighting power to reduce damage
      * @param {Object} playerManager - The player manager instance for grenade consumption
      * @param {Object} sectorManager - The sector manager instance to get original sector list
      * @returns {Object} - Complete damage calculation results
      */
-    calculateEventDamageScenarios(eventBreakdown, fightingPower = 0, playerManager = null, sectorManager = null) {
+    calculateEventDamageScenarios(eventBreakdown, playerManager = null, sectorManager = null) {
+        // Apply ability effects to the event breakdown before calculating damage
+        const modifiedEventBreakdown = this.applyAbilityEffects(eventBreakdown, playerManager, sectorManager);
+        
         let totalAverageDamage = 0;
         let totalOptimistDamage = 0;
         let totalPessimistDamage = 0;
         let totalWorstCaseDamage = 0;
         
-        // Per-player damage information
-        const playerCount = playerManager ? playerManager.players.filter(p => p !== null).length : 1;
-        let perPlayerDamage = {
-            optimist: Array(playerCount).fill(0),
-            average: Array(playerCount).fill(0),
-            pessimist: Array(playerCount).fill(0),
-            worstCase: Array(playerCount).fill(0)
+        // Calculate worst case damage using the new approach
+        const worstCaseResult = this.calculateWorstCaseDamage(modifiedEventBreakdown, playerManager, sectorManager);
+        totalWorstCaseDamage = worstCaseResult.totalDamage;
+
+        // Initialize damage instances tracking
+        const damageInstances = {
+            optimist: [],
+            average: [],
+            pessimist: [],
+            worstCase: worstCaseResult.instances
         };
 
-        // Calculate worst case damage using the new approach
-        totalWorstCaseDamage = this.calculateWorstCaseDamage(eventBreakdown, fightingPower, playerManager, perPlayerDamage.worstCase, sectorManager);
-
-        const damageCalculations = Object.entries(eventBreakdown)
+        const damageCalculations = Object.entries(modifiedEventBreakdown)
             .map(([damageKey, probabilities]) => {
                 const n = probabilities.length;
                 const p = probabilities[0];
@@ -229,18 +220,36 @@ class EventDamageHandler {
                 const baseDamage = this.getDamageFromKey(damageKey);
                 
                 // Calculate damage for each scenario with sequential grenade consumption
-                const optimistDamage = this.calculateSequentialDamage(eventScenarios.optimist, baseDamage, fightingPower, playerManager, damageKey, 'optimist');
-                const averageDamage = this.calculateSequentialDamage(expectedEvents, baseDamage, fightingPower, playerManager, damageKey, 'average');
-                const pessimistDamage = this.calculateSequentialDamage(eventScenarios.pessimist, baseDamage, fightingPower, playerManager, damageKey, 'pessimist');
+                const optimistDamage = this.calculateSequentialDamage(eventScenarios.optimist, baseDamage, playerManager, damageKey, 'optimist');
+                const averageDamage = this.calculateSequentialDamage(expectedEvents, baseDamage, playerManager, damageKey, 'average');
+                const pessimistDamage = this.calculateSequentialDamage(eventScenarios.pessimist, baseDamage, playerManager, damageKey, 'pessimist');
                 
-                // Distribute damage among players for each scenario (worst case handled separately)
-                this.distributePlayerDamage(optimistDamage, perPlayerDamage.optimist, damageKey, 'optimist');
-                this.distributePlayerDamage(averageDamage, perPlayerDamage.average, damageKey, 'average');
-                this.distributePlayerDamage(pessimistDamage, perPlayerDamage.pessimist, damageKey, 'pessimist');
+                // Collect damage instances for each scenario (skip if no events occur)
+                if (eventScenarios.optimist > 0) {
+                    damageInstances.optimist.push({
+                        type: damageKey,
+                        count: eventScenarios.optimist,
+                        damagePerInstance: optimistDamage / eventScenarios.optimist
+                    });
+                }
+                if (expectedEvents > 0) {
+                    damageInstances.average.push({
+                        type: damageKey,
+                        count: expectedEvents,
+                        damagePerInstance: averageDamage / expectedEvents
+                    });
+                }
+                if (eventScenarios.pessimist > 0) {
+                    damageInstances.pessimist.push({
+                        type: damageKey,
+                        count: eventScenarios.pessimist,
+                        damagePerInstance: pessimistDamage / eventScenarios.pessimist
+                    });
+                }
                 
                 // Only add damage if this is not an individual event type that's part of a multi-event sector
                 // (Skip TIRED_2, ACCIDENT_3_5, DISASTER_3_5 if we have LANDING, MOUNTAIN, COLD, or HOT)
-                const hasMultiEventSector = Object.keys(eventBreakdown).some(key => this.isMultiEventSector(key));
+                const hasMultiEventSector = Object.keys(modifiedEventBreakdown).some(key => this.isMultiEventSector(key));
                 const isIndividualEventType = ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5'].includes(damageKey);
                 
                 if (!hasMultiEventSector || !isIndividualEventType) {
@@ -263,6 +272,22 @@ class EventDamageHandler {
             combinedWorstCaseProb *= calc.worstCaseProb;
         });
 
+        // Log damage instances for each scenario
+        console.log('=== EVENT DAMAGE INSTANCES BREAKDOWN ===');
+        ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
+            console.log(`\n${scenario.toUpperCase()} Scenario:`);
+            if (damageInstances[scenario].length === 0) {
+                console.log('  No damage events');
+            } else {
+                damageInstances[scenario].forEach(instance => {
+                    console.log(`  ${instance.count}x ${instance.type} (${instance.damagePerInstance} damage each) = ${instance.count * instance.damagePerInstance} total`);
+                });
+                const scenarioTotal = damageInstances[scenario].reduce((sum, instance) => sum + (instance.count * instance.damagePerInstance), 0);
+                console.log(`  TOTAL: ${scenarioTotal} damage`);
+            }
+        });
+        console.log('==========================================\n');
+
         return {
             totalAverageDamage,
             totalOptimistDamage,
@@ -271,8 +296,77 @@ class EventDamageHandler {
             combinedOptimistProb,
             combinedPessimistProb,
             combinedWorstCaseProb,
-            perPlayerDamage
+            damageInstances
         };
+    }
+
+    /**
+     * Apply ability effects to the event breakdown
+     * @param {Object} eventBreakdown - Original event breakdown
+     * @param {Object} playerManager - Player manager to get abilities
+     * @param {Object} sectorManager - Sector manager to get sector list
+     * @returns {Object} - Modified event breakdown with ability effects applied
+     */
+    applyAbilityEffects(eventBreakdown, playerManager, sectorManager) {
+        if (!playerManager || !playerManager.players) {
+            return eventBreakdown;
+        }
+
+        // Get all active abilities from all players
+        const activeAbilities = new Set();
+        playerManager.players.forEach(player => {
+            if (player.abilities) {
+                player.abilities.forEach(ability => {
+                    if (ability) {
+                        const abilityKey = ability.replace(/\.(png|jpg)$/, '');
+                        activeAbilities.add(abilityKey);
+                    }
+                });
+            }
+        });
+
+        // If no abilities, return original breakdown
+        if (activeAbilities.size === 0) {
+            return eventBreakdown;
+        }
+
+        // Create a copy of the event breakdown
+        const modifiedBreakdown = JSON.parse(JSON.stringify(eventBreakdown));
+
+        // Get sector list for sector-specific modifications
+        let sectors = [];
+        if (sectorManager && typeof sectorManager.getSelectedSectors === 'function') {
+            sectors = sectorManager.getSelectedSectors();
+        }
+
+        // Apply ability effects
+        activeAbilities.forEach(abilityKey => {
+            const abilityConfig = AbilityEffects[abilityKey];
+            if (!abilityConfig || !abilityConfig.effects) return;
+
+            const effects = abilityConfig.effects;
+
+            // Handle sector-specific modifications (like Pilot ability)
+            if (effects.sectorModifications) {
+                sectors.forEach(sectorName => {
+                    if (effects.sectorModifications[sectorName]) {
+                        const modifications = effects.sectorModifications[sectorName];
+                        
+                        // Remove events as specified by the ability
+                        if (modifications.removeEvents) {
+                            modifications.removeEvents.forEach(eventType => {
+                                // Remove the event type completely from the breakdown
+                                if (modifiedBreakdown[eventType]) {
+                                    delete modifiedBreakdown[eventType];
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        return modifiedBreakdown;
     }
 
     /**
@@ -280,25 +374,20 @@ class EventDamageHandler {
      * 1. Handle multi-event sectors first, applying worst case event
      * 2. Handle remaining single events normally
      * @param {Object} eventBreakdown - Event breakdown data
-     * @param {number} fightingPower - Fighting power to reduce damage
      * @param {Object} playerManager - Player manager for grenade count
-     * @param {Array<number>} worstCasePlayerDamage - Array to fill with per-player damage
      * @param {Object} sectorManager - Sector manager to get original sector list
-     * @returns {number} - Total worst case damage
+     * @returns {Object} - Object with totalDamage and instances array
      */
-    calculateWorstCaseDamage(eventBreakdown, fightingPower, playerManager, worstCasePlayerDamage, sectorManager = null) {
+    calculateWorstCaseDamage(eventBreakdown, playerManager, sectorManager = null) {
         let totalDamage = 0;
-        
-        console.log('EventBreakdown in calculateWorstCaseDamage:', eventBreakdown);
+        const instances = []; // Track damage instances for worst case
         
         // Get the original sector list instead of using the processed eventBreakdown
         let sectorsToProcess = [];
         if (sectorManager && typeof sectorManager.getSelectedSectors === 'function') {
             sectorsToProcess = sectorManager.getSelectedSectors();
-            console.log('Using sector list from sectorManager:', sectorsToProcess);
         } else {
             // Fallback: try to reconstruct from eventBreakdown (old approach)
-            console.log('No sectorManager available, using fallback approach');
             sectorsToProcess = Object.keys(eventBreakdown).filter(key => eventBreakdown[key].length > 0);
         }
         
@@ -310,25 +399,24 @@ class EventDamageHandler {
             }
         });
         
-        console.log('Initial remaining events:', remainingEvents);
-        
         // First pass: Handle multi-event sectors using original sector list
         sectorsToProcess.forEach(sectorName => {
             if (this.isMultiEventSector(sectorName)) {
-                console.log(`Processing multi-event sector: ${sectorName}`);
-                
                 const eventTypes = this.getEventTypeByScenario(sectorName);
                 const worstCaseEventType = eventTypes.worstCase;
                 
                 if (worstCaseEventType !== 'NONE') {
                     // Calculate and add damage from this sector's worst case event
                     const baseDamage = this.getDamageFromKey(worstCaseEventType);
-                    const sectorDamage = this.calculateSequentialDamage(1, baseDamage, fightingPower, playerManager, worstCaseEventType, 'worstCase');
+                    const sectorDamage = this.calculateSequentialDamage(1, baseDamage, playerManager, worstCaseEventType, 'worstCase');
                     
-                    console.log(`${sectorName}: ${worstCaseEventType} deals ${sectorDamage} damage`);
+                    // Track this damage instance
+                    instances.push({
+                        type: worstCaseEventType,
+                        count: 1,
+                        damagePerInstance: sectorDamage
+                    });
                     
-                    // Distribute this sector's damage
-                    this.distributePlayerDamage(sectorDamage, worstCasePlayerDamage, worstCaseEventType, 'worstCase');
                     totalDamage += sectorDamage;
                 }
                 
@@ -337,33 +425,34 @@ class EventDamageHandler {
                 possibleEvents.forEach(eventType => {
                     if (remainingEvents[eventType] && remainingEvents[eventType] > 0) {
                         remainingEvents[eventType]--;
-                        console.log(`Removed one ${eventType} event for ${sectorName}. Remaining: ${remainingEvents[eventType]}`);
-                    } else if (remainingEvents[eventType] !== undefined) {
-                        console.error(`Attempted to remove ${eventType} event for ${sectorName} sector, but no instances remain. Remaining: ${remainingEvents[eventType]}`);
                     }
                 });
             }
         });
         
-        console.log('Remaining events after multi-event processing:', remainingEvents);
-        
         // Second pass: Handle remaining single events normally
         Object.entries(remainingEvents).forEach(([eventType, remainingCount]) => {
             if (remainingCount > 0) {
-                console.log(`Processing remaining single event: ${eventType} with ${remainingCount} sectors`);
                 const baseDamage = this.getDamageFromKey(eventType);
-                const eventDamage = this.calculateSequentialDamage(remainingCount, baseDamage, fightingPower, playerManager, eventType, 'worstCase');
+                const eventDamage = this.calculateSequentialDamage(remainingCount, baseDamage, playerManager, eventType, 'worstCase');
                 
-                console.log(`Remaining ${eventType} deals ${eventDamage} total damage`);
+                // Track this damage instance
+                if (remainingCount > 0 && eventDamage > 0) {
+                    instances.push({
+                        type: eventType,
+                        count: remainingCount,
+                        damagePerInstance: eventDamage / remainingCount
+                    });
+                }
                 
-                // Distribute total damage from remaining events of this type
-                this.distributePlayerDamage(eventDamage, worstCasePlayerDamage, eventType, 'worstCase');
                 totalDamage += eventDamage;
             }
         });
         
-        console.log(`Total worst case damage: ${totalDamage}`);
-        return totalDamage;
+        return {
+            totalDamage,
+            instances
+        };
     }
     
     /**
@@ -387,11 +476,10 @@ class EventDamageHandler {
     /**
      * Calculates event damage risks - compatible structure for UI display
      * @param {Object} eventBreakdown - Event breakdown data with structure: { TIRED_2: [...], ACCIDENT_3_5: [...], DISASTER_3_5: [...] }
-     * @param {number} fightingPower - Team's fighting power to reduce damage
      * @param {Object} playerManager - The player manager instance for grenade consumption
      * @returns {Object} - Risk data formatted for UI display
      */
-    calculateEventDamageRisks(eventBreakdown, fightingPower = 0, playerManager = null) {
+    calculateEventDamageRisks(eventBreakdown, playerManager = null) {
         const risks = {};
         
         // Process each event type separately
@@ -440,64 +528,15 @@ class EventDamageHandler {
     }
     
     /**
-     * Distributes total damage among players based on event type
-     * @param {number} totalDamage - Total damage to distribute
-     * @param {Array<number>} playerDamageArray - Array to update with per-player damage
-     * @param {string} damageKey - The damage key to determine distribution type
-     * @param {string} scenario - The scenario (optimist, average, pessimist, worstCase) for multi-event handling
-     */
-    distributePlayerDamage(totalDamage, playerDamageArray, damageKey = '', scenario = 'average') {
-        const playerCount = playerDamageArray.length;
-        if (playerCount === 0) return;
-        
-        // For multi-event sectors, get the actual event type for this scenario
-        let actualEventType = damageKey;
-        if (this.isMultiEventSector(damageKey)) {
-            const eventTypes = this.getEventTypeByScenario(damageKey);
-            actualEventType = eventTypes[scenario];
-            
-            // If no event occurs in this scenario, don't distribute damage
-            if (actualEventType === 'NONE') {
-                return;
-            }
-        }
-        
-        // ACCIDENT_3_5 targets a single player, others target all players
-        if (actualEventType === 'ACCIDENT_3_5') {
-            // Single target damage - give all damage to one player (randomly distributed)
-            const targetPlayerIndex = Math.floor(Math.random() * playerCount);
-            playerDamageArray[targetPlayerIndex] += totalDamage;
-        } else {
-            // Multi-target damage (TIRED_2, DISASTER_3_5) - distribute among all players
-            // Calculate base damage per player (integer division)
-            const baseDamagePerPlayer = Math.floor(totalDamage / playerCount);
-            
-            // Calculate remainder damage to distribute
-            const remainderDamage = totalDamage - (baseDamagePerPlayer * playerCount);
-            
-            // Distribute base damage to all players
-            for (let i = 0; i < playerCount; i++) {
-                playerDamageArray[i] += baseDamagePerPlayer;
-            }
-            
-            // Distribute remainder damage (1 point each to the first remainderDamage players)
-            for (let i = 0; i < remainderDamage; i++) {
-                playerDamageArray[i % playerCount]++;
-            }
-        }
-    }
-
-    /**
      * Calculate damage for a specific number of events using sequential grenade consumption
      * @param {number} numEvents - Number of events to process
      * @param {Object} baseDamage - Base damage values (use average for sequential processing)
-     * @param {number} fightingPower - Fighting power to reduce damage
      * @param {Object} playerManager - Player manager for grenade count
      * @param {string} damageKey - The damage key to determine how damage is applied
      * @param {string} scenario - The scenario for multi-event handling
      * @returns {number} - Total damage after sequential processing
      */
-    calculateSequentialDamage(numEvents, baseDamage, fightingPower, playerManager, damageKey = '', scenario = 'average') {
+    calculateSequentialDamage(numEvents, baseDamage, playerManager, damageKey = '', scenario = 'average') {
         let remainingGrenades = playerManager ? playerManager.getGrenadeCount() : 0;
         let totalDamage = 0;
         
@@ -519,12 +558,9 @@ class EventDamageHandler {
         for (let i = 0; i < numEvents; i++) {
             let damage = damagePerEvent;
             
-            // Apply fighting power reduction
-            damage = this.applyFightingPowerReduction(damage, fightingPower);
-            
             // Apply grenade reduction if available and beneficial
             if (remainingGrenades > 0 && damage > 0) {
-                const damageWithGrenade = this.applyFightingPowerReduction(damagePerEvent, fightingPower + 3);
+                const damageWithGrenade = Math.max(0, damagePerEvent - 3);
                 if (damageWithGrenade < damage) {
                     damage = damageWithGrenade;
                     remainingGrenades--;

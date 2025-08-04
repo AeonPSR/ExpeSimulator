@@ -20,6 +20,12 @@ class PlayerManager {
             pessimist: 0,
             worstCase: 0
         };
+        this.eventDamagePerPlayer = {
+            optimist: [],
+            average: [],
+            pessimist: [],
+            worstCase: []
+        };
         // Track damage sources count per player
         this.damageSources = {
             optimist: [],
@@ -722,12 +728,88 @@ class PlayerManager {
      * @param {Object} combatResults - Results from FightHandler.calculateCombatDamageScenarios
      */
     storeCombatDamage(combatResults) {
-        if (!combatResults || !combatResults.perPlayerDamage) return;
+        if (!combatResults) return;
         
-        this.combatDamage = combatResults.perPlayerDamage;
+        // Distribute combat damage instances among players for each scenario
+        this.combatDamage = this.distributeCombatDamageInstances(combatResults.damageInstances);
         
         // Track combat damage as a source for each player who receives damage
-        this.trackDamageSources('combat', combatResults.perPlayerDamage);
+        this.trackDamageSources('combat', this.combatDamage);
+    }
+
+    /**
+     * Distributes combat damage instances among players (fights distribute damage among all players)
+     * @param {Object} damageInstances - Combat damage instances from FightHandler
+     * @returns {Object} - Per-player damage arrays for each scenario
+     */
+    distributeCombatDamageInstances(damageInstances) {
+        const playerCount = this.players.filter(p => p !== null).length;
+        
+        // If no players, return empty arrays
+        if (playerCount === 0) {
+            return {
+                optimist: [],
+                average: [],
+                pessimist: [],
+                worstCase: []
+            };
+        }
+
+        // Initialize per-player damage arrays
+        const perPlayerDamage = {
+            optimist: Array(playerCount).fill(0),
+            average: Array(playerCount).fill(0),
+            pessimist: Array(playerCount).fill(0),
+            worstCase: Array(playerCount).fill(0)
+        };
+
+        // Process each scenario
+        ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
+            if (damageInstances[scenario]) {
+                damageInstances[scenario].forEach(instance => {
+                    this.distributeCombatInstanceDamage(
+                        instance.count,
+                        instance.damagePerInstance,
+                        perPlayerDamage[scenario]
+                    );
+                });
+            }
+        });
+
+        return perPlayerDamage;
+    }
+
+    /**
+     * Distributes damage from a single combat instance to players
+     * @param {number} count - Number of fights of this type
+     * @param {number} damagePerInstance - Damage per fight instance
+     * @param {Array<number>} playerDamageArray - Array to update with damage distribution
+     */
+    distributeCombatInstanceDamage(count, damagePerInstance, playerDamageArray) {
+        const playerCount = playerDamageArray.length;
+        if (playerCount === 0) return;
+
+        // Process each instance of this fight type
+        for (let i = 0; i < count; i++) {
+            const totalDamage = damagePerInstance;
+
+            // COMBAT: Always distribute among all players (like TIRED_2/DISASTER_3_5)
+            // Calculate base damage per player (integer division)
+            const baseDamagePerPlayer = Math.floor(totalDamage / playerCount);
+            
+            // Calculate remainder damage to distribute
+            const remainderDamage = totalDamage - (baseDamagePerPlayer * playerCount);
+            
+            // Distribute base damage to all players
+            for (let j = 0; j < playerCount; j++) {
+                playerDamageArray[j] += baseDamagePerPlayer;
+            }
+            
+            // Distribute remainder damage (1 point each to the first remainderDamage players)
+            for (let j = 0; j < remainderDamage; j++) {
+                playerDamageArray[j % playerCount]++;
+            }
+        }
     }
     
     /**
@@ -742,12 +824,86 @@ class PlayerManager {
         this.eventDamage.pessimist = eventResults.totalPessimistDamage || 0;
         this.eventDamage.worstCase = eventResults.totalWorstCaseDamage || 0;
         
+        // Distribute damage instances among players for each scenario
+        this.eventDamagePerPlayer = this.distributeDamageInstances(eventResults.damageInstances);
+        
         // If there's any event damage, track it as a source (will be properly distributed later)
         if (eventResults.totalOptimistDamage > 0 || 
             eventResults.totalAverageDamage > 0 || 
             eventResults.totalPessimistDamage > 0 || 
             eventResults.totalWorstCaseDamage > 0) {
             this.trackEventDamageSources(eventResults);
+        }
+    }
+
+    /**
+     * Distributes damage instances among players based on event types
+     * @param {Object} damageInstances - Damage instances from EventDamageHandler
+     * @returns {Object} - Per-player damage arrays for each scenario
+     */
+    distributeDamageInstances(damageInstances) {
+        const playerCount = this.players.filter(p => p !== null).length;
+        
+        // If no players, return empty arrays
+        if (playerCount === 0) {
+            return {
+                optimist: [],
+                average: [],
+                pessimist: [],
+                worstCase: []
+            };
+        }
+
+        // Initialize per-player damage arrays
+        const perPlayerDamage = {
+            optimist: Array(playerCount).fill(0),
+            average: Array(playerCount).fill(0),
+            pessimist: Array(playerCount).fill(0),
+            worstCase: Array(playerCount).fill(0)
+        };
+
+        // Process each scenario
+        ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
+            if (damageInstances[scenario]) {
+                damageInstances[scenario].forEach(instance => {
+                    this.distributeInstanceDamage(
+                        instance.type,
+                        instance.count,
+                        instance.damagePerInstance,
+                        perPlayerDamage[scenario]
+                    );
+                });
+            }
+        });
+
+        return perPlayerDamage;
+    }
+
+    /**
+     * Distributes damage from a single damage instance to players
+     * @param {string} eventType - Type of event (TIRED_2, ACCIDENT_3_5, DISASTER_3_5)
+     * @param {number} count - Number of events of this type
+     * @param {number} damagePerInstance - Damage per event instance
+     * @param {Array<number>} playerDamageArray - Array to update with damage distribution
+     */
+    distributeInstanceDamage(eventType, count, damagePerInstance, playerDamageArray) {
+        const playerCount = playerDamageArray.length;
+        if (playerCount === 0) return;
+
+        // Process each instance of this event type
+        for (let i = 0; i < count; i++) {
+            const totalDamage = damagePerInstance;
+
+            if (eventType === 'ACCIDENT_3_5') {
+                // ACCIDENT: Single target damage - randomly select one player
+                const targetPlayerIndex = Math.floor(Math.random() * playerCount);
+                playerDamageArray[targetPlayerIndex] += totalDamage;
+            } else {
+                // TIRED_2 and DISASTER_3_5: Multi-target damage - apply to ALL players
+                for (let j = 0; j < playerCount; j++) {
+                    playerDamageArray[j] += totalDamage;
+                }
+            }
         }
     }
     
@@ -994,32 +1150,28 @@ class PlayerManager {
                 if (worstCaseDamage > 0) this.damageSources.worstCase[index]++;
             }
             
-            // Add event damage (distributed evenly among players)
+            // Add event damage using the already-distributed per-player arrays
             const playerCount = this.players.filter(p => p !== null).length;
-            if (playerCount > 0 && this.eventDamage) {
-                // Create temporary arrays for event damage distribution
-                const optimistEventDamage = Array(playerCount).fill(0);
-                const averageEventDamage = Array(playerCount).fill(0);
-                const pessimistEventDamage = Array(playerCount).fill(0);
-                const worstCaseEventDamage = Array(playerCount).fill(0);
-                
-                // Use FightHandler's distributePlayerDamage for even distribution with remainder
-                this.fightHandler.distributePlayerDamage(this.eventDamage.optimist, optimistEventDamage);
-                this.fightHandler.distributePlayerDamage(this.eventDamage.average, averageEventDamage);
-                this.fightHandler.distributePlayerDamage(this.eventDamage.pessimist, pessimistEventDamage);
-                this.fightHandler.distributePlayerDamage(this.eventDamage.worstCase, worstCaseEventDamage);
-                
-                // Add distributed event damage to this player's combat damage
-                optimistDamage += optimistEventDamage[index];
-                averageDamage += averageEventDamage[index];
-                pessimistDamage += pessimistEventDamage[index];
-                worstCaseDamage += worstCaseEventDamage[index];
+            if (playerCount > 0 && this.eventDamagePerPlayer) {
+                // Use the pre-calculated per-player damage from EventDamageHandler
+                if (this.eventDamagePerPlayer.optimist && this.eventDamagePerPlayer.optimist.length > index) {
+                    optimistDamage += this.eventDamagePerPlayer.optimist[index];
+                }
+                if (this.eventDamagePerPlayer.average && this.eventDamagePerPlayer.average.length > index) {
+                    averageDamage += this.eventDamagePerPlayer.average[index];
+                }
+                if (this.eventDamagePerPlayer.pessimist && this.eventDamagePerPlayer.pessimist.length > index) {
+                    pessimistDamage += this.eventDamagePerPlayer.pessimist[index];
+                }
+                if (this.eventDamagePerPlayer.worstCase && this.eventDamagePerPlayer.worstCase.length > index) {
+                    worstCaseDamage += this.eventDamagePerPlayer.worstCase[index];
+                }
                 
                 // Track event damage sources
-                if (optimistEventDamage[index] > 0) this.damageSources.optimist[index]++;
-                if (averageEventDamage[index] > 0) this.damageSources.average[index]++;
-                if (pessimistEventDamage[index] > 0) this.damageSources.pessimist[index]++;
-                if (worstCaseEventDamage[index] > 0) this.damageSources.worstCase[index]++;
+                if (this.eventDamagePerPlayer.optimist && this.eventDamagePerPlayer.optimist[index] > 0) this.damageSources.optimist[index]++;
+                if (this.eventDamagePerPlayer.average && this.eventDamagePerPlayer.average[index] > 0) this.damageSources.average[index]++;
+                if (this.eventDamagePerPlayer.pessimist && this.eventDamagePerPlayer.pessimist[index] > 0) this.damageSources.pessimist[index]++;
+                if (this.eventDamagePerPlayer.worstCase && this.eventDamagePerPlayer.worstCase[index] > 0) this.damageSources.worstCase[index]++;
             }
             
             // Calculate final health by subtracting damage from current health
