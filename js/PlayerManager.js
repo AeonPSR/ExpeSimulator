@@ -865,12 +865,19 @@ class PlayerManager {
         // Process each scenario
         ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
             if (damageInstances[scenario]) {
+                // DEBUG: Log damage instances for each scenario
+                console.log(`PLAYER MANAGER DEBUG: Processing scenario "${scenario}" with ${damageInstances[scenario].length} damage instances:`);
+                damageInstances[scenario].forEach((instance, index) => {
+                    console.log(`PLAYER MANAGER DEBUG: Instance ${index}: type=${instance.type}, count=${instance.count}, damagePerInstance=${instance.damagePerInstance}`);
+                });
+                
                 damageInstances[scenario].forEach(instance => {
                     this.distributeInstanceDamage(
                         instance.type,
                         instance.count,
                         instance.damagePerInstance,
-                        perPlayerDamage[scenario]
+                        perPlayerDamage[scenario],
+                        instance.sources || []
                     );
                 });
             }
@@ -885,26 +892,87 @@ class PlayerManager {
      * @param {number} count - Number of events of this type
      * @param {number} damagePerInstance - Damage per event instance
      * @param {Array<number>} playerDamageArray - Array to update with damage distribution
+     * @param {Array<Object>} sources - Array of assigned source information with {sectorId, sectorName} for each instance
      */
-    distributeInstanceDamage(eventType, count, damagePerInstance, playerDamageArray) {
+    distributeInstanceDamage(eventType, count, damagePerInstance, playerDamageArray, sources = []) {
         const playerCount = playerDamageArray.length;
         if (playerCount === 0) return;
 
+        // DEBUG: Log parameters received by PlayerManager
+        if (eventType === 'ACCIDENT_3_5') {
+            console.log(`PLAYER MANAGER DEBUG: distributeInstanceDamage called for ${eventType}`);
+            console.log(`PLAYER MANAGER DEBUG: count = ${count}, damagePerInstance = ${damagePerInstance}`);
+            console.log(`PLAYER MANAGER DEBUG: total damage to distribute = ${count * damagePerInstance}`);
+            console.log(`PLAYER MANAGER DEBUG: sources array length = ${sources.length}`);
+            console.log(`PLAYER MANAGER DEBUG: sources =`, sources);
+        }
+
         // Process each instance of this event type
         for (let i = 0; i < count; i++) {
-            const totalDamage = damagePerInstance;
+            let actualDamage = damagePerInstance;
+            
+            // Get the assigned source for this specific instance
+            const source = sources[i] || null;
 
             if (eventType === 'ACCIDENT_3_5') {
                 // ACCIDENT: Single target damage - randomly select one player
                 const targetPlayerIndex = Math.floor(Math.random() * playerCount);
-                playerDamageArray[targetPlayerIndex] += totalDamage;
+                
+                // Check if the target player has sector-specific immunity
+                if (source && this.hasItemImmunity(targetPlayerIndex, eventType, source.sectorName)) {
+                    console.log(`Player ${targetPlayerIndex} is immune to ${eventType} from ${source.sectorName}#${source.sectorId} (Rope protection)`);
+                    actualDamage = 0;
+                }
+                
+                playerDamageArray[targetPlayerIndex] += actualDamage;
             } else {
                 // TIRED_2 and DISASTER_3_5: Multi-target damage - apply to ALL players
                 for (let j = 0; j < playerCount; j++) {
-                    playerDamageArray[j] += totalDamage;
+                    let playerDamage = actualDamage;
+                    
+                    // Check if this player has sector-specific immunity
+                    if (source && this.hasItemImmunity(j, eventType, source.sectorName)) {
+                        console.log(`Player ${j} is immune to ${eventType} from ${source.sectorName}#${source.sectorId} (Rope protection)`);
+                        playerDamage = 0;
+                    }
+                    
+                    playerDamageArray[j] += playerDamage;
                 }
             }
         }
+    }
+    
+    /**
+     * Checks if a player has item-based immunity to a specific event from a specific sector
+     * @param {number} playerIndex - Index of the player to check
+     * @param {string} eventType - Type of event (e.g., "ACCIDENT_3_5")
+     * @param {string} sectorName - Name of the sector causing the event
+     * @returns {boolean} - True if the player is immune
+     */
+    hasItemImmunity(playerIndex, eventType, sectorName) {
+        if (!this.players[playerIndex] || !this.players[playerIndex].items) {
+            return false;
+        }
+
+        // Check each item the player has
+        for (const item of this.players[playerIndex].items) {
+            if (!item) continue;
+            
+            // Extract item name without file extension
+            const itemName = item.replace(/\.(jpg|png)$/, '');
+            
+            // Check if this item provides immunity
+            if (ItemEffects[itemName] && ItemEffects[itemName].effects && ItemEffects[itemName].effects.sectorSpecificImmunity) {
+                const immunities = ItemEffects[itemName].effects.sectorSpecificImmunity;
+                
+                // Check if this item provides immunity to this event type in this sector
+                if (immunities[sectorName] && immunities[sectorName].includes(eventType)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
     
     /**

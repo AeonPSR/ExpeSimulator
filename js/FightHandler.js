@@ -16,27 +16,6 @@ class FightHandler {
     }
 
     /**
-     * Processes fight events and groups them by damage type
-     * @param {Object} fightBreakdown - Fight breakdown from outcomes
-     * @param {number} fightingPower - Team's fighting power to reduce damage
-     * @param {Object} playerManager - The player manager instance for grenade consumption
-     * @returns {Object} - Processed fight data
-     */
-    processFightBreakdown(fightBreakdown, fightingPower = 0, playerManager = null) {
-        const processedFights = {};
-        
-        Object.entries(fightBreakdown).forEach(([damageKey, probabilities]) => {
-            processedFights[damageKey] = {
-                sectorCount: probabilities.length,
-                probability: probabilities[0], // Assuming all probabilities are the same
-                damageValues: this.getDamageValues(damageKey, fightingPower, playerManager)
-            };
-        });
-        
-        return processedFights;
-    }
-
-    /**
      * Calculates damage scenarios using binomial distribution
      * @param {number} n - Number of trials
      * @param {number} p - Probability per trial
@@ -161,13 +140,62 @@ class FightHandler {
     }
 
     /**
+     * Filters fight breakdown for worst case scenario based on fightVsDamageThreshold.
+     * This now uses the modifiedSectorData to correctly identify sectors where fights should be ignored.
+     * @param {Object} fightBreakdown - Original fight breakdown data
+     * @param {Object} playerManager - Player manager to get player count
+     * @param {Map<string, Object>} modifiedSectorData - The modified sector data map.
+     * @returns {Object} - Filtered fight breakdown for worst case calculations
+     */
+    filterFightBreakdownForWorstCase(fightBreakdown, playerManager, modifiedSectorData) {
+        if (!playerManager || !modifiedSectorData) {
+            return fightBreakdown; // No filtering if managers not available
+        }
+
+        const playerCount = playerManager.getPlayers().filter(p => p !== null).length;
+        const filteredBreakdown = JSON.parse(JSON.stringify(fightBreakdown)); // Deep copy
+
+        // If diplomacy/white flag is active, the fightBreakdown will already be empty
+        // as ProbabilityCalculator removes the events beforehand.
+        // This function now only needs to handle the fightVsDamageThreshold.
+
+        modifiedSectorData.forEach(sectorData => {
+            if (sectorData.fightVsDamageThreshold !== undefined && playerCount > sectorData.fightVsDamageThreshold) {
+                // This sector's fights should be excluded from the worst-case scenario.
+                // We identify which fight types in the breakdown correspond to this sector.
+                Object.keys(sectorData.explorationEvents).forEach(eventKey => {
+                    if (eventKey.startsWith('FIGHT_')) {
+                        let damageKey;
+                        if (eventKey === 'FIGHT_8_10_12_15_18_32') {
+                            damageKey = 'Variable (8/10/12/15/18/32)';
+                        } else {
+                            damageKey = eventKey.split('_')[1].toString();
+                        }
+
+                        // If this fight type exists in the breakdown, remove one instance of it.
+                        if (filteredBreakdown[damageKey] && filteredBreakdown[damageKey].length > 0) {
+                            filteredBreakdown[damageKey].pop(); // Remove one probability instance
+                            if (filteredBreakdown[damageKey].length === 0) {
+                                delete filteredBreakdown[damageKey]; // Clean up if empty
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        return filteredBreakdown;
+    }
+
+    /**
      * Calculates combat damage scenarios for all fight types using sequential grenade consumption
      * @param {Object} fightBreakdown - Fight breakdown data
      * @param {number} fightingPower - Team's fighting power to reduce damage
      * @param {Object} playerManager - The player manager instance for grenade consumption
+     * @param {Map<string, Object>} modifiedSectorData - The modified sector data for filtering.
      * @returns {Object} - Complete damage calculation results
      */
-    calculateCombatDamageScenarios(fightBreakdown, fightingPower = 0, playerManager = null) {
+    calculateCombatDamageScenarios(fightBreakdown, fightingPower = 0, playerManager = null, modifiedSectorData = null) {
         let totalAverageDamage = 0;
         let totalOptimistDamage = 0;
         let totalPessimistDamage = 0;
@@ -181,6 +209,9 @@ class FightHandler {
             worstCase: []
         };
 
+        // Filter fight breakdown for worst case scenario based on player count and fightVsDamageThreshold
+        const filteredFightBreakdownForWorstCase = this.filterFightBreakdownForWorstCase(fightBreakdown, playerManager, modifiedSectorData);
+
         const damageCalculations = Object.entries(fightBreakdown)
             .map(([damageKey, probabilities]) => {
                 const n = probabilities.length;
@@ -190,6 +221,11 @@ class FightHandler {
                 const fightScenarios = this.calculateDamageScenarios(n, p);
                 const expectedFights = Math.round(n * p);
                 
+                // For worst case, use filtered breakdown if this fight type should be excluded
+                const worstCaseCount = filteredFightBreakdownForWorstCase[damageKey] ? 
+                    this.calculateDamageScenarios(filteredFightBreakdownForWorstCase[damageKey].length, filteredFightBreakdownForWorstCase[damageKey][0] || 0).worstCase : 
+                    0;
+                
                 // Get base damage for this fight type
                 const baseDamage = this.getDamageFromKey(damageKey);
                 
@@ -197,7 +233,7 @@ class FightHandler {
                 const optimistDamage = this.calculateSequentialDamage(fightScenarios.optimist, baseDamage, fightingPower, playerManager);
                 const averageDamage = this.calculateSequentialDamage(expectedFights, baseDamage, fightingPower, playerManager);
                 const pessimistDamage = this.calculateSequentialDamage(fightScenarios.pessimist, baseDamage, fightingPower, playerManager);
-                const worstCaseDamage = this.calculateSequentialDamage(fightScenarios.worstCase, baseDamage, fightingPower, playerManager);
+                const worstCaseDamage = this.calculateSequentialDamage(worstCaseCount, baseDamage, fightingPower, playerManager);
                 
                 // Collect damage instances for each scenario (skip if no fights occur)
                 if (fightScenarios.optimist > 0) {
@@ -221,11 +257,11 @@ class FightHandler {
                         damagePerInstance: pessimistDamage / fightScenarios.pessimist
                     });
                 }
-                if (fightScenarios.worstCase > 0) {
+                if (worstCaseCount > 0) {
                     damageInstances.worstCase.push({
                         type: damageKey,
-                        count: fightScenarios.worstCase,
-                        damagePerInstance: worstCaseDamage / fightScenarios.worstCase
+                        count: worstCaseCount,
+                        damagePerInstance: worstCaseDamage / worstCaseCount
                     });
                 }
                 
@@ -234,7 +270,10 @@ class FightHandler {
                 totalPessimistDamage += pessimistDamage;
                 totalWorstCaseDamage += worstCaseDamage;
                 
-                return fightScenarios;
+                return {
+                    ...fightScenarios,
+                    worstCase: worstCaseCount // Use filtered worst case count
+                };
             });
 
         // Calculate combined probabilities

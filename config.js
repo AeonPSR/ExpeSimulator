@@ -103,6 +103,7 @@ const PlanetSectorConfigData = [
 		maxPerPlanet: 4,
 		negativeLevel: 30,
 		nonCombatNegativeLevel: 13,
+		fightVsDamageThreshold: 6,
 		explorationEvents: {
 			'ARTEFACT': 4,
 			'NOTHING_TO_REPORT': 3,
@@ -166,6 +167,7 @@ const PlanetSectorConfigData = [
 		maxPerPlanet: 4,
 		negativeLevel: 30,
 		nonCombatNegativeLevel: 22,
+		fightVsDamageThreshold: 2,
 		explorationEvents: {
 			'PROVISION_4': 4,
 			'PROVISION_2': 3,
@@ -182,6 +184,7 @@ const PlanetSectorConfigData = [
 		maxPerPlanet: 4,
 		negativeLevel: 70,
 		nonCombatNegativeLevel: 50,
+		fightVsDamageThreshold: 2,
 		explorationEvents: {
 			'FIGHT_12': 4,
 			'ACCIDENT_3_5': 3,
@@ -214,6 +217,7 @@ const PlanetSectorConfigData = [
 		maxPerPlanet: 4,
 		negativeLevel: 80,
 		nonCombatNegativeLevel: 78,
+		fightVsDamageThreshold: 2,
 		explorationEvents: {
 			'ACCIDENT_3_5': 4,
 			'DISEASE': 3,

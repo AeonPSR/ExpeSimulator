@@ -19,18 +19,15 @@ class ProbabilityCalculator {
     }
 
     /**
-     * Calculates probabilities for the selected sectors
-     * @param {Array<string>|Array<Object>} selectedSectors - Array of selected sector names or {id, name} objects
-     * @param {Array<Object>} players - Array of player objects with abilities and items
-     * @param {Object} playerManager - The player manager instance for grenade consumption
-     * @returns {string} - HTML string with probability results
+     * Calculates all expedition outcomes and returns a pure data object.
+     * This is the new central function for all calculations.
+     * @param {Array<Object>} selectedSectors - Array of {id, name} objects
+     * @param {Array<Object>} players - Array of player objects
+     * @param {Object} playerManager - The player manager instance
+     * @returns {Object} - A comprehensive object with all calculated outcomes.
      */
-    calculateProbabilities(selectedSectors, players = [], playerManager = null) {
-        if (selectedSectors.length === 0) {
-            return 'Select sectors to see expected outcomes';
-        }
-
-        // Store players data and playerManager for fighting power calculations
+    calculateExpeditionOutcomes(selectedSectors, players, playerManager) {
+        // Store players data and playerManager for use in handlers
         this.players = players;
         this.playerManager = playerManager;
 
@@ -44,6 +41,51 @@ class ProbabilityCalculator {
         // Store modified sector data for all calculations
         outcomes.modifiedSectorData = modifiedSectorData;
         
+        // --- Perform all calculations and store results in outcomes ---
+
+        // 1. Resource Scenarios
+        outcomes.resources.scenarios = this.resourceHandler.calculateResourceScenariosFromSectors(modifiedSectorData);
+
+        // 2. Combat Damage Scenarios
+        const fightingPower = this.playerManager.calculateFightingPower();
+        outcomes.combat.scenarios = this.fightHandler.calculateCombatDamageScenarios(outcomes.combat.fightBreakdown, fightingPower, this.playerManager, modifiedSectorData);
+        
+        // Store combat damage results in player manager for HP preview
+        if (this.playerManager && typeof this.playerManager.storeCombatDamage === 'function') {
+            this.playerManager.storeCombatDamage(outcomes.combat.scenarios);
+        }
+
+        // 3. Event Damage Risks & Scenarios
+        outcomes.damages.risks = this.eventDamageHandler.calculateEventDamageRisks(outcomes.damages.damageBreakdown);
+        outcomes.damages.scenarios = this.eventDamageHandler.calculateEventDamageScenarios(outcomes.damages.damageBreakdown, this.playerManager, modifiedSectorData);
+
+        // Store event damage results in player manager for HP preview
+        if (this.playerManager && typeof this.playerManager.storeEventDamage === 'function') {
+            this.playerManager.storeEventDamage(outcomes.damages.scenarios);
+        }
+
+        // 4. Negative Event Scenarios
+        outcomes.events = this.eventScenarioHandler.calculateEventScenariosFromSectors(modifiedSectorData);
+
+        return outcomes;
+    }
+
+    /**
+     * Calculates probabilities for the selected sectors
+     * @param {Array<string>|Array<Object>} selectedSectors - Array of selected sector names or {id, name} objects
+     * @param {Array<Object>} players - Array of player objects with abilities and items
+     * @param {Object} playerManager - The player manager instance for grenade consumption
+     * @returns {string} - HTML string with probability results
+     */
+    calculateProbabilities(selectedSectors, players = [], playerManager = null) {
+        if (selectedSectors.length === 0) {
+            return 'Select sectors to see expected outcomes';
+        }
+
+        // New flow: First, calculate all outcomes as pure data
+        const outcomes = this.calculateExpeditionOutcomes(selectedSectors, players, playerManager);
+        
+        // Then, generate the HTML from the data
         return this.generateProbabilityHTML(outcomes);
     }
 
@@ -542,19 +584,14 @@ class ProbabilityCalculator {
      * @returns {string} - HTML string
      */
     generateProbabilityHTML(outcomes) {
-        // Pass modified sector data to all sections for calculations
-        outcomes.resources.modifiedSectorData = outcomes.modifiedSectorData;
-        outcomes.risks.modifiedSectorData = outcomes.modifiedSectorData;
-        outcomes.setbacks.modifiedSectorData = outcomes.modifiedSectorData;
-        outcomes.special.modifiedSectorData = outcomes.modifiedSectorData;
-        
+        // Pass the calculated scenarios to each HTML generation function
         return `
             ${this.generateResourcesHTML(outcomes.resources)}
             ${this.generateCombatRisksHTML(outcomes.combat)}
             ${this.generateCombatDamageHTML(outcomes.combat)}
             ${this.generateEventRisksHTML(outcomes.damages)}
-            ${this.generateEventDamagesHTML(outcomes.damages, outcomes.risks)}
-            ${this.generateEventsHTML(outcomes.risks, outcomes.setbacks, outcomes.special)}
+            ${this.generateEventDamagesHTML(outcomes.damages)}
+            ${this.generateEventsHTML(outcomes.events)}
         `;
     }
 
@@ -564,8 +601,8 @@ class ProbabilityCalculator {
      * @returns {string} - HTML string
      */
     generateResourcesHTML(resources) {
-        // Use modified sector data with the existing method name
-        const scenarios = this.resourceHandler.calculateResourceScenariosFromSectors(resources.modifiedSectorData);
+        // Scenarios are now pre-calculated and passed in the resources object
+        const scenarios = resources.scenarios;
         
         // Helper function to format numbers (remove .0 for whole numbers)
         const formatNumber = (num) => {
@@ -724,49 +761,29 @@ class ProbabilityCalculator {
             `;
         }
 
+        // Scenarios are now pre-calculated
+        const results = combat.scenarios;
+        const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
+
         return `
             <div class="outcome-category">
                 <h5>Combat Damage</h5>
-                ${this.calculateCombatDamageScenarios(combat.fightBreakdown)}
-            </div>
-        `;
-    }
-
-    /**
-     * Calculates combat damage scenarios
-     * @param {Object} fightBreakdown - Fight breakdown data
-     * @returns {string} - HTML for damage scenarios
-     */
-    calculateCombatDamageScenarios(fightBreakdown) {
-        // Calculate team fighting power for damage reduction using PlayerManager
-        const fightingPower = this.playerManager.calculateFightingPower();
-        
-        // Use the fight handler to calculate damage scenarios with fighting power and playerManager
-        const results = this.fightHandler.calculateCombatDamageScenarios(fightBreakdown, fightingPower, this.playerManager);
-        
-        // Store the combat damage results in the player manager for HP preview
-        if (this.playerManager && typeof this.playerManager.storeCombatDamage === 'function') {
-            this.playerManager.storeCombatDamage(results);
-        }
-        
-        const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
-        
-        return `
-            <div class="outcome-item">
-                <span>Optimist Scenario: (${formatProbability(results.combinedOptimistProb)}%)</span>
-                <span class="positive">${hpIcon}<strong>${Math.round(results.totalOptimistDamage)}</strong></span>
-            </div>
-            <div class="outcome-item">
-                <span>Average HP Lost:</span>
-                <span class="danger">${hpIcon}<strong>${Math.round(results.totalAverageDamage)}</strong></span>
-            </div>
-            <div class="outcome-item">
-                <span>Pessimist Scenario: (${formatProbability(results.combinedPessimistProb)}%)</span>
-                <span class="critical">${hpIcon}<strong>${Math.round(results.totalPessimistDamage)}</strong></span>
-            </div>
-            <div class="outcome-item">
-                <span>Worst Case Scenario: (${formatProbability(results.combinedWorstCaseProb)}%)</span>
-                <span class="critical bold-damage">${hpIcon}<strong>${Math.round(results.totalWorstCaseDamage)}</strong></span>
+                <div class="outcome-item">
+                    <span>Optimist Scenario: (${formatProbability(results.combinedOptimistProb)}%)</span>
+                    <span class="positive">${hpIcon}<strong>${Math.round(results.totalOptimistDamage)}</strong></span>
+                </div>
+                <div class="outcome-item">
+                    <span>Average HP Lost:</span>
+                    <span class="danger">${hpIcon}<strong>${Math.round(results.totalAverageDamage)}</strong></span>
+                </div>
+                <div class="outcome-item">
+                    <span>Pessimist Scenario: (${formatProbability(results.combinedPessimistProb)}%)</span>
+                    <span class="critical">${hpIcon}<strong>${Math.round(results.totalPessimistDamage)}</strong></span>
+                </div>
+                <div class="outcome-item">
+                    <span>Worst Case Scenario: (${formatProbability(results.combinedWorstCaseProb)}%)</span>
+                    <span class="critical bold-damage">${hpIcon}<strong>${Math.round(results.totalWorstCaseDamage)}</strong></span>
+                </div>
             </div>
         `;
     }
@@ -790,7 +807,7 @@ class ProbabilityCalculator {
             `;
         }
 
-        const risks = this.eventDamageHandler.calculateEventDamageRisks(damages.damageBreakdown);
+        const risks = damages.risks;
         
         const eventEntries = Object.entries(risks)
             .map(([eventType, riskData]) => {
@@ -819,7 +836,7 @@ class ProbabilityCalculator {
      * @param {Object} risks - Risk outcomes
      * @returns {string} - HTML string
      */
-    generateEventDamagesHTML(damages, risks) {
+    generateEventDamagesHTML(damages) {
         const hasEventDamage = damages.damageBreakdown.TIRED_2?.length > 0 ||
                               damages.damageBreakdown.ACCIDENT_3_5?.length > 0 ||
                               damages.damageBreakdown.DISASTER_3_5?.length > 0;
@@ -833,83 +850,40 @@ class ProbabilityCalculator {
             `;
         }
 
+        const results = damages.scenarios;
+        const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
+
         return `
             <div class="outcome-category">
                 <h5>Event Damage</h5>
-                ${this.calculateEventDamageScenarios(damages.damageBreakdown)}
-            </div>
-        `;
-    }
-
-    /**
-     * Calculates event damage scenarios
-     * @param {Object} damageBreakdown - Damage breakdown data
-     * @returns {string} - HTML for damage scenarios
-     */
-    calculateEventDamageScenarios(damageBreakdown) {
-        // Use the event damage handler to calculate damage scenarios
-        // Pass the selected sectors from the sectorManager to initialize damage values
-        const selectedSectorNames = this.sectorManager ? this.sectorManager.getSelectedSectors() : null;
-        console.log("DEBUG: selectedSectorNames from sectorManager:", selectedSectorNames);
-        
-        // Convert sector names to full sector configuration objects
-        let selectedSectors = null;
-        if (selectedSectorNames && Array.isArray(selectedSectorNames)) {
-            selectedSectors = selectedSectorNames.map(sectorName => {
-                console.log("DEBUG: Processing sector name:", sectorName);
-                // Extract the actual sector name from names like "COLD_default"
-                const actualSectorName = sectorName.replace('_default', '');
-                console.log("DEBUG: Actual sector name:", actualSectorName);
-                const foundSector = PlanetSectorConfigData.find(s => s.sectorName === actualSectorName);
-                console.log("DEBUG: Found sector:", foundSector);
-                return foundSector;
-            }).filter(sector => sector !== undefined); // Remove any sectors not found
-            
-            console.log("DEBUG: Final selectedSectors array:", selectedSectors);
-        }
-        
-        const results = this.eventDamageHandler.calculateEventDamageScenarios(damageBreakdown, this.playerManager, this.sectorManager);
-        
-        // Store the event damage results in the player manager for HP preview
-        if (this.playerManager && typeof this.playerManager.storeEventDamage === 'function') {
-            this.playerManager.storeEventDamage(results);
-        }
-        
-        const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
-        
-        return `
-            <div class="outcome-item">
-                <span>Optimist Scenario: (${formatProbability(results.combinedOptimistProb)}%)</span>
-                <span class="positive">${hpIcon}<strong>${Math.round(results.totalOptimistDamage)}</strong></span>
-            </div>
-            <div class="outcome-item">
-                <span>Average HP Lost:</span>
-                <span class="danger">${hpIcon}<strong>${Math.round(results.totalAverageDamage)}</strong></span>
-            </div>
-            <div class="outcome-item">
-                <span>Pessimist Scenario: (${formatProbability(results.combinedPessimistProb)}%)</span>
-                <span class="critical">${hpIcon}<strong>${Math.round(results.totalPessimistDamage)}</strong></span>
-            </div>
-            <div class="outcome-item">
-                <span>Worst Case Scenario: (${formatProbability(results.combinedWorstCaseProb)}%)</span>
-                <span class="critical bold-damage">${hpIcon}<strong>${Math.round(results.totalWorstCaseDamage)}</strong></span>
+                <div class="outcome-item">
+                    <span>Optimist Scenario: (${formatProbability(results.combinedOptimistProb)}%)</span>
+                    <span class="positive">${hpIcon}<strong>${Math.round(results.totalOptimistDamage)}</strong></span>
+                </div>
+                <div class="outcome-item">
+                    <span>Average HP Lost:</span>
+                    <span class="danger">${hpIcon}<strong>${Math.round(results.totalAverageDamage)}</strong></span>
+                </div>
+                <div class="outcome-item">
+                    <span>Pessimist Scenario: (${formatProbability(results.combinedPessimistProb)}%)</span>
+                    <span class="critical">${hpIcon}<strong>${Math.round(results.totalPessimistDamage)}</strong></span>
+                </div>
+                <div class="outcome-item">
+                    <span>Worst Case Scenario: (${formatProbability(results.combinedWorstCaseProb)}%)</span>
+                    <span class="critical bold-damage">${hpIcon}<strong>${Math.round(results.totalWorstCaseDamage)}</strong></span>
+                </div>
             </div>
         `;
     }
 
     /**
      * Generates events section HTML with table layout using scenario system
-     * @param {Object} risks - Risk outcomes  
-     * @param {Object} setbacks - Setback outcomes
-     * @param {Object} special - Special event outcomes
+     * @param {Object} events - The pre-calculated event scenarios
      * @returns {string} - HTML string
      */
-    generateEventsHTML(risks, setbacks, special) {
-        // Get the modified sector data that was passed through
-        const modifiedSectorData = risks.modifiedSectorData || setbacks.modifiedSectorData || special.modifiedSectorData;
-        
-        // Use the event scenario handler to calculate pessimist/average/optimist scenarios from modified data
-        const scenarios = this.eventScenarioHandler.calculateEventScenariosFromSectors(modifiedSectorData);
+    generateEventsHTML(events) {
+        // Scenarios are now pre-calculated and passed in the 'events' object
+        const scenarios = events;
         
         // Helper function to format numbers (remove .0 for whole numbers)
         const formatNumber = (num) => {

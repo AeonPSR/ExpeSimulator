@@ -224,22 +224,4 @@ class ResourceHandler {
             );
         }
     }
-    
-    /**
-     * Calculates resource scenarios for all resource types (legacy method for backward compatibility)
-     * @param {Object} resourceBreakdown - Resource breakdown data (not used in new approach)
-     * @returns {Object} - Complete resource calculation results
-     */
-    calculateResourceScenarios(resourceBreakdown) {
-        // This is a fallback method - in the new approach, we should call calculateResourceScenariosFromSectors directly
-        // For now, return empty results to avoid errors
-        return {
-            fruits: { pessimist: 0, average: 0, optimist: 0 },
-            steaks: { pessimist: 0, average: 0, optimist: 0 },
-            fuel: { pessimist: 0, average: 0, optimist: 0 },
-            oxygen: { pessimist: 0, average: 0, optimist: 0 },
-            artefacts: { pessimist: 0, average: 0, optimist: 0 },
-            starmaps: { pessimist: 0, average: 0, optimist: 0 }
-        };
-    }
 }
