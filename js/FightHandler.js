@@ -139,52 +139,110 @@ class FightHandler {
         return damages;
     }
 
+
+
     /**
-     * Filters fight breakdown for worst case scenario based on fightVsDamageThreshold.
-     * This now uses the modifiedSectorData to correctly identify sectors where fights should be ignored.
-     * @param {Object} fightBreakdown - Original fight breakdown data
-     * @param {Object} playerManager - Player manager to get player count
-     * @param {Map<string, Object>} modifiedSectorData - The modified sector data map.
-     * @returns {Object} - Filtered fight breakdown for worst case calculations
+     * Builds source information for a combat damage instance by assigning specific sectors
+     * @param {string} fightType - The fight type (e.g., "12", "Variable (8/10/12/15/18/32)")
+     * @param {number} instanceCount - Number of combat instances to assign sources for
+     * @param {Map<string, Object>} modifiedSectorData - Modified sector data with sector IDs
+     * @param {Set<string>} usedSectors - Set of already used sector keys in this scenario
+     * @returns {Array<Object>} - Array of assigned sources with {sectorId, sectorName} for each instance
      */
-    filterFightBreakdownForWorstCase(fightBreakdown, playerManager, modifiedSectorData) {
-        if (!playerManager || !modifiedSectorData) {
-            return fightBreakdown; // No filtering if managers not available
+    buildCombatSourceAssignments(fightType, instanceCount, modifiedSectorData, usedSectors = new Set()) {
+        if (!modifiedSectorData || instanceCount <= 0) {
+            return [];
         }
 
-        const playerCount = playerManager.getPlayers().filter(p => p !== null).length;
-        const filteredBreakdown = JSON.parse(JSON.stringify(fightBreakdown)); // Deep copy
+        console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: Building sources for ${fightType}, need ${instanceCount} instances`);
+        console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: Used sectors:`, Array.from(usedSectors));
 
-        // If diplomacy/white flag is active, the fightBreakdown will already be empty
-        // as ProbabilityCalculator removes the events beforehand.
-        // This function now only needs to handle the fightVsDamageThreshold.
+        const availableSources = [];
 
-        modifiedSectorData.forEach(sectorData => {
-            if (sectorData.fightVsDamageThreshold !== undefined && playerCount > sectorData.fightVsDamageThreshold) {
-                // This sector's fights should be excluded from the worst-case scenario.
-                // We identify which fight types in the breakdown correspond to this sector.
+        // Find all sectors that can generate this fight type and haven't been used yet
+        modifiedSectorData.forEach((sectorData, sectorKey) => {
+            const sectorName = sectorKey.includes('_') ? sectorKey.substring(0, sectorKey.lastIndexOf('_')) : sectorKey;
+            const sectorId = sectorKey.includes('_') ? sectorKey.substring(sectorKey.lastIndexOf('_') + 1) : '0';
+            
+            console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: Checking sector ${sectorKey} (name: ${sectorName}, id: ${sectorId})`);
+            
+            // Skip if this sector has already been used in this scenario
+            if (usedSectors.has(sectorKey)) {
+                console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: Skipping ${sectorKey} - already used`);
+                return;
+            }
+            
+            // Check if this sector can generate the combat type
+            let canGenerateEvent = false;
+            
+            // Check for fight events in this sector
+            if (sectorData.explorationEvents) {
                 Object.keys(sectorData.explorationEvents).forEach(eventKey => {
                     if (eventKey.startsWith('FIGHT_')) {
-                        let damageKey;
+                        let fightDamageKey;
                         if (eventKey === 'FIGHT_8_10_12_15_18_32') {
-                            damageKey = 'Variable (8/10/12/15/18/32)';
+                            fightDamageKey = 'Variable (8/10/12/15/18/32)';
                         } else {
-                            damageKey = eventKey.split('_')[1].toString();
+                            fightDamageKey = eventKey.split('_')[1].toString();
                         }
-
-                        // If this fight type exists in the breakdown, remove one instance of it.
-                        if (filteredBreakdown[damageKey] && filteredBreakdown[damageKey].length > 0) {
-                            filteredBreakdown[damageKey].pop(); // Remove one probability instance
-                            if (filteredBreakdown[damageKey].length === 0) {
-                                delete filteredBreakdown[damageKey]; // Clean up if empty
-                            }
+                        
+                        if (fightDamageKey === fightType) {
+                            canGenerateEvent = true;
+                            console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: ${sectorKey} can generate ${fightType} (event: ${eventKey})`);
                         }
                     }
                 });
             }
+
+            if (canGenerateEvent) {
+                availableSources.push({
+                    sectorId,
+                    sectorName,
+                    sectorKey
+                });
+                console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: Added ${sectorKey} as available source`);
+            } else {
+                console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: ${sectorKey} cannot generate ${fightType}`);
+            }
         });
 
-        return filteredBreakdown;
+        console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: Found ${availableSources.length} available sources for ${fightType}:`, availableSources.map(s => s.sectorKey));
+
+        // If no unused sources available, log warning and return empty
+        if (availableSources.length === 0) {
+            console.warn(`No available unused sources for ${fightType} (${instanceCount} instances needed). Used sectors:`, Array.from(usedSectors));
+            return [];
+        }
+
+        // Assign specific sources for each combat instance
+        const assignedSources = [];
+
+        for (let i = 0; i < instanceCount; i++) {
+            // If we need more instances than available sectors, we have a problem
+            if (availableSources.length === 0) {
+                console.warn(`Not enough unused sources for ${fightType}. Need ${instanceCount}, only have ${assignedSources.length} available.`);
+                break;
+            }
+            
+            // Randomly select a source from remaining available sources
+            const availableIndex = Math.floor(Math.random() * availableSources.length);
+            const selectedSource = availableSources[availableIndex];
+            
+            assignedSources.push({
+                sectorId: selectedSource.sectorId,
+                sectorName: selectedSource.sectorName
+            });
+            
+            // Mark this source as used
+            usedSectors.add(selectedSource.sectorKey);
+            
+            // Remove this source from available sources to prevent reuse within this fight type
+            availableSources.splice(availableIndex, 1);
+        }
+
+        console.log(`COMBAT SOURCE ASSIGNMENT DEBUG: Assigned ${assignedSources.length} sources for ${fightType}:`, assignedSources.map(s => `${s.sectorName}#${s.sectorId}`));
+
+        return assignedSources;
     }
 
     /**
@@ -201,6 +259,14 @@ class FightHandler {
         let totalPessimistDamage = 0;
         let totalWorstCaseDamage = 0;
         
+        // Track used sectors for each scenario to prevent reuse
+        const usedSectors = {
+            optimist: new Set(),
+            average: new Set(),
+            pessimist: new Set(),
+            worstCase: new Set()
+        };
+        
         // Initialize damage instances tracking
         const damageInstances = {
             optimist: [],
@@ -210,7 +276,7 @@ class FightHandler {
         };
 
         // Filter fight breakdown for worst case scenario based on player count and fightVsDamageThreshold
-        const filteredFightBreakdownForWorstCase = this.filterFightBreakdownForWorstCase(fightBreakdown, playerManager, modifiedSectorData);
+        // NOTE: This filtering is now handled by ProbabilityCalculator, so we use the original breakdown
 
         const damageCalculations = Object.entries(fightBreakdown)
             .map(([damageKey, probabilities]) => {
@@ -221,10 +287,14 @@ class FightHandler {
                 const fightScenarios = this.calculateDamageScenarios(n, p);
                 const expectedFights = Math.round(n * p);
                 
-                // For worst case, use filtered breakdown if this fight type should be excluded
-                const worstCaseCount = filteredFightBreakdownForWorstCase[damageKey] ? 
-                    this.calculateDamageScenarios(filteredFightBreakdownForWorstCase[damageKey].length, filteredFightBreakdownForWorstCase[damageKey][0] || 0).worstCase : 
-                    0;
+                // Use original breakdown for all scenarios (ProbabilityCalculator will handle filtering)
+                const worstCaseCount = fightScenarios.worstCase;
+                
+                // Generate source assignments for each scenario
+                const optimistSources = this.buildCombatSourceAssignments(damageKey, fightScenarios.optimist, modifiedSectorData, usedSectors.optimist);
+                const averageSources = this.buildCombatSourceAssignments(damageKey, expectedFights, modifiedSectorData, usedSectors.average);
+                const pessimistSources = this.buildCombatSourceAssignments(damageKey, fightScenarios.pessimist, modifiedSectorData, usedSectors.pessimist);
+                const worstCaseSources = this.buildCombatSourceAssignments(damageKey, worstCaseCount, modifiedSectorData, usedSectors.worstCase);
                 
                 // Get base damage for this fight type
                 const baseDamage = this.getDamageFromKey(damageKey);
@@ -235,33 +305,37 @@ class FightHandler {
                 const pessimistDamage = this.calculateSequentialDamage(fightScenarios.pessimist, baseDamage, fightingPower, playerManager);
                 const worstCaseDamage = this.calculateSequentialDamage(worstCaseCount, baseDamage, fightingPower, playerManager);
                 
-                // Collect damage instances for each scenario (skip if no fights occur)
+                // Collect damage instances for each scenario with source tracking (skip if no fights occur)
                 if (fightScenarios.optimist > 0) {
                     damageInstances.optimist.push({
                         type: damageKey,
                         count: fightScenarios.optimist,
-                        damagePerInstance: optimistDamage / fightScenarios.optimist
+                        damagePerInstance: optimistDamage / fightScenarios.optimist,
+                        sources: optimistSources
                     });
                 }
                 if (expectedFights > 0) {
                     damageInstances.average.push({
                         type: damageKey,
                         count: expectedFights,
-                        damagePerInstance: averageDamage / expectedFights
+                        damagePerInstance: averageDamage / expectedFights,
+                        sources: averageSources
                     });
                 }
                 if (fightScenarios.pessimist > 0) {
                     damageInstances.pessimist.push({
                         type: damageKey,
                         count: fightScenarios.pessimist,
-                        damagePerInstance: pessimistDamage / fightScenarios.pessimist
+                        damagePerInstance: pessimistDamage / fightScenarios.pessimist,
+                        sources: pessimistSources
                     });
                 }
                 if (worstCaseCount > 0) {
                     damageInstances.worstCase.push({
                         type: damageKey,
                         count: worstCaseCount,
-                        damagePerInstance: worstCaseDamage / worstCaseCount
+                        damagePerInstance: worstCaseDamage / worstCaseCount,
+                        sources: worstCaseSources
                     });
                 }
                 
@@ -272,7 +346,7 @@ class FightHandler {
                 
                 return {
                     ...fightScenarios,
-                    worstCase: worstCaseCount // Use filtered worst case count
+                    worstCase: worstCaseCount // Use original worst case count
                 };
             });
 
@@ -286,22 +360,6 @@ class FightHandler {
             combinedPessimistProb *= calc.pessimistProb;
             combinedWorstCaseProb *= calc.worstCaseProb;
         });
-
-        // Log damage instances for each scenario
-        console.log('=== COMBAT DAMAGE INSTANCES BREAKDOWN ===');
-        ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
-            console.log(`\n${scenario.toUpperCase()} Scenario:`);
-            if (damageInstances[scenario].length === 0) {
-                console.log('  No combat events');
-            } else {
-                damageInstances[scenario].forEach(instance => {
-                    console.log(`  ${instance.count}x ${instance.type} (${instance.damagePerInstance} damage each) = ${instance.count * instance.damagePerInstance} total`);
-                });
-                const scenarioTotal = damageInstances[scenario].reduce((sum, instance) => sum + (instance.count * instance.damagePerInstance), 0);
-                console.log(`  TOTAL: ${scenarioTotal} damage`);
-            }
-        });
-        console.log('==========================================\n');
 
         return {
             totalAverageDamage,

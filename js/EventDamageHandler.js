@@ -177,7 +177,7 @@ class EventDamageHandler {
      * @param {Set<string>} usedSectors - Set of already used sector keys in this scenario
      * @returns {Array<Object>} - Array of assigned sources with {sectorId, sectorName} for each instance
      */
-    buildDamageSourceAssignments(eventType, instanceCount, modifiedSectorData, usedSectors = new Set()) {
+    buildDamageSourceAssignments(eventType, instanceCount, modifiedSectorData, usedSectors = new Set(), restrictToSectorName = null, excludeMultiEventSectors = false) {
         if (!modifiedSectorData || instanceCount <= 0) {
             return [];
         }
@@ -189,10 +189,15 @@ class EventDamageHandler {
         const availableSources = [];
 
         // Find all sectors that can generate this event type and haven't been used yet
-        modifiedSectorData.forEach((sectorData, sectorKey) => {
+    modifiedSectorData.forEach((sectorData, sectorKey) => {
             const sectorName = sectorKey.includes('_') ? sectorKey.substring(0, sectorKey.lastIndexOf('_')) : sectorKey;
             const sectorId = sectorKey.includes('_') ? sectorKey.substring(sectorKey.lastIndexOf('_') + 1) : '0';
             
+            // If restricting to a specific sector type (e.g., LANDING), skip others
+            if (restrictToSectorName && sectorName !== restrictToSectorName) {
+                return;
+            }
+
             console.log(`SOURCE ASSIGNMENT DEBUG: Checking sector ${sectorKey} (name: ${sectorName}, id: ${sectorId})`);
             console.log(`SOURCE ASSIGNMENT DEBUG: Sector events:`, Object.keys(sectorData.explorationEvents || {}));
             
@@ -207,6 +212,10 @@ class EventDamageHandler {
             
             // For multi-event sectors, check if they can generate this specific event type
             if (this.isMultiEventSector(sectorName)) {
+                if (excludeMultiEventSectors) {
+                    // Caller requested to exclude multi-event sectors from consideration
+                    return;
+                }
                 const possibleEvents = this.getPossibleEventsForSector(sectorName);
                 canGenerateEvent = possibleEvents.includes(eventType);
                 console.log(`SOURCE ASSIGNMENT DEBUG: ${sectorKey} is multi-event, possible events:`, possibleEvents, `can generate ${eventType}:`, canGenerateEvent);
@@ -302,95 +311,174 @@ class EventDamageHandler {
             worstCase: worstCaseResult.instances
         };
 
+        // Count selected multi-event sectors and add their per-scenario contributions explicitly
+        const multiEventSectorTypes = ['LANDING', 'HOT', 'COLD', 'MOUNTAIN'];
+        const multiCounts = { LANDING: 0, HOT: 0, COLD: 0, MOUNTAIN: 0 };
+        if (modifiedSectorData) {
+            for (const key of modifiedSectorData.keys()) {
+                const sectorName = key.substring(0, key.lastIndexOf('_'));
+                if (multiEventSectorTypes.includes(sectorName)) {
+                    multiCounts[sectorName]++;
+                }
+            }
+        }
+
+        // Helper: number of multi-event sectors that can produce a given event
+        const multiProducersForEvent = (eventType) => {
+            if (eventType === 'TIRED_2' || eventType === 'ACCIDENT_3_5') {
+                return multiCounts.LANDING + multiCounts.HOT + multiCounts.COLD + multiCounts.MOUNTAIN;
+            }
+            if (eventType === 'DISASTER_3_5') {
+                return multiCounts.LANDING;
+            }
+            return 0;
+        };
+
+        // Add explicit contributions for multi-event sectors for three scenarios (worstCase handled separately)
+    ['optimist', 'average', 'pessimist'].forEach((scenarioName) => {
+            for (const sectorType of multiEventSectorTypes) {
+                const count = multiCounts[sectorType];
+                if (!count) continue;
+                const chosenEvent = this.getEventTypeByScenario(sectorType)[scenarioName];
+                if (!chosenEvent || chosenEvent === 'NONE') continue;
+
+        const baseDamage = this.getDamageFromKey(chosenEvent);
+        const sources = this.buildDamageSourceAssignments(chosenEvent, count, modifiedSectorData, usedSectors[scenarioName], sectorType);
+        const actualCount = sources.length;
+        if (actualCount === 0) continue;
+        const dmg = this.calculateSequentialDamage(actualCount, baseDamage, playerManager, chosenEvent, scenarioName);
+                damageInstances[scenarioName].push({
+                    type: chosenEvent,
+            count: actualCount,
+            damagePerInstance: dmg / actualCount,
+            sources
+                });
+                if (scenarioName === 'optimist') totalOptimistDamage += dmg;
+                if (scenarioName === 'average') totalAverageDamage += dmg;
+                if (scenarioName === 'pessimist') totalPessimistDamage += dmg;
+            }
+        });
+
         const damageCalculations = Object.entries(correctedEventBreakdown)
             .map(([damageKey, probabilities]) => {
-                const n = probabilities.length;
+                // Skip multi-event sector keys, already handled explicitly above per scenario
+                if (this.isMultiEventSector(damageKey)) {
+                    return null;
+                }
+
+                // Exclude multi-event sector producers of the same event from counts
+                let n = probabilities.length - multiProducersForEvent(damageKey);
+                if (n < 0) n = 0;
                 const p = probabilities[0];
                 
                 // Calculate how many events occur in each scenario
                 const eventScenarios = this.calculateDamageScenarios(n, p);
                 let expectedEvents = Math.round(n * p);
                 
-                // For multi-event sectors, override the event counts since only one event type can occur per sector
-                if (this.isMultiEventSector(damageKey)) {
-                    const eventTypes = this.getEventTypeByScenario(damageKey);
-                    // Each scenario has at most 1 event (or 0 for optimist)
-                    eventScenarios.optimist = eventTypes.optimist === 'NONE' ? 0 : 1;
-                    eventScenarios.pessimist = eventTypes.pessimist === 'NONE' ? 0 : 1;
-                    eventScenarios.worstCase = eventTypes.worstCase === 'NONE' ? 0 : 1;
-                    // Average can use the expected number but cap it at the number of sectors
-                    expectedEvents = eventTypes.average === 'NONE' ? 0 : Math.min(expectedEvents, n);
-                }
-                
                 // Get base damage for this event type
                 const baseDamage = this.getDamageFromKey(damageKey);
-                
-                // Calculate damage for each scenario with sequential grenade consumption
-                const optimistDamage = this.calculateSequentialDamage(eventScenarios.optimist, baseDamage, playerManager, damageKey, 'optimist');
-                const averageDamage = this.calculateSequentialDamage(expectedEvents, baseDamage, playerManager, damageKey, 'average');
-                const pessimistDamage = this.calculateSequentialDamage(eventScenarios.pessimist, baseDamage, playerManager, damageKey, 'pessimist');
-                
-                // Collect damage instances for each scenario (skip if no events occur)
+
+                // Optimist: assign sources first, then compute damage for actual assigned count
                 if (eventScenarios.optimist > 0) {
-                    const actualEventType = this.isMultiEventSector(damageKey) ? this.getEventTypeByScenario(damageKey).optimist : damageKey;
-                    const sources = (actualEventType !== 'NONE') ? this.buildDamageSourceAssignments(actualEventType, eventScenarios.optimist, modifiedSectorData, usedSectors.optimist) : [];
-                    damageInstances.optimist.push({
-                        type: actualEventType !== 'NONE' ? actualEventType : damageKey,
-                        count: eventScenarios.optimist,
-                        damagePerInstance: optimistDamage / eventScenarios.optimist,
-                        sources: sources
-                    });
+                    const actualEventType = damageKey;
+                    const sources = this.buildDamageSourceAssignments(actualEventType, eventScenarios.optimist, modifiedSectorData, usedSectors.optimist, null, true);
+                    const actualCount = sources.length;
+                    if (actualCount > 0) {
+                        const optimistDamage = this.calculateSequentialDamage(actualCount, baseDamage, playerManager, damageKey, 'optimist');
+                        damageInstances.optimist.push({
+                            type: actualEventType,
+                            count: actualCount,
+                            damagePerInstance: optimistDamage / actualCount,
+                            sources
+                        });
+                        totalOptimistDamage += optimistDamage;
+                    }
                 }
+
+                // Average
                 if (expectedEvents > 0) {
-                    const actualEventType = this.isMultiEventSector(damageKey) ? this.getEventTypeByScenario(damageKey).average : damageKey;
-                    const sources = (actualEventType !== 'NONE') ? this.buildDamageSourceAssignments(actualEventType, expectedEvents, modifiedSectorData, usedSectors.average) : [];
-                    damageInstances.average.push({
-                        type: actualEventType !== 'NONE' ? actualEventType : damageKey,
-                        count: expectedEvents,
-                        damagePerInstance: averageDamage / expectedEvents,
-                        sources: sources
-                    });
+                    const actualEventType = damageKey;
+                    const sources = this.buildDamageSourceAssignments(actualEventType, expectedEvents, modifiedSectorData, usedSectors.average, null, true);
+                    const actualCount = sources.length;
+                    if (actualCount > 0) {
+                        const averageDamage = this.calculateSequentialDamage(actualCount, baseDamage, playerManager, damageKey, 'average');
+                        damageInstances.average.push({
+                            type: actualEventType,
+                            count: actualCount,
+                            damagePerInstance: averageDamage / actualCount,
+                            sources
+                        });
+                        totalAverageDamage += averageDamage;
+                    }
                 }
+
+                // Pessimist
                 if (eventScenarios.pessimist > 0) {
-                    const actualEventType = this.isMultiEventSector(damageKey) ? this.getEventTypeByScenario(damageKey).pessimist : damageKey;
-                    const sources = (actualEventType !== 'NONE') ? this.buildDamageSourceAssignments(actualEventType, eventScenarios.pessimist, modifiedSectorData, usedSectors.pessimist) : [];
-                    damageInstances.pessimist.push({
-                        type: actualEventType !== 'NONE' ? actualEventType : damageKey,
-                        count: eventScenarios.pessimist,
-                        damagePerInstance: pessimistDamage / eventScenarios.pessimist,
-                        sources: sources
-                    });
-                }
-                
-                const hasMultiEventSector = Object.keys(correctedEventBreakdown).some(key => this.isMultiEventSector(key));
-                const isIndividualEventType = ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5'].includes(damageKey);
-                
-                if (!hasMultiEventSector || !isIndividualEventType) {
-                    totalOptimistDamage += optimistDamage;
-                    totalAverageDamage += averageDamage;
-                    totalPessimistDamage += pessimistDamage;
+                    const actualEventType = damageKey;
+                    const sources = this.buildDamageSourceAssignments(actualEventType, eventScenarios.pessimist, modifiedSectorData, usedSectors.pessimist, null, true);
+                    const actualCount = sources.length;
+                    if (actualCount > 0) {
+                        const pessimistDamage = this.calculateSequentialDamage(actualCount, baseDamage, playerManager, damageKey, 'pessimist');
+                        damageInstances.pessimist.push({
+                            type: actualEventType,
+                            count: actualCount,
+                            damagePerInstance: pessimistDamage / actualCount,
+                            sources
+                        });
+                        totalPessimistDamage += pessimistDamage;
+                    }
                 }
                 
                 return eventScenarios;
             });
 
-        // Calculate combined probabilities
+        // Calculate combined probabilities from processed single-event types only
         let combinedOptimistProb = 1;
         let combinedPessimistProb = 1;
         let combinedWorstCaseProb = 1;
-        
-        const hasMultiEventSector = Object.keys(correctedEventBreakdown).some(key => this.isMultiEventSector(key));
-        
-        damageCalculations.forEach((calc, index) => {
-            const damageKey = Object.keys(correctedEventBreakdown)[index];
-            const isIndividualEventType = ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5'].includes(damageKey);
-            
-            if (!hasMultiEventSector || !isIndividualEventType) {
-                combinedOptimistProb *= calc.optimistProb;
-                combinedPessimistProb *= calc.pessimistProb;
-                combinedWorstCaseProb *= calc.worstCaseProb;
-            }
+
+        damageCalculations.forEach((calc) => {
+            if (!calc) return; // skipped multi-sector keys
+            combinedOptimistProb *= calc.optimistProb;
+            combinedPessimistProb *= calc.pessimistProb;
+            combinedWorstCaseProb *= calc.worstCaseProb;
         });
+
+        // Multiply by the probability of the chosen event for each multi-event sector per scenario
+        const getEventProb = (eventType) => {
+            const arr = correctedEventBreakdown[eventType];
+            return Array.isArray(arr) && arr.length > 0 ? (arr[0] || 0) : 0;
+        };
+        // Optimist
+        for (const sectorType of multiEventSectorTypes) {
+            const count = multiCounts[sectorType];
+            if (!count) continue;
+            const ev = this.getEventTypeByScenario(sectorType).optimist;
+            if (ev && ev !== 'NONE') {
+                const p = getEventProb(ev);
+                combinedOptimistProb *= Math.pow(p, count);
+            }
+        }
+        // Pessimist
+        for (const sectorType of multiEventSectorTypes) {
+            const count = multiCounts[sectorType];
+            if (!count) continue;
+            const ev = this.getEventTypeByScenario(sectorType).pessimist;
+            if (ev && ev !== 'NONE') {
+                const p = getEventProb(ev);
+                combinedPessimistProb *= Math.pow(p, count);
+            }
+        }
+        // WorstCase
+        for (const sectorType of multiEventSectorTypes) {
+            const count = multiCounts[sectorType];
+            if (!count) continue;
+            const ev = this.getEventTypeByScenario(sectorType).worstCase;
+            if (ev && ev !== 'NONE') {
+                const p = getEventProb(ev);
+                combinedWorstCaseProb *= Math.pow(p, count);
+            }
+        }
 
         // Log damage instances for each scenario
         console.log('=== EVENT DAMAGE INSTANCES BREAKDOWN ===');
@@ -475,10 +563,12 @@ class EventDamageHandler {
                     // Add the multi-event sector entry with combined probabilities
                     correctedBreakdown[sectorName] = combinedProbability;
                     
+					/*
                     // Remove the individual event entries
                     possibleEvents.forEach(eventType => {
                         delete correctedBreakdown[eventType];
                     });
+					*/
                 }
             }
         });

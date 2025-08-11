@@ -27,6 +27,8 @@ class ProbabilityCalculator {
      * @returns {Object} - A comprehensive object with all calculated outcomes.
      */
     calculateExpeditionOutcomes(selectedSectors, players, playerManager) {
+        console.log(`PROBA CALCULATOR DEBUG: calculateExpeditionOutcomes called with ${selectedSectors.length} sectors, ${players.length} players`);
+        
         // Store players data and playerManager for use in handlers
         this.players = players;
         this.playerManager = playerManager;
@@ -41,6 +43,8 @@ class ProbabilityCalculator {
         // Store modified sector data for all calculations
         outcomes.modifiedSectorData = modifiedSectorData;
         
+        console.log(`PROBA CALCULATOR DEBUG: About to calculate combat scenarios with fightBreakdown:`, outcomes.combat.fightBreakdown);
+        
         // --- Perform all calculations and store results in outcomes ---
 
         // 1. Resource Scenarios
@@ -48,7 +52,52 @@ class ProbabilityCalculator {
 
         // 2. Combat Damage Scenarios
         const fightingPower = this.playerManager.calculateFightingPower();
+        console.log(`PROBA CALCULATOR DEBUG: Calling calculateCombatDamageScenarios with fighting power: ${fightingPower}`);
         outcomes.combat.scenarios = this.fightHandler.calculateCombatDamageScenarios(outcomes.combat.fightBreakdown, fightingPower, this.playerManager, modifiedSectorData);
+        outcomes.combat.scenarios.adjustedForEventPriority = false; // Initialize adjustment flag
+        
+        // Log damage instances for each scenario with source tracking
+        const { damageInstances } = outcomes.combat.scenarios;
+        if (damageInstances) {
+            console.log('=== COMBAT DAMAGE INSTANCES BREAKDOWN (WITH SOURCES) ===');
+            ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
+                console.log(`\n${scenario.toUpperCase()} Scenario:`);
+                if (!damageInstances[scenario] || damageInstances[scenario].length === 0) {
+                    console.log('  No combat events');
+                } else {
+                    damageInstances[scenario].forEach(instance => {
+                        console.log(`  ${instance.count}x ${instance.type} (${instance.damagePerInstance} damage each) = ${instance.count * instance.damagePerInstance} total`);
+                        
+                        // Log source information
+                        if (instance.sources && instance.sources.length > 0) {
+                            const sourceList = instance.sources.map(source => `${source.sectorName}#${source.sectorId}`).join(', ');
+                            console.log(`    Sources: ${sourceList}`);
+                        } else {
+                            console.log(`    Sources: none assigned`);
+                        }
+                    });
+                    const scenarioTotal = damageInstances[scenario].reduce((sum, instance) => sum + (instance.count * instance.damagePerInstance), 0);
+                    console.log(`  TOTAL: ${scenarioTotal} damage`);
+                }
+            });
+            console.log('==========================================\n');
+        }
+        
+        // DEBUG: Log combat scenarios returned by FightHandler
+        console.log(`PROBA CALCULATOR DEBUG: FightHandler returned combat scenarios:`, outcomes.combat.scenarios);
+        if (outcomes.combat.scenarios && outcomes.combat.scenarios.damageInstances) {
+            console.log(`PROBA CALCULATOR DEBUG: Combat damage instances structure:`, {
+                optimist: outcomes.combat.scenarios.damageInstances.optimist ? outcomes.combat.scenarios.damageInstances.optimist.length : 0,
+                average: outcomes.combat.scenarios.damageInstances.average ? outcomes.combat.scenarios.damageInstances.average.length : 0,
+                pessimist: outcomes.combat.scenarios.damageInstances.pessimist ? outcomes.combat.scenarios.damageInstances.pessimist.length : 0,
+                worstCase: outcomes.combat.scenarios.damageInstances.worstCase ? outcomes.combat.scenarios.damageInstances.worstCase.length : 0
+            });
+            
+            // Log a few sample instances to see the source tracking
+            if (outcomes.combat.scenarios.damageInstances.average && outcomes.combat.scenarios.damageInstances.average.length > 0) {
+                console.log(`PROBA CALCULATOR DEBUG: Sample combat instances from average scenario:`, outcomes.combat.scenarios.damageInstances.average.slice(0, 3));
+            }
+        }
         
         // Store combat damage results in player manager for HP preview
         if (this.playerManager && typeof this.playerManager.storeCombatDamage === 'function') {
@@ -58,6 +107,7 @@ class ProbabilityCalculator {
         // 3. Event Damage Risks & Scenarios
         outcomes.damages.risks = this.eventDamageHandler.calculateEventDamageRisks(outcomes.damages.damageBreakdown);
         outcomes.damages.scenarios = this.eventDamageHandler.calculateEventDamageScenarios(outcomes.damages.damageBreakdown, this.playerManager, modifiedSectorData);
+        outcomes.damages.scenarios.adjustedForCombatPriority = false; // Initialize adjustment flag
 
         // Store event damage results in player manager for HP preview
         if (this.playerManager && typeof this.playerManager.storeEventDamage === 'function') {
@@ -67,7 +117,96 @@ class ProbabilityCalculator {
         // 4. Negative Event Scenarios
         outcomes.events = this.eventScenarioHandler.calculateEventScenariosFromSectors(modifiedSectorData);
 
+        // 5. Adjust worst-case scenarios based on fightVsDamageThreshold
+        this.adjustWorstCaseScenarios(outcomes);
+
         return outcomes;
+    }
+
+    /**
+     * Adjusts worst-case scenarios for sectors with fightVsDamageThreshold.
+     * This ensures that for a given sector, only the true worst-case (either a fight or an event) is counted.
+     * @param {Object} outcomes - The outcomes object to modify in place.
+     * @private
+     */
+    adjustWorstCaseScenarios(outcomes) {
+        if (!this.playerManager || !outcomes.modifiedSectorData) {
+            return;
+        }
+
+        const playerCount = this.playerManager.getPlayers().filter(p => p !== null).length;
+        const activeAbilities = this.collectActiveAbilities(this.players || []);
+        const activeItems = this.collectActiveItems(this.players || []);
+        const hasDiplomacyOrWhiteFlag = activeAbilities.has('diplomacy') || activeItems.includes('white_flag');
+
+        outcomes.modifiedSectorData.forEach((sectorData, sectorKey) => {
+            if (sectorData.fightVsDamageThreshold !== undefined) {
+                const sectorId = sectorKey.split('_')[1];
+
+                // Determine the true worst-case for this sector
+                const worstCaseIsFight = !hasDiplomacyOrWhiteFlag && (playerCount <= sectorData.fightVsDamageThreshold);
+
+                if (worstCaseIsFight) {
+                    // The worst case is a fight, so we must remove the corresponding event damage instance.
+                    const eventDamageInstances = outcomes.damages.scenarios.damageInstances.worstCase;
+                    const instanceIndex = eventDamageInstances.findIndex(instance => 
+                        instance.sources.some(source => source.sectorId == sectorId)
+                    );
+
+                    if (instanceIndex > -1) {
+                        const instance = eventDamageInstances[instanceIndex];
+                        
+                        // Remove only the specific source for this sector
+                        const sourceIndex = instance.sources.findIndex(source => source.sectorId == sectorId);
+                        if (sourceIndex > -1) {
+                            // Remove the source
+                            instance.sources.splice(sourceIndex, 1);
+                            
+                            // Decrease count and recalculate total damage
+                            instance.count--;
+                            const damageReduction = instance.damagePerInstance;
+                            outcomes.damages.scenarios.totalWorstCaseDamage -= damageReduction;
+                            
+                            // If no sources remain, remove the entire instance
+                            if (instance.sources.length === 0 || instance.count <= 0) {
+                                eventDamageInstances.splice(instanceIndex, 1);
+                            }
+                            
+                            outcomes.damages.scenarios.adjustedForCombatPriority = true; // Flag for tooltip on event section
+                        }
+                    }
+                } else {
+                    // The worst case is an event damage, so we must remove the corresponding combat damage instance.
+                    const combatDamageInstances = outcomes.combat.scenarios.damageInstances.worstCase;
+                    const instanceIndex = combatDamageInstances.findIndex(instance => 
+                        instance.sources.some(source => source.sectorId == sectorId)
+                    );
+
+                    if (instanceIndex > -1) {
+                        const instance = combatDamageInstances[instanceIndex];
+                        
+                        // Remove only the specific source for this sector
+                        const sourceIndex = instance.sources.findIndex(source => source.sectorId == sectorId);
+                        if (sourceIndex > -1) {
+                            // Remove the source
+                            instance.sources.splice(sourceIndex, 1);
+                            
+                            // Decrease count and recalculate total damage
+                            instance.count--;
+                            const damageReduction = instance.damagePerInstance;
+                            outcomes.combat.scenarios.totalWorstCaseDamage -= damageReduction;
+                            
+                            // If no sources remain, remove the entire instance
+                            if (instance.sources.length === 0 || instance.count <= 0) {
+                                combatDamageInstances.splice(instanceIndex, 1);
+                            }
+                            
+                            outcomes.combat.scenarios.adjustedForEventPriority = true; // Flag for tooltip on combat section
+                        }
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -761,9 +900,9 @@ class ProbabilityCalculator {
             `;
         }
 
-        // Scenarios are now pre-calculated
         const results = combat.scenarios;
         const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
+        const adjustedForEventPriority = results.adjustedForEventPriority;
 
         return `
             <div class="outcome-category">
@@ -784,6 +923,7 @@ class ProbabilityCalculator {
                     <span>Worst Case Scenario: (${formatProbability(results.combinedWorstCaseProb)}%)</span>
                     <span class="critical bold-damage">${hpIcon}<strong>${Math.round(results.totalWorstCaseDamage)}</strong></span>
                 </div>
+                ${adjustedForEventPriority ? `<div class="tooltip-item"><span>Since we can't have both an event and a combat on the same sector, Worst Case values may seem odd as they're partially handled by event damage.</span></div>` : ''}
             </div>
         `;
     }
@@ -852,6 +992,7 @@ class ProbabilityCalculator {
 
         const results = damages.scenarios;
         const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
+        const adjustedForCombatPriority = results.adjustedForCombatPriority;
 
         return `
             <div class="outcome-category">
@@ -872,6 +1013,7 @@ class ProbabilityCalculator {
                     <span>Worst Case Scenario: (${formatProbability(results.combinedWorstCaseProb)}%)</span>
                     <span class="critical bold-damage">${hpIcon}<strong>${Math.round(results.totalWorstCaseDamage)}</strong></span>
                 </div>
+                ${adjustedForCombatPriority ? `<div class="tooltip-item"><span>Since we can't have both an event and a combat on the same sector, Worst Case values may seem odd as they're partially handled by combat damage.</span></div>` : ''}
             </div>
         `;
     }
