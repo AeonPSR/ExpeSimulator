@@ -109,9 +109,9 @@ class EventHandler {
         }
         if (this.playerManager) {
             const resultsContent = this.playerManager.renderExpeditionResults();
-            const legendContent = this.playerManager.renderExpeditionLegend();
             this.uiManager.updateExpeditionResults(resultsContent);
-            this.uiManager.updateExpeditionLegend(legendContent);
+            // Legend is now integrated within the results cards; clear the separate container
+            this.uiManager.updateExpeditionLegend('');
         }
     }
 

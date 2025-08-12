@@ -8,7 +8,7 @@
 	z-index: 10000;
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	color: #ecf0f1;
-	/*transform: translateX(-400px);*/
+	transform: translateX(-400px);
 	transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 	overflow: visible;
 	display: flex;
@@ -463,7 +463,8 @@ body:not(.traitor-active) .negative-level-icon {
 }
 
 /* Expedition results player profile styling */
-.expedition-result-card {
+.expedition-result-card,
+.expedition-legend-card {
 	display: flex;
 	background: rgba(0, 0, 0, 0.2);
 	border: 2px solid #e67e22 !important;
@@ -476,6 +477,11 @@ body:not(.traitor-active) .negative-level-icon {
 	width: calc(25% - 11.25px);
 	margin-bottom: 5px;
 	box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
+}
+
+/* Center legend card content along the main axis as well */
+.expedition-legend-card {
+	justify-content: center;
 }
 
 .expedition-result-avatar {
@@ -565,16 +571,16 @@ body:not(.traitor-active) .negative-level-icon {
 
 /* Expedition results legend */
 .expedition-legend {
-	margin-top: 15px;
-	padding: 10px;
-	background: rgba(0, 0, 0, 0.1);
-	border-radius: 6px;
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	padding: 0px;
+	margin: 0px;
+	border-width: 0px;
+	height: 100%;
 }
 
 .expedition-legend h5 {
-	margin: 0 0 8px 0;
-	font-size: 12px;
+	margin-top: 20px;
+	margin-bottom: 50px;
+	font-size: x-small;
 	color: #bdc3c7;
 	font-weight: 600;
 	text-transform: uppercase;

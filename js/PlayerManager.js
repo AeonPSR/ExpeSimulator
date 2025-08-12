@@ -1441,7 +1441,15 @@ class PlayerManager {
             `;
         }).join('');
 
-        return resultsHTML;
+        // Append an integrated legend card styled like a player card
+        const legendBlock = this.renderExpeditionLegend();
+        const legendCard = `
+            <div class="expedition-legend-card">
+                ${legendBlock}
+            </div>
+        `;
+
+        return resultsHTML + legendCard;
     }
 
     /**
