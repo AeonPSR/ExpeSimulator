@@ -1299,6 +1299,7 @@ class PlayerManager {
         if (fightingPowerValue) {
             fightingPowerValue.textContent = displayPower;
         }
+
     }
 
     /**

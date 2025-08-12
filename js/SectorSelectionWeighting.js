@@ -16,6 +16,17 @@ Notes
 */
 
 class SectorSelectionWeighting {
+    // Optional per-sector multipliers applied to weightAtPlanetExploration (e.g., from items)
+    static explorationWeightMultipliers = {};
+
+    /**
+     * Set per-sector exploration weight multipliers, e.g., { HYDROCARBON: 5 }.
+     * Pass an empty object to clear.
+     * @param {Object<string, number>} map
+     */
+    static setExplorationWeightMultipliers(map) {
+        SectorSelectionWeighting.explorationWeightMultipliers = map || {};
+    }
     /**
      * Computes an approximate per-sector visit likelihood based on exploration weights and movement budget.
      * @param {Array<string|{id: (number|string), name: string}>} selectedSectors - The sectors picked by the user (can be names or {id,name}).
@@ -33,7 +44,12 @@ class SectorSelectionWeighting {
 
         sectorsWithIds.forEach(({ id, name }) => {
             const sectorDefinition = SectorSelectionWeighting.findSectorDefinitionByName(name);
-            const explorationWeight = sectorDefinition ? (sectorDefinition.weightAtPlanetExploration || 0) : 0;
+            let explorationWeight = sectorDefinition ? (sectorDefinition.weightAtPlanetExploration || 0) : 0;
+            // Apply optional multiplier for this sector type (from items)
+            const m = SectorSelectionWeighting.explorationWeightMultipliers[name];
+            if (typeof m === 'number' && isFinite(m) && m > 0) {
+                explorationWeight *= m;
+            }
             const key = `${name}_${id}`;
             sectorWeights.push({ key, name, explorationWeight });
             if (name === 'LANDING') {

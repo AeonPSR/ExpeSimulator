@@ -619,8 +619,14 @@ class EventDamageHandler {
                     const baseDamage = this.getDamageFromKey(worstCaseEventType);
                     const sectorDamage = this.calculateSequentialDamage(1, baseDamage, playerManager, worstCaseEventType, 'worstCase');
                     
-                    // Track this damage instance
-                    const sources = this.buildDamageSourceAssignments(worstCaseEventType, 1, modifiedSectorData, usedSectors);
+                    // Track this damage instance (restrict to this multi-event sector type)
+                    const sources = this.buildDamageSourceAssignments(
+                        worstCaseEventType,
+                        1,
+                        modifiedSectorData,
+                        usedSectors,
+                        sectorName // ensure the source comes from this sector type (e.g., COLD, LANDING)
+                    );
                     instances.push({
                         type: worstCaseEventType,
                         count: 1,

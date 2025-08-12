@@ -50,6 +50,10 @@ class ProbabilityCalculator {
             if (this.playerManager) {
                 this.playerManager.oxygenlessPlanet = !oxygenSelected;
                 console.log(`[OXYGEN RULE] oxygenSelected=${oxygenSelected} -> oxygenlessPlanet=${this.playerManager.oxygenlessPlanet}`);
+                // Keep UI indicators in sync when oxygen state flips due to sector changes
+                if (typeof this.playerManager.updateFightingPowerDisplay === 'function') {
+                    this.playerManager.updateFightingPowerDisplay();
+                }
             }
         } catch (e) {
             console.warn('[OXYGEN RULE] Could not evaluate oxygen sector presence:', e);
@@ -75,6 +79,28 @@ class ProbabilityCalculator {
         let scaledSectorData = modifiedSectorData;
         try {
             if (typeof SectorSelectionWeighting !== 'undefined' && outcomes && typeof outcomes.movements === 'number') {
+                // Apply item-driven exploration weight multipliers (Echo Sounder, Heat Seeker)
+                const multipliers = {};
+                try {
+                    // Determine active players (respect oxygenless gating)
+                    const activePlayers = this.getActivePlayers();
+                    // Collect active items names without extension
+                    const activeItemNames = [];
+                    activePlayers.forEach(p => {
+                        (p.items || []).forEach(it => { if (it) activeItemNames.push(it.replace(/\.(jpg|png)$/,'')); });
+                    });
+                    const hasEcho = activeItemNames.includes('echo_sounder');
+                    const hasHeat = activeItemNames.includes('heat_seeker');
+                    if (hasEcho) {
+                        multipliers['HYDROCARBON'] = 5; // x5 total vs base (config defines +4 bonus, we model as x5 weight)
+                    }
+                    if (hasHeat) {
+                        ['RUMINANT','MANKAROG','INSECT','PREDATOR','INTELLIGENT'].forEach(s => { multipliers[s] = 5; });
+                    }
+                } catch (e) { /* ignore */ }
+                if (typeof SectorSelectionWeighting.setExplorationWeightMultipliers === 'function') {
+                    SectorSelectionWeighting.setExplorationWeightMultipliers(multipliers);
+                }
                 scaledSectorData = SectorSelectionWeighting.scaleEventProbabilities(modifiedSectorData, outcomes.movements);
             }
         } catch (e) {
