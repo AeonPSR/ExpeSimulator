@@ -457,6 +457,14 @@ const AbilityEffects = {
 			fruitBonus: 1
 		}
 	},
+	'skillful': {
+		name: 'Skillful',
+		description: 'Acts as both Botanic (fruit +1) and Diplomacy (removes combat events)',
+		effects: {
+			fruitBonus: 1,
+			removeCombatEvents: true
+		}
+	},
 	'gunman': {
 		name: 'Gunman',
 		description: 'Increases combat power by 1 if wielder has any gun',

@@ -101,6 +101,12 @@ class EventHandler {
      * Updates the expedition results display
      */
     updateExpeditionResults() {
+        const selectedSectors = this.sectorManager.getSelectedSectors();
+        if (!selectedSectors || selectedSectors.length === 0) {
+            this.uiManager.updateExpeditionResults('');
+            this.uiManager.updateExpeditionLegend('');
+            return;
+        }
         if (this.playerManager) {
             const resultsContent = this.playerManager.renderExpeditionResults();
             const legendContent = this.playerManager.renderExpeditionLegend();

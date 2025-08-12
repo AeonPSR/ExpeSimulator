@@ -7,6 +7,8 @@ class PlayerManager {
         this.toggleState = false; // Toggle button state
         this.antigravPropellerState = false; // Antigrav propeller button state
         this.currentMode = 'icarus'; // Mode button state: 'patrol' or 'icarus' (default: icarus)
+    this.oxygenlessPlanet = false; // If true, players without space suit are stuck on ship
+    this.currentMovements = 0; // Cached movements value for UI
         this.onPlayerUpdateCallback = onPlayerUpdateCallback;
         this.combatDamage = {
             optimist: [],
@@ -43,7 +45,7 @@ class PlayerManager {
             'lambda_f.png' // Lambda at the end
         ];
         this.normalAbilities = [
-            'survival.png', 'botanic.png', 'pilot.png', 'gunman.png', 'diplomacy.png', 'sprint.png'
+            'survival.png', 'botanic.png', 'pilot.png', 'gunman.png', 'diplomacy.png', 'sprint.png', 'skillful.png'
         ];
         this.pinkAbilities = [
             'traitor.png'
@@ -80,6 +82,9 @@ class PlayerManager {
         
         // Initialize mode button
         this.initializeModeButton();
+
+    // Initialize oxygenless planet toggle
+    this.initializeOxygenlessPlanetToggle();
     }
 
     /**
@@ -685,8 +690,60 @@ class PlayerManager {
                 
                 // Update fighting power display
                 this.updateFightingPowerDisplay();
+
+                // Update movements display immediately when mode changes
+                this.updateMovementsDisplay();
+
+                // Trigger callback to refresh all calculations/UI (re-run simulation)
+                if (this.onPlayerUpdateCallback) {
+                    this.onPlayerUpdateCallback();
+                }
             });
         }
+    }
+
+    /**
+     * Initialize oxygenless planet toggle functionality
+     */
+    initializeOxygenlessPlanetToggle() {
+        const oxyBtn = document.querySelector('#oxygenless-planet-btn');
+        if (oxyBtn) {
+            oxyBtn.addEventListener('click', () => {
+                this.oxygenlessPlanet = !this.oxygenlessPlanet;
+                oxyBtn.setAttribute('data-active', this.oxygenlessPlanet.toString());
+                // Trigger callback to refresh all calculations/UI
+                if (this.onPlayerUpdateCallback) {
+                    this.onPlayerUpdateCallback();
+                }
+                this.updateFightingPowerDisplay();
+                this.updateMovementsDisplay();
+            });
+        }
+    }
+
+    /**
+     * Returns true if the player is considered active for the expedition (not stuck in ship)
+     * On oxygenless planets, only players with a space suit are active.
+     * @param {number|Object} playerOrIndex - Player object or index
+     */
+    isPlayerActive(playerOrIndex) {
+        const player = typeof playerOrIndex === 'number' ? this.players[playerOrIndex] : playerOrIndex;
+        if (!player) return false;
+        if (!this.oxygenlessPlanet) return true; // Oxygen available: all players active
+        // Oxygenless: needs space suit to participate
+        return (player.items || []).some(it => it && it.startsWith('space_suit'));
+    }
+
+    /**
+     * Get indices of active players only (those who will be accounted for in calculations)
+     * @returns {number[]} indices of active players in this.players
+     */
+    getActivePlayerIndices() {
+        const indices = [];
+        this.players.forEach((p, i) => {
+            if (this.isPlayerActive(p)) indices.push(i);
+        });
+        return indices;
     }
     
     /**
@@ -696,12 +753,14 @@ class PlayerManager {
      */
     calculateFightingPower() {
         let fightingPower = 0;
-        
-        // Base power: number of players in expedition
-        fightingPower += this.players.length;
-        
-        // Add power from permanent items and abilities
-        this.players.forEach(player => {
+
+        // Only active players contribute to fighting power on oxygenless planets
+        const activeIndices = this.getActivePlayerIndices();
+        fightingPower += activeIndices.length;
+
+        // Add power from permanent items and abilities (only from active players)
+        activeIndices.forEach(idx => {
+            const player = this.players[idx];
             // Add non-grenade item powers
             player.items.forEach((item) => {
                 if (item) {
@@ -743,34 +802,49 @@ class PlayerManager {
      * @returns {Object} - Per-player damage arrays for each scenario
      */
     distributeCombatDamageInstances(damageInstances) {
-        const playerCount = this.players.filter(p => p !== null).length;
-        
-        // If no players, return empty arrays
-        if (playerCount === 0) {
+        const totalPlayers = this.players.length;
+        const activeIndices = this.getActivePlayerIndices();
+        const activeCount = activeIndices.length;
+
+        // If no active players, return zeroed arrays sized to total players for stable indexing
+        if (activeCount === 0) {
             return {
-                optimist: [],
-                average: [],
-                pessimist: [],
-                worstCase: []
+                optimist: Array(totalPlayers).fill(0),
+                average: Array(totalPlayers).fill(0),
+                pessimist: Array(totalPlayers).fill(0),
+                worstCase: Array(totalPlayers).fill(0)
             };
         }
 
         // Initialize per-player damage arrays
         const perPlayerDamage = {
-            optimist: Array(playerCount).fill(0),
-            average: Array(playerCount).fill(0),
-            pessimist: Array(playerCount).fill(0),
-            worstCase: Array(playerCount).fill(0)
+            optimist: Array(totalPlayers).fill(0),
+            average: Array(totalPlayers).fill(0),
+            pessimist: Array(totalPlayers).fill(0),
+            worstCase: Array(totalPlayers).fill(0)
         };
 
         // Process each scenario
+        // Precompute armor/survival reduction per ACTIVE player index
+        const armorReductionActive = activeIndices.map(idx => {
+            const p = this.players[idx];
+            return p.items && p.items.some(it => it && it.startsWith('plastenite_armor')) ? 1 : 0;
+        });
+        const survivalReductionActive = activeIndices.map(idx => {
+            const p = this.players[idx];
+            return p.abilities && p.abilities.some(ab => ab === 'survival.png') ? 1 : 0;
+        });
+
         ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
             if (damageInstances[scenario]) {
                 damageInstances[scenario].forEach(instance => {
                     this.distributeCombatInstanceDamage(
                         instance.count,
                         instance.damagePerInstance,
-                        perPlayerDamage[scenario]
+                        perPlayerDamage[scenario],
+                        armorReductionActive,
+                        survivalReductionActive,
+                        activeIndices
                     );
                 });
             }
@@ -785,29 +859,44 @@ class PlayerManager {
      * @param {number} damagePerInstance - Damage per fight instance
      * @param {Array<number>} playerDamageArray - Array to update with damage distribution
      */
-    distributeCombatInstanceDamage(count, damagePerInstance, playerDamageArray) {
-        const playerCount = playerDamageArray.length;
-        if (playerCount === 0) return;
+    distributeCombatInstanceDamage(count, damagePerInstance, playerDamageArray, armorReductionActive = [], survivalReductionActive = [], activeIndices = []) {
+        const activeCount = activeIndices.length;
+        if (activeCount === 0) return;
 
         // Process each instance of this fight type
         for (let i = 0; i < count; i++) {
-            const totalDamage = damagePerInstance;
+            let totalDamage = damagePerInstance;
 
             // COMBAT: Always distribute among all players (like TIRED_2/DISASTER_3_5)
-            // Calculate base damage per player (integer division)
-            const baseDamagePerPlayer = Math.floor(totalDamage / playerCount);
-            
-            // Calculate remainder damage to distribute
-            const remainderDamage = totalDamage - (baseDamagePerPlayer * playerCount);
-            
-            // Distribute base damage to all players
-            for (let j = 0; j < playerCount; j++) {
-                playerDamageArray[j] += baseDamagePerPlayer;
-            }
-            
-            // Distribute remainder damage (1 point each to the first remainderDamage players)
+            const baseDamagePerPlayer = Math.floor(totalDamage / activeCount);
+            const remainderDamage = totalDamage - (baseDamagePerPlayer * activeCount);
+
+            // Temporary array to apply per-instance reductions before aggregating
+            const instanceDamage = new Array(activeCount).fill(baseDamagePerPlayer);
+
+            // Apply remainder
             for (let j = 0; j < remainderDamage; j++) {
-                playerDamageArray[j % playerCount]++;
+                instanceDamage[j % activeCount] += 1;
+            }
+
+            // Apply armor reduction (1 per fight instance for equipped players), not below 0
+            for (let j = 0; j < activeCount; j++) {
+                if (armorReductionActive[j] > 0 && instanceDamage[j] > 0) {
+                    instanceDamage[j] = Math.max(0, instanceDamage[j] - armorReductionActive[j]);
+                }
+            }
+
+            // Apply survival reduction (1 per fight instance for players with Survival), cumulative with armor
+            for (let j = 0; j < activeCount; j++) {
+                if (survivalReductionActive[j] > 0 && instanceDamage[j] > 0) {
+                    instanceDamage[j] = Math.max(0, instanceDamage[j] - survivalReductionActive[j]);
+                }
+            }
+
+            // Add to cumulative array
+            for (let j = 0; j < activeCount; j++) {
+                const playerIndex = activeIndices[j];
+                playerDamageArray[playerIndex] += instanceDamage[j];
             }
         }
     }
@@ -823,10 +912,16 @@ class PlayerManager {
         this.eventDamage.average = eventResults.totalAverageDamage || 0;
         this.eventDamage.pessimist = eventResults.totalPessimistDamage || 0;
         this.eventDamage.worstCase = eventResults.totalWorstCaseDamage || 0;
-        
+
+        // Remove event damage for worstCase if combat is the true worst case (flag set by ProbabilityCalculator)
+        if (eventResults.combatOverridesWorstCase) {
+            eventResults.damageInstances.worstCase = [];
+            eventResults.totalWorstCaseDamage = 0;
+        }
+
         // Distribute damage instances among players for each scenario
         this.eventDamagePerPlayer = this.distributeDamageInstances(eventResults.damageInstances);
-        
+
         // If there's any event damage, track it as a source (will be properly distributed later)
         if (eventResults.totalOptimistDamage > 0 || 
             eventResults.totalAverageDamage > 0 || 
@@ -842,25 +937,27 @@ class PlayerManager {
      * @returns {Object} - Per-player damage arrays for each scenario
      */
     distributeDamageInstances(damageInstances) {
-        const playerCount = this.players.filter(p => p !== null).length;
-        
-        // If no players, return empty arrays
-        if (playerCount === 0) {
+    const totalPlayers = this.players.length;
+    const activeIndices = this.getActivePlayerIndices();
+    const activeCount = activeIndices.length;
+
+    // If no active players, return zeroed arrays sized to total players for stable indexing
+    if (activeCount === 0) {
             return {
-                optimist: [],
-                average: [],
-                pessimist: [],
-                worstCase: []
+        optimist: Array(totalPlayers).fill(0),
+        average: Array(totalPlayers).fill(0),
+        pessimist: Array(totalPlayers).fill(0),
+        worstCase: Array(totalPlayers).fill(0)
             };
         }
 
         // Initialize per-player damage arrays
-        const perPlayerDamage = {
-            optimist: Array(playerCount).fill(0),
-            average: Array(playerCount).fill(0),
-            pessimist: Array(playerCount).fill(0),
-            worstCase: Array(playerCount).fill(0)
-        };
+    const perPlayerDamage = {
+        optimist: Array(totalPlayers).fill(0),
+        average: Array(totalPlayers).fill(0),
+        pessimist: Array(totalPlayers).fill(0),
+        worstCase: Array(totalPlayers).fill(0)
+    };
 
         // Process each scenario
         ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
@@ -877,7 +974,8 @@ class PlayerManager {
                         instance.count,
                         instance.damagePerInstance,
                         perPlayerDamage[scenario],
-                        instance.sources || []
+                        instance.sources || [],
+                        activeIndices
                     );
                 });
             }
@@ -894,9 +992,9 @@ class PlayerManager {
      * @param {Array<number>} playerDamageArray - Array to update with damage distribution
      * @param {Array<Object>} sources - Array of assigned source information with {sectorId, sectorName} for each instance
      */
-    distributeInstanceDamage(eventType, count, damagePerInstance, playerDamageArray, sources = []) {
-        const playerCount = playerDamageArray.length;
-        if (playerCount === 0) return;
+    distributeInstanceDamage(eventType, count, damagePerInstance, playerDamageArray, sources = [], activeIndices = []) {
+        const activeCount = activeIndices.length;
+        if (activeCount === 0) return;
 
         // DEBUG: Log parameters received by PlayerManager
         if (eventType === 'ACCIDENT_3_5') {
@@ -916,18 +1014,26 @@ class PlayerManager {
 
             if (eventType === 'ACCIDENT_3_5') {
                 // ACCIDENT: Single target damage - randomly select one player
-                const targetPlayerIndex = Math.floor(Math.random() * playerCount);
+                const targetActiveIdx = Math.floor(Math.random() * activeCount);
+                const targetPlayerIndex = activeIndices[targetActiveIdx];
                 
                 // Check if the target player has sector-specific immunity
                 if (source && this.hasItemImmunity(targetPlayerIndex, eventType, source.sectorName)) {
                     console.log(`Player ${targetPlayerIndex} is immune to ${eventType} from ${source.sectorName}#${source.sectorId} (Rope protection)`);
                     actualDamage = 0;
                 }
+
+                // Survival reduction for targeted events
+                const targetPlayer = this.players[targetPlayerIndex];
+                if (actualDamage > 0 && targetPlayer && targetPlayer.abilities && targetPlayer.abilities.some(ab => ab === 'survival.png')) {
+                    actualDamage = Math.max(0, actualDamage - 1);
+                }
                 
                 playerDamageArray[targetPlayerIndex] += actualDamage;
             } else {
                 // TIRED_2 and DISASTER_3_5: Multi-target damage - apply to ALL players
-                for (let j = 0; j < playerCount; j++) {
+                for (let aj = 0; aj < activeCount; aj++) {
+                    const j = activeIndices[aj];
                     let playerDamage = actualDamage;
                     
                     // Check if this player has sector-specific immunity
@@ -936,6 +1042,11 @@ class PlayerManager {
                         playerDamage = 0;
                     }
                     
+                    // Survival reduction for AoE events
+                    const playerObj = this.players[j];
+                    if (playerDamage > 0 && playerObj && playerObj.abilities && playerObj.abilities.some(ab => ab === 'survival.png')) {
+                        playerDamage = Math.max(0, playerDamage - 1);
+                    }
                     playerDamageArray[j] += playerDamage;
                 }
             }
@@ -1140,7 +1251,9 @@ class PlayerManager {
      */
     getGrenadeCount() {
         let grenadeCount = 0;
-        this.players.forEach(player => {
+        const activeIndices = this.getActivePlayerIndices();
+        activeIndices.forEach(idx => {
+            const player = this.players[idx];
             player.items.forEach(item => {
                 if (item) {
                     const itemKey = item.replace(/\.(jpg|png)$/, '');
@@ -1163,6 +1276,9 @@ class PlayerManager {
         
         // Update fighting power display
         this.updateFightingPowerDisplay();
+
+    // Update movements display
+    this.updateMovementsDisplay();
     }
 
     /**
@@ -1186,6 +1302,36 @@ class PlayerManager {
     }
 
     /**
+     * Calculate team movements based on mode and Sprinter abilities.
+     * Base: 9 for Icarus, 3 for Patrol. +1 per player with Sprint (counts even if stuck on ship).
+     * @returns {number}
+     */
+    calculateMovements() {
+        const base = this.currentMode === 'patrol' ? 3 : 9;
+        let sprinters = 0;
+        this.players.forEach(p => {
+            if (p && Array.isArray(p.abilities)) {
+                sprinters += p.abilities.filter(a => a === 'sprint.png').length;
+            }
+        });
+        return base + sprinters;
+    }
+
+    /**
+     * Update the movements value in the UI and cache it.
+     * If a value is provided, use it; otherwise compute locally.
+     * @param {number} [value]
+     */
+    updateMovementsDisplay(value) {
+        const movements = typeof value === 'number' ? value : this.calculateMovements();
+        this.currentMovements = movements;
+        const el = document.getElementById('movements-value');
+        if (el) {
+            el.textContent = movements;
+        }
+    }
+
+    /**
      * Render expedition results showing final player health
      * @returns {string} - HTML string for expedition results
      */
@@ -1203,21 +1349,21 @@ class PlayerManager {
             let averageDamage = 0;
             let pessimistDamage = 0;
             let worstCaseDamage = 0;
-            
+
             // If we have combat damage data, use it instead of default values
             if (this.combatDamage && this.combatDamage.optimist && this.combatDamage.optimist.length > index) {
                 optimistDamage = this.combatDamage.optimist[index];
                 averageDamage = this.combatDamage.average[index];
                 pessimistDamage = this.combatDamage.pessimist[index];
                 worstCaseDamage = this.combatDamage.worstCase[index];
-                
+
                 // Track combat damage sources
                 if (optimistDamage > 0) this.damageSources.optimist[index]++;
                 if (averageDamage > 0) this.damageSources.average[index]++;
                 if (pessimistDamage > 0) this.damageSources.pessimist[index]++;
                 if (worstCaseDamage > 0) this.damageSources.worstCase[index]++;
             }
-            
+
             // Add event damage using the already-distributed per-player arrays
             const playerCount = this.players.filter(p => p !== null).length;
             if (playerCount > 0 && this.eventDamagePerPlayer) {
@@ -1231,22 +1377,24 @@ class PlayerManager {
                 if (this.eventDamagePerPlayer.pessimist && this.eventDamagePerPlayer.pessimist.length > index) {
                     pessimistDamage += this.eventDamagePerPlayer.pessimist[index];
                 }
-                if (this.eventDamagePerPlayer.worstCase && this.eventDamagePerPlayer.worstCase.length > index) {
+                // For worstCase, only add event damage if combatOverridesWorstCase is NOT true
+                if (!this.combatOverridesWorstCase && this.eventDamagePerPlayer.worstCase && this.eventDamagePerPlayer.worstCase.length > index) {
                     worstCaseDamage += this.eventDamagePerPlayer.worstCase[index];
                 }
-                
+
                 // Track event damage sources
                 if (this.eventDamagePerPlayer.optimist && this.eventDamagePerPlayer.optimist[index] > 0) this.damageSources.optimist[index]++;
                 if (this.eventDamagePerPlayer.average && this.eventDamagePerPlayer.average[index] > 0) this.damageSources.average[index]++;
                 if (this.eventDamagePerPlayer.pessimist && this.eventDamagePerPlayer.pessimist[index] > 0) this.damageSources.pessimist[index]++;
-                if (this.eventDamagePerPlayer.worstCase && this.eventDamagePerPlayer.worstCase[index] > 0) this.damageSources.worstCase[index]++;
+                if (!this.combatOverridesWorstCase && this.eventDamagePerPlayer.worstCase && this.eventDamagePerPlayer.worstCase[index] > 0) this.damageSources.worstCase[index]++;
             }
             
-            // Calculate final health by subtracting damage from current health
-            const optimistHealth = Math.max(0, player.health - optimistDamage);
-            const averageHealth = Math.max(0, player.health - averageDamage);
-            const pessimistHealth = Math.max(0, player.health - pessimistDamage);
-            const worstHealth = Math.max(0, player.health - worstCaseDamage);
+            const isActive = this.isPlayerActive(player);
+            // Calculate final health by subtracting damage from current health (only matters if active)
+            const optimistHealth = isActive ? Math.max(0, player.health - optimistDamage) : player.health;
+            const averageHealth = isActive ? Math.max(0, player.health - averageDamage) : player.health;
+            const pessimistHealth = isActive ? Math.max(0, player.health - pessimistDamage) : player.health;
+            const worstHealth = isActive ? Math.max(0, player.health - worstCaseDamage) : player.health;
             
             // Function to determine health class
             const getHealthClass = (health) => {
@@ -1264,24 +1412,28 @@ class PlayerManager {
                     </div>
                     <div class="expedition-result-health-container">
                         <div class="expedition-result-health worst ${getHealthClass(worstHealth)}">
-                            ${worstHealth > 0 ? 
+                            ${isActive ? (worstHealth > 0 ? 
                                 `${worstHealth}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />` : 
-                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`}
+                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`) :
+                                `<img src="${getResourceURL('others/stuck_in_ship.png')}" alt="Stuck" class="dead-icon" />`}
                         </div>
                         <div class="expedition-result-health pessimist ${getHealthClass(pessimistHealth)}">
-                            ${pessimistHealth > 0 ? 
+                            ${isActive ? (pessimistHealth > 0 ? 
                                 `${pessimistHealth}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />` : 
-                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`}
+                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`) :
+                                `<img src="${getResourceURL('others/stuck_in_ship.png')}" alt="Stuck" class="dead-icon" />`}
                         </div>
                         <div class="expedition-result-health average ${getHealthClass(averageHealth)}">
-                            ${averageHealth > 0 ? 
+                            ${isActive ? (averageHealth > 0 ? 
                                 `${averageHealth}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />` : 
-                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`}
+                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`) :
+                                `<img src="${getResourceURL('others/stuck_in_ship.png')}" alt="Stuck" class="dead-icon" />`}
                         </div>
                         <div class="expedition-result-health optimist ${getHealthClass(optimistHealth)}">
-                            ${optimistHealth > 0 ? 
+                            ${isActive ? (optimistHealth > 0 ? 
                                 `${optimistHealth}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />` : 
-                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`}
+                                `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`) :
+                                `<img src="${getResourceURL('others/stuck_in_ship.png')}" alt="Stuck" class="dead-icon" />`}
                         </div>
                     </div>
                 </div>

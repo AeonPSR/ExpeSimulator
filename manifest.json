@@ -12,6 +12,7 @@
       "js": [
         "config.js",
         "js/utils.js",
+  "js/SectorSelectionWeighting.js",
         "js/SectorManager.js",
         "js/UIManager.js",
         "js/PlayerManager.js",

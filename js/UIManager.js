@@ -130,6 +130,10 @@ class UIManager {
 									<span id="fighting-power-value">0</span>
 									<img src="${getResourceURL('others/fight.png')}" alt="Fighting Power" class="fight-power-icon" />
 								</button>
+								<button id="movements-btn" class="fighting-power-btn">
+									<span id="movements-value">10</span>
+									<img src="${getResourceURL('abilities/sprint.png')}" alt="Movements" class="fight-power-icon" />
+								</button>
 								<button id="players-mode-btn" class="players-mode-btn" data-mode="icarus">
 									<img src="${getResourceURL('others/icarus_access.png')}" alt="Mode" />
 								</button>

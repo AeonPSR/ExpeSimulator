@@ -11,6 +11,17 @@ class ProbabilityCalculator {
     }
 
     /**
+     * Returns the list of players that are active for the expedition (respecting oxygenless rule).
+     * Falls back to all players if playerManager is not available.
+     */
+    getActivePlayers() {
+        if (!this.playerManager || !this.playerManager.getPlayers) return this.players || [];
+        const all = this.playerManager.getPlayers();
+        if (!this.playerManager.isPlayerActive) return all;
+        return all.filter(p => this.playerManager.isPlayerActive(p));
+    }
+
+    /**
      * Sets the sector manager reference
      * @param {Object} sectorManager - The sector manager instance
      */
@@ -29,96 +40,124 @@ class ProbabilityCalculator {
     calculateExpeditionOutcomes(selectedSectors, players, playerManager) {
         console.log(`PROBA CALCULATOR DEBUG: calculateExpeditionOutcomes called with ${selectedSectors.length} sectors, ${players.length} players`);
         
-        // Store players data and playerManager for use in handlers
-        this.players = players;
-        this.playerManager = playerManager;
+    // Store players data and playerManager for use in handlers
+    this.players = players;
+    this.playerManager = playerManager;
 
-        const outcomes = this.initializeOutcomes();
+        // Determine oxygen availability from selected sectors: if OXYGEN sector is present, no suit required
+        try {
+            const oxygenSelected = selectedSectors.some(s => (typeof s === 'string' ? s : s && s.name) === 'OXYGEN');
+            if (this.playerManager) {
+                this.playerManager.oxygenlessPlanet = !oxygenSelected;
+                console.log(`[OXYGEN RULE] oxygenSelected=${oxygenSelected} -> oxygenlessPlanet=${this.playerManager.oxygenlessPlanet}`);
+            }
+        } catch (e) {
+            console.warn('[OXYGEN RULE] Could not evaluate oxygen sector presence:', e);
+        }
+
+    const outcomes = this.initializeOutcomes();
+        // Compute and track movements early so UI can reflect it
+        if (this.playerManager && typeof this.playerManager.calculateMovements === 'function') {
+            const movements = this.playerManager.calculateMovements();
+            outcomes.movements = movements;
+            // Sync UI display
+            if (typeof this.playerManager.updateMovementsDisplay === 'function') {
+                this.playerManager.updateMovementsDisplay(movements);
+            }
+        } else {
+            outcomes.movements = 0;
+        }
         
         // Apply ability and item modifications to sector data
-        const modifiedSectorData = this.applyAbilityAndItemModifications(selectedSectors, players, playerManager);
+    const modifiedSectorData = this.applyAbilityAndItemModifications(selectedSectors, players, playerManager);
+
+        // Scale sector event probabilities by visit likelihood using movement budget and exploration weights
+        let scaledSectorData = modifiedSectorData;
+        try {
+            if (typeof SectorSelectionWeighting !== 'undefined' && outcomes && typeof outcomes.movements === 'number') {
+                scaledSectorData = SectorSelectionWeighting.scaleEventProbabilities(modifiedSectorData, outcomes.movements);
+            }
+        } catch (e) {
+            console.warn('[SectorSelectionWeighting] Failed to scale event probabilities:', e);
+            scaledSectorData = modifiedSectorData;
+        }
         
-        this.calculateSectorOutcomes(outcomes, modifiedSectorData);
+    this.calculateSectorOutcomes(outcomes, scaledSectorData);
         
         // Store modified sector data for all calculations
-        outcomes.modifiedSectorData = modifiedSectorData;
-        
-        console.log(`PROBA CALCULATOR DEBUG: About to calculate combat scenarios with fightBreakdown:`, outcomes.combat.fightBreakdown);
-        
-        // --- Perform all calculations and store results in outcomes ---
+    // Store both original (post-mods) and scaled maps if needed downstream
+    outcomes.modifiedSectorData = modifiedSectorData;
+    outcomes.scaledSectorData = scaledSectorData;
 
         // 1. Resource Scenarios
-        outcomes.resources.scenarios = this.resourceHandler.calculateResourceScenariosFromSectors(modifiedSectorData);
+    outcomes.resources.scenarios = this.resourceHandler.calculateResourceScenariosFromSectors(scaledSectorData);
 
         // 2. Combat Damage Scenarios
         const fightingPower = this.playerManager.calculateFightingPower();
         console.log(`PROBA CALCULATOR DEBUG: Calling calculateCombatDamageScenarios with fighting power: ${fightingPower}`);
-        outcomes.combat.scenarios = this.fightHandler.calculateCombatDamageScenarios(outcomes.combat.fightBreakdown, fightingPower, this.playerManager, modifiedSectorData);
+    outcomes.combat.scenarios = this.fightHandler.calculateCombatDamageScenarios(outcomes.combat.fightBreakdown, fightingPower, this.playerManager, scaledSectorData);
         outcomes.combat.scenarios.adjustedForEventPriority = false; // Initialize adjustment flag
         
-        // Log damage instances for each scenario with source tracking
-        const { damageInstances } = outcomes.combat.scenarios;
-        if (damageInstances) {
-            console.log('=== COMBAT DAMAGE INSTANCES BREAKDOWN (WITH SOURCES) ===');
-            ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
-                console.log(`\n${scenario.toUpperCase()} Scenario:`);
-                if (!damageInstances[scenario] || damageInstances[scenario].length === 0) {
-                    console.log('  No combat events');
-                } else {
-                    damageInstances[scenario].forEach(instance => {
-                        console.log(`  ${instance.count}x ${instance.type} (${instance.damagePerInstance} damage each) = ${instance.count * instance.damagePerInstance} total`);
-                        
-                        // Log source information
-                        if (instance.sources && instance.sources.length > 0) {
-                            const sourceList = instance.sources.map(source => `${source.sectorName}#${source.sectorId}`).join(', ');
-                            console.log(`    Sources: ${sourceList}`);
-                        } else {
-                            console.log(`    Sources: none assigned`);
-                        }
-                    });
-                    const scenarioTotal = damageInstances[scenario].reduce((sum, instance) => sum + (instance.count * instance.damagePerInstance), 0);
-                    console.log(`  TOTAL: ${scenarioTotal} damage`);
-                }
-            });
-            console.log('==========================================\n');
-        }
-        
-        // DEBUG: Log combat scenarios returned by FightHandler
-        console.log(`PROBA CALCULATOR DEBUG: FightHandler returned combat scenarios:`, outcomes.combat.scenarios);
-        if (outcomes.combat.scenarios && outcomes.combat.scenarios.damageInstances) {
-            console.log(`PROBA CALCULATOR DEBUG: Combat damage instances structure:`, {
-                optimist: outcomes.combat.scenarios.damageInstances.optimist ? outcomes.combat.scenarios.damageInstances.optimist.length : 0,
-                average: outcomes.combat.scenarios.damageInstances.average ? outcomes.combat.scenarios.damageInstances.average.length : 0,
-                pessimist: outcomes.combat.scenarios.damageInstances.pessimist ? outcomes.combat.scenarios.damageInstances.pessimist.length : 0,
-                worstCase: outcomes.combat.scenarios.damageInstances.worstCase ? outcomes.combat.scenarios.damageInstances.worstCase.length : 0
-            });
-            
-            // Log a few sample instances to see the source tracking
-            if (outcomes.combat.scenarios.damageInstances.average && outcomes.combat.scenarios.damageInstances.average.length > 0) {
-                console.log(`PROBA CALCULATOR DEBUG: Sample combat instances from average scenario:`, outcomes.combat.scenarios.damageInstances.average.slice(0, 3));
-            }
-        }
-        
-        // Store combat damage results in player manager for HP preview
-        if (this.playerManager && typeof this.playerManager.storeCombatDamage === 'function') {
-            this.playerManager.storeCombatDamage(outcomes.combat.scenarios);
-        }
+    // (Deferred combat logging & storage until after worst-case adjustments)
 
         // 3. Event Damage Risks & Scenarios
-        outcomes.damages.risks = this.eventDamageHandler.calculateEventDamageRisks(outcomes.damages.damageBreakdown);
-        outcomes.damages.scenarios = this.eventDamageHandler.calculateEventDamageScenarios(outcomes.damages.damageBreakdown, this.playerManager, modifiedSectorData);
+    outcomes.damages.risks = this.eventDamageHandler.calculateEventDamageRisks(outcomes.damages.damageBreakdown);
+    outcomes.damages.scenarios = this.eventDamageHandler.calculateEventDamageScenarios(outcomes.damages.damageBreakdown, this.playerManager, scaledSectorData);
         outcomes.damages.scenarios.adjustedForCombatPriority = false; // Initialize adjustment flag
 
-        // Store event damage results in player manager for HP preview
-        if (this.playerManager && typeof this.playerManager.storeEventDamage === 'function') {
-            this.playerManager.storeEventDamage(outcomes.damages.scenarios);
-        }
+    // (Deferred event damage storage until after worst-case adjustments)
 
         // 4. Negative Event Scenarios
         outcomes.events = this.eventScenarioHandler.calculateEventScenariosFromSectors(modifiedSectorData);
 
         // 5. Adjust worst-case scenarios based on fightVsDamageThreshold
         this.adjustWorstCaseScenarios(outcomes);
+
+        // --- POST-ADJUSTMENT LOGGING & STORAGE (final state) ---
+        const { damageInstances: finalCombatInstances } = outcomes.combat.scenarios;
+        if (finalCombatInstances) {
+            console.log('=== FINAL COMBAT DAMAGE INSTANCES (POST-ADJUSTMENT) ===');
+            ['optimist', 'average', 'pessimist', 'worstCase'].forEach(scenario => {
+                console.log(`\n${scenario.toUpperCase()} Scenario:`);
+                if (!finalCombatInstances[scenario] || finalCombatInstances[scenario].length === 0) {
+                    console.log('  No combat events');
+                } else {
+                    finalCombatInstances[scenario].forEach(instance => {
+                        console.log(`  ${instance.count}x ${instance.type} (${instance.damagePerInstance} dmg) = ${instance.count * instance.damagePerInstance}`);
+                        if (instance.sources && instance.sources.length > 0) {
+                            const sourceList = instance.sources.map(source => `${source.sectorName}#${source.sectorId}`).join(', ');
+                            console.log(`    Sources: ${sourceList}`);
+                        }
+                    });
+                    const scenarioTotal = finalCombatInstances[scenario].reduce((sum, inst) => sum + (inst.count * inst.damagePerInstance), 0);
+                    console.log(`  TOTAL: ${scenarioTotal} damage`);
+                }
+            });
+            console.log('===============================================\n');
+        }
+
+        // DEBUG: Final structures summary
+        console.log('PROBA CALCULATOR DEBUG: Final combat scenarios structure:', {
+            optimist: outcomes.combat.scenarios.damageInstances.optimist ? outcomes.combat.scenarios.damageInstances.optimist.length : 0,
+            average: outcomes.combat.scenarios.damageInstances.average ? outcomes.combat.scenarios.damageInstances.average.length : 0,
+            pessimist: outcomes.combat.scenarios.damageInstances.pessimist ? outcomes.combat.scenarios.damageInstances.pessimist.length : 0,
+            worstCase: outcomes.combat.scenarios.damageInstances.worstCase ? outcomes.combat.scenarios.damageInstances.worstCase.length : 0
+        });
+
+        // Expose override flags to playerManager so UI logic can suppress double-counting
+        if (this.playerManager) {
+            this.playerManager.combatOverridesWorstCase = !!(outcomes.damages.scenarios && outcomes.damages.scenarios.adjustedForCombatPriority);
+            this.playerManager.eventOverridesWorstCase = !!(outcomes.combat.scenarios && outcomes.combat.scenarios.adjustedForEventPriority);
+        }
+
+        // Store final (post-adjustment) combat damage results
+        if (this.playerManager && typeof this.playerManager.storeCombatDamage === 'function') {
+            this.playerManager.storeCombatDamage(outcomes.combat.scenarios);
+        }
+        // Store final (post-adjustment) event damage results
+        if (this.playerManager && typeof this.playerManager.storeEventDamage === 'function') {
+            this.playerManager.storeEventDamage(outcomes.damages.scenarios);
+        }
 
         return outcomes;
     }
@@ -134,17 +173,18 @@ class ProbabilityCalculator {
             return;
         }
 
-        const playerCount = this.playerManager.getPlayers().filter(p => p !== null).length;
-        const activeAbilities = this.collectActiveAbilities(this.players || []);
-        const activeItems = this.collectActiveItems(this.players || []);
-        const hasDiplomacyOrWhiteFlag = activeAbilities.has('diplomacy') || activeItems.includes('white_flag');
+        const playerCount = this.getActivePlayers().length;
+    const abilitiesForWorstCase = this.collectActiveAbilities(this.getActivePlayers());
+    const itemsForWorstCase = this.collectActiveItems(this.getActivePlayers());
+    // Consider any source that removed combat events (diplomacy, skillful, white_flag) from ACTIVE participants
+    const hasCombatEventRemoval = abilitiesForWorstCase.has('diplomacy') || abilitiesForWorstCase.has('skillful') || itemsForWorstCase.includes('white_flag');
 
         outcomes.modifiedSectorData.forEach((sectorData, sectorKey) => {
             if (sectorData.fightVsDamageThreshold !== undefined) {
                 const sectorId = sectorKey.split('_')[1];
 
                 // Determine the true worst-case for this sector
-                const worstCaseIsFight = !hasDiplomacyOrWhiteFlag && (playerCount <= sectorData.fightVsDamageThreshold);
+                const worstCaseIsFight = !hasCombatEventRemoval && (playerCount <= sectorData.fightVsDamageThreshold);
 
                 if (worstCaseIsFight) {
                     // The worst case is a fight, so we must remove the corresponding event damage instance.
@@ -238,9 +278,27 @@ class ProbabilityCalculator {
     applyAbilityAndItemModifications(selectedSectors, players, playerManager) {
         const modifiedData = new Map();
         
-        // Collect all active abilities and items from players
-        const activeAbilities = this.collectActiveAbilities(players);
-        const activeItems = this.collectActiveItems(players);
+        // Determine who is active for this expedition (space suit gating)
+        const activePlayers = playerManager ? players.filter(p => p && playerManager.isPlayerActive(p)) : players;
+
+        // Collect abilities and items from ACTIVE players only
+        const activeAbilities = this.collectActiveAbilities(activePlayers);
+        const activeItems = this.collectActiveItems(activePlayers);
+
+        // Exceptions: Pilot and Traitor abilities still work even if holders are inactive
+        if (players && Array.isArray(players)) {
+            const anyPilot = players.some(p => p && p.abilities && p.abilities.includes('pilot.png'));
+            const anyTraitor = players.some(p => p && p.abilities && p.abilities.includes('traitor.png'));
+            if (anyPilot) activeAbilities.add('pilot');
+            if (anyTraitor) activeAbilities.add('traitor');
+        }
+
+        // Count survival abilities (stacking steak bonus)
+    const survivalCount = activePlayers.reduce((sum, p) => {
+            if (!p || !p.abilities) return sum;
+            return sum + p.abilities.filter(a => a === 'survival.png').length;
+        }, 0);
+        this._survivalSteakBonus = survivalCount; // store for use in ability modifications
         
         // Handle both old format (array of strings) and new format (array of {id, name} objects)
         const sectorsWithIds = selectedSectors.map((sector, index) => {
@@ -383,6 +441,11 @@ class ProbabilityCalculator {
             if (effects.fruitBonus) {
                 this.applyFruitBonus(sectorData, effects.fruitBonus);
             }
+
+            // Survival steak bonus: additive per survival instance counted earlier
+            if (ability === 'survival' && this._survivalSteakBonus > 0) {
+                this.applySteakBonus(sectorData, this._survivalSteakBonus);
+            }
             
             // Sector-specific modifications (Pilot ability)
             if (effects.sectorModifications && effects.sectorModifications[sectorName]) {
@@ -412,6 +475,15 @@ class ProbabilityCalculator {
             // Remove specific events (Quad Compass)
             if (effects.removeEvents) {
                 this.removeSpecificEvents(sectorData, effects.removeEvents);
+            }
+
+            // Solo expedition extra protection (Quad Compass): if only 1 player, remove PLAYER_LOST event from pools
+            if (item === 'quad_compass' && this.getActivePlayers().length === 1) {
+                if (sectorData.explorationEvents && sectorData.explorationEvents['PLAYER_LOST']) {
+                    delete sectorData.explorationEvents['PLAYER_LOST'];
+                    this.normalizeEventWeights(sectorData);
+                    console.log('[Quad Compass] Solo expedition: removed PLAYER_LOST event from', sectorName);
+                }
             }
             
             // Double fuel gains (Driller)
@@ -522,6 +594,27 @@ class ProbabilityCalculator {
     }
 
     /**
+     * Applies steak bonus (Survival ability) to provision events
+     * @param {Object} sectorData - Sector data to modify
+     * @param {number} bonus - Bonus steaks to add (already summed across multiple Survival abilities)
+     */
+    applySteakBonus(sectorData, bonus) {
+        if (bonus <= 0) return;
+        const newEvents = {};
+        Object.entries(sectorData.explorationEvents).forEach(([event, weight]) => {
+            if (event.startsWith('PROVISION_')) {
+                const originalAmount = parseInt(event.split('_')[1]);
+                const newAmount = originalAmount + bonus;
+                const newEventName = `PROVISION_${newAmount}`;
+                newEvents[newEventName] = weight;
+            } else {
+                newEvents[event] = weight;
+            }
+        });
+        sectorData.explorationEvents = newEvents;
+    }
+
+    /**
      * Doubles fuel gains from fuel events
      * @param {Object} sectorData - Sector data to modify
      */
@@ -578,6 +671,7 @@ class ProbabilityCalculator {
                     starmaps: []
                 }
             },
+            movements: 0,
             combat: { fightBreakdown: {} },
             damages: { 
                 groupDamageOther: 0, 
@@ -799,7 +893,7 @@ class ProbabilityCalculator {
         });
         
         // Generate rows from sorted data
-        const tableRows = resourceData.map(resource => 
+    const tableRows = resourceData.map(resource => 
             generateRow(
                 getResourceIcon(resource.icon, resource.name),
                 resource.data.pessimist,
@@ -807,6 +901,9 @@ class ProbabilityCalculator {
                 resource.data.optimist
             )
         ).join('');
+        
+    // Detect skew case where Optimist (percentile) is below Average (mean)
+    const showSkewTooltip = resourceData.some(r => (r.data?.optimist ?? 0) < (r.data?.average ?? 0));
         
         return `
             <div class="outcome-category">
@@ -824,6 +921,7 @@ class ProbabilityCalculator {
                         ${tableRows}
                     </tbody>
                 </table>
+                ${showSkewTooltip ? `<div class="tooltip-item"><span>Note: If Optimist is below Average, it's due to a skewed distribution (many zeros with a small chance of a big gain). In such cases the mean can exceed the optimistic percentile.</span></div>` : ''}
             </div>
         `;
     }
@@ -902,7 +1000,8 @@ class ProbabilityCalculator {
 
         const results = combat.scenarios;
         const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
-        const adjustedForEventPriority = results.adjustedForEventPriority;
+    const adjustedForEventPriority = results.adjustedForEventPriority;
+    const showPessimistTooltip = (results.totalPessimistDamage ?? 0) > (results.totalAverageDamage ?? 0);
 
         return `
             <div class="outcome-category">
@@ -924,6 +1023,7 @@ class ProbabilityCalculator {
                     <span class="critical bold-damage">${hpIcon}<strong>${Math.round(results.totalWorstCaseDamage)}</strong></span>
                 </div>
                 ${adjustedForEventPriority ? `<div class="tooltip-item"><span>Since we can't have both an event and a combat on the same sector, Worst Case values may seem odd as they're partially handled by event damage.</span></div>` : ''}
+                ${showPessimistTooltip ? `<div class="tooltip-item"><span>Note: Pessimist is a high-percentile (tail) outcome. With skewed damage (rare big hits), it can be higher than the Average—this is expected.</span></div>` : ''}
             </div>
         `;
     }
@@ -992,7 +1092,7 @@ class ProbabilityCalculator {
 
         const results = damages.scenarios;
         const hpIcon = `<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
-        const adjustedForCombatPriority = results.adjustedForCombatPriority;
+    const adjustedForCombatPriority = results.adjustedForCombatPriority;
 
         return `
             <div class="outcome-category">
@@ -1082,9 +1182,14 @@ class ProbabilityCalculator {
         });
         
         // Generate rows from sorted data
-        const tableRows = eventData.map(event => 
+    const tableRows = eventData.map(event => 
             generateEventRow(event.name, event.data, event.isSpecial)
         ).join('');
+        
+    // Detect skew case where Optimist (percentile) is below Average (mean)
+    const showSkewTooltip = eventData.some(e => (e.data?.optimist ?? 0) < (e.data?.average ?? 0));
+    // Detect tail case where Pessimist (high-percentile) exceeds Average (mean)
+    const showPessimistTooltip = eventData.some(e => (e.data?.pessimist ?? 0) > (e.data?.average ?? 0));
         
         return `
             <div class="outcome-category">
@@ -1102,6 +1207,8 @@ class ProbabilityCalculator {
                         ${tableRows}
                     </tbody>
                 </table>
+                ${showSkewTooltip ? `<div class="tooltip-item"><span>Note: If Optimist is below Average, it's due to a skewed distribution (many zeros with a small chance of a big effect). In such cases the mean can exceed the optimistic percentile.</span></div>` : ''}
+                ${showPessimistTooltip ? `<div class="tooltip-item"><span>Note: Pessimist is a high-percentile (tail) outcome. With skewed counts (rare big effects), it can be higher than the Average—this is expected.</span></div>` : ''}
             </div>
         `;
     }
