@@ -11,7 +11,8 @@ Chromee web extension for simulating planet expeditions with combat mechanics an
 
 ## TODO
 
-
+- **Translation**: Make all text by translation key, with a dictionnary and all that mess
+- **Debug mode**: Hide all the writing to console there currently is, activate it back if we turn on debug mode.
 - **Planet Import System**: Import planet configurations from Astro chat or console
 - **Scenario Export**: Export calculated scenarios for copy-paste into game chat
 - **Sector Count **: Integrate the number of sectors explored during an expedition.
