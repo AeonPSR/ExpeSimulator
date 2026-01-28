@@ -1,0 +1,582 @@
+/* ==========================================================================
+   Button Styles
+   All button types: toggle buttons, clear button, debug buttons, add player
+   ========================================================================== */
+
+/* ==========================================================================
+   Toggle Button Base (shared by traitor, diplomacy, players, antigrav)
+   ========================================================================== */
+
+.toggle-btn-base {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.toggle-btn-base img {
+	width: 30px;
+	height: 30px;
+	opacity: 0.5;
+	transition: opacity 0.3s ease;
+}
+
+/* X mark overlay for inactive state */
+.toggle-btn-base::before,
+.toggle-btn-base::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.toggle-btn-base::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.toggle-btn-base::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.toggle-btn-base:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+.toggle-btn-base:hover::before,
+.toggle-btn-base:hover::after {
+	background: #7f8c8d;
+}
+
+/* ==========================================================================
+   Sectors Toggle Button (Traitor)
+   ========================================================================== */
+
+.sectors-toggle-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.sectors-toggle-btn img {
+	width: 30px;
+	height: 30px;
+	opacity: 0.5;
+	transition: opacity 0.3s ease;
+}
+
+.sectors-toggle-btn::before,
+.sectors-toggle-btn::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.sectors-toggle-btn::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.sectors-toggle-btn::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.sectors-toggle-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+.sectors-toggle-btn:hover::before,
+.sectors-toggle-btn:hover::after {
+	background: #7f8c8d;
+}
+
+/* Active State - Pink/Magenta */
+.sectors-toggle-btn[data-active="true"] {
+	border-color: #e91e63;
+	background: rgba(233, 30, 99, 0.3);
+}
+
+.sectors-toggle-btn[data-active="true"] img {
+	opacity: 1;
+}
+
+.sectors-toggle-btn[data-active="true"]::before,
+.sectors-toggle-btn[data-active="true"]::after {
+	opacity: 0;
+}
+
+.sectors-toggle-btn[data-active="true"]:hover {
+	border-color: #c2185b;
+	background: rgba(233, 30, 99, 0.5);
+}
+
+/* ==========================================================================
+   Diplomacy Toggle Button
+   ========================================================================== */
+
+.diplomacy-toggle-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.diplomacy-toggle-btn img {
+	width: 30px;
+	height: 30px;
+	opacity: 0.5;
+	transition: opacity 0.3s ease;
+}
+
+.diplomacy-toggle-btn::before,
+.diplomacy-toggle-btn::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.diplomacy-toggle-btn::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.diplomacy-toggle-btn::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.diplomacy-toggle-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+.diplomacy-toggle-btn:hover::before,
+.diplomacy-toggle-btn:hover::after {
+	background: #7f8c8d;
+}
+
+/* Active State - Blue */
+.diplomacy-toggle-btn[data-active="true"] {
+	border-color: #2196f3;
+	background: rgba(33, 150, 243, 0.3);
+}
+
+.diplomacy-toggle-btn[data-active="true"] img {
+	opacity: 1;
+}
+
+.diplomacy-toggle-btn[data-active="true"]::before,
+.diplomacy-toggle-btn[data-active="true"]::after {
+	opacity: 0;
+}
+
+.diplomacy-toggle-btn[data-active="true"]:hover {
+	border-color: #1976d2;
+	background: rgba(33, 150, 243, 0.5);
+}
+
+/* ==========================================================================
+   Players Toggle Button
+   ========================================================================== */
+
+.players-toggle-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.players-toggle-btn img {
+	width: 30px;
+	height: 30px;
+	opacity: 0.5;
+	transition: opacity 0.3s ease;
+}
+
+.players-toggle-btn::before,
+.players-toggle-btn::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.players-toggle-btn::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.players-toggle-btn::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.players-toggle-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+.players-toggle-btn:hover::before,
+.players-toggle-btn:hover::after {
+	background: #7f8c8d;
+}
+
+/* Active State - Orange */
+.players-toggle-btn[data-active="true"] {
+	border-color: #e67e22;
+	background: rgba(230, 126, 34, 0.3);
+}
+
+.players-toggle-btn[data-active="true"] img {
+	opacity: 1;
+}
+
+.players-toggle-btn[data-active="true"]::before,
+.players-toggle-btn[data-active="true"]::after {
+	opacity: 0;
+}
+
+.players-toggle-btn[data-active="true"]:hover {
+	border-color: #d35400;
+	background: rgba(230, 126, 34, 0.5);
+}
+
+/* ==========================================================================
+   Antigrav Propeller Button
+   ========================================================================== */
+
+.antigrav-propeller-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.antigrav-propeller-btn img {
+	width: 30px;
+	height: 30px;
+	opacity: 0.5;
+	transition: opacity 0.3s ease;
+}
+
+.antigrav-propeller-btn::before,
+.antigrav-propeller-btn::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.antigrav-propeller-btn::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.antigrav-propeller-btn::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.antigrav-propeller-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+.antigrav-propeller-btn:hover::before,
+.antigrav-propeller-btn:hover::after {
+	background: #7f8c8d;
+}
+
+/* Active State - Orange */
+.antigrav-propeller-btn[data-active="true"] {
+	border-color: #e67e22;
+	background: rgba(230, 126, 34, 0.3);
+}
+
+.antigrav-propeller-btn[data-active="true"] img {
+	opacity: 1;
+}
+
+.antigrav-propeller-btn[data-active="true"]::before,
+.antigrav-propeller-btn[data-active="true"]::after {
+	opacity: 0;
+}
+
+.antigrav-propeller-btn[data-active="true"]:hover {
+	border-color: #d35400;
+	background: rgba(230, 126, 34, 0.5);
+}
+
+/* ==========================================================================
+   Players Mode Button
+   ========================================================================== */
+
+.players-mode-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #3498db;
+	border-radius: 4px;
+	background: rgba(52, 152, 219, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.players-mode-btn img {
+	width: 30px;
+	height: 30px;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.players-mode-btn:hover {
+	border-color: #2980b9;
+	background: rgba(52, 152, 219, 0.5);
+}
+
+.players-mode-btn[data-mode="icarus"] {
+	border-color: #e67e22;
+	background: rgba(230, 126, 34, 0.3);
+}
+
+.players-mode-btn[data-mode="icarus"]:hover {
+	border-color: #d35400;
+	background: rgba(230, 126, 34, 0.5);
+}
+
+/* ==========================================================================
+   Fighting Power Button
+   ========================================================================== */
+
+.fighting-power-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	margin-left: 5px;
+	font-size: 14px;
+	font-weight: bold;
+	color: #ecf0f1;
+}
+
+.fighting-power-btn .fight-power-icon {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	bottom: -5px;
+	left: -5px;
+	pointer-events: none;
+	z-index: 2;
+	border-radius: 0;
+	object-fit: contain;
+}
+
+.fighting-power-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+/* ==========================================================================
+   Clear Button
+   ========================================================================== */
+
+.clear-btn {
+	width: 100%;
+	background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+	border: none;
+	color: white;
+	padding: 10px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.3s ease;
+	margin-bottom: 20px;
+}
+
+.clear-btn:hover {
+	background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+/* ==========================================================================
+   Debug/Example World Buttons
+   ========================================================================== */
+
+.example-worlds {
+	margin-top: 20px;
+}
+
+.example-worlds h4 {
+	margin: 0 0 10px 0;
+	font-size: 14px;
+	color: #9b59b6;
+	border-bottom: 2px solid #9b59b6;
+	padding-bottom: 5px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.debug-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.debug-row:last-child {
+	margin-bottom: 0;
+}
+
+.debug-btn {
+	background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+	border: none;
+	color: white;
+	padding: 8px 4px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 11px;
+	font-weight: 500;
+	transition: all 0.3s ease;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.debug-btn:hover {
+	background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+}
+
+/* ==========================================================================
+   Add Player Button
+   ========================================================================== */
+
+.add-player-btn {
+	background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+	border: 2px dashed #f39c12;
+	color: white;
+	padding: 15px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 16px;
+	font-weight: 600;
+	transition: all 0.3s ease;
+	text-align: center;
+	width: 100%;
+	height: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.add-player-btn:hover {
+	background: linear-gradient(135deg, #d35400 0%, #ba4a00 100%);
+	border-color: #e67e22;
+	transform: translateY(-2px);
+	box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3);
+}
+
+.plus-icon {
+	font-size: 24px;
+	font-weight: bold;
+}
+
+/* ==========================================================================
+   Player Remove Button
+   ========================================================================== */
+
+.player-remove-btn {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	width: 20px;
+	height: 20px;
+	background: #e74c3c;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	color: white;
+	font-size: 12px;
+	font-weight: bold;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+}
+
+.player-remove-btn:hover {
+	background: #c0392b;
+	transform: scale(1.1);
+}

@@ -1,0 +1,20 @@
+/* ==========================================================================
+   Expedition Simulator - Main CSS Entry Point
+   
+   This file imports all component stylesheets in the correct order.
+   Import this single file in your HTML/manifest to load all styles.
+   ========================================================================== */
+
+/* Base layout and panel structure */
+@import url('./main.css');
+
+/* Utility classes (colors, icons, helpers) - load early for overrides */
+@import url('./utilities.css');
+
+/* Component styles */
+@import url('./buttons.css');
+@import url('./sectors.css');
+@import url('./players.css');
+@import url('./tables.css');
+@import url('./results.css');
+@import url('./modals.css');

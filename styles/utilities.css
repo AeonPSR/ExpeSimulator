@@ -1,0 +1,98 @@
+/* ==========================================================================
+   Utility Styles
+   Colors, status classes, icons, and reusable utility classes
+   ========================================================================== */
+
+/* ==========================================================================
+   Status Colors
+   ========================================================================== */
+
+.positive {
+	color: #2ecc71 !important;
+	font-weight: 600;
+}
+
+.neutral {
+	color: #95a5a6 !important;
+	font-weight: 600;
+}
+
+.warning {
+	color: #f39c12 !important;
+	font-weight: 600;
+}
+
+.danger {
+	color: #e67e22 !important;
+	font-weight: 600;
+}
+
+.critical {
+	color: #e74c3c !important;
+	font-weight: 600;
+}
+
+/* ==========================================================================
+   Icons
+   ========================================================================== */
+
+/* Resource Icons */
+.resource-icon {
+	width: 48px;
+	height: 48px;
+	vertical-align: middle;
+}
+
+/* HP Icon */
+.hp-icon {
+	width: 16px;
+	height: 16px;
+	vertical-align: middle;
+	margin-left: 3px;
+}
+
+/* Dead Icon */
+.dead-icon {
+	width: 20px;
+	height: 20px;
+	vertical-align: middle;
+	filter: grayscale(100%);
+}
+
+/* ==========================================================================
+   Text Utilities
+   ========================================================================== */
+
+.bold-damage {
+	font-weight: bold;
+}
+
+/* ==========================================================================
+   Selection Prevention (for drag/select issues)
+   ========================================================================== */
+
+.sector-item,
+.selected-sector-item {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-touch-callout: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.sector-item img,
+.selected-sector-item img {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-touch-callout: none;
+	-webkit-tap-highlight-color: transparent;
+	pointer-events: none;
+}
+
+.sector-item:focus,
+.selected-sector-item:focus {
+	outline: none;
+}

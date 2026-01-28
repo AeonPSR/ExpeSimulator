@@ -1,0 +1,121 @@
+/* ==========================================================================
+   Main Panel Styles
+   Base layout, panel structure, header, content area, and scrollbars
+   ========================================================================== */
+
+/* Main Panel Container */
+#expedition-simulator {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 400px;
+	height: 100vh;
+	z-index: 10000;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	color: #ecf0f1;
+	transform: translateX(-400px); /* Comment to lock panel open */
+	transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	overflow: visible;
+	display: flex;
+	pointer-events: auto;
+}
+
+#expedition-simulator:hover {
+	transform: translateX(0);
+}
+
+#expedition-simulator.collapsed {
+	transform: translateX(-360px);
+}
+
+/* Panel Tongue (Tab to expand) */
+.panel-tongue {
+	position: absolute;
+	left: 100%;
+	top: 50%;
+	transform: translateY(-50%);
+	background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+	color: white;
+	padding: 10px;
+	border-radius: 0 8px 8px 0;
+	cursor: pointer;
+	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+	width: 40px;
+	height: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: -1;
+}
+
+.panel-tongue img {
+	width: 30px;
+	height: 30px;
+	object-fit: contain;
+}
+
+/* Main Panel Body */
+.panel-main {
+	width: 400px;
+	height: 100vh;
+	background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+	border-right: 3px solid #3498db;
+	box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+	overflow: hidden;
+	pointer-events: auto;
+}
+
+/* Panel Header */
+.panel-header {
+	background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+	padding: 15px 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.panel-header h3 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: white;
+}
+
+/* Panel Content Area */
+.panel-content {
+	height: calc(100vh - 70px);
+	overflow-y: auto;
+	padding: 20px;
+}
+
+/* Scrollbar Styling */
+.panel-content::-webkit-scrollbar {
+	width: 8px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 4px;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+	background: #3498db;
+	border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	#expedition-simulator {
+		width: 100vw;
+		transform: translateX(-100vw);
+	}
+	
+	#expedition-simulator:hover {
+		transform: translateX(0);
+	}
+	
+	.panel-main {
+		width: 100vw;
+	}
+}

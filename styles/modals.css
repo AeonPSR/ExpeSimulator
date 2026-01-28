@@ -1,0 +1,153 @@
+/* ==========================================================================
+   Modal Styles
+   Character selection, ability selection, item selection modals
+   ========================================================================== */
+
+/* ==========================================================================
+   Modal Overlay
+   ========================================================================== */
+
+.character-selection-modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.8);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 20000;
+	backdrop-filter: blur(5px);
+}
+
+/* ==========================================================================
+   Modal Content
+   ========================================================================== */
+
+.character-selection-content {
+	background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+	border: 3px solid #3498db;
+	border-radius: 12px;
+	padding: 20px;
+	max-width: 500px;
+	max-height: 80vh;
+	overflow-y: auto;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+	position: relative;
+}
+
+/* ==========================================================================
+   Modal Close Button
+   ========================================================================== */
+
+.character-selection-close {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	width: 24px;
+	height: 24px;
+	background: #e74c3c;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	color: white;
+	font-size: 14px;
+	font-weight: bold;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	line-height: 1;
+	z-index: 10;
+}
+
+.character-selection-close:hover {
+	background: #c0392b;
+	transform: scale(1.1);
+}
+
+/* ==========================================================================
+   Modal Header
+   ========================================================================== */
+
+.character-selection-header {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.character-selection-header h3 {
+	margin: 0 0 10px 0;
+	color: #3498db;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.character-selection-header p {
+	margin: 0;
+	color: #bdc3c7;
+	font-size: 14px;
+}
+
+/* ==========================================================================
+   Character Grid
+   ========================================================================== */
+
+.character-grid {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 10px;
+}
+
+/* ==========================================================================
+   Character Option (Generic)
+   ========================================================================== */
+
+.character-option {
+	width: 42px;
+	height: 60px;
+	border: 2px solid #34495e;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.character-option:hover {
+	border-color: #3498db;
+	transform: scale(1.05);
+	box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.character-option img {
+	width: auto;
+	height: auto;
+	object-fit: cover;
+}
+
+.character-option.selected {
+	border-color: #e67e22;
+	box-shadow: 0 0 0 2px #e67e22;
+}
+
+/* ==========================================================================
+   Ability Selection Modal Variant
+   ========================================================================== */
+
+.ability-selection .character-option {
+	width: 60px;
+	height: 60px;
+}
+
+/* ==========================================================================
+   Item Selection Modal Variant
+   ========================================================================== */
+
+.item-selection .character-option {
+	width: 60px;
+	height: 60px;
+}

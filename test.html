@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expedition Simulator - Test Page</title>
+    <link rel="stylesheet" href="styles/index.css">
+    <style>
+        /* Override for testing outside extension context */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #1a1a2e;
+        }
+        
+        /* Uncomment the line below to lock panel open during development */
+        /* #expedition-simulator { transform: translateX(0) !important; } */
+    </style>
+</head>
+<body>
+    <h1 style="color: white; margin-left: 450px; padding: 20px;">Test Page - Expedition Simulator</h1>
+    <p style="color: #888; margin-left: 450px; padding: 0 20px;">
+        The panel should be visible on the left side.<br>
+        This page simulates the extension environment for testing.
+    </p>
+
+    <!-- Load scripts in order -->
+    <script src="js/utils/constants.js"></script>
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/data/SectorData.js"></script>
+    <script src="js/data/CharacterData.js"></script>
+    <script src="js/data/AbilityData.js"></script>
+    <script src="js/data/ItemData.js"></script>
+    <script src="js/core/Component.js"></script>
+    <script src="js/components/shared/ToggleButton.js"></script>
+    <script src="js/components/shared/Modal.js"></script>
+    <script src="js/components/shared/SelectionModal.js"></script>
+    <script src="js/components/Panel.js"></script>
+    <script src="js/components/SectorGrid.js"></script>
+    <script src="js/components/SelectedSectors.js"></script>
+    <script src="js/components/PlayerCard.js"></script>
+    <script src="js/components/PlayerSection.js"></script>
+    <script src="js/components/ProbabilityDisplay.js"></script>
+    <script src="js/components/ResultsDisplay.js"></script>
+    <script src="js/components/ExampleWorlds.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/content.js"></script>
+</body>
+</html>

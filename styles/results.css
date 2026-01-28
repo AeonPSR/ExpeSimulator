@@ -1,0 +1,261 @@
+/* ==========================================================================
+   Results Styles
+   Expedition results display, result cards, health counters, legend
+   ========================================================================== */
+
+/* ==========================================================================
+   Results Container
+   ========================================================================== */
+
+.expedition-results {
+	margin-top: 20px;
+}
+
+.results-content {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	padding: 15px;
+	max-height: 300px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.results-content::-webkit-scrollbar {
+	width: 6px;
+}
+
+.results-content::-webkit-scrollbar-thumb {
+	background: #3498db;
+	border-radius: 3px;
+}
+
+/* ==========================================================================
+   Expedition Result Card
+   ========================================================================== */
+
+.expedition-result-card {
+	display: flex;
+	background: rgba(0, 0, 0, 0.2);
+	border: 2px solid #e67e22 !important;
+	border-radius: 8px;
+	padding: 10px;
+	gap: 10px;
+	position: relative;
+	flex-direction: column;
+	align-items: center;
+	width: calc(25% - 11.25px);
+	margin-bottom: 5px;
+	box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
+}
+
+/* Result Avatar */
+.expedition-result-avatar {
+	width: 42px;
+	height: 60px;
+	border-radius: 4px;
+	border: 2px solid rgb(230, 126, 34);
+	flex-shrink: 0;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.expedition-result-avatar img {
+	width: auto;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* ==========================================================================
+   Health Display
+   ========================================================================== */
+
+.expedition-result-health {
+	width: 42px;
+	height: 40px;
+	border: 2px solid #e74c3c;
+	border-radius: 4px;
+	background: rgba(231, 76, 60, 0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 15px;
+	font-weight: 600;
+	color: #fff;
+	flex-direction: column;
+}
+
+.expedition-result-health-container {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	align-items: center;
+}
+
+/* Scenario-based Health Counter Colors */
+.expedition-result-health.pessimist {
+	border-color: #e74c3c;
+	background: rgba(231, 76, 60, 0.3);
+}
+
+.expedition-result-health.average {
+	border-color: #f39c12;
+	background: rgba(243, 156, 18, 0.3);
+}
+
+.expedition-result-health.optimist {
+	border-color: #2ecc71;
+	background: rgba(46, 204, 113, 0.3);
+}
+
+.expedition-result-health.worst {
+	border-color: #e67e22;
+	background: rgba(44, 62, 80, 0.4);
+}
+
+/* Health Status Colors */
+.expedition-result-health.health-critical {
+	color: #e74c3c !important;
+}
+
+.expedition-result-health.health-low {
+	color: #f39c12 !important;
+}
+
+.expedition-result-health.health-medium {
+	color: #f1c40f !important;
+}
+
+.expedition-result-health.health-high {
+	color: #2ecc71 !important;
+}
+
+.expedition-result-health.health-dead {
+	color: #95a5a6 !important;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+/* ==========================================================================
+   Expedition Legend
+   ========================================================================== */
+
+.expedition-legend {
+	margin-top: 15px;
+	padding: 10px;
+	background: rgba(0, 0, 0, 0.1);
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.expedition-legend h5 {
+	margin: 0 0 8px 0;
+	font-size: 12px;
+	color: #bdc3c7;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	text-align: center;
+}
+
+.legend-items {
+	display: flex;
+	justify-content: space-between;
+	gap: 5px;
+}
+
+.legend-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+}
+
+.legend-color {
+	width: 20px;
+	height: 15px;
+	border: 2px solid;
+	border-radius: 3px;
+	margin-bottom: 3px;
+}
+
+.legend-color.pessimist {
+	border-color: #e74c3c;
+	background: rgba(231, 76, 60, 0.3);
+}
+
+.legend-color.average {
+	border-color: #f39c12;
+	background: rgba(243, 156, 18, 0.3);
+}
+
+.legend-color.optimist {
+	border-color: #2ecc71;
+	background: rgba(46, 204, 113, 0.3);
+}
+
+.legend-color.worst {
+	border-color: #e67e22;
+	background: rgba(44, 62, 80, 0.4);
+}
+
+.legend-text {
+	font-size: 9px;
+	color: #95a5a6;
+	text-align: center;
+	font-weight: 500;
+}
+
+/* ==========================================================================
+   Probability Display
+   ========================================================================== */
+
+.probability-display {
+	margin: 20px 0;
+}
+
+.probability-display h4 {
+	margin: 0 0 15px 0;
+	font-size: 16px;
+	color: #9b59b6;
+	border-bottom: 2px solid #9b59b6;
+	padding-bottom: 8px;
+	font-weight: 600;
+}
+
+.prob-content {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	padding: 15px;
+	color: #bdc3c7;
+	font-size: 14px;
+}
+
+.prob-content p {
+	margin: 5px 0;
+}
+
+.prob-content em {
+	font-style: italic;
+	color: #95a5a6;
+}
+
+.outcome-category {
+	margin-bottom: 15px;
+}
+
+.outcome-category:last-child {
+	margin-bottom: 0;
+}
+
+.outcome-category h5 {
+	margin: 0 0 8px 0;
+	font-size: 14px;
+	color: #3498db;
+	font-weight: 600;
+}

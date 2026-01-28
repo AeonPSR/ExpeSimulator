@@ -1,0 +1,228 @@
+/* ==========================================================================
+   Table Styles
+   Resource tables and events tables for probability display
+   ========================================================================== */
+
+/* ==========================================================================
+   Probability Display Container
+   ========================================================================== */
+
+.prob-content {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	padding: 15px;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.prob-content::-webkit-scrollbar {
+	width: 6px;
+}
+
+.prob-content::-webkit-scrollbar-thumb {
+	background: #3498db;
+	border-radius: 3px;
+}
+
+/* ==========================================================================
+   Outcome Categories
+   ========================================================================== */
+
+.outcome-category {
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.outcome-category:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+}
+
+.outcome-category h5 {
+	margin: 0 0 10px 0;
+	font-size: 14px;
+	color: #3498db;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.fight-stats {
+	align-items: center;
+}
+
+.outcome-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 4px 0;
+	font-size: 12px;
+}
+
+.outcome-item span:first-child {
+	color: #ecf0f1;
+	font-weight: 500;
+}
+
+/* ==========================================================================
+   Resource Table
+   ========================================================================== */
+
+.resource-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 10px;
+	background: rgba(52, 73, 94, 0.3);
+	border-radius: 6px;
+	overflow: hidden;
+	font-size: 13px;
+}
+
+.resource-table th,
+.resource-table td {
+	padding: 8px 12px;
+	text-align: left;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.resource-table thead {
+	background: linear-gradient(135deg, #34495e, #2c3e50);
+}
+
+.resource-table th {
+	font-weight: 600;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #bdc3c7;
+	padding: 10px 8px;
+}
+
+.resource-table tbody tr {
+	transition: background-color 0.2s ease;
+}
+
+.resource-table tbody tr:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.resource-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.resource-table td:first-child {
+	font-weight: 500;
+	color: #ecf0f1;
+	width: 35%;
+}
+
+.pessimist-col,
+.average-col,
+.optimist-col {
+	width: 21.66%;
+	text-align: center;
+}
+
+.resource-table .warning,
+.resource-table .neutral,
+.resource-table .positive {
+	font-weight: 600;
+}
+
+/* Special styling for "none" rows */
+.resource-table td[colspan="3"] {
+	opacity: 0.6;
+	font-size: 12px;
+}
+
+.resource-table .icon-cell {
+	text-align: left;
+	vertical-align: middle;
+}
+
+.resource-table .none-row {
+	text-align: center;
+	font-style: italic;
+}
+
+/* ==========================================================================
+   Events Table
+   ========================================================================== */
+
+.events-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 10px;
+	background: rgba(52, 73, 94, 0.3);
+	border-radius: 6px;
+	overflow: hidden;
+	font-size: 13px;
+}
+
+.events-table th,
+.events-table td {
+	padding: 8px 12px;
+	text-align: left;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.events-table thead {
+	background: linear-gradient(135deg, #34495e, #2c3e50);
+}
+
+.events-table th {
+	font-weight: 600;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #bdc3c7;
+	padding: 10px 8px;
+}
+
+.events-table th:first-child {
+	width: 40%;
+}
+
+.events-table th:nth-child(2),
+.events-table th:nth-child(3),
+.events-table th:nth-child(4) {
+	width: 20%;
+	text-align: center;
+}
+
+.events-table tbody tr {
+	transition: background-color 0.2s ease;
+}
+
+.events-table tbody tr:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.events-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.events-table td:first-child {
+	font-weight: 500;
+	color: #ecf0f1;
+}
+
+.events-table td:nth-child(2),
+.events-table td:nth-child(3),
+.events-table td:nth-child(4) {
+	text-align: center;
+	font-weight: 600;
+}
+
+.events-table .warning,
+.events-table .neutral,
+.events-table .positive {
+	font-weight: 600;
+}
+
+.events-table .none-row {
+	text-align: center;
+	font-style: italic;
+	opacity: 0.6;
+}
