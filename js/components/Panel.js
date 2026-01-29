@@ -39,6 +39,11 @@ class Panel extends Component {
 			className: 'expedition-panel'
 		});
 
+		// Check if we're in test mode and keep panel expanded
+		if (this._isTestMode()) {
+			this.element.classList.add('test-mode');
+		}
+
 		// Panel tongue (expand tab)
 		this._tongue = this._createTongue();
 		this.element.appendChild(this._tongue);
@@ -187,6 +192,17 @@ class Panel extends Component {
 	 */
 	isCollapsed() {
 		return this.element?.classList.contains('collapsed') || false;
+	}
+
+	/**
+	 * Checks if we're running in test mode (test.html page)
+	 * @private
+	 * @returns {boolean}
+	 */
+	_isTestMode() {
+		// Check if we're in test.html or if document title contains "Test Page"
+		return window.location.pathname.includes('test.html') || 
+		       document.title.includes('Test Page');
 	}
 }
 

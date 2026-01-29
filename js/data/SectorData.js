@@ -9,9 +9,6 @@ const SectorData = {
 	 * List of all available sectors
 	 */
 	sectors: [
-		{ sectorName: 'OXYGEN' },
-		{ sectorName: 'HYDROCARBON' },
-		{ sectorName: 'LANDING' },
 		{ sectorName: 'CAVE' },
 		{ sectorName: 'MOUNTAIN' },
 		{ sectorName: 'FOREST' },
@@ -27,12 +24,15 @@ const SectorData = {
 		{ sectorName: 'INTELLIGENT' },
 		{ sectorName: 'INSECT' },
 		{ sectorName: 'MANKAROG' },
-		{ sectorName: 'LOST' },
 		{ sectorName: 'SEISMIC_ACTIVITY' },
 		{ sectorName: 'VOLCANIC_ACTIVITY' },
 		{ sectorName: 'COLD' },
 		{ sectorName: 'HOT' },
-		{ sectorName: 'STRONG_WIND' }
+		{ sectorName: 'STRONG_WIND' },
+		{ sectorName: 'OXYGEN' },
+		{ sectorName: 'HYDROCARBON' },
+		{ sectorName: 'LANDING' },
+		{ sectorName: 'LOST' }
 	],
 
 	/**

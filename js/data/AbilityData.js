@@ -9,47 +9,18 @@ const AbilityData = {
 		'gunman.png', 'diplomacy.png', 'sprint.png'
 	],
 
-	pink: [
-		'traitor.png'
-	],
-
-	/**
-	 * Gets normal abilities as selection items
-	 * @param {Function} getResourceURL - URL resolver
-	 * @returns {Array<Object>}
-	 */
-	getNormalSelectionItems(getResourceURL) {
-		return this.normal.map(ability => ({
-			id: ability,
-			image: getResourceURL(`abilities/${ability}`),
-			label: ability.replace('.png', '')
-		}));
-	},
-
-	/**
-	 * Gets pink abilities as selection items
-	 * @param {Function} getResourceURL - URL resolver
-	 * @returns {Array<Object>}
-	 */
-	getPinkSelectionItems(getResourceURL) {
-		return this.pink.map(ability => ({
-			id: ability,
-			image: getResourceURL(`abilities/${ability}`),
-			label: ability.replace('.png', '')
-		}));
-	},
-
-	/**
-	 * Gets all abilities for a slot (normal or pink)
-	 * @param {boolean} isPink - Whether this is the pink slot
-	 * @param {Function} getResourceURL - URL resolver
-	 * @returns {Array<Object>}
-	 */
-	getSelectionItemsForSlot(isPink, getResourceURL) {
-		return isPink 
-			? this.getPinkSelectionItems(getResourceURL)
-			: this.getNormalSelectionItems(getResourceURL);
-	}
+	   /**
+		* Gets all abilities as selection items
+		* @param {Function} getResourceURL - URL resolver
+		* @returns {Array<Object>}
+		*/
+	   getSelectionItems(getResourceURL) {
+		   return this.normal.map(ability => ({
+			   id: ability,
+			   image: getResourceURL(`abilities/${ability}`),
+			   label: ability.replace('.png', '')
+		   }));
+	   }
 };
 
 // Export

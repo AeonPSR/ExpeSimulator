@@ -128,15 +128,6 @@
 	background: rgba(52, 152, 219, 0.2);
 }
 
-.ability-slot.pink {
-	border-color: #e91e63;
-	background: rgba(233, 30, 99, 0.2);
-}
-
-.ability-slot.pink:hover {
-	border-color: #c2185b;
-	background: rgba(233, 30, 99, 0.3);
-}
 
 .ability-slot img {
 	width: -webkit-fill-available;

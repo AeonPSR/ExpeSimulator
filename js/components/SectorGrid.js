@@ -2,14 +2,13 @@
  * SectorGrid Component
  * 
  * Displays the grid of available sectors that can be added to an expedition.
- * Includes header with toggle buttons for traitor and diplomacy modes.
+ * Includes header with toggle button for diplomacy mode.
  * 
  * Features:
  * - 5-column grid of sector icons
  * - Fight icon overlay for combat sectors
- * - Negative level icon overlay (when traitor active)
  * - Disabled state for unavailable sectors
- * - Traitor and Diplomacy toggle buttons
+ * - Diplomacy toggle button
  */
 class SectorGrid extends Component {
 	/**
@@ -17,7 +16,7 @@ class SectorGrid extends Component {
 	 * @param {Array<Object>} options.sectors - Array of sector configs
 	 *   Each: { sectorName: string, ... }
 	 * @param {Function} [options.onSectorClick] - Callback: (sectorName) => void
-	 * @param {Function} [options.onTraitorToggle] - Callback: (isActive) => void
+	* @param {Function} [options.onDiplomacyToggle] - Callback: (isActive) => void
 	 * @param {Function} [options.onDiplomacyToggle] - Callback: (isActive) => void
 	 * @param {Function} [options.getResourceURL] - Resource URL resolver
 	 * @param {Function} [options.getSectorAvailability] - Returns { shouldDisable, tooltipText }
@@ -27,7 +26,6 @@ class SectorGrid extends Component {
 		super(options);
 		this.sectors = options.sectors || [];
 		this.onSectorClick = options.onSectorClick || null;
-		this.onTraitorToggle = options.onTraitorToggle || null;
 		this.onDiplomacyToggle = options.onDiplomacyToggle || null;
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 		this.getSectorAvailability = options.getSectorAvailability || null;
@@ -36,8 +34,6 @@ class SectorGrid extends Component {
 			'PREDATOR', 'INTELLIGENT', 'INSECT', 'MANKAROG'
 		];
 
-		// Toggle button instances
-		this._traitorToggle = null;
 		this._diplomacyToggle = null;
 		this._gridElement = null;
 	}
@@ -59,9 +55,8 @@ class SectorGrid extends Component {
 
 		return this.element;
 	}
-
-	/**
-	 * Creates the header with title and toggle buttons
+	/** 
+	 * Creates the header with title and diplomacy toggle button
 	 * @private
 	 * @returns {HTMLElement}
 	 */
@@ -75,41 +70,24 @@ class SectorGrid extends Component {
 		// Buttons container
 		const buttonsContainer = this.createElement('div', { className: 'sectors-buttons' });
 
-		// Traitor toggle
-		this._traitorToggle = new ToggleButton({
-			id: 'sectors-toggle-btn',
-			className: 'sectors-toggle-btn',
-			icon: this.getResourceURL('abilities/traitor.png'),
-			alt: 'Toggle Traitor',
-			activeColor: 'pink',
-			onToggle: (isActive) => {
-				if (isActive) {
-					document.body.classList.add('traitor-active');
-				} else {
-					document.body.classList.remove('traitor-active');
+		// Instantiate the diplomacy toggle if not already
+		if (!this._diplomacyToggle) {
+			this._diplomacyToggle = new ToggleButton({
+				id: 'diplomacy-toggle-btn',
+				className: 'diplomacy-toggle-btn',
+				icon: this.getResourceURL('abilities/diplomacy.png'),
+				alt: 'Toggle Diplomacy',
+				activeColor: 'blue',
+				onToggle: (isActive) => {
+					if (isActive) {
+						document.body.classList.add('diplomacy-active');
+					} else {
+						document.body.classList.remove('diplomacy-active');
+					}
+					this.onDiplomacyToggle?.(isActive);
 				}
-				this.onTraitorToggle?.(isActive);
-			}
-		});
-		this._traitorToggle.render();
-		buttonsContainer.appendChild(this._traitorToggle.element);
-
-		// Diplomacy toggle
-		this._diplomacyToggle = new ToggleButton({
-			id: 'diplomacy-toggle-btn',
-			className: 'diplomacy-toggle-btn',
-			icon: this.getResourceURL('abilities/diplomacy.png'),
-			alt: 'Toggle Diplomacy',
-			activeColor: 'blue',
-			onToggle: (isActive) => {
-				if (isActive) {
-					document.body.classList.add('diplomacy-active');
-				} else {
-					document.body.classList.remove('diplomacy-active');
-				}
-				this.onDiplomacyToggle?.(isActive);
-			}
-		});
+			});
+		}
 		this._diplomacyToggle.render();
 		buttonsContainer.appendChild(this._diplomacyToggle.element);
 
@@ -164,19 +142,11 @@ class SectorGrid extends Component {
 		if (this._hasFightEvents(sectorName)) {
 			const fightImg = this.createElement('img', {
 				src: this.getResourceURL('others/fight.png'),
-				alt: 'Fight',
+				alt: 'Fight Event',
 				className: 'fight-icon'
 			});
 			sectorDiv.appendChild(fightImg);
 		}
-
-		// Negative level icon placeholder (shown/hidden via CSS based on traitor-active)
-		const negativeImg = this.createElement('img', {
-			src: this.getResourceURL('abilities/traitor.png'),
-			alt: 'Negative Level',
-			className: 'negative-level-icon'
-		});
-		sectorDiv.appendChild(negativeImg);
 
 		// Click handler
 		this.addEventListener(sectorDiv, 'click', () => {
@@ -187,7 +157,6 @@ class SectorGrid extends Component {
 
 		return sectorDiv;
 	}
-
 	/**
 	 * Checks if a sector has fight events
 	 * @private
@@ -201,9 +170,7 @@ class SectorGrid extends Component {
 	/**
 	 * Updates sector availability (disabled states)
 	 */
-	updateAvailability() {
-		if (!this._gridElement || !this.getSectorAvailability) return;
-
+	updateSectorAvailability() {
 		const sectorItems = this._gridElement.querySelectorAll('.sector-item');
 		sectorItems.forEach(sectorDiv => {
 			const sectorName = sectorDiv.dataset.sector;
@@ -226,27 +193,11 @@ class SectorGrid extends Component {
 	}
 
 	/**
-	 * Gets the traitor toggle state
-	 * @returns {boolean}
-	 */
-	isTraitorActive() {
-		return this._traitorToggle?.getActive() || false;
-	}
-
-	/**
 	 * Gets the diplomacy toggle state
 	 * @returns {boolean}
 	 */
 	isDiplomacyActive() {
 		return this._diplomacyToggle?.getActive() || false;
-	}
-
-	/**
-	 * Sets the traitor toggle state
-	 * @param {boolean} active
-	 */
-	setTraitorActive(active) {
-		this._traitorToggle?.setActive(active);
 	}
 
 	/**

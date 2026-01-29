@@ -28,6 +28,16 @@
 	transform: translateX(-360px);
 }
 
+/* Test mode - lock panel open and disable hover */
+#expedition-simulator.test-mode {
+	transform: translateX(0) !important;
+	transition: none !important;
+}
+
+#expedition-simulator.test-mode:hover {
+	transform: translateX(0) !important;
+}
+
 /* Panel Tongue (Tab to expand) */
 .panel-tongue {
 	position: absolute;

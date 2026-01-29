@@ -131,13 +131,6 @@ class SelectedSectors extends Component {
 			sectorDiv.appendChild(fightImg);
 		}
 
-		// Negative level icon (shown via CSS when traitor active)
-		const negativeImg = this.createElement('img', {
-			src: this.getResourceURL('abilities/traitor.png'),
-			alt: 'Negative Level',
-			className: 'negative-level-icon'
-		});
-		sectorDiv.appendChild(negativeImg);
 
 		// Click to remove
 		this.addEventListener(sectorDiv, 'click', () => {

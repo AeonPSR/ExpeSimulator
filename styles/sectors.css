@@ -202,6 +202,3 @@ body.diplomacy-active .fight-icon {
 	display: none;
 }
 
-body:not(.traitor-active) .negative-level-icon {
-	display: none;
-}

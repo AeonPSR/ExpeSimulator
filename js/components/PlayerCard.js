@@ -5,7 +5,7 @@
  * 
  * Features:
  * - Clickable avatar for character selection
- * - 4 regular ability slots + 1 pink (traitor) slot
+ * - 4 regular ability slots
  * - 3 item slots
  * - Health display
  * - Remove button
@@ -109,12 +109,11 @@ class PlayerCard extends Component {
 	_createAbilitiesRow() {
 		const abilitiesDiv = this.createElement('div', { className: 'player-abilities' });
 
-		for (let i = 0; i < 5; i++) {
-			const isPink = i === 4;
+		for (let i = 0; i < 4; i++) {
 			const ability = this.player.abilities[i];
 
 			const slot = this.createElement('div', {
-				className: isPink ? 'ability-slot pink' : 'ability-slot',
+				className: 'ability-slot',
 				dataset: { 
 					type: 'ability', 
 					slot: i.toString(), 

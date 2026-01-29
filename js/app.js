@@ -54,7 +54,6 @@ class ExpeditionSimulatorApp {
 			getResourceURL: getResourceURL,
 			sectorsWithFight: SectorData.sectorsWithFight,
 			onSectorClick: (sectorName) => this._handleSectorClick(sectorName),
-			onTraitorToggle: (isActive) => this._handleTraitorToggle(isActive),
 			onDiplomacyToggle: (isActive) => this._handleDiplomacyToggle(isActive)
 		});
 		this._sectorGrid.mount(contentArea);
@@ -142,15 +141,6 @@ class ExpeditionSimulatorApp {
 		console.log('Cleared all sectors');
 	}
 
-	/**
-	 * Handles traitor toggle
-	 * @private
-	 * @param {boolean} isActive
-	 */
-	_handleTraitorToggle(isActive) {
-		console.log(`Traitor toggle: ${isActive}`);
-		this._updateDisplays();
-	}
 
 	/**
 	 * Handles diplomacy toggle
@@ -261,14 +251,13 @@ class ExpeditionSimulatorApp {
 		const player = this._players.find(p => p.id === playerId);
 		if (!player) return;
 
-		const isPink = slotIndex === 4;
-		const items = AbilityData.getSelectionItemsForSlot(isPink, getResourceURL);
+		const items = AbilityData.getSelectionItems(getResourceURL);
 
 		// Add "clear" option
 		items.unshift({ id: null, image: '', label: 'Clear' });
 
 		const modal = new SelectionModal({
-			title: isPink ? 'Select Pink Ability' : 'Select Ability',
+			title: 'Select Ability',
 			items: items,
 			selectedId: player.abilities[slotIndex],
 			columns: 4,

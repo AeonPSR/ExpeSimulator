@@ -117,10 +117,6 @@
 }
 
 /* Active State - Pink/Magenta */
-.sectors-toggle-btn[data-active="true"] {
-	border-color: #e91e63;
-	background: rgba(233, 30, 99, 0.3);
-}
 
 .sectors-toggle-btn[data-active="true"] img {
 	opacity: 1;

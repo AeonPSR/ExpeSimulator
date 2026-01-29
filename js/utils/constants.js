@@ -19,7 +19,6 @@ const Constants = {
 
 	// CSS Classes
 	CSS: {
-		TRAITOR_ACTIVE: 'traitor-active',
 		DIPLOMACY_ACTIVE: 'diplomacy-active',
 		SECTOR_DISABLED: 'sector-disabled'
 	}
