@@ -54,7 +54,8 @@ class ExpeditionSimulatorApp {
 			getResourceURL: getResourceURL,
 			sectorsWithFight: SectorData.sectorsWithFight,
 			onSectorClick: (sectorName) => this._handleSectorClick(sectorName),
-			onDiplomacyToggle: (isActive) => this._handleDiplomacyToggle(isActive)
+			onDiplomacyToggle: (isActive) => this._handleDiplomacyToggle(isActive),
+			getSectorAvailability: (sectorName) => this._getSectorAvailability(sectorName)
 		});
 		this._sectorGrid.mount(contentArea);
 
@@ -104,8 +105,12 @@ class ExpeditionSimulatorApp {
 	 * @param {string} sectorName
 	 */
 	_handleSectorClick(sectorName) {
-		if (this._selectedSectors.length >= Constants.MAX_SECTORS) {
-			console.log('Max sectors reached');
+		// Use validation utility to check if sector can be added
+		const validation = ValidationUtils.validateAddSector(sectorName, this._selectedSectors);
+		
+		if (!validation.isValid) {
+			console.log(validation.message);
+			// TODO: Show user-friendly error message/notification
 			return;
 		}
 
@@ -152,6 +157,30 @@ class ExpeditionSimulatorApp {
 		this._updateDisplays();
 	}
 
+	/**
+	 * Gets sector availability information for UI display
+	 * @private
+	 * @param {string} sectorName
+	 * @returns {Object} availability info with shouldDisable and tooltipText
+	 */
+	_getSectorAvailability(sectorName) {
+		const validation = ValidationUtils.validateSectorLimit(sectorName, this._selectedSectors);
+		const totalValidation = ValidationUtils.validateTotalSectorLimit(this._selectedSectors);
+		
+		let shouldDisable = false;
+		let tooltipText = `${formatSectorName(sectorName)} (${validation.currentCount}/${validation.maxAllowed})`;
+		
+		if (!validation.isValid) {
+			shouldDisable = true;
+			tooltipText = `Maximum ${validation.maxAllowed} ${sectorName} sectors allowed (currently have ${validation.currentCount})`;
+		} else if (!totalValidation.isValid) {
+			shouldDisable = true;
+			tooltipText = `Maximum ${totalValidation.maxTotal} total sectors allowed (currently have ${totalValidation.currentTotal})`;
+		}
+		
+		return { shouldDisable, tooltipText };
+	}
+
 	// ========================================
 	// World Handlers
 	// ========================================
@@ -176,6 +205,11 @@ class ExpeditionSimulatorApp {
 	 * @private
 	 */
 	_handleAddPlayer() {
+		if (this._players.length >= Constants.MAX_PLAYERS) {
+			console.log('Max players reached');
+			return;
+		}
+
 		const playerId = this._nextPlayerId++;
 
 		const player = {
@@ -372,6 +406,11 @@ class ExpeditionSimulatorApp {
 	 * @private
 	 */
 	_updateDisplays() {
+		// Update sector availability states
+		if (this._sectorGrid && this._sectorGrid.updateSectorAvailability) {
+			this._sectorGrid.updateSectorAvailability();
+		}
+
 		// Update probability display
 		if (this._selectedSectors.length > 0) {
 			this._probabilityDisplay.setContent(`
