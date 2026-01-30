@@ -451,6 +451,9 @@ class ExpeditionSimulatorApp {
 			this._sectorGrid.updateSectorAvailability();
 		}
 
+		// Analyze current player configuration for server-side processing
+		const playerAnalysis = this._analyzePlayerConfiguration();
+
 		// Update probability display
 		if (this._selectedSectors.length > 0) {
 			this._probabilityDisplay.setContent(`
@@ -474,6 +477,37 @@ class ExpeditionSimulatorApp {
 		} else {
 			this._resultsDisplay.clear();
 		}
+	}
+
+	// ========================================
+	// Analysis Methods
+	// ========================================
+
+	/**
+	 * Analyzes current player configuration for server-side processing
+	 * @private
+	 * @returns {Object} Player analysis data
+	 */
+	_analyzePlayerConfiguration() {
+		const analysis = PlayerAnalysisService.analyzePlayerConfiguration(this._players);
+		
+		// Log analysis for debugging (remove in production)
+		console.log('Player Analysis:', analysis);
+		
+		// This data can be passed to probability calculation system
+		return analysis;
+	}
+
+	/**
+	 * Gets current expedition data for external systems
+	 * @returns {Object} Complete expedition configuration
+	 */
+	getExpeditionData() {
+		return {
+			sectors: [...this._selectedSectors],
+			playerAnalysis: this._analyzePlayerConfiguration(),
+			timestamp: Date.now()
+		};
 	}
 
 	// ========================================
