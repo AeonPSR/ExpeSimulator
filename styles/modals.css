@@ -35,6 +35,8 @@
 	overflow-y: auto;
 	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 	position: relative;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	color: #ecf0f1;
 }
 
 /* ==========================================================================
