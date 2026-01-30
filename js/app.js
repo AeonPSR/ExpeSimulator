@@ -459,15 +459,10 @@ class ExpeditionSimulatorApp {
 		// Update fighting power display
 		this._updateFightingPower();
 
-		// Update probability display
+		// Update probability display using EventWeightCalculator
 		if (this._selectedSectors.length > 0) {
-			this._probabilityDisplay.setContent(`
-				<div class="outcome-category">
-					<h5>Selected Sectors</h5>
-					<p>${this._selectedSectors.length} sectors selected</p>
-					<p><em>Probability calculations will be added when backend is connected</em></p>
-				</div>
-			`);
+			const probabilityHTML = EventWeightCalculator.generateTestOutput(this._selectedSectors);
+			this._probabilityDisplay.setContent(probabilityHTML);
 		} else {
 			this._probabilityDisplay.clear();
 		}

@@ -10,12 +10,14 @@
     {
       "matches": ["https://emush.eternaltwin.org/game*"],
       "js": [
+        "config.js",
         "js/utils/constants.js",
         "js/utils/helpers.js",
         "js/data/SectorData.js",
         "js/data/CharacterData.js",
         "js/data/AbilityData.js",
         "js/data/ItemData.js",
+        "js/data/WorldData.js",
         "js/core/Component.js",
         "js/components/shared/ToggleButton.js",
         "js/components/shared/Modal.js",
@@ -28,6 +30,10 @@
         "js/components/ProbabilityDisplay.js",
         "js/components/ResultsDisplay.js",
         "js/components/ExampleWorlds.js",
+        "js/services/FightingPowerService.js",
+        "js/services/PlayerAnalysisService.js",
+        "js/probability/EventWeightCalculator.js",
+        "js/probability/BinomialCalculator.js",
         "js/app.js",
         "js/content.js"
       ],
