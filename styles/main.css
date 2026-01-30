@@ -18,6 +18,14 @@
 	overflow: visible;
 	display: flex;
 	pointer-events: auto;
+	
+	/* Prevent text selection/highlighting */
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-touch-callout: none;
+	-webkit-tap-highlight-color: transparent;
 }
 
 #expedition-simulator:hover {

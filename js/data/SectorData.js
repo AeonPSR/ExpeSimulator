@@ -55,6 +55,13 @@ const SectorData = {
 	],
 
 	/**
+	 * Special sectors that don't count towards the 20 sector limit
+	 */
+	specialSectors: [
+		'LANDING', 'LOST'
+	],
+
+	/**
 	 * Gets unique sector names
 	 * @returns {Array<string>}
 	 */
@@ -88,6 +95,15 @@ const SectorData = {
 	 */
 	getSectorConfig(sectorName) {
 		return this.sectors.find(s => s.sectorName === sectorName) || null;
+	},
+
+	/**
+	 * Checks if a sector is special (doesn't count towards the 20 sector limit)
+	 * @param {string} sectorName
+	 * @returns {boolean}
+	 */
+	isSpecialSector(sectorName) {
+		return this.specialSectors.includes(sectorName);
 	}
 };
 

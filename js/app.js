@@ -6,8 +6,8 @@
  */
 class ExpeditionSimulatorApp {
 	constructor() {
-		// State
-		this._selectedSectors = [];
+		// State - Initialize with LANDING sector automatically selected
+		this._selectedSectors = ['LANDING'];
 		this._players = [];
 		this._nextPlayerId = 1;
 
@@ -93,6 +93,10 @@ class ExpeditionSimulatorApp {
 		// 6. Results Display
 		this._resultsDisplay = new ResultsDisplay();
 		this._resultsDisplay.mount(contentArea);
+
+		// Initial update to show LANDING sector
+		this._selectedSectorsComponent.update(this._selectedSectors);
+		this._updateDisplays();
 	}
 
 	// ========================================
@@ -139,11 +143,12 @@ class ExpeditionSimulatorApp {
 	 * @private
 	 */
 	_handleClearAllSectors() {
-		this._selectedSectors = [];
+		// Clear all sectors and automatically add LANDING back
+		this._selectedSectors = ['LANDING'];
 		this._selectedSectorsComponent.update(this._selectedSectors);
 		this._updateDisplays();
 
-		console.log('Cleared all sectors');
+		console.log('Cleared all sectors, LANDING automatically added');
 	}
 
 

@@ -36,7 +36,11 @@ const ValidationUtils = {
 	 * @returns {Object} validation result
 	 */
 	validateTotalSectorLimit(currentSelectedSectors) {
-		const currentTotal = currentSelectedSectors.length;
+		// Count only non-special sectors towards the limit
+		const countableSectors = currentSelectedSectors.filter(sectorName => 
+			!SectorData.isSpecialSector(sectorName)
+		);
+		const currentTotal = countableSectors.length;
 		const maxTotal = Constants.MAX_SECTORS;
 		const isValid = currentTotal < maxTotal;
 		
@@ -44,7 +48,7 @@ const ValidationUtils = {
 			isValid,
 			currentTotal,
 			maxTotal,
-			message: isValid ? null : `Maximum ${maxTotal} sectors allowed (currently have ${currentTotal})`
+			message: isValid ? null : `Maximum ${maxTotal} sectors allowed (currently have ${currentTotal}, excluding LANDING/LOST)`
 		};
 	},
 
