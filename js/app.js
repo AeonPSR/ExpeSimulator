@@ -212,9 +212,28 @@ class ExpeditionSimulatorApp {
 	 * @param {string} worldName
 	 */
 	_handleWorldSelect(worldName) {
-		console.log(`Selected world: ${worldName}`);
-		// TODO: Load predefined sector configurations
-		alert(`Would load: ${worldName}\n(Not implemented yet)`);
+		const sectors = WorldData.getWorldConfiguration(worldName);
+		if (sectors.length === 0) {
+			console.warn(`Unknown world: ${worldName}`);
+			return;
+		}
+
+		this._loadWorldSectors(sectors);
+		console.log(`Loaded ${worldName}:`, this._selectedSectors);
+	}
+
+	/**
+	 * Loads a world's sector configuration
+	 * @private
+	 * @param {Array<string>} sectors
+	 */
+	_loadWorldSectors(sectors) {
+		this._handleClearAllSectors();
+		sectors.filter(s => s !== 'LANDING').forEach(sectorName => {
+			this._selectedSectors.push(sectorName);
+		});
+		this._selectedSectorsComponent.update(this._selectedSectors);
+		this._updateDisplays();
 	}
 
 	// ========================================
