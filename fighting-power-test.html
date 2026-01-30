@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fighting Power Test</title>
+</head>
+<body>
+    <h1>Fighting Power Service Test</h1>
+    <div id="test-results"></div>
+    
+    <!-- Load dependencies -->
+    <script src="config.js"></script>
+    <script src="js/services/FightingPowerService.js"></script>
+    
+    <script>
+        // Test fighting power calculation
+        function runTest() {
+            const resultsDiv = document.getElementById('test-results');
+            
+            try {
+                // Test case 1: Empty players array
+                let players = [];
+                let result = FightingPowerService.calculateTotalFightingPower(players, false);
+                resultsDiv.innerHTML += `<p>Test 1 (no players): Fighting Power = ${result}</p>`;
+                
+                // Test case 2: Single player with no items/abilities
+                players = [
+                    { id: 1, character: 'Andie', abilities: [], items: [] }
+                ];
+                result = FightingPowerService.calculateTotalFightingPower(players, false);
+                resultsDiv.innerHTML += `<p>Test 2 (1 player, no gear): Fighting Power = ${result}</p>`;
+                
+                // Test case 3: Player with combat items
+                players = [
+                    { 
+                        id: 1, 
+                        character: 'Andie', 
+                        abilities: [], 
+                        items: ['blaster', 'knife'] 
+                    }
+                ];
+                result = FightingPowerService.calculateTotalFightingPower(players, false);
+                resultsDiv.innerHTML += `<p>Test 3 (1 player, blaster+knife): Fighting Power = ${result}</p>`;
+                
+                // Test case 4: Player with Gunman ability and gun
+                players = [
+                    { 
+                        id: 1, 
+                        character: 'Andie', 
+                        abilities: ['gunman'], 
+                        items: ['blaster'] 
+                    }
+                ];
+                result = FightingPowerService.calculateTotalFightingPower(players, false);
+                resultsDiv.innerHTML += `<p>Test 4 (Gunman + blaster): Fighting Power = ${result}</p>`;
+                
+                // Test case 5: With Centauri base effect
+                result = FightingPowerService.calculateTotalFightingPower(players, true);
+                resultsDiv.innerHTML += `<p>Test 5 (Gunman + blaster + Centauri): Fighting Power = ${result}</p>`;
+                
+                resultsDiv.innerHTML += `<p style="color: green;"><strong>All tests completed successfully!</strong></p>`;
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `<p style="color: red;"><strong>Error: ${error.message}</strong></p>`;
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Run test when page loads
+        window.addEventListener('load', runTest);
+    </script>
+</body>
+</html>

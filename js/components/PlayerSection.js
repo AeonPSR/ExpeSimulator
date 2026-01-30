@@ -39,6 +39,8 @@ class PlayerSection extends Component {
 		this._playersContainer = null;
 		this._addPlayerBtn = null;
 		this._fightingPowerBtn = null;
+		this._fightingPowerValue = null;
+		this._fightingPowerBtn = null;
 		this._modeBtn = null;
 		this._antigravToggle = null;
 		this._baseToggle = null;
@@ -90,8 +92,8 @@ class PlayerSection extends Component {
 			id: 'fighting-power-btn',
 			className: 'fighting-power-btn'
 		});
-		const fpValue = this.createElement('span', { id: 'fighting-power-value' }, '0');
-		this._fightingPowerBtn.appendChild(fpValue);
+		this._fightingPowerValue = this.createElement('span', { id: 'fighting-power-value' }, '0');
+		this._fightingPowerBtn.appendChild(this._fightingPowerValue);
 		const fpIcon = this.createElement('img', {
 			src: this.getResourceURL('others/fight.png'),
 			alt: 'Fighting Power',
@@ -229,9 +231,11 @@ class PlayerSection extends Component {
 	 */
 	setFightingPower(power) {
 		this._fightingPower = power;
-		const valueEl = this._fightingPowerBtn?.querySelector('#fighting-power-value');
-		if (valueEl) {
-			valueEl.textContent = power.toString();
+		if (this._fightingPowerValue) {
+			this._fightingPowerValue.textContent = power.toString();
+			console.log('Fighting power UI updated to:', power);
+		} else {
+			console.warn('_fightingPowerValue element not found');
 		}
 	}
 

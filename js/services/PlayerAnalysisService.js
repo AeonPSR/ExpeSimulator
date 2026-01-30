@@ -31,6 +31,8 @@ class PlayerAnalysisService {
 		players.forEach((player, index) => {
 			if (player.abilities && Array.isArray(player.abilities)) {
 				player.abilities.forEach(skillIcon => {
+					if (!skillIcon) return; // Skip null/empty slots
+					
 					const skillName = this.iconToSkillName(skillIcon);
 					
 					// Count occurrences
@@ -65,6 +67,8 @@ class PlayerAnalysisService {
 		players.forEach((player, index) => {
 			if (player.items && Array.isArray(player.items)) {
 				player.items.forEach(itemIcon => {
+					if (!itemIcon) return; // Skip null/empty slots
+					
 					const itemName = this.iconToItemName(itemIcon);
 					
 					// Count occurrences
@@ -90,18 +94,20 @@ class PlayerAnalysisService {
 	/**
 	 * Converts skill icon filename to skill name
 	 * @param {string} icon - Icon filename (e.g., 'survival.png')
-	 * @returns {string} Skill name (e.g., 'survival')
+	 * @returns {string|null} Skill name (e.g., 'survival') or null if invalid
 	 */
 	static iconToSkillName(icon) {
+		if (!icon) return null;
 		return icon.replace('.png', '').toLowerCase();
 	}
 
 	/**
 	 * Converts item icon filename to item name
 	 * @param {string} icon - Icon filename (e.g., 'blaster.png')
-	 * @returns {string} Item name (e.g., 'blaster')
+	 * @returns {string|null} Item name (e.g., 'blaster') or null if invalid
 	 */
 	static iconToItemName(icon) {
+		if (!icon) return null;
 		return icon.replace('.png', '').toLowerCase();
 	}
 }

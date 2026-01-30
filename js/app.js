@@ -10,6 +10,7 @@ class ExpeditionSimulatorApp {
 		this._selectedSectors = ['LANDING'];
 		this._players = [];
 		this._nextPlayerId = 1;
+		this._centauriActive = false;
 
 		// Component instances
 		this._panel = null;
@@ -428,12 +429,13 @@ class ExpeditionSimulatorApp {
 	}
 
 	/**
-	 * Handles base toggle
+	 * Handles base toggle (Centauri effect)
 	 * @private
 	 * @param {boolean} isActive
 	 */
 	_handleBaseToggle(isActive) {
-		console.log(`Base: ${isActive}`);
+		this._centauriActive = isActive;
+		console.log(`Centauri base: ${isActive}`);
 		this._updateDisplays();
 	}
 
@@ -453,6 +455,9 @@ class ExpeditionSimulatorApp {
 
 		// Analyze current player configuration for server-side processing
 		const playerAnalysis = this._analyzePlayerConfiguration();
+
+		// Update fighting power display
+		this._updateFightingPower();
 
 		// Update probability display
 		if (this._selectedSectors.length > 0) {
@@ -499,13 +504,41 @@ class ExpeditionSimulatorApp {
 	}
 
 	/**
+	 * Calculates and updates fighting power display
+	 * @private
+	 */
+	_updateFightingPower() {
+		const centauriActive = this._isCentauriActive();
+		const fightingPower = FightingPowerService.calculateTotalFightingPower(this._players, centauriActive);
+		
+		// Update fighting power display through PlayerSection component
+		if (this._playerSection && this._playerSection.setFightingPower) {
+			this._playerSection.setFightingPower(fightingPower);
+		}
+	}
+
+	/**
+	 * Checks if Centauri base effect is currently active
+	 * @private
+	 * @returns {boolean}
+	 */
+	_isCentauriActive() {
+		return this._centauriActive;
+	}
+
+	/**
 	 * Gets current expedition data for external systems
 	 * @returns {Object} Complete expedition configuration
 	 */
 	getExpeditionData() {
+		const centauriActive = this._isCentauriActive();
+		
 		return {
 			sectors: [...this._selectedSectors],
 			playerAnalysis: this._analyzePlayerConfiguration(),
+			fightingPower: FightingPowerService.calculateBaseFightingPower(this._players, centauriActive),
+			grenadeCount: FightingPowerService.countGrenades(this._players),
+			centauriActive: centauriActive,
 			timestamp: Date.now()
 		};
 	}

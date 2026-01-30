@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Fighting Power Debug</title>
+</head>
+<body>
+    <h1>Fighting Power Debug</h1>
+    <button onclick="testFightingPower()">Test Fighting Power</button>
+    <div id="output"></div>
+    
+    <script src="config.js"></script>
+    <script src="js/services/FightingPowerService.js"></script>
+    
+    <script>
+        function testFightingPower() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<h3>Testing Fighting Power Service...</h3>';
+            
+            try {
+                // Check if config objects exist
+                output.innerHTML += `<p>ItemEffects exists: ${typeof ItemEffects !== 'undefined'}</p>`;
+                output.innerHTML += `<p>AbilityEffects exists: ${typeof AbilityEffects !== 'undefined'}</p>`;
+                output.innerHTML += `<p>BaseEffects exists: ${typeof BaseEffects !== 'undefined'}</p>`;
+                
+                // Test empty players
+                let result = FightingPowerService.calculateTotalFightingPower([], false);
+                output.innerHTML += `<p>Empty players: ${result}</p>`;
+                
+                // Test one player with no equipment (like the app creates)
+                const players = [{
+                    id: 1,
+                    avatar: 'andie.png',
+                    abilities: [null, null, null, null, null],
+                    items: [null, null, null],
+                    health: 14
+                }];
+                
+                result = FightingPowerService.calculateTotalFightingPower(players, false);
+                output.innerHTML += `<p>1 player, no equipment: ${result}</p>`;
+                
+                // Test player with equipment
+                const playersWithGear = [{
+                    id: 1,
+                    avatar: 'andie.png',
+                    abilities: ['gunman.png', null, null, null, null],
+                    items: ['blaster.png', null, null],
+                    health: 14
+                }];
+                
+                result = FightingPowerService.calculateTotalFightingPower(playersWithGear, false);
+                output.innerHTML += `<p>1 player with gunman + blaster: ${result}</p>`;
+                
+                output.innerHTML += '<p style="color: green;">Test completed - check console for debug logs</p>';
+                
+            } catch (error) {
+                output.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error('Test error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
