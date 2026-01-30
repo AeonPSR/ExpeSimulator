@@ -480,6 +480,13 @@ const AbilityEffects = {
 			additionalSectors: 1
 		}
 	},
+	'tracker': {
+		name: 'Tracker',
+		description: 'Allows to see the content of unexplored sectors',
+		effects: {
+			revealUnexploredSectors: true
+		}
+	},
 	'traitor': {
 		name: 'Traitor',
 		description: 'Doubles the odds of all negative events',
