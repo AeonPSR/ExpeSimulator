@@ -74,7 +74,17 @@ class SelectedSectors extends Component {
 	 * @returns {string}
 	 */
 	_getHeaderText() {
-		return `Selected Expedition (${this._selectedSectors.length}/${this.maxSectors})`;
+		// Count only regular sectors (excluding LANDING and LOST) for the X/20 limit
+		const regularCount = this._selectedSectors.filter(sectorName => 
+			!SectorData.isSpecialSector(sectorName)
+		).length;
+		const totalCount = this._selectedSectors.length;
+		
+		// Show format like original: "Selected Expedition (5/20)" or "Selected Expedition (5/20 + 2 special)"
+		const baseText = `Selected Expedition (${regularCount}/${this.maxSectors})`;
+		const specialCount = totalCount - regularCount;
+		
+		return specialCount > 0 ? `${baseText} + ${specialCount} special` : baseText;
 	}
 
 	/**

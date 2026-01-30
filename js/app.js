@@ -109,13 +109,23 @@ class ExpeditionSimulatorApp {
 	 * @param {string} sectorName
 	 */
 	_handleSectorClick(sectorName) {
-		// Use validation utility to check if sector can be added
-		const validation = ValidationUtils.validateAddSector(sectorName, this._selectedSectors);
-		
-		if (!validation.isValid) {
-			console.log(validation.message);
+		// Check per-sector limit first
+		const sectorValidation = ValidationUtils.validateSectorLimit(sectorName, this._selectedSectors);
+		if (!sectorValidation.isValid) {
+			console.log(sectorValidation.message);
 			// TODO: Show user-friendly error message/notification
 			return;
+		}
+
+		// Only apply total sector limit to regular sectors (not special sectors)
+		const isSpecialSector = SectorData.isSpecialSector(sectorName);
+		if (!isSpecialSector) {
+			const totalValidation = ValidationUtils.validateTotalSectorLimit(this._selectedSectors);
+			if (!totalValidation.isValid) {
+				console.log(totalValidation.message);
+				// TODO: Show user-friendly error message/notification
+				return;
+			}
 		}
 
 		this._selectedSectors.push(sectorName);
@@ -170,17 +180,23 @@ class ExpeditionSimulatorApp {
 	 */
 	_getSectorAvailability(sectorName) {
 		const validation = ValidationUtils.validateSectorLimit(sectorName, this._selectedSectors);
-		const totalValidation = ValidationUtils.validateTotalSectorLimit(this._selectedSectors);
+		const isSpecialSector = SectorData.isSpecialSector(sectorName);
 		
 		let shouldDisable = false;
 		let tooltipText = `${formatSectorName(sectorName)} (${validation.currentCount}/${validation.maxAllowed})`;
 		
+		// Check per-sector limit first
 		if (!validation.isValid) {
 			shouldDisable = true;
 			tooltipText = `Maximum ${validation.maxAllowed} ${sectorName} sectors allowed (currently have ${validation.currentCount})`;
-		} else if (!totalValidation.isValid) {
-			shouldDisable = true;
-			tooltipText = `Maximum ${totalValidation.maxTotal} total sectors allowed (currently have ${totalValidation.currentTotal})`;
+		} 
+		// Only apply total sector limit to regular sectors (not special sectors)
+		else if (!isSpecialSector) {
+			const totalValidation = ValidationUtils.validateTotalSectorLimit(this._selectedSectors);
+			if (!totalValidation.isValid) {
+				shouldDisable = true;
+				tooltipText = `Maximum ${totalValidation.maxTotal} regular sectors allowed (currently have ${totalValidation.currentTotal})`;
+			}
 		}
 		
 		return { shouldDisable, tooltipText };
