@@ -227,35 +227,3 @@
 	padding-bottom: 8px;
 	font-weight: 600;
 }
-
-.prob-content {
-	background: rgba(0, 0, 0, 0.2);
-	border-radius: 8px;
-	padding: 15px;
-	color: #bdc3c7;
-	font-size: 14px;
-}
-
-.prob-content p {
-	margin: 5px 0;
-}
-
-.prob-content em {
-	font-style: italic;
-	color: #95a5a6;
-}
-
-.outcome-category {
-	margin-bottom: 15px;
-}
-
-.outcome-category:last-child {
-	margin-bottom: 0;
-}
-
-.outcome-category h5 {
-	margin: 0 0 8px 0;
-	font-size: 14px;
-	color: #3498db;
-	font-weight: 600;
-}
