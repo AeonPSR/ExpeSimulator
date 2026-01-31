@@ -459,10 +459,15 @@ class ExpeditionSimulatorApp {
 		// Update fighting power display
 		this._updateFightingPower();
 
-		// Update probability display using EventWeightCalculator
+		// Build combined loadout from all players for probability calculation
+		const loadout = this._buildCombinedLoadout();
+
+		// Update probability display: Frontend -> Backend -> Frontend
 		if (this._selectedSectors.length > 0) {
-			const probabilityHTML = EventWeightCalculator.generateTestOutput(this._selectedSectors);
-			this._probabilityDisplay.setContent(probabilityHTML);
+			// Backend: calculate probabilities (returns data, not HTML)
+			const results = EventWeightCalculator.calculate(this._selectedSectors, loadout);
+			// Frontend: render the data
+			this._probabilityDisplay.update(results);
 		} else {
 			this._probabilityDisplay.clear();
 		}
@@ -482,6 +487,51 @@ class ExpeditionSimulatorApp {
 	// ========================================
 	// Analysis Methods
 	// ========================================
+
+	/**
+	 * Builds a combined loadout from all players for probability calculations.
+	 * Merges all abilities and items across all players.
+	 * Converts filenames (e.g., 'pilot.png') to identifiers (e.g., 'PILOT').
+	 * @private
+	 * @returns {Object} Combined loadout { abilities: [], items: [], projects: [] }
+	 */
+	_buildCombinedLoadout() {
+		const abilities = new Set();
+		const items = new Set();
+
+		for (const player of this._players) {
+			// Add all non-null abilities (converted to identifiers)
+			for (const ability of player.abilities || []) {
+				if (ability) {
+					abilities.add(this._filenameToId(ability));
+				}
+			}
+			// Add all non-null items (converted to identifiers)
+			for (const item of player.items || []) {
+				if (item) {
+					items.add(this._filenameToId(item));
+				}
+			}
+		}
+
+		return {
+			abilities: [...abilities],
+			items: [...items],
+			projects: [] // TODO: Wire up project selection (e.g., Antigrav Propeller)
+		};
+	}
+
+	/**
+	 * Converts a filename to an identifier.
+	 * 'pilot.png' -> 'PILOT'
+	 * 'white_flag.jpg' -> 'WHITE_FLAG'
+	 * @private
+	 */
+	_filenameToId(filename) {
+		return filename
+			.replace(/\.(png|jpg|gif)$/i, '')  // Remove extension
+			.toUpperCase();                     // Convert to uppercase
+	}
 
 	/**
 	 * Analyzes current player configuration for server-side processing
