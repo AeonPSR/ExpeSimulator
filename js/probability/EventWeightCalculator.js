@@ -81,9 +81,10 @@ const EventWeightCalculator = {
 	 * 
 	 * @param {Array<string>} sectors - Array of sector names
 	 * @param {Object} loadout - Combined loadout { abilities: [], items: [], projects: [] }
+	 * @param {Array<Object>} players - Optional: raw player data for resource modifier counting
 	 * @returns {Object} Complete results data structure
 	 */
-	calculate(sectors, loadout = {}) {
+	calculate(sectors, loadout = {}, players = []) {
 		if (!sectors || sectors.length === 0) {
 			return null;
 		}
@@ -94,20 +95,19 @@ const EventWeightCalculator = {
 			sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
 		}
 
-		// Aggregate events across all sectors
+		// Calculate resources using ResourceCalculator (with binomial distribution)
+		const resources = typeof ResourceCalculator !== 'undefined'
+			? ResourceCalculator.calculate(sectors, loadout, players)
+			: this._legacyResourceCalculation(sectors, loadout);
+
+		// Aggregate non-resource events
 		const aggregated = this._aggregateEvents(sectors, loadout);
 
 		// Build sector breakdown
 		const sectorBreakdown = this._buildSectorBreakdown(sectorCounts, loadout);
 
 		return {
-			resources: {
-				fruits: aggregated.fruits,
-				steaks: aggregated.steaks,
-				fuel: aggregated.fuel,
-				oxygen: aggregated.oxygen,
-				artefacts: aggregated.artefacts
-			},
+			resources: resources,
 			fights: aggregated.fights,
 			eventDamage: {
 				tired: aggregated.tired,
@@ -128,6 +128,44 @@ const EventWeightCalculator = {
 		};
 	},
 
+	/**
+	 * Legacy resource calculation (fallback if ResourceCalculator not loaded).
+	 * @private
+	 */
+	_legacyResourceCalculation(sectors, loadout) {
+		const zero = { pessimist: 0, average: 0, optimist: 0 };
+		const result = {
+			fruits: { ...zero },
+			steaks: { ...zero },
+			fuel: { ...zero },
+			oxygen: { ...zero },
+			artefacts: { ...zero },
+			mapFragments: { ...zero }
+		};
+
+		for (const sectorName of sectors) {
+			const probs = this.getModifiedProbabilities(sectorName, loadout);
+			for (const [eventName, prob] of probs) {
+				if (eventName.startsWith('HARVEST_')) {
+					result.fruits.average += prob * (parseInt(eventName.split('_')[1]) || 1);
+				} else if (eventName.startsWith('PROVISION_')) {
+					result.steaks.average += prob * (parseInt(eventName.split('_')[1]) || 1);
+				} else if (eventName.startsWith('FUEL_')) {
+					result.fuel.average += prob * (parseInt(eventName.split('_')[1]) || 1);
+				} else if (eventName.startsWith('OXYGEN_')) {
+					result.oxygen.average += prob * (parseInt(eventName.split('_')[1]) || 1);
+				} else if (eventName === 'ARTEFACT') {
+					result.artefacts.average += prob * (8/9);
+					result.mapFragments.average += prob * (1/9);
+				} else if (eventName === 'STARMAP') {
+					result.mapFragments.average += prob;
+				}
+			}
+		}
+
+		return result;
+	},
+
 	// ========================================
 	// Private Helper Methods
 	// ========================================
@@ -140,11 +178,10 @@ const EventWeightCalculator = {
 	},
 
 	/**
-	 * @private - Aggregates events across all sectors
+	 * @private - Aggregates non-resource events across all sectors
 	 */
 	_aggregateEvents(sectors, loadout) {
 		const result = {
-			fruits: 0, steaks: 0, fuel: 0, oxygen: 0, artefacts: 0,
 			fights: {},
 			tired: 0, accident: 0, disaster: 0,
 			disease: 0, playerLost: 0, again: 0, itemLost: 0,
@@ -166,24 +203,8 @@ const EventWeightCalculator = {
 	 * @private - Categorizes a single event into the result structure
 	 */
 	_categorizeEvent(eventName, prob, result) {
-		// Resources
-		if (eventName.startsWith('HARVEST_')) {
-			const amount = parseInt(eventName.split('_')[1]) || 1;
-			result.fruits += prob * amount;
-		} else if (eventName.startsWith('PROVISION_')) {
-			const amount = parseInt(eventName.split('_')[1]) || 1;
-			result.steaks += prob * amount;
-		} else if (eventName.startsWith('FUEL_')) {
-			const amount = parseInt(eventName.split('_')[1]) || 1;
-			result.fuel += prob * amount;
-		} else if (eventName.startsWith('OXYGEN_')) {
-			const amount = parseInt(eventName.split('_')[1]) || 1;
-			result.oxygen += prob * amount;
-		} else if (eventName === 'ARTEFACT') {
-			result.artefacts += prob;
-		}
 		// Combat
-		else if (eventName.startsWith('FIGHT_')) {
+		if (eventName.startsWith('FIGHT_')) {
 			const fightType = eventName.replace('FIGHT_', '');
 			result.fights[fightType] = (result.fights[fightType] || 0) + prob;
 		}
@@ -213,6 +234,8 @@ const EventWeightCalculator = {
 		} else if (eventName === 'NOTHING_TO_REPORT') {
 			result.nothing += prob;
 		}
+		// Note: Resource events (HARVEST_, PROVISION_, FUEL_, OXYGEN_, ARTEFACT, STARMAP)
+		// are handled by ResourceCalculator
 	},
 
 	/**

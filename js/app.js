@@ -260,10 +260,11 @@ class ExpeditionSimulatorApp {
 			return;
 		}
 
-		const loadout = LoadoutBuilder.build(this._state.getPlayers(), {
+		const players = this._state.getPlayers();
+		const loadout = LoadoutBuilder.build(players, {
 			antigravActive: this._state.isAntigravActive()
 		});
-		const results = EventWeightCalculator.calculate(sectors, loadout);
+		const results = EventWeightCalculator.calculate(sectors, loadout, players);
 		this._probabilityDisplay.update(results);
 	}
 

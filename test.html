@@ -15,14 +15,77 @@
         
         /* Uncomment the line below to lock panel open during development */
         /* #expedition-simulator { transform: translateX(0) !important; } */
+
+        /* Test table styles */
+        .test-section {
+            margin-left: 450px;
+            padding: 20px;
+            color: white;
+        }
+        .test-table {
+            border-collapse: collapse;
+            margin: 10px 0 30px 0;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .test-table th, .test-table td {
+            border: 1px solid #444;
+            padding: 6px 12px;
+            text-align: center;
+        }
+        .test-table th {
+            background: #2a2a4e;
+            color: #8888ff;
+        }
+        .test-table td {
+            background: #1e1e3e;
+        }
+        .test-table td.scenario {
+            text-align: left;
+            background: #252545;
+        }
+        .test-table tr:hover td {
+            background: #2a2a5e;
+        }
+        .test-table .header-resource {
+            background: #3a3a5e;
+            color: #aaffaa;
+        }
+        .test-btn {
+            background: #4a4a8e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 4px;
+        }
+        .test-btn:hover {
+            background: #5a5aae;
+        }
+        #test-results {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1 style="color: white; margin-left: 450px; padding: 20px;">Test Page - Expedition Simulator</h1>
-    <p style="color: #888; margin-left: 450px; padding: 0 20px;">
-        The panel should be visible on the left side.<br>
-        This page simulates the extension environment for testing.
-    </p>
+    <div class="test-section">
+        <h1>Test Page - Expedition Simulator</h1>
+        <p style="color: #888;">
+            The panel should be visible on the left side.<br>
+            This page simulates the extension environment for testing.
+        </p>
+        
+        <h2>📊 Resource Calculator Reference Values</h2>
+        <p style="color: #aaa; font-size: 13px;">
+            These values are calculated using the convolution-based ResourceCalculator.<br>
+            Compare what you see in the app with these expected values.
+        </p>
+        
+        <button class="test-btn" onclick="runAllTests()">🔄 Recalculate All</button>
+        
+        <div id="test-results"></div>
+    </div>
 
     <!-- Load scripts in order -->
     <script src="config.js"></script>
@@ -39,8 +102,9 @@
     <script src="js/services/PlayerAnalysisService.js"></script>
     <script src="js/services/FightingPowerService.js"></script>
     <script src="js/services/LoadoutBuilder.js"></script>
+    <script src="js/probability/DistributionCalculator.js"></script>
     <script src="js/probability/EventWeightCalculator.js"></script>
-    <script src="js/probability/BinomialCalculator.js"></script>
+    <script src="js/probability/ResourceCalculator.js"></script>
     <script src="js/probability/EventModifier.js"></script>
     <script src="js/probability/AbilityModifiers.js"></script>
     <script src="js/probability/ItemModifiers.js"></script>
@@ -59,5 +123,253 @@
     <script src="js/components/ExampleWorlds.js"></script>
     <script src="js/app.js"></script>
     <script src="js/content.js"></script>
+
+    <script>
+    /**
+     * Test Suite for ResourceCalculator
+     * Generates reference tables for validation
+     */
+    
+    function runAllTests() {
+        const container = document.getElementById('test-results');
+        container.innerHTML = '';
+        
+        // STEAKS tests (RUMINANT, PREDATOR, INSECT)
+        container.innerHTML += generateSteakTests();
+        
+        // FRUITS tests (FRUIT_TREES)
+        container.innerHTML += generateFruitTests();
+        
+        // FUEL tests (HYDROCARBON)
+        container.innerHTML += generateFuelTests();
+        
+        // Mixed sector tests
+        container.innerHTML += generateMixedTests();
+        
+        // Bonus modifier tests
+        container.innerHTML += generateBonusTests();
+    }
+    
+    function calc(sectors, loadout = {}, players = []) {
+        return ResourceCalculator.calculate(sectors, loadout, players);
+    }
+    
+    function fmt(val) {
+        if (typeof val === 'object' && val !== null) {
+            return `${val.pessimist} / ${val.average.toFixed(2)} / ${val.optimist}`;
+        }
+        return val;
+    }
+    
+    function generateSteakTests() {
+        let html = '<h3>🥩 Steaks (RUMINANT sector)</h3>';
+        html += '<p style="color:#888;font-size:12px;">RUMINANT: PROVISION_4 (4/10=40%), PROVISION_2 (3/10=30%), other (30%)</p>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th class="header-resource">Steaks (pess/avg/opt)</th><th>Expected Avg</th></tr>';
+        
+        const tests = [
+            { name: '1× RUMINANT', sectors: ['RUMINANT'], expected: '2.2' },
+            { name: '2× RUMINANT', sectors: ['RUMINANT', 'RUMINANT'], expected: '4.4' },
+            { name: '3× RUMINANT', sectors: ['RUMINANT', 'RUMINANT', 'RUMINANT'], expected: '6.6' },
+            { name: '4× RUMINANT', sectors: ['RUMINANT', 'RUMINANT', 'RUMINANT', 'RUMINANT'], expected: '8.8' },
+        ];
+        
+        for (const test of tests) {
+            const result = calc(test.sectors);
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>${fmt(result.steaks)}</td>
+                <td>${test.expected}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
+        
+        // Also show PREDATOR and INSECT
+        html += '<p style="color:#888;font-size:12px;">PREDATOR: PROVISION_3 (1/10=10%); INSECT: PROVISION_1 (2/10=20%)</p>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th class="header-resource">Steaks (pess/avg/opt)</th><th>Expected Avg</th></tr>';
+        
+        const otherTests = [
+            { name: '1× PREDATOR', sectors: ['PREDATOR'], expected: '0.3' },
+            { name: '1× INSECT', sectors: ['INSECT'], expected: '0.2' },
+            { name: '3× RUMINANT + 2× INSECT', sectors: ['RUMINANT', 'RUMINANT', 'RUMINANT', 'INSECT', 'INSECT'], expected: '7.0' },
+        ];
+        
+        for (const test of otherTests) {
+            const result = calc(test.sectors);
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>${fmt(result.steaks)}</td>
+                <td>${test.expected}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
+        return html;
+    }
+    
+    function generateFruitTests() {
+        let html = '<h3>🍎 Fruits (FRUIT_TREES sector)</h3>';
+        html += '<p style="color:#888;font-size:12px;">FRUIT_TREES: HARVEST_3 (4/10=40%), HARVEST_1 (3/10=30%), nothing (30%)</p>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th class="header-resource">Fruits (pess/avg/opt)</th><th>Expected Avg</th></tr>';
+        
+        const tests = [
+            { name: '1× FRUIT_TREES', sectors: ['FRUIT_TREES'], expected: '1.5' },
+            { name: '2× FRUIT_TREES', sectors: ['FRUIT_TREES', 'FRUIT_TREES'], expected: '3.0' },
+            { name: '3× FRUIT_TREES', sectors: ['FRUIT_TREES', 'FRUIT_TREES', 'FRUIT_TREES'], expected: '4.5' },
+            { name: '4× FRUIT_TREES', sectors: ['FRUIT_TREES', 'FRUIT_TREES', 'FRUIT_TREES', 'FRUIT_TREES'], expected: '6.0' },
+        ];
+        
+        for (const test of tests) {
+            const result = calc(test.sectors);
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>${fmt(result.fruits)}</td>
+                <td>${test.expected}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
+        return html;
+    }
+    
+    function generateFuelTests() {
+        let html = '<h3>⛽ Fuel (HYDROCARBON sector)</h3>';
+        html += '<p style="color:#888;font-size:12px;">HYDROCARBON: FUEL_3 (4/10), FUEL_4 (3/10), FUEL_5 (2/10), FUEL_6 (1/10) = 100% fuel</p>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th class="header-resource">Fuel (pess/avg/opt)</th><th>Expected Avg</th></tr>';
+        
+        // Calculate: 3*0.4 + 4*0.3 + 5*0.2 + 6*0.1 = 1.2 + 1.2 + 1.0 + 0.6 = 4.0
+        const tests = [
+            { name: '1× HYDROCARBON', sectors: ['HYDROCARBON'], expected: '4.0' },
+            { name: '2× HYDROCARBON', sectors: ['HYDROCARBON', 'HYDROCARBON'], expected: '8.0' },
+        ];
+        
+        for (const test of tests) {
+            const result = calc(test.sectors);
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>${fmt(result.fuel)}</td>
+                <td>${test.expected}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
+        return html;
+    }
+    
+    function generateMixedTests() {
+        let html = '<h3>🔀 Mixed Sectors</h3>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th class="header-resource">Steaks</th><th class="header-resource">Fruits</th><th class="header-resource">Fuel</th></tr>';
+        
+        const tests = [
+            { name: '2× RUMINANT + 2× FRUIT_TREES', sectors: ['RUMINANT', 'RUMINANT', 'FRUIT_TREES', 'FRUIT_TREES'] },
+            { name: '1× each (RUM, FRUIT, HYDRO)', sectors: ['RUMINANT', 'FRUIT_TREES', 'HYDROCARBON'] },
+            { name: '4× RUMINANT + 4× FRUIT_TREES', sectors: ['RUMINANT', 'RUMINANT', 'RUMINANT', 'RUMINANT', 'FRUIT_TREES', 'FRUIT_TREES', 'FRUIT_TREES', 'FRUIT_TREES'] },
+        ];
+        
+        for (const test of tests) {
+            const result = calc(test.sectors);
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>${fmt(result.steaks)}</td>
+                <td>${fmt(result.fruits)}</td>
+                <td>${fmt(result.fuel)}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
+        return html;
+    }
+    
+    function generateBonusTests() {
+        let html = '<h3>🎯 Bonus Modifiers</h3>';
+        html += '<p style="color:#888;font-size:12px;">Survival: +1 per PROVISION event; Botanist: +1 per HARVEST event; Driller: ×2 fuel</p>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th>Modifier</th><th class="header-resource">Result</th><th>Without Bonus</th></tr>';
+        
+        // Survival tests
+        const survival1 = [{ abilities: ['Survival'] }];
+        const survival2 = [{ abilities: ['Survival'] }, { abilities: ['Survival'] }];
+        const botanist1 = [{ abilities: ['Botanist'] }];
+        const driller1 = [{ abilities: ['Driller'] }];
+        const driller2 = [{ abilities: ['Driller'] }, { abilities: ['Driller'] }];
+        
+        const bonusTests = [
+            { 
+                name: '2× RUMINANT', 
+                sectors: ['RUMINANT', 'RUMINANT'],
+                players: survival1,
+                modifier: '1× Survival (+1/event)',
+                resource: 'steaks',
+                note: 'Base: 4.4 → +1 per event'
+            },
+            { 
+                name: '2× RUMINANT', 
+                sectors: ['RUMINANT', 'RUMINANT'],
+                players: survival2,
+                modifier: '2× Survival (+2/event)',
+                resource: 'steaks',
+                note: 'Base: 4.4 → +2 per event'
+            },
+            { 
+                name: '2× FRUIT_TREES', 
+                sectors: ['FRUIT_TREES', 'FRUIT_TREES'],
+                players: botanist1,
+                modifier: '1× Botanist (+1/event)',
+                resource: 'fruits',
+                note: 'Base: 3.0 → +1 per event'
+            },
+            { 
+                name: '1× HYDROCARBON', 
+                sectors: ['HYDROCARBON'],
+                players: driller1,
+                modifier: '1× Driller (×2)',
+                resource: 'fuel',
+                note: 'Base: 4.0 → ×2'
+            },
+            { 
+                name: '1× HYDROCARBON', 
+                sectors: ['HYDROCARBON'],
+                players: driller2,
+                modifier: '2× Driller (×4)',
+                resource: 'fuel',
+                note: 'Base: 4.0 → ×4'
+            },
+        ];
+        
+        for (const test of bonusTests) {
+            const withBonus = calc(test.sectors, {}, test.players);
+            const withoutBonus = calc(test.sectors, {}, []);
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>${test.modifier}</td>
+                <td>${fmt(withBonus[test.resource])}</td>
+                <td>${fmt(withoutBonus[test.resource])}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
+        
+        // Detailed breakdown for Survival
+        html += '<h4>📐 Survival Bonus Math (for verification)</h4>';
+        html += '<p style="color:#888;font-size:12px;">';
+        html += 'RUMINANT sector: 40% chance of PROVISION_4, 30% chance of PROVISION_2<br>';
+        html += 'With 1× Survival: PROVISION_4 → 5, PROVISION_2 → 3<br>';
+        html += 'Expected per sector: 0.4×5 + 0.3×3 = 2.0 + 0.9 = 2.9<br>';
+        html += 'For 2 sectors: 2 × 2.9 = 5.8<br>';
+        html += '</p>';
+        
+        return html;
+    }
+    
+    // Run tests when page loads
+    window.addEventListener('load', () => {
+        setTimeout(runAllTests, 500); // Wait for scripts to load
+    });
+    </script>
 </body>
 </html>

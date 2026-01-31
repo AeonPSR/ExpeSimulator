@@ -67,25 +67,27 @@ class ProbabilityDisplay extends Component {
 
 	_renderResources(resources) {
 		const items = [
-			{ name: 'Fruits', icon: 'items/fruit10.jpg', value: resources.fruits },
-			{ name: 'Steaks', icon: 'items/alien_steak.jpg', value: resources.steaks },
-			{ name: 'Fuel', icon: 'items/fuel_capsule.jpg', value: resources.fuel },
-			{ name: 'Oxygen', icon: 'items/oxy_capsule.jpg', value: resources.oxygen },
-			{ name: 'Artefacts', icon: 'items/artefact.png', value: resources.artefacts }
+			{ name: 'Fruits', icon: 'items/fruit10.jpg', data: resources.fruits },
+			{ name: 'Steaks', icon: 'items/alien_steak.jpg', data: resources.steaks },
+			{ name: 'Fuel', icon: 'items/fuel_capsule.jpg', data: resources.fuel },
+			{ name: 'Oxygen', icon: 'items/oxy_capsule.jpg', data: resources.oxygen },
+			{ name: 'Artefacts', icon: 'items/artefact.png', data: resources.artefacts },
+			{ name: 'Map Fragments', icon: 'items/super_map.jpg', data: resources.mapFragments }
 		];
 
-		items.sort((a, b) => (b.value > 0 ? 1 : 0) - (a.value > 0 ? 1 : 0));
+		// Sort: items with values first
+		items.sort((a, b) => (b.data.average > 0 ? 1 : 0) - (a.data.average > 0 ? 1 : 0));
 
 		const rows = items.map(r => {
 			const icon = this._icon(r.icon);
-			if (r.value === 0) {
+			if (r.data.average === 0) {
 				return `<tr><td class="icon-cell">${icon}</td><td colspan="3" class="neutral none-row">none</td></tr>`;
 			}
 			return `<tr>
 				<td class="icon-cell">${icon}</td>
-				<td class="warning">-</td>
-				<td class="neutral">${r.value.toFixed(1)}</td>
-				<td class="positive">-</td>
+				<td class="warning">${this._formatResourceValue(r.data.pessimist)}</td>
+				<td class="neutral">${this._formatResourceValue(r.data.average)}</td>
+				<td class="positive">${this._formatResourceValue(r.data.optimist)}</td>
 			</tr>`;
 		}).join('');
 
@@ -105,6 +107,16 @@ class ProbabilityDisplay extends Component {
 				</table>
 			</div>
 		`;
+	}
+
+	/**
+	 * Formats a resource value for display
+	 * @private
+	 */
+	_formatResourceValue(value) {
+		if (value === 0) return '0';
+		if (value < 0.1) return '<0.1';
+		return value.toFixed(1);
 	}
 
 	_renderCombatRisks(fights) {
