@@ -236,67 +236,6 @@ const EventWeightCalculator = {
 		}
 
 		return breakdown;
-	},
-
-	// ========================================
-	// Test Methods (console output only)
-	// ========================================
-
-	/**
-	 * Runs tests and outputs to console.
-	 */
-	runTests() {
-		console.log('═══════════════════════════════════════════════════════');
-		console.log('EventWeightCalculator - Tests');
-		console.log('═══════════════════════════════════════════════════════');
-
-		const testSectors = ['FOREST', 'CAVE', 'RUINS', 'WRECK', 'DESERT'];
-		
-		for (const sectorName of testSectors) {
-			const probs = this.getModifiedProbabilities(sectorName, {});
-			console.log(`\n${sectorName} sector probabilities:`);
-			let total = 0;
-			for (const [event, prob] of probs) {
-				console.log(`  ${event}: ${(prob * 100).toFixed(1)}%`);
-				total += prob;
-			}
-			console.log(`  Total: ${total.toFixed(4)} ${Math.abs(total - 1) < 0.0001 ? '✓' : '✗'}`);
-		}
-
-		console.log('\n═══════════════════════════════════════════════════════');
-	},
-
-	/**
-	 * Runs modifier tests.
-	 */
-	runModifierTests() {
-		console.log('═══════════════════════════════════════════════════════');
-		console.log('Event Modifier Tests');
-		console.log('═══════════════════════════════════════════════════════');
-
-		// Test Pilot
-		console.log('\n▶ PILOT (LANDING):');
-		const landingOrig = this.getModifiedProbabilities('LANDING', {});
-		const landingMod = this.getModifiedProbabilities('LANDING', { abilities: ['PILOT'] });
-		console.log('  Original events:', landingOrig.size, '→ Modified:', landingMod.size);
-
-		// Test Diplomacy
-		console.log('\n▶ DIPLOMACY (INTELLIGENT):');
-		const intOrig = this.getModifiedProbabilities('INTELLIGENT', {});
-		const intMod = this.getModifiedProbabilities('INTELLIGENT', { abilities: ['DIPLOMACY'] });
-		const origFights = [...intOrig.keys()].filter(k => k.startsWith('FIGHT_'));
-		const modFights = [...intMod.keys()].filter(k => k.startsWith('FIGHT_'));
-		console.log('  Fights before:', origFights.join(', ') || 'none');
-		console.log('  Fights after:', modFights.join(', ') || 'none');
-
-		// Test Tracker
-		console.log('\n▶ TRACKER (LOST):');
-		const lostOrig = this.getModifiedProbabilities('LOST', {});
-		const lostMod = this.getModifiedProbabilities('LOST', { abilities: ['TRACKER'] });
-		console.log('  KILL_LOST before:', lostOrig.has('KILL_LOST') ? 'present' : 'absent');
-		console.log('  KILL_LOST after:', lostMod.has('KILL_LOST') ? 'present' : 'REMOVED ✓');
-
-		console.log('\n═══════════════════════════════════════════════════════');
 	}
 };
 

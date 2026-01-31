@@ -1,18 +1,15 @@
 /**
  * ExpeditionSimulator Application
  * 
- * Main application class that orchestrates all UI components.
- * This is the entry point that wires everything together.
+ * Main application class - orchestrates components and state.
+ * Delegates state management to ExpeditionState.
+ * Delegates data transformation to services.
  */
 class ExpeditionSimulatorApp {
 	constructor() {
-		// State - Initialize with LANDING sector automatically selected
-		this._selectedSectors = ['LANDING'];
-		this._players = [];
-		this._nextPlayerId = 1;
-		this._centauriActive = false;
+		this._state = new ExpeditionState();
+		this._state.setOnChange(() => this._updateDisplays());
 
-		// Component instances
 		this._panel = null;
 		this._sectorGrid = null;
 		this._selectedSectorsComponent = null;
@@ -21,317 +18,174 @@ class ExpeditionSimulatorApp {
 		this._probabilityDisplay = null;
 		this._resultsDisplay = null;
 
-		// Initialize
 		this._init();
 	}
 
-	/**
-	 * Initializes the application
-	 * @private
-	 */
 	_init() {
-		// Create main panel
 		this._panel = new Panel({
 			title: 'Expedition Simulator',
 			tongueIcon: getResourceURL('astro/astrophysicist.png'),
 			getResourceURL: getResourceURL
 		});
 		this._panel.mount(document.body);
-
-		// Create and add all sections
 		this._createSections();
 	}
 
-	/**
-	 * Creates all UI sections
-	 * @private
-	 */
 	_createSections() {
 		const contentArea = this._panel.getContentArea();
 
-		// 1. Sector Grid
 		this._sectorGrid = new SectorGrid({
 			sectors: SectorData.sectors,
 			getResourceURL: getResourceURL,
 			sectorsWithFight: SectorData.sectorsWithFight,
-			onSectorClick: (sectorName) => this._handleSectorClick(sectorName),
-			onDiplomacyToggle: (isActive) => this._handleDiplomacyToggle(isActive),
-			getSectorAvailability: (sectorName) => this._getSectorAvailability(sectorName)
+			onSectorClick: (name) => this._onSectorClick(name),
+			onDiplomacyToggle: (active) => this._updateDisplays(),
+			getSectorAvailability: (name) => this._getSectorAvailability(name)
 		});
 		this._sectorGrid.mount(contentArea);
 
-		// 2. Selected Sectors
 		this._selectedSectorsComponent = new SelectedSectors({
 			maxSectors: Constants.MAX_SECTORS,
 			getResourceURL: getResourceURL,
 			sectorsWithFight: SectorData.sectorsWithFight,
-			onSectorRemove: (index) => this._handleSectorRemove(index),
-			onClearAll: () => this._handleClearAllSectors()
+			onSectorRemove: (index) => this._onSectorRemove(index),
+			onClearAll: () => this._onClearSectors()
 		});
 		this._selectedSectorsComponent.mount(contentArea);
 
-		// 3. Example Worlds
 		this._exampleWorlds = new ExampleWorlds({
-			onWorldSelect: (worldName) => this._handleWorldSelect(worldName)
+			onWorldSelect: (name) => this._onWorldSelect(name)
 		});
 		this._exampleWorlds.mount(contentArea);
 
-		// 4. Player Section
 		this._playerSection = new PlayerSection({
 			maxPlayers: Constants.MAX_PLAYERS,
 			getResourceURL: getResourceURL,
-			onAddPlayer: () => this._handleAddPlayer(),
-			onModeToggle: (mode) => this._handleModeToggle(mode),
-			onAntigravToggle: (isActive) => this._handleAntigravToggle(isActive),
-			onBaseToggle: (isActive) => this._handleBaseToggle(isActive)
+			onAddPlayer: () => this._onAddPlayer(),
+			onModeToggle: (mode) => this._updateDisplays(),
+			onAntigravToggle: (active) => this._state.setAntigravActive(active),
+			onBaseToggle: (active) => this._state.setCentauriActive(active)
 		});
 		this._playerSection.mount(contentArea);
 
-		// 5. Probability Display
 		this._probabilityDisplay = new ProbabilityDisplay();
 		this._probabilityDisplay.mount(contentArea);
 
-		// 6. Results Display
 		this._resultsDisplay = new ResultsDisplay();
 		this._resultsDisplay.mount(contentArea);
 
-		// Initial update to show LANDING sector
-		this._selectedSectorsComponent.update(this._selectedSectors);
+		this._selectedSectorsComponent.update(this._state.getSectors());
 		this._updateDisplays();
 	}
 
 	// ========================================
-	// Sector Handlers
+	// Sector Events
 	// ========================================
 
-	/**
-	 * Handles sector click in the grid
-	 * @private
-	 * @param {string} sectorName
-	 */
-	_handleSectorClick(sectorName) {
-		// Check per-sector limit first
-		const sectorValidation = ValidationUtils.validateSectorLimit(sectorName, this._selectedSectors);
-		if (!sectorValidation.isValid) {
-			console.log(sectorValidation.message);
-			// TODO: Show user-friendly error message/notification
-			return;
+	_onSectorClick(sectorName) {
+		const sectors = this._state.getSectors();
+		const validation = ValidationUtils.validateSectorLimit(sectorName, sectors);
+		if (!validation.isValid) return;
+
+		if (!SectorData.isSpecialSector(sectorName)) {
+			const totalValidation = ValidationUtils.validateTotalSectorLimit(sectors);
+			if (!totalValidation.isValid) return;
 		}
 
-		// Only apply total sector limit to regular sectors (not special sectors)
-		const isSpecialSector = SectorData.isSpecialSector(sectorName);
-		if (!isSpecialSector) {
-			const totalValidation = ValidationUtils.validateTotalSectorLimit(this._selectedSectors);
-			if (!totalValidation.isValid) {
-				console.log(totalValidation.message);
-				// TODO: Show user-friendly error message/notification
-				return;
-			}
-		}
-
-		this._selectedSectors.push(sectorName);
-		this._selectedSectorsComponent.update(this._selectedSectors);
-		this._updateDisplays();
-
-		console.log(`Added sector: ${sectorName}`, this._selectedSectors);
+		this._state.addSector(sectorName);
+		this._selectedSectorsComponent.update(this._state.getSectors());
 	}
 
-	/**
-	 * Handles removing a sector from selection
-	 * @private
-	 * @param {number} index
-	 */
-	_handleSectorRemove(index) {
-		this._selectedSectors.splice(index, 1);
-		this._selectedSectorsComponent.update(this._selectedSectors);
-		this._updateDisplays();
-
-		console.log(`Removed sector at index ${index}`, this._selectedSectors);
+	_onSectorRemove(index) {
+		this._state.removeSector(index);
+		this._selectedSectorsComponent.update(this._state.getSectors());
 	}
 
-	/**
-	 * Handles clearing all selected sectors
-	 * @private
-	 */
-	_handleClearAllSectors() {
-		// Clear all sectors and automatically add LANDING back
-		this._selectedSectors = ['LANDING'];
-		this._selectedSectorsComponent.update(this._selectedSectors);
-		this._updateDisplays();
-
-		console.log('Cleared all sectors, LANDING automatically added');
+	_onClearSectors() {
+		this._state.clearSectors();
+		this._selectedSectorsComponent.update(this._state.getSectors());
 	}
 
-
-	/**
-	 * Handles diplomacy toggle
-	 * @private
-	 * @param {boolean} isActive
-	 */
-	_handleDiplomacyToggle(isActive) {
-		console.log(`Diplomacy toggle: ${isActive}`);
-		this._updateDisplays();
-	}
-
-	/**
-	 * Gets sector availability information for UI display
-	 * @private
-	 * @param {string} sectorName
-	 * @returns {Object} availability info with shouldDisable and tooltipText
-	 */
 	_getSectorAvailability(sectorName) {
-		const validation = ValidationUtils.validateSectorLimit(sectorName, this._selectedSectors);
-		const isSpecialSector = SectorData.isSpecialSector(sectorName);
+		const sectors = this._state.getSectors();
+		const validation = ValidationUtils.validateSectorLimit(sectorName, sectors);
 		
-		let shouldDisable = false;
+		let shouldDisable = !validation.isValid;
 		let tooltipText = `${formatSectorName(sectorName)} (${validation.currentCount}/${validation.maxAllowed})`;
-		
-		// Check per-sector limit first
-		if (!validation.isValid) {
-			shouldDisable = true;
-			tooltipText = `Maximum ${validation.maxAllowed} ${sectorName} sectors allowed (currently have ${validation.currentCount})`;
-		} 
-		// Only apply total sector limit to regular sectors (not special sectors)
-		else if (!isSpecialSector) {
-			const totalValidation = ValidationUtils.validateTotalSectorLimit(this._selectedSectors);
+
+		if (!shouldDisable && !SectorData.isSpecialSector(sectorName)) {
+			const totalValidation = ValidationUtils.validateTotalSectorLimit(sectors);
 			if (!totalValidation.isValid) {
 				shouldDisable = true;
-				tooltipText = `Maximum ${totalValidation.maxTotal} regular sectors allowed (currently have ${totalValidation.currentTotal})`;
+				tooltipText = `Maximum ${totalValidation.maxTotal} regular sectors`;
 			}
 		}
-		
+
 		return { shouldDisable, tooltipText };
 	}
 
 	// ========================================
-	// World Handlers
+	// World Events
 	// ========================================
 
-	/**
-	 * Handles example world selection
-	 * @private
-	 * @param {string} worldName
-	 */
-	_handleWorldSelect(worldName) {
+	_onWorldSelect(worldName) {
 		const sectors = WorldData.getWorldConfiguration(worldName);
-		if (sectors.length === 0) {
-			console.warn(`Unknown world: ${worldName}`);
-			return;
-		}
+		if (sectors.length === 0) return;
 
-		this._loadWorldSectors(sectors);
-		console.log(`Loaded ${worldName}:`, this._selectedSectors);
-	}
-
-	/**
-	 * Loads a world's sector configuration
-	 * @private
-	 * @param {Array<string>} sectors
-	 */
-	_loadWorldSectors(sectors) {
-		this._handleClearAllSectors();
-		sectors.filter(s => s !== 'LANDING').forEach(sectorName => {
-			this._selectedSectors.push(sectorName);
-		});
-		this._selectedSectorsComponent.update(this._selectedSectors);
-		this._updateDisplays();
+		this._state.clearSectors();
+		sectors.filter(s => s !== 'LANDING').forEach(s => this._state.addSector(s));
+		this._selectedSectorsComponent.update(this._state.getSectors());
 	}
 
 	// ========================================
-	// Player Handlers
+	// Player Events
 	// ========================================
 
-	/**
-	 * Handles adding a new player
-	 * @private
-	 */
-	_handleAddPlayer() {
-		if (this._players.length >= Constants.MAX_PLAYERS) {
-			console.log('Max players reached');
-			return;
-		}
+	_onAddPlayer() {
+		if (this._state.getPlayerCount() >= Constants.MAX_PLAYERS) return;
 
-		const playerId = this._nextPlayerId++;
-
-		const player = {
-			id: playerId,
-			avatar: Constants.DEFAULT_AVATAR,
-			abilities: [null, null, null, null, null],
-			items: [null, null, null],
-			health: Constants.DEFAULT_HEALTH
-		};
-
-		this._players.push(player);
-
-		const playerCard = new PlayerCard({
+		const player = this._state.addPlayer();
+		const card = new PlayerCard({
 			player: player,
 			getResourceURL: getResourceURL,
-			onAvatarClick: (id) => this._handleAvatarClick(id),
-			onAbilityClick: (id, slot) => this._handleAbilityClick(id, slot),
-			onItemClick: (id, slot) => this._handleItemClick(id, slot),
-			onHealthClick: (id) => this._handleHealthClick(id),
-			onRemove: (id) => this._handleRemovePlayer(id)
+			onAvatarClick: (id) => this._onAvatarClick(id),
+			onAbilityClick: (id, slot) => this._onAbilityClick(id, slot),
+			onItemClick: (id, slot) => this._onItemClick(id, slot),
+			onHealthClick: (id) => this._onHealthClick(id),
+			onRemove: (id) => this._onRemovePlayer(id)
 		});
-
-		this._playerSection.addPlayerCard(playerCard);
-		this._updateDisplays();
-
-		console.log(`Added player ${playerId}`, player);
+		this._playerSection.addPlayerCard(card);
 	}
 
-	/**
-	 * Handles removing a player
-	 * @private
-	 * @param {number} playerId
-	 */
-	_handleRemovePlayer(playerId) {
-		this._players = this._players.filter(p => p.id !== playerId);
+	_onRemovePlayer(playerId) {
+		this._state.removePlayer(playerId);
 		this._playerSection.removePlayerCard(playerId);
-		this._updateDisplays();
-
-		console.log(`Removed player ${playerId}`);
 	}
 
-	/**
-	 * Handles avatar click (open character selection)
-	 * @private
-	 * @param {number} playerId
-	 */
-	_handleAvatarClick(playerId) {
-		const player = this._players.find(p => p.id === playerId);
+	_onAvatarClick(playerId) {
+		const player = this._state.getPlayer(playerId);
 		if (!player) return;
 
-		const modal = new SelectionModal({
+		new SelectionModal({
 			title: 'Select Character',
 			items: CharacterData.getSelectionItems(getResourceURL),
 			selectedId: player.avatar,
 			columns: 6,
 			onSelect: (item) => {
-				player.avatar = item.id;
-				const card = this._playerSection.getPlayerCard(playerId);
-				card?.updateAvatar(item.id);
-				console.log(`Player ${playerId} avatar changed to ${item.id}`);
+				this._state.setPlayerAvatar(playerId, item.id);
+				this._playerSection.getPlayerCard(playerId)?.updateAvatar(item.id);
 			}
-		});
-		modal.open();
+		}).open();
 	}
 
-	/**
-	 * Handles ability slot click
-	 * @private
-	 * @param {number} playerId
-	 * @param {number} slotIndex
-	 */
-	_handleAbilityClick(playerId, slotIndex) {
-		const player = this._players.find(p => p.id === playerId);
+	_onAbilityClick(playerId, slotIndex) {
+		const player = this._state.getPlayer(playerId);
 		if (!player) return;
 
 		const items = AbilityData.getSelectionItems(getResourceURL);
-
-		// Add "clear" option
 		items.unshift({ id: null, image: '', label: 'Clear' });
 
-		const modal = new SelectionModal({
+		new SelectionModal({
 			title: 'Select Ability',
 			items: items,
 			selectedId: player.abilities[slotIndex],
@@ -339,32 +193,20 @@ class ExpeditionSimulatorApp {
 			itemSize: 'large',
 			className: 'ability-selection',
 			onSelect: (item) => {
-				player.abilities[slotIndex] = item.id;
-				const card = this._playerSection.getPlayerCard(playerId);
-				card?.updateAbility(slotIndex, item.id);
-				this._updateDisplays();
-				console.log(`Player ${playerId} ability[${slotIndex}] changed to ${item.id}`);
+				this._state.setPlayerAbility(playerId, slotIndex, item.id);
+				this._playerSection.getPlayerCard(playerId)?.updateAbility(slotIndex, item.id);
 			}
-		});
-		modal.open();
+		}).open();
 	}
 
-	/**
-	 * Handles item slot click
-	 * @private
-	 * @param {number} playerId
-	 * @param {number} slotIndex
-	 */
-	_handleItemClick(playerId, slotIndex) {
-		const player = this._players.find(p => p.id === playerId);
+	_onItemClick(playerId, slotIndex) {
+		const player = this._state.getPlayer(playerId);
 		if (!player) return;
 
 		const items = ItemData.getSelectionItems(getResourceURL);
-
-		// Add "clear" option
 		items.unshift({ id: null, image: '', label: 'Clear' });
 
-		const modal = new SelectionModal({
+		new SelectionModal({
 			title: 'Select Item',
 			items: items,
 			selectedId: player.items[slotIndex],
@@ -372,110 +214,63 @@ class ExpeditionSimulatorApp {
 			itemSize: 'large',
 			className: 'item-selection',
 			onSelect: (item) => {
-				player.items[slotIndex] = item.id;
-				const card = this._playerSection.getPlayerCard(playerId);
-				card?.updateItem(slotIndex, item.id);
-				this._updateDisplays();
-				console.log(`Player ${playerId} item[${slotIndex}] changed to ${item.id}`);
+				this._state.setPlayerItem(playerId, slotIndex, item.id);
+				this._playerSection.getPlayerCard(playerId)?.updateItem(slotIndex, item.id);
 			}
-		});
-		modal.open();
+		}).open();
 	}
 
-	/**
-	 * Handles health click (edit health)
-	 * @private
-	 * @param {number} playerId
-	 */
-	_handleHealthClick(playerId) {
-		const player = this._players.find(p => p.id === playerId);
+	_onHealthClick(playerId) {
+		const player = this._state.getPlayer(playerId);
 		if (!player) return;
 
 		const newHealth = prompt('Enter health value:', player.health.toString());
 		if (newHealth !== null) {
-			const healthValue = parseInt(newHealth, 10);
-			if (!isNaN(healthValue) && healthValue >= 0) {
-				player.health = healthValue;
-				const card = this._playerSection.getPlayerCard(playerId);
-				card?.updateHealth(healthValue);
-				this._updateDisplays();
-				console.log(`Player ${playerId} health changed to ${healthValue}`);
+			const value = parseInt(newHealth, 10);
+			if (!isNaN(value) && value >= 0) {
+				this._state.setPlayerHealth(playerId, value);
+				this._playerSection.getPlayerCard(playerId)?.updateHealth(value);
 			}
 		}
-	}
-
-	// ========================================
-	// Mode Handlers
-	// ========================================
-
-	/**
-	 * Handles mode toggle
-	 * @private
-	 * @param {string} mode
-	 */
-	_handleModeToggle(mode) {
-		console.log(`Mode changed to: ${mode}`);
-		this._updateDisplays();
-	}
-
-	/**
-	 * Handles antigrav toggle
-	 * @private
-	 * @param {boolean} isActive
-	 */
-	_handleAntigravToggle(isActive) {
-		console.log(`Antigrav: ${isActive}`);
-		this._updateDisplays();
-	}
-
-	/**
-	 * Handles base toggle (Centauri effect)
-	 * @private
-	 * @param {boolean} isActive
-	 */
-	_handleBaseToggle(isActive) {
-		this._centauriActive = isActive;
-		console.log(`Centauri base: ${isActive}`);
-		this._updateDisplays();
 	}
 
 	// ========================================
 	// Display Updates
 	// ========================================
 
-	/**
-	 * Updates probability and results displays
-	 * @private
-	 */
 	_updateDisplays() {
-		// Update sector availability states
-		if (this._sectorGrid && this._sectorGrid.updateSectorAvailability) {
-			this._sectorGrid.updateSectorAvailability();
-		}
-
-		// Analyze current player configuration for server-side processing
-		const playerAnalysis = this._analyzePlayerConfiguration();
-
-		// Update fighting power display
+		this._sectorGrid?.updateSectorAvailability?.();
 		this._updateFightingPower();
+		this._updateProbabilityDisplay();
+		this._updateResultsDisplay();
+	}
 
-		// Build combined loadout from all players for probability calculation
-		const loadout = this._buildCombinedLoadout();
+	_updateFightingPower() {
+		const power = FightingPowerService.calculateTotalFightingPower(
+			this._state.getPlayers(),
+			this._state.isCentauriActive()
+		);
+		this._playerSection?.setFightingPower?.(power);
+	}
 
-		// Update probability display: Frontend -> Backend -> Frontend
-		if (this._selectedSectors.length > 0) {
-			// Backend: calculate probabilities (returns data, not HTML)
-			const results = EventWeightCalculator.calculate(this._selectedSectors, loadout);
-			// Frontend: render the data
-			this._probabilityDisplay.update(results);
-		} else {
+	_updateProbabilityDisplay() {
+		const sectors = this._state.getSectors();
+		if (sectors.length === 0) {
 			this._probabilityDisplay.clear();
+			return;
 		}
 
-		// Update results display
-		if (this._players.length > 0) {
+		const loadout = LoadoutBuilder.build(this._state.getPlayers(), {
+			antigravActive: this._state.isAntigravActive()
+		});
+		const results = EventWeightCalculator.calculate(sectors, loadout);
+		this._probabilityDisplay.update(results);
+	}
+
+	_updateResultsDisplay() {
+		if (this._state.getPlayerCount() > 0) {
 			this._resultsDisplay.setContent(`
-				<p>${this._players.length} player(s) configured</p>
+				<p>${this._state.getPlayerCount()} player(s) configured</p>
 				<p><em>Expedition results will be calculated when backend is connected</em></p>
 			`);
 			this._resultsDisplay.showDefaultLegend();
@@ -485,136 +280,12 @@ class ExpeditionSimulatorApp {
 	}
 
 	// ========================================
-	// Analysis Methods
-	// ========================================
-
-	/**
-	 * Builds a combined loadout from all players for probability calculations.
-	 * Merges all abilities and items across all players.
-	 * Converts filenames (e.g., 'pilot.png') to identifiers (e.g., 'PILOT').
-	 * @private
-	 * @returns {Object} Combined loadout { abilities: [], items: [], projects: [] }
-	 */
-	_buildCombinedLoadout() {
-		const abilities = new Set();
-		const items = new Set();
-
-		for (const player of this._players) {
-			// Add all non-null abilities (converted to identifiers)
-			for (const ability of player.abilities || []) {
-				if (ability) {
-					abilities.add(this._filenameToId(ability));
-				}
-			}
-			// Add all non-null items (converted to identifiers)
-			for (const item of player.items || []) {
-				if (item) {
-					items.add(this._filenameToId(item));
-				}
-			}
-		}
-
-		return {
-			abilities: [...abilities],
-			items: [...items],
-			projects: [] // TODO: Wire up project selection (e.g., Antigrav Propeller)
-		};
-	}
-
-	/**
-	 * Converts a filename to an identifier.
-	 * 'pilot.png' -> 'PILOT'
-	 * 'white_flag.jpg' -> 'WHITE_FLAG'
-	 * @private
-	 */
-	_filenameToId(filename) {
-		return filename
-			.replace(/\.(png|jpg|gif)$/i, '')  // Remove extension
-			.toUpperCase();                     // Convert to uppercase
-	}
-
-	/**
-	 * Analyzes current player configuration for server-side processing
-	 * @private
-	 * @returns {Object} Player analysis data
-	 */
-	_analyzePlayerConfiguration() {
-		const analysis = PlayerAnalysisService.analyzePlayerConfiguration(this._players);
-		
-		// Log analysis for debugging (remove in production)
-		console.log('Player Analysis:', analysis);
-		
-		// This data can be passed to probability calculation system
-		return analysis;
-	}
-
-	/**
-	 * Calculates and updates fighting power display
-	 * @private
-	 */
-	_updateFightingPower() {
-		const centauriActive = this._isCentauriActive();
-		const fightingPower = FightingPowerService.calculateTotalFightingPower(this._players, centauriActive);
-		
-		// Update fighting power display through PlayerSection component
-		if (this._playerSection && this._playerSection.setFightingPower) {
-			this._playerSection.setFightingPower(fightingPower);
-		}
-	}
-
-	/**
-	 * Checks if Centauri base effect is currently active
-	 * @private
-	 * @returns {boolean}
-	 */
-	_isCentauriActive() {
-		return this._centauriActive;
-	}
-
-	/**
-	 * Gets current expedition data for external systems
-	 * @returns {Object} Complete expedition configuration
-	 */
-	getExpeditionData() {
-		const centauriActive = this._isCentauriActive();
-		
-		return {
-			sectors: [...this._selectedSectors],
-			playerAnalysis: this._analyzePlayerConfiguration(),
-			fightingPower: FightingPowerService.calculateBaseFightingPower(this._players, centauriActive),
-			grenadeCount: FightingPowerService.countGrenades(this._players),
-			centauriActive: centauriActive,
-			timestamp: Date.now()
-		};
-	}
-
-	// ========================================
 	// Public API
 	// ========================================
 
-	/**
-	 * Gets the selected sectors
-	 * @returns {Array<string>}
-	 */
-	getSelectedSectors() {
-		return [...this._selectedSectors];
-	}
-
-	/**
-	 * Gets the players
-	 * @returns {Array<Object>}
-	 */
-	getPlayers() {
-		return this._players.map(p => ({ ...p }));
-	}
-
-	/**
-	 * Gets the main panel
-	 * @returns {Panel}
-	 */
-	getPanel() {
-		return this._panel;
-	}
+	getSelectedSectors() { return this._state.getSectors(); }
+	getPlayers() { return this._state.getPlayers(); }
+	getPanel() { return this._panel; }
 }
 
 // Export

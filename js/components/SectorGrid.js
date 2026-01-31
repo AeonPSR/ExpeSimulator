@@ -29,10 +29,6 @@ class SectorGrid extends Component {
 		this.onDiplomacyToggle = options.onDiplomacyToggle || null;
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 		this.getSectorAvailability = options.getSectorAvailability || null;
-		this.sectorsWithFight = options.sectorsWithFight || [
-			'RUINS', 'WRECK', 'CRISTAL_FIELD', 'RUMINANT', 
-			'PREDATOR', 'INTELLIGENT', 'INSECT', 'MANKAROG'
-		];
 
 		this._diplomacyToggle = null;
 		this._gridElement = null;
@@ -164,7 +160,7 @@ class SectorGrid extends Component {
 	 * @returns {boolean}
 	 */
 	_hasFightEvents(sectorName) {
-		return this.sectorsWithFight.includes(sectorName);
+		return SectorData.hasFightEvents(sectorName);
 	}
 
 	/**

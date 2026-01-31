@@ -26,10 +26,6 @@ class SelectedSectors extends Component {
 		this.onSectorRemove = options.onSectorRemove || null;
 		this.onClearAll = options.onClearAll || null;
 		this.getResourceURL = options.getResourceURL || ((path) => path);
-		this.sectorsWithFight = options.sectorsWithFight || [
-			'RUINS', 'WRECK', 'CRISTAL_FIELD', 'RUMINANT',
-			'PREDATOR', 'INTELLIGENT', 'INSECT', 'MANKAROG'
-		];
 
 		// Current selected sectors
 		this._selectedSectors = [];
@@ -157,7 +153,7 @@ class SelectedSectors extends Component {
 	 * @returns {boolean}
 	 */
 	_hasFightEvents(sectorName) {
-		return this.sectorsWithFight.includes(sectorName);
+		return SectorData.hasFightEvents(sectorName);
 	}
 
 	/**
