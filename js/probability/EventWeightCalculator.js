@@ -199,6 +199,123 @@ const EventWeightCalculator = {
 	},
 
 	/**
+	 * Runs modifier tests and outputs to console.
+	 * Call this to verify ModifierApplicator is working correctly.
+	 */
+	runModifierTests() {
+		console.log('═══════════════════════════════════════════════════════');
+		console.log('Event Modifier Tests');
+		console.log('═══════════════════════════════════════════════════════');
+
+		// Test 1: Pilot removes LANDING damage events
+		this._testPilot();
+
+		// Test 2: Diplomacy removes all FIGHT_* events
+		this._testDiplomacy();
+
+		// Test 3: Tracker removes KILL_LOST from LOST
+		this._testTracker();
+
+		// Test 4: White Flag only affects INTELLIGENT
+		this._testWhiteFlag();
+
+		// Test 5: Antigrav Propeller doubles NOTHING_TO_REPORT in LANDING
+		this._testAntigrav();
+
+		console.log('\n═══════════════════════════════════════════════════════');
+		console.log('Modifier tests complete');
+		console.log('═══════════════════════════════════════════════════════');
+	},
+
+	/**
+	 * @private Test Pilot ability
+	 */
+	_testPilot() {
+		console.log('\n▶ PILOT (LANDING sector):');
+		const config = this.getSectorConfig('LANDING');
+		const original = this.calculateProbabilities(config);
+		
+		const modified = ModifierApplicator.apply(config, 'LANDING', { abilities: ['PILOT'] });
+		const modifiedProbs = this.calculateProbabilities(modified);
+
+		console.log('  Removed: TIRED_2, ACCIDENT_3_5, DISASTER_3_5');
+		console.log('  Original events:', original.size, '→ Modified:', modifiedProbs.size);
+	},
+
+	/**
+	 * @private Test Diplomacy ability
+	 */
+	_testDiplomacy() {
+		console.log('\n▶ DIPLOMACY (INTELLIGENT sector):');
+		const config = this.getSectorConfig('INTELLIGENT');
+		const original = this.calculateProbabilities(config);
+		
+		const fightEvents = [...original.keys()].filter(k => k.startsWith('FIGHT_'));
+		console.log('  Original FIGHT_* events:', fightEvents.join(', ') || 'none');
+
+		const modified = ModifierApplicator.apply(config, 'INTELLIGENT', { abilities: ['DIPLOMACY'] });
+		const modifiedProbs = this.calculateProbabilities(modified);
+		
+		const remainingFights = [...modifiedProbs.keys()].filter(k => k.startsWith('FIGHT_'));
+		console.log('  After Diplomacy:', remainingFights.join(', ') || 'none');
+	},
+
+	/**
+	 * @private Test Tracker ability
+	 */
+	_testTracker() {
+		console.log('\n▶ TRACKER (LOST sector):');
+		const config = this.getSectorConfig('LOST');
+		const original = this.calculateProbabilities(config);
+		
+		console.log('  Original KILL_LOST:', original.has('KILL_LOST') ? ((original.get('KILL_LOST') * 100).toFixed(1) + '%') : 'not present');
+
+		const modified = ModifierApplicator.apply(config, 'LOST', { abilities: ['TRACKER'] });
+		const modifiedProbs = this.calculateProbabilities(modified);
+		
+		console.log('  After Tracker:', modifiedProbs.has('KILL_LOST') ? ((modifiedProbs.get('KILL_LOST') * 100).toFixed(1) + '%') : 'REMOVED');
+	},
+
+	/**
+	 * @private Test White Flag item
+	 */
+	_testWhiteFlag() {
+		console.log('\n▶ WHITE FLAG (INTELLIGENT vs FOREST):');
+		
+		// INTELLIGENT - should remove fights
+		const intConfig = this.getSectorConfig('INTELLIGENT');
+		const intModified = ModifierApplicator.apply(intConfig, 'INTELLIGENT', { items: ['WHITE_FLAG'] });
+		const intProbs = this.calculateProbabilities(intModified);
+		const intFights = [...intProbs.keys()].filter(k => k.startsWith('FIGHT_'));
+		console.log('  INTELLIGENT after White Flag:', intFights.length === 0 ? 'No fights ✓' : intFights.join(', '));
+
+		// FOREST - should NOT affect fights (White Flag only works on INTELLIGENT)
+		const forestConfig = this.getSectorConfig('FOREST');
+		const forestOriginal = this.calculateProbabilities(forestConfig);
+		const forestModified = ModifierApplicator.apply(forestConfig, 'FOREST', { items: ['WHITE_FLAG'] });
+		const forestProbs = this.calculateProbabilities(forestModified);
+		const forestFightsOrig = [...forestOriginal.keys()].filter(k => k.startsWith('FIGHT_'));
+		const forestFightsMod = [...forestProbs.keys()].filter(k => k.startsWith('FIGHT_'));
+		console.log('  FOREST fights unchanged:', forestFightsOrig.length === forestFightsMod.length ? '✓' : '✗');
+	},
+
+	/**
+	 * @private Test Antigrav Propeller project
+	 */
+	_testAntigrav() {
+		console.log('\n▶ ANTIGRAV PROPELLER (LANDING sector):');
+		const config = this.getSectorConfig('LANDING');
+		const original = this.calculateProbabilities(config);
+		
+		console.log('  Original NOTHING_TO_REPORT:', ((original.get('NOTHING_TO_REPORT') || 0) * 100).toFixed(1) + '%');
+
+		const modified = ModifierApplicator.apply(config, 'LANDING', { projects: ['ANTIGRAV_PROPELLER'] });
+		const modifiedProbs = this.calculateProbabilities(modified);
+		
+		console.log('  After Antigrav:', ((modifiedProbs.get('NOTHING_TO_REPORT') || 0) * 100).toFixed(1) + '%');
+	},
+
+	/**
 	 * Generates test output HTML for all selected sectors.
 	 * 
 	 * @param {Array<string>} selectedSectors - Array of sector names

@@ -34,6 +34,11 @@
         "js/services/PlayerAnalysisService.js",
         "js/probability/EventWeightCalculator.js",
         "js/probability/BinomialCalculator.js",
+        "js/probability/EventModifier.js",
+        "js/probability/AbilityModifiers.js",
+        "js/probability/ItemModifiers.js",
+        "js/probability/ProjectModifiers.js",
+        "js/probability/ModifierApplicator.js",
         "js/app.js",
         "js/content.js"
       ],
