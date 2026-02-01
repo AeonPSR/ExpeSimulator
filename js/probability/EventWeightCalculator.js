@@ -105,7 +105,12 @@ const EventWeightCalculator = {
 			? FightCalculator.calculate(sectors, loadout, players)
 			: this._legacyFightCalculation(sectors, loadout);
 
-		// Aggregate non-resource, non-fight events
+		// Calculate event damage using EventDamageCalculator (convolution-based)
+		const eventDamage = typeof EventDamageCalculator !== 'undefined'
+			? EventDamageCalculator.calculate(sectors, loadout, players)
+			: this._legacyEventDamageCalculation(sectors, loadout);
+
+		// Aggregate non-resource, non-fight, non-damage events
 		const aggregated = this._aggregateEvents(sectors, loadout);
 
 		// Build sector breakdown
@@ -113,12 +118,8 @@ const EventWeightCalculator = {
 
 		return {
 			resources: resources,
-			combat: combat,  // New: full fight data with occurrence + damage
-			eventDamage: {
-				tired: aggregated.tired,
-				accident: aggregated.accident,
-				disaster: aggregated.disaster
-			},
+			combat: combat,  // Full fight data with occurrence + damage
+			eventDamage: eventDamage,  // Full event damage data with occurrence + scenarios
 			negativeEvents: {
 				disease: aggregated.disease,
 				playerLost: aggregated.playerLost,
@@ -193,6 +194,40 @@ const EventWeightCalculator = {
 		}
 
 		return result;
+	},
+
+	/**
+	 * Legacy event damage calculation (fallback if EventDamageCalculator not loaded).
+	 * @private
+	 */
+	_legacyEventDamageCalculation(sectors, loadout) {
+		let tired = 0, accident = 0, disaster = 0;
+		
+		for (const sectorName of sectors) {
+			const probs = this.getModifiedProbabilities(sectorName, loadout);
+			for (const [eventName, prob] of probs) {
+				if (eventName === 'TIRED_2') tired += prob;
+				else if (eventName === 'ACCIDENT_3_5') accident += prob;
+				else if (eventName === 'DISASTER_3_5') disaster += prob;
+			}
+		}
+		
+		// Calculate rough damage estimates (assumes 1 player)
+		const avgDamage = (tired * 2) + (accident * 4) + (disaster * 4);
+		
+		return {
+			occurrence: {},
+			damage: { 
+				pessimist: Math.round(avgDamage * 1.5), 
+				average: Math.round(avgDamage), 
+				optimist: Math.round(avgDamage * 0.5), 
+				worstCase: Math.round(avgDamage * 2)
+			},
+			tired,
+			accident,
+			disaster,
+			scenarios: { pessimist: 0, average: 0, optimist: 0, worstCase: 0 }
+		};
 	},
 
 	// ========================================

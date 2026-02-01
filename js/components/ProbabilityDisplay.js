@@ -187,8 +187,14 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		// Format probability percentages
-		const formatProb = (prob) => prob !== undefined ? `(${(prob * 100).toFixed(1)}%)` : '';
+		// Format probability percentages - show "<0.1%" for very small non-zero values
+		const formatProb = (prob) => {
+			if (prob === undefined) return '';
+			const pct = prob * 100;
+			if (pct === 0) return '(0%)';
+			if (pct < 0.1) return '(<0.1%)';
+			return `(${pct.toFixed(1)}%)`;
+		};
 
 		return `
 			<div class="outcome-category">
