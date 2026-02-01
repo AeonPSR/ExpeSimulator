@@ -36,9 +36,10 @@ const FightCalculator = {
 	 * @param {Array<string>} sectors - Array of sector names
 	 * @param {Object} loadout - { abilities: [], items: [], projects: [] }
 	 * @param {Array<Object>} players - Raw player data
+	 * @param {Set<string>} worstCaseExclusions - Sectors to exclude from worst case (where event damage "wins")
 	 * @returns {Object} Fight data with occurrence and damage info
 	 */
-	calculate(sectors, loadout = {}, players = []) {
+	calculate(sectors, loadout = {}, players = [], worstCaseExclusions = null) {
 		if (!sectors || sectors.length === 0) {
 			return this._emptyResult();
 		}
@@ -55,14 +56,25 @@ const FightCalculator = {
 			occurrence[fightType] = this._calculateOccurrence(sectors, loadout, fightType);
 		}
 
+		// For worst case, also calculate occurrence excluding sectors where event damage wins
+		let worstCaseOccurrence = occurrence;
+		if (worstCaseExclusions && worstCaseExclusions.size > 0) {
+			const filteredSectors = sectors.filter(s => !worstCaseExclusions.has(s));
+			worstCaseOccurrence = {};
+			for (const fightType of fightTypes) {
+				worstCaseOccurrence[fightType] = this._calculateOccurrence(filteredSectors, loadout, fightType);
+			}
+		}
+
 		// Calculate damage scenarios
-		const damage = this._calculateDamage(occurrence, fightingPower, grenadeCount);
+		const damage = this._calculateDamage(occurrence, worstCaseOccurrence, fightingPower, grenadeCount);
 
 		return {
 			occurrence,      // { "12": { pessimist, average, optimist, distribution }, ... }
 			damage,          // { pessimist, average, optimist, worstCase }
 			fightingPower,
-			grenadeCount
+			grenadeCount,
+			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
 		};
 	},
 
@@ -133,9 +145,13 @@ const FightCalculator = {
 
 	/**
 	 * Calculates total damage for all scenarios.
+	 * @param {Object} occurrence - Fight occurrence data for normal scenarios
+	 * @param {Object} worstCaseOccurrence - Fight occurrence data for worst case (may exclude some sectors)
+	 * @param {number} fightingPower - Team's fighting power
+	 * @param {number} grenadeCount - Available grenades
 	 * @private
 	 */
-	_calculateDamage(occurrence, fightingPower, grenadeCount) {
+	_calculateDamage(occurrence, worstCaseOccurrence, fightingPower, grenadeCount) {
 		// For each scenario (pessimist/average/optimist), calculate total damage
 		const scenarios = ['pessimist', 'average', 'optimist'];
 		const result = {
@@ -203,9 +219,22 @@ const FightCalculator = {
 					result[scenario + 'Prob'] *= (prob > 0 ? prob : 1);
 				}
 			}
+		}
 
-			// Worst case: max possible fights for this type
+		// Worst case: use worstCaseOccurrence (which may have excluded sectors)
+		const worstCaseSortedTypes = Object.keys(worstCaseOccurrence).sort((a, b) => {
+			const damageA = this._getBaseDamage(a, 'worstCase');
+			const damageB = this._getBaseDamage(b, 'worstCase');
+			return damageB - damageA;
+		});
+
+		for (const fightType of worstCaseSortedTypes) {
+			const occ = worstCaseOccurrence[fightType];
+			if (!occ) continue;
+
+			const dist = occ.distribution;
 			const maxFights = occ.maxPossible || 0;
+			
 			const worstDamageInfo = this._calculateFightTypeDamage(
 				fightType,
 				maxFights,

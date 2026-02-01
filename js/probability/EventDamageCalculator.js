@@ -40,9 +40,10 @@ const EventDamageCalculator = {
 	 * @param {Array<string>} sectors - Array of sector names
 	 * @param {Object} loadout - { abilities: [], items: [], projects: [] }
 	 * @param {Array<Object>} players - Raw player data
+	 * @param {Set<string>} worstCaseExclusions - Sectors to exclude from worst case (where fight damage "wins")
 	 * @returns {Object} Event damage data with scenarios
 	 */
-	calculate(sectors, loadout = {}, players = []) {
+	calculate(sectors, loadout = {}, players = [], worstCaseExclusions = null) {
 		if (!sectors || sectors.length === 0) {
 			return this._emptyResult();
 		}
@@ -50,7 +51,7 @@ const EventDamageCalculator = {
 		const playerCount = players.length || 1;
 
 		// Build per-sector damage distributions, then convolve
-		const damageResult = this._calculateDamageWithConvolution(sectors, loadout, playerCount);
+		const damageResult = this._calculateDamageWithConvolution(sectors, loadout, playerCount, worstCaseExclusions);
 
 		// Also calculate occurrence for legacy compatibility (Event Risks display)
 		const occurrence = this._calculateOccurrences(sectors, loadout);
@@ -63,21 +64,32 @@ const EventDamageCalculator = {
 			tired: occurrence.TIRED_2?.average || 0,
 			accident: occurrence.ACCIDENT_3_5?.average || 0,
 			disaster: occurrence.DISASTER_3_5?.average || 0,
-			scenarios: damageResult  // Alias for display
+			scenarios: damageResult,  // Alias for display
+			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
 		};
 	},
 
 	/**
 	 * Calculates damage using proper per-sector convolution.
 	 * Each sector can only produce ONE event, so we build sector damage distributions.
+	 * @param {Array<string>} sectors - Sector names
+	 * @param {Object} loadout - Player loadout
+	 * @param {number} playerCount - Number of players
+	 * @param {Set<string>} worstCaseExclusions - Sectors to exclude from worst case
 	 * @private
 	 */
-	_calculateDamageWithConvolution(sectors, loadout, playerCount) {
+	_calculateDamageWithConvolution(sectors, loadout, playerCount, worstCaseExclusions = null) {
 		const distributions = [];
+		const worstCaseDistributions = [];
 
 		for (const sectorName of sectors) {
 			const dist = this._buildSectorDamageDistribution(sectorName, loadout, playerCount);
 			distributions.push(dist);
+			
+			// For worst case, skip excluded sectors (where fight damage "wins")
+			if (!worstCaseExclusions || !worstCaseExclusions.has(sectorName)) {
+				worstCaseDistributions.push(dist);
+			}
 		}
 
 		if (distributions.length === 0) {
@@ -90,10 +102,16 @@ const EventDamageCalculator = {
 		// For damage: lower = better (optimist), so higherIsBetter = false
 		const scenarios = DistributionCalculator.getScenarios(combined, false);
 
-		// Calculate worst case (max damage) and its probability
-		const sortedEntries = [...combined.entries()].sort((a, b) => b[0] - a[0]);
-		const worstCase = sortedEntries[0]?.[0] || 0;
-		const worstCaseProb = sortedEntries[0]?.[1] || 0;
+		// For worst case, use the filtered distributions
+		let worstCase = 0;
+		let worstCaseProb = 1;
+		
+		if (worstCaseDistributions.length > 0) {
+			const worstCaseCombined = DistributionCalculator.convolveAll(worstCaseDistributions);
+			const sortedEntries = [...worstCaseCombined.entries()].sort((a, b) => b[0] - a[0]);
+			worstCase = sortedEntries[0]?.[0] || 0;
+			worstCaseProb = sortedEntries[0]?.[1] || 0;
+		}
 
 		// Get probabilities for pessimist/optimist values
 		const pessimistProb = combined.get(scenarios.pessimist) || 0;

@@ -100,14 +100,44 @@ const EventWeightCalculator = {
 			? ResourceCalculator.calculate(sectors, loadout, players)
 			: this._legacyResourceCalculation(sectors, loadout);
 
+		// Use DamageComparator to determine which sectors should have fight vs event damage
+		// for worst case calculations (mutual exclusivity)
+		let fightExclusions = null;  // Sectors where event damage "wins" (exclude from fight worst case)
+		let eventExclusions = null;  // Sectors where fight damage "wins" (exclude from event worst case)
+		
+		if (typeof DamageComparator !== 'undefined' && typeof FightingPowerService !== 'undefined') {
+			const playerCount = players.length || 1;
+			const fightingPower = FightingPowerService.calculateBaseFightingPower(players);
+			const grenadeCount = FightingPowerService.countGrenades(players);
+			
+			const evaluation = DamageComparator.evaluateExpedition(
+				sectors, loadout, playerCount, fightingPower, grenadeCount
+			);
+			
+			fightExclusions = new Set();
+			eventExclusions = new Set();
+			
+			for (const [sectorName, result] of evaluation.sectorResults) {
+				if (result.worstEvent) {
+					if (result.eventType === 'event') {
+						// Event damage wins - exclude this sector from fight worst case
+						fightExclusions.add(sectorName);
+					} else if (result.eventType === 'fight') {
+						// Fight damage wins - exclude this sector from event worst case
+						eventExclusions.add(sectorName);
+					}
+				}
+			}
+		}
+
 		// Calculate fights using FightCalculator (convolution-based)
 		const combat = typeof FightCalculator !== 'undefined'
-			? FightCalculator.calculate(sectors, loadout, players)
+			? FightCalculator.calculate(sectors, loadout, players, fightExclusions)
 			: this._legacyFightCalculation(sectors, loadout);
 
 		// Calculate event damage using EventDamageCalculator (convolution-based)
 		const eventDamage = typeof EventDamageCalculator !== 'undefined'
-			? EventDamageCalculator.calculate(sectors, loadout, players)
+			? EventDamageCalculator.calculate(sectors, loadout, players, eventExclusions)
 			: this._legacyEventDamageCalculation(sectors, loadout);
 
 		// Aggregate non-resource, non-fight, non-damage events
