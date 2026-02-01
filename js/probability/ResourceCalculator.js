@@ -195,10 +195,12 @@ const ResourceCalculator = {
 
 	/**
 	 * Calculates map fragments (STARMAP + 1/9 of ARTEFACT).
+	 * If any ARTEFACT exists, optimist is at least 0.1 (important for ending)
 	 * @private
 	 */
 	_calculateMapFragments(sectors, loadout) {
 		const distributions = [];
+		let hasArtefact = false;
 
 		for (const sectorName of sectors) {
 			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
@@ -210,6 +212,7 @@ const ResourceCalculator = {
 					dist.set(1, (dist.get(1) || 0) + prob);
 					mapProb += prob;
 				} else if (eventName === 'ARTEFACT') {
+					hasArtefact = true;
 					// 1/9 chance it's a map fragment
 					const mapFragmentProb = prob * (1 / 9);
 					dist.set(1, (dist.get(1) || 0) + mapFragmentProb);
@@ -234,7 +237,14 @@ const ResourceCalculator = {
 		}
 
 		const combined = DistributionCalculator.convolveAll(distributions);
-		return DistributionCalculator.getScenarios(combined);
+		const result = DistributionCalculator.getScenarios(combined);
+
+		// If any artefact exists, optimist should be at least 0.1 (starmaps are important for endings)
+		if (hasArtefact && result.optimist < 0.1) {
+			result.optimist = 0.1;
+		}
+
+		return result;
 	},
 
 	/**

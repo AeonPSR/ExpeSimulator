@@ -75,12 +75,17 @@ class ProbabilityDisplay extends Component {
 			{ name: 'Map Fragments', icon: 'items/super_map.jpg', data: resources.mapFragments }
 		];
 
-		// Sort: items with values first
-		items.sort((a, b) => (b.data.average > 0 ? 1 : 0) - (a.data.average > 0 ? 1 : 0));
+		// Sort: items with values first (check both average and optimist)
+		items.sort((a, b) => {
+			const aHasValue = (a.data.average > 0 || a.data.optimist > 0) ? 1 : 0;
+			const bHasValue = (b.data.average > 0 || b.data.optimist > 0) ? 1 : 0;
+			return bHasValue - aHasValue;
+		});
 
 		const rows = items.map(r => {
 			const icon = this._icon(r.icon);
-			if (r.data.average === 0) {
+			// Show "none" only if both average AND optimist are 0
+			if (r.data.average === 0 && r.data.optimist === 0) {
 				return `<tr><td class="icon-cell">${icon}</td><td colspan="3" class="neutral none-row">none</td></tr>`;
 			}
 			return `<tr>
