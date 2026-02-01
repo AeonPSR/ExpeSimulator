@@ -90,14 +90,22 @@ const DistributionCalculator = {
 	 * Extracts pessimist/average/optimist from a distribution.
 	 * 
 	 * @param {Map<number, number>} distribution - Value → probability map
+	 * @param {boolean} [higherIsBetter=true] - If true (resources), higher values are optimist.
+	 *                                          If false (damage/fights), lower values are optimist.
 	 * @returns {{pessimist: number, average: number, optimist: number}}
 	 */
-	getScenarios(distribution) {
-		return {
-			pessimist: this.getPercentile(distribution, 0.25),
-			average: Math.round(this.getExpectedValue(distribution) * 10) / 10,
-			optimist: this.getPercentile(distribution, 0.75)
-		};
+	getScenarios(distribution, higherIsBetter = true) {
+		const p25 = this.getPercentile(distribution, 0.25);
+		const p75 = this.getPercentile(distribution, 0.75);
+		const avg = Math.round(this.getExpectedValue(distribution) * 10) / 10;
+
+		if (higherIsBetter) {
+			// Resources: higher = better
+			return { pessimist: p25, average: avg, optimist: p75 };
+		} else {
+			// Damage/Fights: lower = better
+			return { pessimist: p75, average: avg, optimist: p25 };
+		}
 	},
 
 	/**

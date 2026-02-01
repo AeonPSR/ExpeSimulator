@@ -68,6 +68,25 @@
 }
 
 /* ==========================================================================
+   Damage Display Items (Combat/Event Damage sections)
+   Vertically stacked, centered layout
+   ========================================================================== */
+
+.damage-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 6px 0;
+	font-size: 12px;
+}
+
+.damage-item span:first-child {
+	color: #ecf0f1;
+	font-weight: 500;
+	margin-bottom: 2px;
+}
+
+/* ==========================================================================
    Selection Prevention (for drag/select issues)
    ========================================================================== */
 

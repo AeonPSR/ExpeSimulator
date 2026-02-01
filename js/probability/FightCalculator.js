@@ -100,7 +100,8 @@ const FightCalculator = {
 
 		// Convolve all sector distributions
 		const combined = DistributionCalculator.convolveAll(distributions);
-		const scenarios = DistributionCalculator.getScenarios(combined);
+		// For fights: lower count = better (optimist), so higherIsBetter = false
+		const scenarios = DistributionCalculator.getScenarios(combined, false);
 
 		return {
 			...scenarios,
@@ -142,6 +143,10 @@ const FightCalculator = {
 			average: 0,
 			optimist: 0,
 			worstCase: 0,
+			// Probabilities for each scenario
+			pessimistProb: 1,
+			optimistProb: 1,
+			worstCaseProb: 1,
 			breakdown: {
 				pessimist: [],
 				average: [],
@@ -167,6 +172,7 @@ const FightCalculator = {
 
 		for (const fightType of sortedTypes) {
 			const occ = occurrence[fightType];
+			const dist = occ.distribution;
 
 			for (const scenario of scenarios) {
 				const fightCount = Math.round(occ[scenario]);
@@ -190,6 +196,12 @@ const FightCalculator = {
 						grenadesUsed: damageInfo.grenadesUsed
 					});
 				}
+
+				// Calculate probability for this scenario's fight count
+				if (scenario === 'pessimist' || scenario === 'optimist') {
+					const prob = dist.get(fightCount) || 0;
+					result[scenario + 'Prob'] *= (prob > 0 ? prob : 1);
+				}
 			}
 
 			// Worst case: max possible fights for this type
@@ -204,6 +216,10 @@ const FightCalculator = {
 			
 			result.worstCase += worstDamageInfo.totalDamage;
 			grenadesRemaining.worstCase = worstDamageInfo.grenadesRemaining;
+			
+			// Worst case probability: probability of getting max fights
+			const worstProb = dist.get(maxFights) || 0;
+			result.worstCaseProb *= (worstProb > 0 ? worstProb : 1);
 			
 			if (maxFights > 0) {
 				result.breakdown.worstCase.push({

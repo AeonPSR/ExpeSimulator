@@ -45,7 +45,7 @@ class ProbabilityDisplay extends Component {
 		html += this._renderCombatRisks(data.combat);
 		html += this._renderCombatDamage(data.combat);
 		html += this._renderEventRisks(data.eventDamage);
-		html += this._renderEventDamage();
+		html += this._renderEventDamage(data.eventDamage);
 		html += this._renderNegativeEvents(data.negativeEvents);
 		html += this._renderSectorBreakdown(data.sectorBreakdown);
 
@@ -175,8 +175,7 @@ class ProbabilityDisplay extends Component {
 	}
 
 	_renderCombatDamage(combat) {
-		const hpIcon = this._icon('astro/hp.png');
-		const fightIcon = this._icon('others/fight.png');
+		const hpIcon = this._icon('astro/hp.png', 'hp-icon');
 		const damage = combat?.damage;
 		
 		if (!damage || (damage.pessimist === 0 && damage.average === 0 && damage.optimist === 0 && damage.worstCase === 0)) {
@@ -188,33 +187,27 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		// Show fighting power info
-		const fpInfo = combat.fightingPower > 0 || combat.grenadeCount > 0
-			? `<div class="outcome-item fp-info">
-				<span>${fightIcon} Fighting Power: ${combat.fightingPower}</span>
-				${combat.grenadeCount > 0 ? `<span class="grenade-info">(+${combat.grenadeCount} grenades)</span>` : ''}
-			</div>`
-			: '';
+		// Format probability percentages
+		const formatProb = (prob) => prob !== undefined ? `(${(prob * 100).toFixed(1)}%)` : '';
 
 		return `
 			<div class="outcome-category">
 				<h5>Combat Damage</h5>
-				${fpInfo}
-				<div class="outcome-item">
-					<span>Optimist:</span>
+				<div class="damage-item">
+					<span>Optimist Scenario: ${formatProb(damage.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${Math.round(damage.optimist)}</strong></span>
 				</div>
-				<div class="outcome-item">
-					<span>Average:</span>
-					<span class="warning">${hpIcon}<strong>${Math.round(damage.average)}</strong></span>
+				<div class="damage-item">
+					<span>Average HP Lost:</span>
+					<span class="danger">${hpIcon}<strong>${Math.round(damage.average)}</strong></span>
 				</div>
-				<div class="outcome-item">
-					<span>Pessimist:</span>
-					<span class="danger">${hpIcon}<strong>${Math.round(damage.pessimist)}</strong></span>
+				<div class="damage-item">
+					<span>Pessimist Scenario: ${formatProb(damage.pessimistProb)}</span>
+					<span class="critical">${hpIcon}<strong>${Math.round(damage.pessimist)}</strong></span>
 				</div>
-				<div class="outcome-item">
-					<span>Worst Case:</span>
-					<span class="critical">${hpIcon}<strong>${Math.round(damage.worstCase)}</strong></span>
+				<div class="damage-item">
+					<span>Worst Case Scenario: ${formatProb(damage.worstCaseProb)}</span>
+					<span class="critical bold-damage">${hpIcon}<strong>${Math.round(damage.worstCase)}</strong></span>
 				</div>
 			</div>
 		`;
@@ -251,26 +244,43 @@ class ProbabilityDisplay extends Component {
 		`;
 	}
 
-	_renderEventDamage() {
-		const hpIcon = this._icon('astro/hp.png');
+	_renderEventDamage(eventDamage) {
+		const hpIcon = this._icon('astro/hp.png', 'hp-icon');
+		const scenarios = eventDamage?.scenarios;
+		
+		// Check if there's any event damage
+		const hasEventDamage = eventDamage && (eventDamage.tired > 0 || eventDamage.accident > 0 || eventDamage.disaster > 0);
+		
+		if (!hasEventDamage || !scenarios) {
+			return `
+				<div class="outcome-category">
+					<h5>Event Damage</h5>
+					<div class="outcome-item"><span>No event damage expected</span></div>
+				</div>
+			`;
+		}
+
+		// Format probability percentages
+		const formatProb = (prob) => prob !== undefined ? `(${(prob * 100).toFixed(1)}%)` : '';
+
 		return `
 			<div class="outcome-category">
 				<h5>Event Damage</h5>
-				<div class="outcome-item">
-					<span>Optimist Scenario:</span>
-					<span class="positive">${hpIcon}<strong>-</strong></span>
+				<div class="damage-item">
+					<span>Optimist Scenario: ${formatProb(scenarios.optimistProb)}</span>
+					<span class="positive">${hpIcon}<strong>${Math.round(scenarios.optimist)}</strong></span>
 				</div>
-				<div class="outcome-item">
+				<div class="damage-item">
 					<span>Average HP Lost:</span>
-					<span class="warning">${hpIcon}<strong>-</strong></span>
+					<span class="danger">${hpIcon}<strong>${Math.round(scenarios.average)}</strong></span>
 				</div>
-				<div class="outcome-item">
-					<span>Pessimist Scenario:</span>
-					<span class="danger">${hpIcon}<strong>-</strong></span>
+				<div class="damage-item">
+					<span>Pessimist Scenario: ${formatProb(scenarios.pessimistProb)}</span>
+					<span class="critical">${hpIcon}<strong>${Math.round(scenarios.pessimist)}</strong></span>
 				</div>
-				<div class="outcome-item">
-					<span>Worst Case:</span>
-					<span class="critical">${hpIcon}<strong>-</strong></span>
+				<div class="damage-item">
+					<span>Worst Case Scenario: ${formatProb(scenarios.worstCaseProb)}</span>
+					<span class="critical bold-damage">${hpIcon}<strong>${Math.round(scenarios.worstCase)}</strong></span>
 				</div>
 			</div>
 		`;
@@ -345,9 +355,14 @@ class ProbabilityDisplay extends Component {
 	// Helper Methods
 	// ========================================
 
-	_icon(path) {
+	/**
+	 * Creates an icon img tag with appropriate class
+	 * @param {string} path - Resource path
+	 * @param {string} [className='resource-icon'] - CSS class name
+	 */
+	_icon(path, className = 'resource-icon') {
 		if (this._getResourceURL) {
-			return `<img src="${this._getResourceURL(path)}" alt="" class="resource-icon" />`;
+			return `<img src="${this._getResourceURL(path)}" alt="" class="${className}" />`;
 		}
 		return '';
 	}
