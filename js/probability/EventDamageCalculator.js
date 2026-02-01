@@ -50,15 +50,25 @@ const EventDamageCalculator = {
 
 		const playerCount = players.length || 1;
 
+		// Calculate occurrences with source tracking for each event type
+		const occurrenceWithSources = this._calculateOccurrencesWithSources(sectors, loadout);
+
 		// Build per-sector damage distributions, then convolve
 		const damageResult = this._calculateDamageWithConvolution(sectors, loadout, playerCount, worstCaseExclusions);
 
-		// Also calculate occurrence for legacy compatibility (Event Risks display)
-		const occurrence = this._calculateOccurrences(sectors, loadout);
+		// Build damage instances for per-player distribution
+		const damageInstances = this._buildDamageInstances(occurrenceWithSources, playerCount, worstCaseExclusions);
+
+		// Legacy occurrence format (without sources)
+		const occurrence = {};
+		for (const eventType of Object.keys(occurrenceWithSources)) {
+			occurrence[eventType] = occurrenceWithSources[eventType].occurrence;
+		}
 
 		return {
 			occurrence,
 			damage: damageResult,
+			damageInstances,  // Per-scenario damage instances with sources
 			playerCount,
 			// Legacy format for backward compatibility
 			tired: occurrence.TIRED_2?.average || 0,
@@ -202,6 +212,185 @@ const EventDamageCalculator = {
 	},
 
 	/**
+	 * Calculates occurrence counts for each event type with source tracking.
+	 * @private
+	 */
+	_calculateOccurrencesWithSources(sectors, loadout) {
+		const eventTypes = ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5'];
+		const result = {};
+
+		for (const eventType of eventTypes) {
+			result[eventType] = this._calculateEventOccurrenceWithSources(sectors, loadout, eventType);
+		}
+
+		return result;
+	},
+
+	/**
+	 * Calculates occurrence for a specific event type with source tracking.
+	 * @private
+	 */
+	_calculateEventOccurrenceWithSources(sectors, loadout, eventType) {
+		const distributions = [];
+		const sectorsWithEvent = [];
+
+		for (const sectorName of sectors) {
+			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+			let eventProb = 0;
+
+			for (const [eventName, prob] of probs) {
+				if (eventName === eventType) {
+					eventProb = prob;
+					break;
+				}
+			}
+
+			if (eventProb > 0) {
+				distributions.push(new Map([
+					[0, 1 - eventProb],
+					[1, eventProb]
+				]));
+				sectorsWithEvent.push({
+					sectorName,
+					probability: eventProb
+				});
+			}
+		}
+
+		if (distributions.length === 0) {
+			return { 
+				occurrence: { pessimist: 0, average: 0, optimist: 0, distribution: new Map([[0, 1]]) },
+				sectors: []
+			};
+		}
+
+		const combined = DistributionCalculator.convolveAll(distributions);
+		const scenarios = DistributionCalculator.getScenarios(combined, false);
+
+		return {
+			occurrence: {
+				...scenarios,
+				distribution: combined,
+				maxPossible: distributions.length
+			},
+			sectors: sectorsWithEvent
+		};
+	},
+
+	/**
+	 * Builds damage instances for each scenario with source information.
+	 * @private
+	 */
+	_buildDamageInstances(occurrenceWithSources, playerCount, worstCaseExclusions = null) {
+		const damageInstances = {
+			pessimist: [],
+			average: [],
+			optimist: [],
+			worstCase: []
+		};
+
+		const eventTypes = ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5'];
+		const scenarios = ['pessimist', 'average', 'optimist'];
+
+		for (const eventType of eventTypes) {
+			const eventData = occurrenceWithSources[eventType];
+			if (!eventData) continue;
+
+			const { occurrence, sectors } = eventData;
+			const eventInfo = this.EVENT_DAMAGES[eventType];
+			if (!eventInfo) continue;
+
+			// Filter sectors for worst case (exclude sectors where fight wins)
+			const worstCaseSectors = worstCaseExclusions 
+				? sectors.filter(s => !worstCaseExclusions.has(s.sectorName))
+				: sectors;
+
+			for (const scenario of scenarios) {
+				const eventCount = Math.round(occurrence[scenario]);
+				if (eventCount <= 0) continue;
+
+				// Get damage for this scenario
+				const damagePerInstance = this._getDamageForScenario(eventType, scenario);
+				
+				// Assign sources to instances
+				const sources = this._assignSourcesToInstances(eventCount, sectors);
+
+				damageInstances[scenario].push({
+					type: eventType,
+					count: eventCount,
+					damagePerInstance: damagePerInstance,
+					sources: sources
+				});
+			}
+
+			// Worst case: max possible events from non-excluded sectors
+			const worstCaseCount = worstCaseSectors.length;
+			if (worstCaseCount > 0) {
+				const worstCaseDamage = this._getDamageForScenario(eventType, 'worstCase');
+				const sources = this._assignSourcesToInstances(worstCaseCount, worstCaseSectors);
+
+				damageInstances.worstCase.push({
+					type: eventType,
+					count: worstCaseCount,
+					damagePerInstance: worstCaseDamage,
+					sources: sources
+				});
+			}
+		}
+
+		return damageInstances;
+	},
+
+	/**
+	 * Gets damage value for a specific event type and scenario.
+	 * @private
+	 */
+	_getDamageForScenario(eventType, scenario) {
+		const eventInfo = this.EVENT_DAMAGES[eventType];
+		if (!eventInfo) return 0;
+
+		if (eventInfo.min === eventInfo.max) {
+			return eventInfo.min;  // Fixed damage
+		}
+
+		// Variable damage: use scenario-appropriate value
+		switch (scenario) {
+			case 'optimist':
+				return eventInfo.min;
+			case 'average':
+				return eventInfo.average;
+			case 'pessimist':
+			case 'worstCase':
+				return eventInfo.max;
+			default:
+				return eventInfo.average;
+		}
+	},
+
+	/**
+	 * Assigns source sectors to event instances.
+	 * @private
+	 */
+	_assignSourcesToInstances(count, availableSectors) {
+		const sources = [];
+		for (let i = 0; i < count; i++) {
+			if (i < availableSectors.length) {
+				sources.push({
+					sectorName: availableSectors[i].sectorName,
+					probability: availableSectors[i].probability
+				});
+			} else {
+				// More instances than sectors - shouldn't happen but handle gracefully
+				sources.push({
+					sectorName: availableSectors[i % availableSectors.length]?.sectorName || 'UNKNOWN',
+					probability: availableSectors[i % availableSectors.length]?.probability || 0
+				});
+			}
+		}
+		return sources;
+	},
+
+	/**
 	 * Calculates occurrence for a specific event type.
 	 * @private
 	 */
@@ -266,6 +455,12 @@ const EventDamageCalculator = {
 		return {
 			occurrence: {},
 			damage: this._emptyDamageResult(),
+			damageInstances: {
+				pessimist: [],
+				average: [],
+				optimist: [],
+				worstCase: []
+			},
 			playerCount: 0,
 			tired: 0,
 			accident: 0,

@@ -47,44 +47,64 @@ const FightCalculator = {
 		// Get fighting power
 		const fightingPower = this._getFightingPower(players);
 		const grenadeCount = this._getGrenadeCount(players);
+		const playerCount = players.length || 1;
 
-		// Calculate occurrence for each fight type
+		// Calculate occurrence for each fight type, tracking which sectors can produce each type
 		const fightTypes = this._getAllFightTypes(sectors, loadout);
 		const occurrence = {};
+		const sectorsByFightType = {};  // Track which sectors can produce each fight type
 		
 		for (const fightType of fightTypes) {
-			occurrence[fightType] = this._calculateOccurrence(sectors, loadout, fightType);
+			const occResult = this._calculateOccurrenceWithSources(sectors, loadout, fightType);
+			occurrence[fightType] = occResult.occurrence;
+			sectorsByFightType[fightType] = occResult.sectors;
 		}
 
 		// For worst case, also calculate occurrence excluding sectors where event damage wins
 		let worstCaseOccurrence = occurrence;
+		let worstCaseSectorsByFightType = sectorsByFightType;
 		if (worstCaseExclusions && worstCaseExclusions.size > 0) {
 			const filteredSectors = sectors.filter(s => !worstCaseExclusions.has(s));
 			worstCaseOccurrence = {};
+			worstCaseSectorsByFightType = {};
 			for (const fightType of fightTypes) {
-				worstCaseOccurrence[fightType] = this._calculateOccurrence(filteredSectors, loadout, fightType);
+				const occResult = this._calculateOccurrenceWithSources(filteredSectors, loadout, fightType);
+				worstCaseOccurrence[fightType] = occResult.occurrence;
+				worstCaseSectorsByFightType[fightType] = occResult.sectors;
 			}
 		}
 
-		// Calculate damage scenarios
-		const damage = this._calculateDamage(occurrence, worstCaseOccurrence, fightingPower, grenadeCount);
+		// Calculate damage scenarios with damage instances
+		const damageResult = this._calculateDamageWithInstances(
+			occurrence, 
+			worstCaseOccurrence, 
+			fightingPower, 
+			grenadeCount,
+			playerCount,
+			sectorsByFightType,
+			worstCaseSectorsByFightType
+		);
 
 		return {
 			occurrence,      // { "12": { pessimist, average, optimist, distribution }, ... }
-			damage,          // { pessimist, average, optimist, worstCase }
+			damage: damageResult.damage,
+			damageInstances: damageResult.damageInstances,  // Per-scenario damage instances with sources
 			fightingPower,
 			grenadeCount,
+			playerCount,
 			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
 		};
 	},
 
 	/**
 	 * Calculates fight occurrence for a specific fight type using convolution.
+	 * Also returns the list of sectors that can produce this fight type.
 	 * @private
 	 */
-	_calculateOccurrence(sectors, loadout, fightType) {
+	_calculateOccurrenceWithSources(sectors, loadout, fightType) {
 		const distributions = [];
 		const fightEvent = `FIGHT_${fightType}`;
+		const sectorsWithFight = [];  // Track which sectors can produce this fight
 
 		for (const sectorName of sectors) {
 			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
@@ -103,11 +123,18 @@ const FightCalculator = {
 					[0, 1 - fightProb],
 					[1, fightProb]
 				]));
+				sectorsWithFight.push({
+					sectorName,
+					probability: fightProb
+				});
 			}
 		}
 
 		if (distributions.length === 0) {
-			return { pessimist: 0, average: 0, optimist: 0, distribution: new Map([[0, 1]]) };
+			return { 
+				occurrence: { pessimist: 0, average: 0, optimist: 0, distribution: new Map([[0, 1]]) },
+				sectors: []
+			};
 		}
 
 		// Convolve all sector distributions
@@ -116,10 +143,22 @@ const FightCalculator = {
 		const scenarios = DistributionCalculator.getScenarios(combined, false);
 
 		return {
-			...scenarios,
-			distribution: combined,
-			maxPossible: distributions.length
+			occurrence: {
+				...scenarios,
+				distribution: combined,
+				maxPossible: distributions.length
+			},
+			sectors: sectorsWithFight
 		};
+	},
+
+	/**
+	 * Calculates fight occurrence for a specific fight type using convolution.
+	 * @deprecated Use _calculateOccurrenceWithSources instead
+	 * @private
+	 */
+	_calculateOccurrence(sectors, loadout, fightType) {
+		return this._calculateOccurrenceWithSources(sectors, loadout, fightType).occurrence;
 	},
 
 	/**
@@ -265,6 +304,184 @@ const FightCalculator = {
 	},
 
 	/**
+	 * Calculates total damage for all scenarios with damage instances for per-player distribution.
+	 * @param {Object} occurrence - Fight occurrence data for normal scenarios
+	 * @param {Object} worstCaseOccurrence - Fight occurrence data for worst case
+	 * @param {number} fightingPower - Team's fighting power
+	 * @param {number} grenadeCount - Available grenades
+	 * @param {number} playerCount - Number of players
+	 * @param {Object} sectorsByFightType - Sectors that can produce each fight type
+	 * @param {Object} worstCaseSectorsByFightType - Sectors for worst case calculation
+	 * @private
+	 */
+	_calculateDamageWithInstances(occurrence, worstCaseOccurrence, fightingPower, grenadeCount, playerCount, sectorsByFightType, worstCaseSectorsByFightType) {
+		const scenarios = ['pessimist', 'average', 'optimist'];
+		
+		const damage = {
+			pessimist: 0,
+			average: 0,
+			optimist: 0,
+			worstCase: 0,
+			pessimistProb: 1,
+			optimistProb: 1,
+			worstCaseProb: 1,
+			breakdown: {
+				pessimist: [],
+				average: [],
+				optimist: [],
+				worstCase: []
+			}
+		};
+
+		// Damage instances for per-player distribution
+		const damageInstances = {
+			pessimist: [],
+			average: [],
+			optimist: [],
+			worstCase: []
+		};
+
+		// Track grenades and used sectors per scenario
+		const grenadesRemaining = {
+			pessimist: grenadeCount,
+			average: grenadeCount,
+			optimist: grenadeCount,
+			worstCase: grenadeCount
+		};
+
+		// Sort fight types by damage (highest first) - use grenades on biggest fights
+		const sortedTypes = Object.keys(occurrence).sort((a, b) => {
+			const damageA = this._getBaseDamage(a, 'average');
+			const damageB = this._getBaseDamage(b, 'average');
+			return damageB - damageA;
+		});
+
+		for (const fightType of sortedTypes) {
+			const occ = occurrence[fightType];
+			const dist = occ.distribution;
+			const availableSectors = sectorsByFightType[fightType] || [];
+
+			for (const scenario of scenarios) {
+				const fightCount = Math.round(occ[scenario]);
+				const damageInfo = this._calculateFightTypeDamage(
+					fightType, 
+					fightCount, 
+					fightingPower, 
+					grenadesRemaining[scenario],
+					scenario
+				);
+				
+				damage[scenario] += damageInfo.totalDamage;
+				grenadesRemaining[scenario] = damageInfo.grenadesRemaining;
+				
+				if (fightCount > 0) {
+					damage.breakdown[scenario].push({
+						type: fightType,
+						count: fightCount,
+						damagePerFight: damageInfo.damagePerFight,
+						totalDamage: damageInfo.totalDamage,
+						grenadesUsed: damageInfo.grenadesUsed
+					});
+
+					// Build damage instances with sources
+					// Assign sectors to each fight instance (pick from available sectors)
+					const sources = this._assignSourcesToInstances(fightCount, availableSectors);
+					
+					damageInstances[scenario].push({
+						type: `FIGHT_${fightType}`,
+						count: fightCount,
+						damagePerInstance: damageInfo.damagePerFight,
+						totalDamage: damageInfo.totalDamage,
+						sources: sources
+					});
+				}
+
+				// Calculate probability for this scenario's fight count
+				if (scenario === 'pessimist' || scenario === 'optimist') {
+					const prob = dist.get(fightCount) || 0;
+					damage[scenario + 'Prob'] *= (prob > 0 ? prob : 1);
+				}
+			}
+		}
+
+		// Worst case: use worstCaseOccurrence
+		const worstCaseSortedTypes = Object.keys(worstCaseOccurrence).sort((a, b) => {
+			const damageA = this._getBaseDamage(a, 'worstCase');
+			const damageB = this._getBaseDamage(b, 'worstCase');
+			return damageB - damageA;
+		});
+
+		for (const fightType of worstCaseSortedTypes) {
+			const occ = worstCaseOccurrence[fightType];
+			if (!occ) continue;
+
+			const dist = occ.distribution;
+			const maxFights = occ.maxPossible || 0;
+			const availableSectors = worstCaseSectorsByFightType[fightType] || [];
+			
+			const worstDamageInfo = this._calculateFightTypeDamage(
+				fightType,
+				maxFights,
+				fightingPower,
+				grenadesRemaining.worstCase,
+				'worstCase'
+			);
+			
+			damage.worstCase += worstDamageInfo.totalDamage;
+			grenadesRemaining.worstCase = worstDamageInfo.grenadesRemaining;
+			
+			const worstProb = dist.get(maxFights) || 0;
+			damage.worstCaseProb *= (worstProb > 0 ? worstProb : 1);
+			
+			if (maxFights > 0) {
+				damage.breakdown.worstCase.push({
+					type: fightType,
+					count: maxFights,
+					damagePerFight: worstDamageInfo.damagePerFight,
+					totalDamage: worstDamageInfo.totalDamage,
+					grenadesUsed: worstDamageInfo.grenadesUsed
+				});
+
+				// Build damage instances with sources for worst case
+				const sources = this._assignSourcesToInstances(maxFights, availableSectors);
+				
+				damageInstances.worstCase.push({
+					type: `FIGHT_${fightType}`,
+					count: maxFights,
+					damagePerInstance: worstDamageInfo.damagePerFight,
+					totalDamage: worstDamageInfo.totalDamage,
+					sources: sources
+				});
+			}
+		}
+
+		return { damage, damageInstances };
+	},
+
+	/**
+	 * Assigns source sectors to fight instances.
+	 * @private
+	 */
+	_assignSourcesToInstances(count, availableSectors) {
+		const sources = [];
+		for (let i = 0; i < count; i++) {
+			if (i < availableSectors.length) {
+				sources.push({
+					sectorName: availableSectors[i].sectorName,
+					probability: availableSectors[i].probability
+				});
+			} else {
+				// More instances than sectors - shouldn't happen but handle gracefully
+				sources.push({
+					sectorName: availableSectors[i % availableSectors.length]?.sectorName || 'UNKNOWN',
+					probability: availableSectors[i % availableSectors.length]?.probability || 0
+				});
+			}
+		}
+		return sources;
+	},
+
+	/**
 	 * Calculates damage for a specific fight type and count.
 	 * @private
 	 */
@@ -381,8 +598,15 @@ const FightCalculator = {
 					worstCase: []
 				}
 			},
+			damageInstances: {
+				pessimist: [],
+				average: [],
+				optimist: [],
+				worstCase: []
+			},
 			fightingPower: 0,
-			grenadeCount: 0
+			grenadeCount: 0,
+			playerCount: 0
 		};
 	}
 };
