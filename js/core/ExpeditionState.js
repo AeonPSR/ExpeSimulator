@@ -14,6 +14,35 @@ class ExpeditionState {
 		this._centauriActive = false;
 		this._antigravActive = false;
 		this._onChange = null;
+
+		// Initialize with 4 default players, first one with Pilot ability
+		this._initializeDefaultPlayers();
+	}
+
+	/**
+	 * Initializes the default player setup (4 players, first with Pilot)
+	 * @private
+	 */
+	_initializeDefaultPlayers() {
+		// Player 1: Has Pilot ability
+		this._players.push({
+			id: this._nextPlayerId++,
+			avatar: Constants.DEFAULT_AVATAR,
+			abilities: ['pilot.png', null, null, null, null],
+			items: [null, null, null],
+			health: Constants.DEFAULT_HEALTH
+		});
+
+		// Players 2-4: Default setup
+		for (let i = 0; i < 3; i++) {
+			this._players.push({
+				id: this._nextPlayerId++,
+				avatar: Constants.DEFAULT_AVATAR,
+				abilities: [null, null, null, null, null],
+				items: [null, null, null],
+				health: Constants.DEFAULT_HEALTH
+			});
+		}
 	}
 
 	/**

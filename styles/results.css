@@ -46,7 +46,6 @@
 	position: relative;
 	flex-direction: column;
 	align-items: center;
-	width: calc(25% - 11.25px);
 	margin-bottom: 5px;
 	box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
 }

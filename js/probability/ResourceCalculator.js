@@ -31,10 +31,21 @@ const ResourceCalculator = {
 			fruits: this._calculateWithConvolution(sectors, loadout, 'HARVEST', modifiers.botanistCount),
 			steaks: this._calculateWithConvolution(sectors, loadout, 'PROVISION', modifiers.survivalCount),
 			fuel: this._calculateFuelWithConvolution(sectors, loadout, modifiers.drillerCount),
-			oxygen: this._calculateWithConvolution(sectors, loadout, 'OXYGEN', 0),
+			oxygen: this._calculateOxygen(sectors, loadout),
 			artefacts: this._calculateArtefacts(sectors, loadout),
 			mapFragments: this._calculateMapFragments(sectors, loadout)
 		};
+	},
+
+	/**
+	 * Calculates oxygen with pessimist always = 0 (worst case: find nothing)
+	 * @private
+	 */
+	_calculateOxygen(sectors, loadout) {
+		const result = this._calculateWithConvolution(sectors, loadout, 'OXYGEN', 0);
+		// Pessimist for O2 is always 0 (you might find nothing)
+		result.pessimist = 0;
+		return result;
 	},
 
 	/**

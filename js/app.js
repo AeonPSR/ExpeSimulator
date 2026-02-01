@@ -75,7 +75,31 @@ class ExpeditionSimulatorApp {
 		this._resultsDisplay.mount(contentArea);
 
 		this._selectedSectorsComponent.update(this._state.getSectors());
+		
+		// Render initial players from state
+		this._renderInitialPlayers();
+		
 		this._updateDisplays();
+	}
+
+	/**
+	 * Renders player cards for any players already in state (e.g., default players)
+	 * @private
+	 */
+	_renderInitialPlayers() {
+		const players = this._state.getPlayers();
+		for (const player of players) {
+			const card = new PlayerCard({
+				player: player,
+				getResourceURL: getResourceURL,
+				onAvatarClick: (id) => this._onAvatarClick(id),
+				onAbilityClick: (id, slot) => this._onAbilityClick(id, slot),
+				onItemClick: (id, slot) => this._onItemClick(id, slot),
+				onHealthClick: (id) => this._onHealthClick(id),
+				onRemove: (id) => this._onRemovePlayer(id)
+			});
+			this._playerSection.addPlayerCard(card);
+		}
 	}
 
 	// ========================================
@@ -271,7 +295,27 @@ class ExpeditionSimulatorApp {
 	_updateResultsDisplay() {
 		const players = this._state.getPlayers();
 		if (players.length > 0) {
-			const resultsHTML = this._renderExpeditionResults(players);
+			// Get sectors and build loadout
+			const sectors = this._state.getSectors();
+			const loadout = LoadoutBuilder.build(players, {
+				antigravActive: this._state.isAntigravActive()
+			});
+
+			// Calculate damage from both sources
+			const fightResult = FightCalculator.calculate(sectors, loadout, players);
+			const eventResult = EventDamageCalculator.calculate(sectors, loadout, players);
+
+			// Distribute damage to players for all scenarios
+			const damageByScenario = DamageSpreader.distributeAllScenarios(
+				fightResult.damageInstances,
+				eventResult.damageInstances,
+				players.length
+			);
+
+			// Calculate final health for all scenarios
+			const healthByScenario = DamageSpreader.calculateAllFinalHealth(players, damageByScenario);
+
+			const resultsHTML = this._renderExpeditionResults(players, healthByScenario);
 			this._resultsDisplay.setContent(resultsHTML);
 			this._resultsDisplay.showDefaultLegend();
 		} else {
@@ -282,19 +326,15 @@ class ExpeditionSimulatorApp {
 	/**
 	 * Renders expedition results HTML for all players
 	 * @param {Array} players - Array of player objects
+	 * @param {Object} healthByScenario - { pessimist, average, optimist, worstCase } health arrays
 	 * @returns {string} - HTML string for expedition results
 	 */
-	_renderExpeditionResults(players) {
-		// Hardcoded health values for now: worst/pessimist/average/optimist
-		const hardcodedHealth = {
-			worst: 0,
-			pessimist: 5,
-			average: 9,
-			optimist: 14
-		};
-
-		return players.map(player => {
-			const { worst, pessimist, average, optimist } = hardcodedHealth;
+	_renderExpeditionResults(players, healthByScenario) {
+		return players.map((player, index) => {
+			const optimist = healthByScenario.optimist[index] ?? player.health;
+			const average = healthByScenario.average[index] ?? player.health;
+			const pessimist = healthByScenario.pessimist[index] ?? player.health;
+			const worst = healthByScenario.worstCase[index] ?? player.health;
 
 			return `
 				<div class="expedition-result-card">
