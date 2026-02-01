@@ -42,8 +42,8 @@ class ProbabilityDisplay extends Component {
 
 		let html = '';
 		html += this._renderResources(data.resources);
-		html += this._renderCombatRisks(data.fights);
-		html += this._renderCombatDamage();
+		html += this._renderCombatRisks(data.combat);
+		html += this._renderCombatDamage(data.combat);
 		html += this._renderEventRisks(data.eventDamage);
 		html += this._renderEventDamage();
 		html += this._renderNegativeEvents(data.negativeEvents);
@@ -119,8 +119,10 @@ class ProbabilityDisplay extends Component {
 		return value.toFixed(1);
 	}
 
-	_renderCombatRisks(fights) {
-		const fightTypes = Object.keys(fights);
+	_renderCombatRisks(combat) {
+		// Handle both new format (combat.occurrence) and legacy format
+		const occurrence = combat?.occurrence || {};
+		const fightTypes = Object.keys(occurrence);
 
 		if (fightTypes.length === 0) {
 			return `
@@ -131,12 +133,35 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
+		// Sort by damage value (highest first)
+		fightTypes.sort((a, b) => {
+			const damageA = parseInt(a) || 17; // Variable fight defaults to ~17
+			const damageB = parseInt(b) || 17;
+			return damageB - damageA;
+		});
+
 		const entries = fightTypes.map(type => {
-			const expected = fights[type];
+			const occ = occurrence[type];
+			const displayName = type === '8_10_12_15_18_32' ? 'Variable (8-32)' : type;
+			
+			// Build distribution string for fights with probability > 1%
+			let distStr = '';
+			if (occ.distribution && occ.distribution.size > 0) {
+				const distParts = [];
+				const sortedEntries = Array.from(occ.distribution.entries()).sort((a, b) => a[0] - b[0]);
+				for (const [count, prob] of sortedEntries) {
+					if (prob >= 0.01) {
+						distParts.push(`${count}: ${(prob * 100).toFixed(0)}%`);
+					}
+				}
+				distStr = distParts.join(' | ');
+			}
+			
 			return `<div class="outcome-item">
-				<span>FIGHT_${type}:</span>
+				<span>FIGHT_${displayName}:</span>
 				<div class="fight-stats">
-					<div class="expected-fights">Expected: ${expected.toFixed(2)} fights</div>
+					<div class="expected-fights">Expected: ${occ.average.toFixed(1)} fights (${occ.pessimist}-${occ.optimist})</div>
+					${distStr ? `<div class="fight-distribution">${distStr}</div>` : ''}
 				</div>
 			</div>`;
 		}).join('');
@@ -149,26 +174,47 @@ class ProbabilityDisplay extends Component {
 		`;
 	}
 
-	_renderCombatDamage() {
+	_renderCombatDamage(combat) {
 		const hpIcon = this._icon('astro/hp.png');
+		const fightIcon = this._icon('others/fight.png');
+		const damage = combat?.damage;
+		
+		if (!damage || (damage.pessimist === 0 && damage.average === 0 && damage.optimist === 0 && damage.worstCase === 0)) {
+			return `
+				<div class="outcome-category">
+					<h5>Combat Damage</h5>
+					<div class="outcome-item"><span>No combat damage expected</span></div>
+				</div>
+			`;
+		}
+
+		// Show fighting power info
+		const fpInfo = combat.fightingPower > 0 || combat.grenadeCount > 0
+			? `<div class="outcome-item fp-info">
+				<span>${fightIcon} Fighting Power: ${combat.fightingPower}</span>
+				${combat.grenadeCount > 0 ? `<span class="grenade-info">(+${combat.grenadeCount} grenades)</span>` : ''}
+			</div>`
+			: '';
+
 		return `
 			<div class="outcome-category">
 				<h5>Combat Damage</h5>
+				${fpInfo}
 				<div class="outcome-item">
-					<span>Optimist Scenario:</span>
-					<span class="positive">${hpIcon}<strong>-</strong></span>
+					<span>Optimist:</span>
+					<span class="positive">${hpIcon}<strong>${Math.round(damage.optimist)}</strong></span>
 				</div>
 				<div class="outcome-item">
-					<span>Average HP Lost:</span>
-					<span class="warning">${hpIcon}<strong>-</strong></span>
+					<span>Average:</span>
+					<span class="warning">${hpIcon}<strong>${Math.round(damage.average)}</strong></span>
 				</div>
 				<div class="outcome-item">
-					<span>Pessimist Scenario:</span>
-					<span class="danger">${hpIcon}<strong>-</strong></span>
+					<span>Pessimist:</span>
+					<span class="danger">${hpIcon}<strong>${Math.round(damage.pessimist)}</strong></span>
 				</div>
 				<div class="outcome-item">
 					<span>Worst Case:</span>
-					<span class="critical">${hpIcon}<strong>-</strong></span>
+					<span class="critical">${hpIcon}<strong>${Math.round(damage.worstCase)}</strong></span>
 				</div>
 			</div>
 		`;

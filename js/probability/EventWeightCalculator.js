@@ -95,12 +95,17 @@ const EventWeightCalculator = {
 			sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
 		}
 
-		// Calculate resources using ResourceCalculator (with binomial distribution)
+		// Calculate resources using ResourceCalculator (convolution-based)
 		const resources = typeof ResourceCalculator !== 'undefined'
 			? ResourceCalculator.calculate(sectors, loadout, players)
 			: this._legacyResourceCalculation(sectors, loadout);
 
-		// Aggregate non-resource events
+		// Calculate fights using FightCalculator (convolution-based)
+		const combat = typeof FightCalculator !== 'undefined'
+			? FightCalculator.calculate(sectors, loadout, players)
+			: this._legacyFightCalculation(sectors, loadout);
+
+		// Aggregate non-resource, non-fight events
 		const aggregated = this._aggregateEvents(sectors, loadout);
 
 		// Build sector breakdown
@@ -108,7 +113,7 @@ const EventWeightCalculator = {
 
 		return {
 			resources: resources,
-			fights: aggregated.fights,
+			combat: combat,  // New: full fight data with occurrence + damage
 			eventDamage: {
 				tired: aggregated.tired,
 				accident: aggregated.accident,
@@ -125,6 +130,30 @@ const EventWeightCalculator = {
 				nothing: aggregated.nothing
 			},
 			sectorBreakdown: sectorBreakdown
+		};
+	},
+
+	/**
+	 * Legacy fight calculation (fallback if FightCalculator not loaded).
+	 * @private
+	 */
+	_legacyFightCalculation(sectors, loadout) {
+		const fights = {};
+		for (const sectorName of sectors) {
+			const probs = this.getModifiedProbabilities(sectorName, loadout);
+			for (const [eventName, prob] of probs) {
+				if (eventName.startsWith('FIGHT_')) {
+					const fightType = eventName.replace('FIGHT_', '');
+					fights[fightType] = (fights[fightType] || 0) + prob;
+				}
+			}
+		}
+		return {
+			occurrence: {},
+			damage: { pessimist: 0, average: 0, optimist: 0, worstCase: 0 },
+			fightingPower: 0,
+			grenadeCount: 0,
+			_legacyFights: fights  // Keep old format for backward compat
 		};
 	},
 

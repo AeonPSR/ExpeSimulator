@@ -105,6 +105,7 @@
     <script src="js/probability/DistributionCalculator.js"></script>
     <script src="js/probability/EventWeightCalculator.js"></script>
     <script src="js/probability/ResourceCalculator.js"></script>
+    <script src="js/probability/FightCalculator.js"></script>
     <script src="js/probability/EventModifier.js"></script>
     <script src="js/probability/AbilityModifiers.js"></script>
     <script src="js/probability/ItemModifiers.js"></script>
@@ -148,6 +149,9 @@
         
         // Bonus modifier tests
         container.innerHTML += generateBonusTests();
+        
+        // FIGHT tests (occurrence + damage)
+        container.innerHTML += generateFightTests();
     }
     
     function calc(sectors, loadout = {}, players = []) {
@@ -362,6 +366,116 @@
         html += 'Expected per sector: 0.4×5 + 0.3×3 = 2.0 + 0.9 = 2.9<br>';
         html += 'For 2 sectors: 2 × 2.9 = 5.8<br>';
         html += '</p>';
+        
+        return html;
+    }
+    
+    function generateFightTests() {
+        let html = '<h3>⚔️ Fight Occurrence (Convolution)</h3>';
+        html += '<p style="color:#888;font-size:12px;">RUMINANT: FIGHT_8 (1/10=10%); PREDATOR: FIGHT_12 (4/10=40%)</p>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th>Fight Type</th><th class="header-resource">Fights (pess/avg/opt)</th><th>Distribution</th></tr>';
+        
+        const tests = [
+            { name: '1× RUMINANT', sectors: ['RUMINANT'], fightType: '8' },
+            { name: '2× RUMINANT', sectors: ['RUMINANT', 'RUMINANT'], fightType: '8' },
+            { name: '4× RUMINANT', sectors: ['RUMINANT', 'RUMINANT', 'RUMINANT', 'RUMINANT'], fightType: '8' },
+            { name: '1× PREDATOR', sectors: ['PREDATOR'], fightType: '12' },
+            { name: '2× PREDATOR', sectors: ['PREDATOR', 'PREDATOR'], fightType: '12' },
+            { name: '4× PREDATOR', sectors: ['PREDATOR', 'PREDATOR', 'PREDATOR', 'PREDATOR'], fightType: '12' },
+        ];
+        
+        for (const test of tests) {
+            const result = FightCalculator.calculate(test.sectors, {}, []);
+            const occ = result.occurrence[test.fightType];
+            
+            // Build distribution string
+            let distStr = 'N/A';
+            if (occ && occ.distribution) {
+                const parts = [];
+                const sorted = Array.from(occ.distribution.entries()).sort((a,b) => a[0] - b[0]);
+                for (const [count, prob] of sorted) {
+                    if (prob >= 0.01) {
+                        parts.push(`${count}:${(prob*100).toFixed(0)}%`);
+                    }
+                }
+                distStr = parts.join(' ');
+            }
+            
+            const fmtOcc = occ ? `${occ.pessimist} / ${occ.average.toFixed(2)} / ${occ.optimist}` : 'N/A';
+            
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>FIGHT_${test.fightType}</td>
+                <td>${fmtOcc}</td>
+                <td style="font-size:11px">${distStr}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
+        
+        // Damage tests
+        html += '<h3>💥 Fight Damage (with FP reduction)</h3>';
+        html += '<p style="color:#888;font-size:12px;">Fighting Power reduces damage: finalDamage = baseDamage - FP (min 0)</p>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th>FP</th><th class="header-resource">Damage (pess/avg/opt/worst)</th></tr>';
+        
+        const damageTests = [
+            { name: '2× PREDATOR', sectors: ['PREDATOR', 'PREDATOR'], players: [] },
+            { name: '2× PREDATOR + FP5', sectors: ['PREDATOR', 'PREDATOR'], players: [{}, {}, {}, {}, {}] }, // 5 players = 5 FP
+            { name: '4× PREDATOR', sectors: ['PREDATOR', 'PREDATOR', 'PREDATOR', 'PREDATOR'], players: [] },
+            { name: '4× RUMINANT', sectors: ['RUMINANT', 'RUMINANT', 'RUMINANT', 'RUMINANT'], players: [] },
+        ];
+        
+        for (const test of damageTests) {
+            const result = FightCalculator.calculate(test.sectors, {}, test.players);
+            const dmg = result.damage;
+            const fp = result.fightingPower;
+            
+            const fmtDmg = `${dmg.pessimist} / ${dmg.average.toFixed(1)} / ${dmg.optimist} / ${dmg.worstCase}`;
+            
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>${fp}</td>
+                <td>${fmtDmg}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
+        
+        // Grenade tests
+        html += '<h3>💣 Grenade Usage</h3>';
+        html += '<p style="color:#888;font-size:12px;">Grenades add +3 FP per fight (consumable, used on highest damage fights first)</p>';
+        html += '<table class="test-table">';
+        html += '<tr><th>Scenario</th><th>Grenades</th><th class="header-resource">Damage (without/with grenades)</th></tr>';
+        
+        const grenadeTests = [
+            { 
+                name: '2× PREDATOR', 
+                sectors: ['PREDATOR', 'PREDATOR'],
+                playersNoGrenade: [{}, {}],
+                playersWithGrenade: [{items: ['grenade.jpg']}, {}]
+            },
+            { 
+                name: '4× PREDATOR', 
+                sectors: ['PREDATOR', 'PREDATOR', 'PREDATOR', 'PREDATOR'],
+                playersNoGrenade: [{}, {}],
+                playersWithGrenade: [{items: ['grenade.jpg', 'grenade.jpg']}, {}]
+            },
+        ];
+        
+        for (const test of grenadeTests) {
+            const resultNo = FightCalculator.calculate(test.sectors, {}, test.playersNoGrenade);
+            const resultWith = FightCalculator.calculate(test.sectors, {}, test.playersWithGrenade);
+            
+            html += `<tr>
+                <td class="scenario">${test.name}</td>
+                <td>${resultWith.grenadeCount}</td>
+                <td>${resultNo.damage.average.toFixed(1)} → ${resultWith.damage.average.toFixed(1)}</td>
+            </tr>`;
+        }
+        
+        html += '</table>';
         
         return html;
     }

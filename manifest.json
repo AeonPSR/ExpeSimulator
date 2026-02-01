@@ -37,6 +37,7 @@
         "js/probability/DistributionCalculator.js",
         "js/probability/EventWeightCalculator.js",
         "js/probability/ResourceCalculator.js",
+        "js/probability/FightCalculator.js",
         "js/probability/EventModifier.js",
         "js/probability/AbilityModifiers.js",
         "js/probability/ItemModifiers.js",
