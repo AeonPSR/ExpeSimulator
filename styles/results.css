@@ -141,6 +141,20 @@
 	align-items: center;
 }
 
+/* HP and Dead Icons */
+.expedition-result-health .hp-icon {
+	width: 16px;
+	height: 16px;
+	margin-left: 3px;
+	vertical-align: middle;
+}
+
+.expedition-result-health .dead-icon {
+	width: 20px;
+	height: 20px;
+	filter: grayscale(100%);
+}
+
 /* ==========================================================================
    Expedition Legend
    ========================================================================== */

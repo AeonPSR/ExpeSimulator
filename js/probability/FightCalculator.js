@@ -483,6 +483,7 @@ const FightCalculator = {
 
 	/**
 	 * Calculates damage for a specific fight type and count.
+	 * Multiple grenades can be used per fight to reduce damage further.
 	 * @private
 	 */
 	_calculateFightTypeDamage(fightType, fightCount, fightingPower, grenades, scenario) {
@@ -491,6 +492,7 @@ const FightCalculator = {
 		}
 
 		const baseDamage = this._getBaseDamage(fightType, scenario);
+		const grenadePower = 3;  // Each grenade adds +3 FP
 		let totalDamage = 0;
 		let grenadesUsed = 0;
 		let grenadesRemaining = grenades;
@@ -498,19 +500,25 @@ const FightCalculator = {
 		// Process each fight sequentially
 		for (let i = 0; i < fightCount; i++) {
 			let effectiveFP = fightingPower;
+			let grenadesUsedThisFight = 0;
 
-			// Use grenade if available and beneficial
-			if (grenadesRemaining > 0) {
-				const damageWithoutGrenade = Math.max(0, baseDamage - fightingPower);
-				const damageWithGrenade = Math.max(0, baseDamage - fightingPower - 3);
+			// Use grenades while available and beneficial (can use multiple per fight)
+			while (grenadesRemaining > 0) {
+				const currentDamage = Math.max(0, baseDamage - effectiveFP);
+				const damageWithOneMoreGrenade = Math.max(0, baseDamage - effectiveFP - grenadePower);
 				
-				if (damageWithGrenade < damageWithoutGrenade) {
-					effectiveFP += 3;
+				// Only use grenade if it reduces damage
+				if (damageWithOneMoreGrenade < currentDamage) {
+					effectiveFP += grenadePower;
 					grenadesRemaining--;
-					grenadesUsed++;
+					grenadesUsedThisFight++;
+				} else {
+					// No benefit from using another grenade
+					break;
 				}
 			}
 
+			grenadesUsed += grenadesUsedThisFight;
 			const damage = Math.max(0, baseDamage - effectiveFP);
 			totalDamage += damage;
 		}

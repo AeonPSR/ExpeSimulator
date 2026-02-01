@@ -269,15 +269,80 @@ class ExpeditionSimulatorApp {
 	}
 
 	_updateResultsDisplay() {
-		if (this._state.getPlayerCount() > 0) {
-			this._resultsDisplay.setContent(`
-				<p>${this._state.getPlayerCount()} player(s) configured</p>
-				<p><em>Expedition results will be calculated when backend is connected</em></p>
-			`);
+		const players = this._state.getPlayers();
+		if (players.length > 0) {
+			const resultsHTML = this._renderExpeditionResults(players);
+			this._resultsDisplay.setContent(resultsHTML);
 			this._resultsDisplay.showDefaultLegend();
 		} else {
 			this._resultsDisplay.clear();
 		}
+	}
+
+	/**
+	 * Renders expedition results HTML for all players
+	 * @param {Array} players - Array of player objects
+	 * @returns {string} - HTML string for expedition results
+	 */
+	_renderExpeditionResults(players) {
+		// Hardcoded health values for now: worst/pessimist/average/optimist
+		const hardcodedHealth = {
+			worst: 0,
+			pessimist: 5,
+			average: 9,
+			optimist: 14
+		};
+
+		return players.map(player => {
+			const { worst, pessimist, average, optimist } = hardcodedHealth;
+
+			return `
+				<div class="expedition-result-card">
+					<div class="expedition-result-avatar">
+						<img src="${getResourceURL(`characters/${player.avatar}`)}" alt="Player Avatar" />
+					</div>
+					<div class="expedition-result-health-container">
+						<div class="expedition-result-health optimist ${this._getHealthClass(optimist)}">
+							${this._renderHealthValue(optimist)}
+						</div>
+						<div class="expedition-result-health average ${this._getHealthClass(average)}">
+							${this._renderHealthValue(average)}
+						</div>
+						<div class="expedition-result-health pessimist ${this._getHealthClass(pessimist)}">
+							${this._renderHealthValue(pessimist)}
+						</div>
+						<div class="expedition-result-health worst ${this._getHealthClass(worst)}">
+							${this._renderHealthValue(worst)}
+						</div>
+					</div>
+				</div>
+			`;
+		}).join('');
+	}
+
+	/**
+	 * Renders the health value display (number + icon or dead icon)
+	 * @param {number} health - Health value
+	 * @returns {string} - HTML string
+	 */
+	_renderHealthValue(health) {
+		if (health <= 0) {
+			return `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`;
+		}
+		return `${health}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
+	}
+
+	/**
+	 * Gets the CSS class for health status coloring
+	 * @param {number} health - Health value
+	 * @returns {string} - CSS class name
+	 */
+	_getHealthClass(health) {
+		if (health <= 0) return 'health-dead';
+		if (health <= 3) return 'health-critical';
+		if (health <= 6) return 'health-low';
+		if (health <= 10) return 'health-medium';
+		return 'health-high';
 	}
 
 	// ========================================

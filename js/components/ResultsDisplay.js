@@ -91,16 +91,16 @@ class ResultsDisplay extends Component {
 				<h5>Scenarios</h5>
 				<div class="legend-items">
 					<div class="legend-item">
-						<div class="legend-color pessimist"></div>
-						<span class="legend-text">Pessimist</span>
+						<div class="legend-color optimist"></div>
+						<span class="legend-text">Optimist</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color average"></div>
 						<span class="legend-text">Average</span>
 					</div>
 					<div class="legend-item">
-						<div class="legend-color optimist"></div>
-						<span class="legend-text">Optimist</span>
+						<div class="legend-color pessimist"></div>
+						<span class="legend-text">Pessimist</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color worst"></div>
