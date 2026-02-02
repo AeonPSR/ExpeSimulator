@@ -277,45 +277,53 @@ class ExpeditionSimulatorApp {
 		this._playerSection?.setFightingPower?.(power);
 	}
 
-	_updateProbabilityDisplay() {
+	/**
+	 * Calculates all expedition results from a single source.
+	 * This is the ONLY place where calculation happens.
+	 * @returns {Object|null} Complete calculation results or null if no sectors
+	 * @private
+	 */
+	_calculateExpeditionResults() {
 		const sectors = this._state.getSectors();
 		if (sectors.length === 0) {
-			this._probabilityDisplay.clear();
-			return;
+			return null;
 		}
 
 		const players = this._state.getPlayers();
 		const loadout = LoadoutBuilder.build(players, {
 			antigravActive: this._state.isAntigravActive()
 		});
+
+		// Single source of truth for all calculations
 		const results = EventWeightCalculator.calculate(sectors, loadout, players);
+		
+		// Add player health calculations to the results
+		if (players.length > 0 && results) {
+			results.healthByScenario = DamageSpreader.calculateHealthFromTotals(
+				players,
+				results.combat?.damage || { pessimist: 0, average: 0, optimist: 0, worstCase: 0 },
+				results.eventDamage?.damage || { pessimist: 0, average: 0, optimist: 0, worstCase: 0 }
+			);
+		}
+
+		return results;
+	}
+
+	_updateProbabilityDisplay() {
+		const results = this._calculateExpeditionResults();
+		if (!results) {
+			this._probabilityDisplay.clear();
+			return;
+		}
 		this._probabilityDisplay.update(results);
 	}
 
 	_updateResultsDisplay() {
 		const players = this._state.getPlayers();
-		if (players.length > 0) {
-			// Get sectors and build loadout
-			const sectors = this._state.getSectors();
-			const loadout = LoadoutBuilder.build(players, {
-				antigravActive: this._state.isAntigravActive()
-			});
-
-			// Calculate damage from both sources
-			const fightResult = FightCalculator.calculate(sectors, loadout, players);
-			const eventResult = EventDamageCalculator.calculate(sectors, loadout, players);
-
-			// Distribute damage to players for all scenarios
-			const damageByScenario = DamageSpreader.distributeAllScenarios(
-				fightResult.damageInstances,
-				eventResult.damageInstances,
-				players.length
-			);
-
-			// Calculate final health for all scenarios
-			const healthByScenario = DamageSpreader.calculateAllFinalHealth(players, damageByScenario);
-
-			const resultsHTML = this._renderExpeditionResults(players, healthByScenario);
+		const results = this._calculateExpeditionResults();
+		
+		if (players.length > 0 && results?.healthByScenario) {
+			const resultsHTML = this._renderExpeditionResults(players, results.healthByScenario);
 			this._resultsDisplay.setContent(resultsHTML);
 			this._resultsDisplay.showDefaultLegend();
 		} else {
