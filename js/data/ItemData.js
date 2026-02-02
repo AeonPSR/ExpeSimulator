@@ -20,7 +20,7 @@ const ItemData = {
 	getSelectionItems(getResourceURL) {
 		return this.available.map(item => ({
 			id: item,
-			image: getResourceURL(`items_exploration/${item}`),
+			image: getResourceURL(`pictures/items_exploration/${item}`),
 			label: item.replace('.jpg', '').replace(/_/g, ' ')
 		}));
 	}

@@ -24,7 +24,7 @@ class ExpeditionSimulatorApp {
 	_init() {
 		this._panel = new Panel({
 			title: 'Expedition Simulator',
-			tongueIcon: getResourceURL('astro/astrophysicist.png'),
+			tongueIcon: getResourceURL('pictures/astro/astrophysicist.png'),
 			getResourceURL: getResourceURL
 		});
 		this._panel.mount(document.body);
@@ -339,7 +339,7 @@ class ExpeditionSimulatorApp {
 			return `
 				<div class="expedition-result-card">
 					<div class="expedition-result-avatar">
-						<img src="${getResourceURL(`characters/${player.avatar}`)}" alt="Player Avatar" />
+						<img src="${getResourceURL(`pictures/characters/${player.avatar}`)}" alt="Player Avatar" />
 					</div>
 					<div class="expedition-result-health-container">
 						<div class="expedition-result-health optimist ${this._getHealthClass(optimist)}">
@@ -367,9 +367,9 @@ class ExpeditionSimulatorApp {
 	 */
 	_renderHealthValue(health) {
 		if (health <= 0) {
-			return `<img src="${getResourceURL('others/dead.png')}" alt="Dead" class="dead-icon" />`;
+			return `<img src="${getResourceURL('pictures/others/dead.png')}" alt="Dead" class="dead-icon" />`;
 		}
-		return `${health}<img src="${getResourceURL('astro/hp.png')}" alt="HP" class="hp-icon" />`;
+		return `${health}<img src="${getResourceURL('pictures/astro/hp.png')}" alt="HP" class="hp-icon" />`;
 	}
 
 	/**

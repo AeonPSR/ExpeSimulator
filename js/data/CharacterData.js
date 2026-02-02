@@ -22,7 +22,7 @@ const CharacterData = {
 	getSelectionItems(getResourceURL) {
 		return this.available.map(char => ({
 			id: char,
-			image: getResourceURL(`characters/${char}`),
+			image: getResourceURL(`pictures/characters/${char}`),
 			label: char.replace('.png', '').replace('_', ' ')
 		}));
 	}

@@ -17,7 +17,7 @@ const AbilityData = {
 	   getSelectionItems(getResourceURL) {
 		   return this.normal.map(ability => ({
 			   id: ability,
-			   image: getResourceURL(`abilities/${ability}`),
+			   image: getResourceURL(`pictures/abilities/${ability}`),
 			   label: ability.replace('.png', '')
 		   }));
 	   }

@@ -121,6 +121,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	overflow: hidden;
 }
 
 .ability-slot:hover {
@@ -130,8 +131,8 @@
 
 
 .ability-slot img {
-	width: -webkit-fill-available;
-	height: auto;
+	width: 100%;
+	height: 100%;
 	object-fit: contain;
 }
 
@@ -157,6 +158,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	overflow: hidden;
 }
 
 .item-slot:hover {
@@ -165,8 +167,8 @@
 }
 
 .item-slot img {
-	width: -webkit-fill-available;
-	height: auto;
+	width: 100%;
+	height: 100%;
 	object-fit: contain;
 }
 

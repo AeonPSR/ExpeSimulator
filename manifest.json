@@ -54,7 +54,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["astro/*", "abilities/*", "characters/*", "items/*", "items_exploration/*", "others/*", "*.png", "*.jpg", "*.gif"],
+      "resources": ["pictures/astro/*", "pictures/abilities/*", "pictures/characters/*", "pictures/items/*", "pictures/items_exploration/*", "pictures/others/*", "*.png", "*.jpg", "*.gif"],
       "matches": ["<all_urls>"]
     }
   ],

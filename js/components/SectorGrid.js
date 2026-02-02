@@ -71,7 +71,7 @@ class SectorGrid extends Component {
 			this._diplomacyToggle = new ToggleButton({
 				id: 'diplomacy-toggle-btn',
 				className: 'diplomacy-toggle-btn',
-				icon: this.getResourceURL('abilities/diplomacy.png'),
+				icon: this.getResourceURL('pictures/abilities/diplomacy.png'),
 				alt: 'Toggle Diplomacy',
 				activeColor: 'blue',
 				onToggle: (isActive) => {
@@ -127,7 +127,7 @@ class SectorGrid extends Component {
 
 		// Main sector image
 		const img = this.createElement('img', {
-			src: this.getResourceURL(`astro/${sectorName.toLowerCase()}.png`),
+			src: this.getResourceURL(`pictures/astro/${sectorName.toLowerCase()}.png`),
 			alt: sectorName,
 			title: formatSectorName(sectorName),
 			className: 'sector-main-img'
@@ -137,7 +137,7 @@ class SectorGrid extends Component {
 		// Fight icon if sector has fight events
 		if (this._hasFightEvents(sectorName)) {
 			const fightImg = this.createElement('img', {
-				src: this.getResourceURL('others/fight.png'),
+				src: this.getResourceURL('pictures/others/fight.png'),
 				alt: 'Fight Event',
 				className: 'fight-icon'
 			});

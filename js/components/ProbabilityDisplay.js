@@ -67,12 +67,12 @@ class ProbabilityDisplay extends Component {
 
 	_renderResources(resources) {
 		const items = [
-			{ name: 'Fruits', icon: 'items/fruit10.jpg', data: resources.fruits },
-			{ name: 'Steaks', icon: 'items/alien_steak.jpg', data: resources.steaks },
-			{ name: 'Fuel', icon: 'items/fuel_capsule.jpg', data: resources.fuel },
-			{ name: 'Oxygen', icon: 'items/oxy_capsule.jpg', data: resources.oxygen },
-			{ name: 'Artefacts', icon: 'items/artefact.png', data: resources.artefacts },
-			{ name: 'Map Fragments', icon: 'items/super_map.jpg', data: resources.mapFragments }
+			{ name: 'Fruits', icon: 'pictures/items/fruit10.jpg', data: resources.fruits },
+			{ name: 'Steaks', icon: 'pictures/items/alien_steak.jpg', data: resources.steaks },
+			{ name: 'Fuel', icon: 'pictures/items/fuel_capsule.jpg', data: resources.fuel },
+			{ name: 'Oxygen', icon: 'pictures/items/oxy_capsule.jpg', data: resources.oxygen },
+			{ name: 'Artefacts', icon: 'pictures/items/artefact.png', data: resources.artefacts },
+			{ name: 'Map Fragments', icon: 'pictures/items/super_map.jpg', data: resources.mapFragments }
 		];
 
 		// Sort: items with values first (check both average and optimist)
@@ -180,7 +180,7 @@ class ProbabilityDisplay extends Component {
 	}
 
 	_renderCombatDamage(combat) {
-		const hpIcon = this._icon('astro/hp.png', 'hp-icon');
+		const hpIcon = this._icon('pictures/astro/hp.png', 'hp-icon');
 		const damage = combat?.damage;
 		
 		if (!damage || (damage.pessimist === 0 && damage.average === 0 && damage.optimist === 0 && damage.worstCase === 0)) {
@@ -256,7 +256,7 @@ class ProbabilityDisplay extends Component {
 	}
 
 	_renderEventDamage(eventDamage) {
-		const hpIcon = this._icon('astro/hp.png', 'hp-icon');
+		const hpIcon = this._icon('pictures/astro/hp.png', 'hp-icon');
 		const scenarios = eventDamage?.scenarios;
 		
 		// Check if there's any event damage

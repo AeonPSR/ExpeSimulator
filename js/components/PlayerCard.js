@@ -70,7 +70,7 @@ class PlayerCard extends Component {
 		});
 
 		const img = this.createElement('img', {
-			src: this.getResourceURL(`characters/${this.player.avatar}`),
+			src: this.getResourceURL(`pictures/characters/${this.player.avatar}`),
 			alt: 'Player Avatar'
 		});
 		avatar.appendChild(img);
@@ -123,7 +123,7 @@ class PlayerCard extends Component {
 
 			if (ability) {
 				const img = this.createElement('img', {
-					src: this.getResourceURL(`abilities/${ability}`),
+					src: this.getResourceURL(`pictures/abilities/${ability}`),
 					alt: 'Ability'
 				});
 				slot.appendChild(img);
@@ -162,7 +162,7 @@ class PlayerCard extends Component {
 
 			if (item) {
 				const img = this.createElement('img', {
-					src: this.getResourceURL(`items_exploration/${item}`),
+					src: this.getResourceURL(`pictures/items_exploration/${item}`),
 					alt: 'Item'
 				});
 				slot.appendChild(img);
@@ -183,7 +183,7 @@ class PlayerCard extends Component {
 		healthSlot.textContent = this.player.health;
 
 		const hpIcon = this.createElement('img', {
-			src: this.getResourceURL('astro/hp.png'),
+			src: this.getResourceURL('pictures/astro/hp.png'),
 			alt: 'HP',
 			className: 'hp-icon'
 		});
@@ -224,7 +224,7 @@ class PlayerCard extends Component {
 		this.player.avatar = avatarFile;
 		const img = this.element?.querySelector('.player-avatar img');
 		if (img) {
-			img.src = this.getResourceURL(`characters/${avatarFile}`);
+			img.src = this.getResourceURL(`pictures/characters/${avatarFile}`);
 		}
 	}
 
@@ -240,7 +240,7 @@ class PlayerCard extends Component {
 			slot.innerHTML = '';
 			if (abilityFile) {
 				const img = this.createElement('img', {
-					src: this.getResourceURL(`abilities/${abilityFile}`),
+					src: this.getResourceURL(`pictures/abilities/${abilityFile}`),
 					alt: 'Ability'
 				});
 				slot.appendChild(img);
@@ -260,7 +260,7 @@ class PlayerCard extends Component {
 			slot.innerHTML = '';
 			if (itemFile) {
 				const img = this.createElement('img', {
-					src: this.getResourceURL(`items_exploration/${itemFile}`),
+					src: this.getResourceURL(`pictures/items_exploration/${itemFile}`),
 					alt: 'Item'
 				});
 				slot.appendChild(img);
