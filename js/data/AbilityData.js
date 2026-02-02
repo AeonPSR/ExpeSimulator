@@ -6,7 +6,8 @@
 const AbilityData = {
 	normal: [
 		'survival.png', 'botanic.png', 'pilot.png', 
-		'gunman.png', 'diplomacy.png', 'sprint.png', 'tracker.png'
+		'gunman.png', 'diplomacy.png', 'sprint.png', 'tracker.png',
+		'skillful.png'
 	],
 
 	   /**

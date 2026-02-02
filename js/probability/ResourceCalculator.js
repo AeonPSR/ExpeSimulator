@@ -249,6 +249,7 @@ const ResourceCalculator = {
 
 	/**
 	 * Counts modifiers from raw player data.
+	 * Skillful counts as Botanic for fruit bonus.
 	 * @private
 	 */
 	_countModifiers(players) {
@@ -261,7 +262,7 @@ const ResourceCalculator = {
 				for (const ability of player.abilities) {
 					if (ability) {
 						const id = ability.replace(/\.(png|jpg|gif)$/i, '').toUpperCase();
-						if (id === 'BOTANIC') botanistCount++;
+						if (id === 'BOTANIC' || id === 'SKILLFUL') botanistCount++;
 						if (id === 'SURVIVAL') survivalCount++;
 					}
 				}

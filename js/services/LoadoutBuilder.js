@@ -40,12 +40,18 @@ const LoadoutBuilder = {
 
 	/**
 	 * Collects abilities from a player, converting to identifiers.
+	 * Skillful expands to include DIPLOMACY effect.
 	 * @private
 	 */
 	_collectAbilities(player, abilities) {
 		for (const ability of player.abilities || []) {
 			if (ability) {
-				abilities.add(this.filenameToId(ability));
+				const id = this.filenameToId(ability);
+				abilities.add(id);
+				// Skillful grants Diplomacy effect
+				if (id === 'SKILLFUL') {
+					abilities.add('DIPLOMACY');
+				}
 			}
 		}
 	},
