@@ -361,6 +361,82 @@
 }
 
 /* ==========================================================================
+   Oxygen Toggle Button (Planet has oxygen)
+   ========================================================================== */
+
+.oxygen-toggle-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.oxygen-toggle-btn img {
+	width: 30px;
+	height: 30px;
+	opacity: 0.5;
+	transition: opacity 0.3s ease;
+}
+
+.oxygen-toggle-btn::before,
+.oxygen-toggle-btn::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.oxygen-toggle-btn::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.oxygen-toggle-btn::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.oxygen-toggle-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+.oxygen-toggle-btn:hover::before,
+.oxygen-toggle-btn:hover::after {
+	background: #7f8c8d;
+}
+
+/* Active State - Green (planet has oxygen) */
+.oxygen-toggle-btn[data-active="true"] {
+	border-color: #4CAF50;
+	background: rgba(76, 175, 80, 0.3);
+}
+
+.oxygen-toggle-btn[data-active="true"] img {
+	opacity: 1;
+}
+
+.oxygen-toggle-btn[data-active="true"]::before,
+.oxygen-toggle-btn[data-active="true"]::after {
+	opacity: 0;
+}
+
+.oxygen-toggle-btn[data-active="true"]:hover {
+	border-color: #45a049;
+	background: rgba(76, 175, 80, 0.5);
+}
+
+/* ==========================================================================
    Players Mode Button
    ========================================================================== */
 

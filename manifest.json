@@ -35,6 +35,7 @@
         "js/services/PlayerAnalysisService.js",
         "js/services/LoadoutBuilder.js",
         "js/services/DamageSpreader.js",
+        "js/services/OxygenService.js",
         "js/probability/DistributionCalculator.js",
         "js/probability/EventModifier.js",
         "js/probability/AbilityModifiers.js",

@@ -270,8 +270,13 @@ class ExpeditionSimulatorApp {
 	}
 
 	_updateFightingPower() {
+		// Only count fighting power from players who can participate
+		const sectors = this._state.getSectors();
+		const allPlayers = this._state.getPlayers();
+		const participatingPlayers = OxygenService.getParticipatingPlayers(allPlayers, sectors);
+		
 		const power = FightingPowerService.calculateTotalFightingPower(
-			this._state.getPlayers(),
+			participatingPlayers,
 			this._state.isCentauriActive()
 		);
 		this._playerSection?.setFightingPower?.(power);
@@ -289,22 +294,29 @@ class ExpeditionSimulatorApp {
 			return null;
 		}
 
-		const players = this._state.getPlayers();
-		const loadout = LoadoutBuilder.build(players, {
+		const allPlayers = this._state.getPlayers();
+		
+		// Filter to only players who can participate (have oxygen access)
+		const participatingPlayers = OxygenService.getParticipatingPlayers(allPlayers, sectors);
+		
+		const loadout = LoadoutBuilder.build(participatingPlayers, {
 			antigravActive: this._state.isAntigravActive()
 		});
 
-		// Single source of truth for all calculations
-		const results = EventWeightCalculator.calculate(sectors, loadout, players);
+		// Single source of truth for all calculations (only participating players)
+		const results = EventWeightCalculator.calculate(sectors, loadout, participatingPlayers);
 		
-		// Add player health calculations to the results
-		if (players.length > 0 && results) {
+		// Add player health calculations to the results (only for participating players)
+		if (participatingPlayers.length > 0 && results) {
 			results.healthByScenario = DamageSpreader.calculateHealthFromTotals(
-				players,
+				participatingPlayers,
 				results.combat?.damage || { pessimist: 0, average: 0, optimist: 0, worstCase: 0 },
 				results.eventDamage?.damage || { pessimist: 0, average: 0, optimist: 0, worstCase: 0 }
 			);
 		}
+		
+		// Store participation info for rendering
+		results.participationStatus = OxygenService.getParticipationStatus(allPlayers, sectors);
 
 		return results;
 	}
@@ -322,8 +334,12 @@ class ExpeditionSimulatorApp {
 		const players = this._state.getPlayers();
 		const results = this._calculateExpeditionResults();
 		
-		if (players.length > 0 && results?.healthByScenario) {
-			const resultsHTML = this._renderExpeditionResults(players, results.healthByScenario);
+		if (players.length > 0 && results) {
+			const resultsHTML = this._renderExpeditionResults(
+				players, 
+				results.healthByScenario || {}, 
+				results.participationStatus || []
+			);
 			this._resultsDisplay.setContent(resultsHTML);
 			this._resultsDisplay.showDefaultLegend();
 		} else {
@@ -335,14 +351,50 @@ class ExpeditionSimulatorApp {
 	 * Renders expedition results HTML for all players
 	 * @param {Array} players - Array of player objects
 	 * @param {Object} healthByScenario - { pessimist, average, optimist, worstCase } health arrays
+	 * @param {Array} participationStatus - Participation status for each player
 	 * @returns {string} - HTML string for expedition results
 	 */
-	_renderExpeditionResults(players, healthByScenario) {
-		return players.map((player, index) => {
-			const optimist = healthByScenario.optimist[index] ?? player.health;
-			const average = healthByScenario.average[index] ?? player.health;
-			const pessimist = healthByScenario.pessimist[index] ?? player.health;
-			const worst = healthByScenario.worstCase[index] ?? player.health;
+	_renderExpeditionResults(players, healthByScenario, participationStatus) {
+		// Build a map of participating player indices for health lookup
+		let participatingIndex = 0;
+		
+		return players.map((player, playerIndex) => {
+			const status = participationStatus[playerIndex];
+			const canParticipate = status?.canParticipate ?? true;
+			
+			// If player can't participate, show stuck in ship icon in each scenario
+			if (!canParticipate) {
+				const stuckIcon = `<img src="${getResourceURL('pictures/others/stuck_in_ship.png')}" alt="Stuck in Ship" class="stuck-icon" title="No oxygen - stuck in ship" />`;
+				return `
+					<div class="expedition-result-card">
+						<div class="expedition-result-avatar">
+							<img src="${getResourceURL(`pictures/characters/${player.avatar}`)}" alt="Player Avatar" />
+						</div>
+						<div class="expedition-result-health-container">
+							<div class="expedition-result-health optimist health-stuck">
+								${stuckIcon}
+							</div>
+							<div class="expedition-result-health average health-stuck">
+								${stuckIcon}
+							</div>
+							<div class="expedition-result-health pessimist health-stuck">
+								${stuckIcon}
+							</div>
+							<div class="expedition-result-health worst health-stuck">
+								${stuckIcon}
+							</div>
+						</div>
+					</div>
+				`;
+			}
+			
+			// Get health values for this participating player
+			const optimist = healthByScenario.optimist?.[participatingIndex] ?? player.health;
+			const average = healthByScenario.average?.[participatingIndex] ?? player.health;
+			const pessimist = healthByScenario.pessimist?.[participatingIndex] ?? player.health;
+			const worst = healthByScenario.worstCase?.[participatingIndex] ?? player.health;
+			
+			participatingIndex++;
 
 			return `
 				<div class="expedition-result-card">
