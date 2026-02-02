@@ -82,60 +82,68 @@ const EventDamageCalculator = {
 	/**
 	 * Calculates damage using proper per-sector convolution.
 	 * Each sector can only produce ONE event, so we build sector damage distributions.
+	 * 
+	 * For pessimist and worst case: excludes sectors where fight damage "wins"
+	 * (since fight and event are mutually exclusive - we count fight damage there instead).
+	 * For optimist and average: uses full distribution.
+	 * 
 	 * @param {Array<string>} sectors - Sector names
 	 * @param {Object} loadout - Player loadout
 	 * @param {number} playerCount - Number of players
-	 * @param {Set<string>} worstCaseExclusions - Sectors to exclude from worst case
+	 * @param {Set<string>} fightWinExclusions - Sectors where fight damage > event damage
 	 * @private
 	 */
-	_calculateDamageWithConvolution(sectors, loadout, playerCount, worstCaseExclusions = null) {
-		const distributions = [];
-		const worstCaseDistributions = [];
+	_calculateDamageWithConvolution(sectors, loadout, playerCount, fightWinExclusions = null) {
+		const allDistributions = [];
+		const filteredDistributions = [];
 
 		for (const sectorName of sectors) {
 			const dist = this._buildSectorDamageDistribution(sectorName, loadout, playerCount);
-			distributions.push(dist);
+			allDistributions.push(dist);
 			
-			// For worst case, skip excluded sectors (where fight damage "wins")
-			if (!worstCaseExclusions || !worstCaseExclusions.has(sectorName)) {
-				worstCaseDistributions.push(dist);
+			// For pessimist/worst case, skip sectors where fight damage "wins"
+			if (!fightWinExclusions || !fightWinExclusions.has(sectorName)) {
+				filteredDistributions.push(dist);
 			}
 		}
 
-		if (distributions.length === 0) {
+		if (allDistributions.length === 0) {
 			return this._emptyDamageResult();
 		}
 
-		// Convolve all sector damage distributions
-		const combined = DistributionCalculator.convolveAll(distributions);
-		
-		// For damage: lower = better (optimist), so higherIsBetter = false
-		const scenarios = DistributionCalculator.getScenarios(combined, false);
+		// Full distribution for optimist and average
+		const fullCombined = DistributionCalculator.convolveAll(allDistributions);
+		const fullScenarios = DistributionCalculator.getScenarios(fullCombined, false);
 
-		// For worst case, use the filtered distributions
+		// Filtered distribution for pessimist and worst case
+		let pessimist = 0;
 		let worstCase = 0;
+		let pessimistProb = 1;
 		let worstCaseProb = 1;
-		
-		if (worstCaseDistributions.length > 0) {
-			const worstCaseCombined = DistributionCalculator.convolveAll(worstCaseDistributions);
-			const sortedEntries = [...worstCaseCombined.entries()].sort((a, b) => b[0] - a[0]);
+
+		if (filteredDistributions.length > 0) {
+			const filteredCombined = DistributionCalculator.convolveAll(filteredDistributions);
+			const filteredScenarios = DistributionCalculator.getScenarios(filteredCombined, false);
+			pessimist = filteredScenarios.pessimist;
+			pessimistProb = filteredCombined.get(pessimist) || 0;
+			
+			const sortedEntries = [...filteredCombined.entries()].sort((a, b) => b[0] - a[0]);
 			worstCase = sortedEntries[0]?.[0] || 0;
 			worstCaseProb = sortedEntries[0]?.[1] || 0;
 		}
 
-		// Get probabilities for pessimist/optimist values
-		const pessimistProb = combined.get(scenarios.pessimist) || 0;
-		const optimistProb = combined.get(scenarios.optimist) || 0;
+		// Get probability for optimist from full distribution
+		const optimistProb = fullCombined.get(fullScenarios.optimist) || 0;
 
 		return {
-			pessimist: scenarios.pessimist,
-			average: scenarios.average,
-			optimist: scenarios.optimist,
+			pessimist,
+			average: fullScenarios.average,
+			optimist: fullScenarios.optimist,
 			worstCase,
 			pessimistProb,
 			optimistProb,
 			worstCaseProb,
-			distribution: combined
+			distribution: fullCombined
 		};
 	},
 
