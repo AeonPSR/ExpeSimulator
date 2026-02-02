@@ -31,6 +31,23 @@ const ItemModifiers = {
 	 */
 	applyQuadCompass(events, sectorName) {
 		return EventModifier.removeEventsByPrefix(events, 'AGAIN');
+	},
+
+	/**
+	 * Applies Trad Module: Doubles ARTEFACT weight in INTELLIGENT sector.
+	 * 
+	 * @param {Object} events - The explorationEvents object (will be mutated)
+	 * @param {string} sectorName - Current sector name
+	 * @returns {Object} The modified events object
+	 */
+	applyTradModule(events, sectorName) {
+		if (sectorName !== 'INTELLIGENT') {
+			return events;
+		}
+		if (events['ARTEFACT'] !== undefined) {
+			events['ARTEFACT'] *= 2;
+		}
+		return events;
 	}
 };
 

@@ -44,7 +44,8 @@ const ModifierApplicator = {
 	_applyItems(events, sectorName, items) {
 		const itemMap = {
 			'WHITE_FLAG': ItemModifiers.applyWhiteFlag,
-			'QUAD_COMPASS': ItemModifiers.applyQuadCompass
+			'QUAD_COMPASS': ItemModifiers.applyQuadCompass,
+			'TRAD_MODULE': ItemModifiers.applyTradModule
 		};
 		this._applyModifiers(events, sectorName, items, itemMap);
 	},
