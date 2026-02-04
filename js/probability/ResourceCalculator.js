@@ -16,9 +16,10 @@ const ResourceCalculator = {
 	 * @param {Array<string>} sectors - Array of sector names
 	 * @param {Object} loadout - { abilities: [], items: [], projects: [] }
 	 * @param {Array<Object>} players - Raw player data for counting duplicates
+	 * @param {Map} sectorProbabilities - Precomputed sector probabilities (optional)
 	 * @returns {Object} Resource data with pessimist/average/optimist for each
 	 */
-	calculate(sectors, loadout = {}, players = []) {
+	calculate(sectors, loadout = {}, players = [], sectorProbabilities = null) {
 		if (!sectors || sectors.length === 0) {
 			return this._emptyResult();
 		}
@@ -28,12 +29,12 @@ const ResourceCalculator = {
 
 		// Build and convolve distributions for each resource type
 		return {
-			fruits: this._calculateWithConvolution(sectors, loadout, 'HARVEST', modifiers.botanistCount),
-			steaks: this._calculateWithConvolution(sectors, loadout, 'PROVISION', modifiers.survivalCount),
-			fuel: this._calculateFuelWithConvolution(sectors, loadout, modifiers.drillerCount),
-			oxygen: this._calculateOxygen(sectors, loadout),
-			artefacts: this._calculateArtefacts(sectors, loadout),
-			mapFragments: this._calculateMapFragments(sectors, loadout)
+			fruits: this._calculateWithConvolution(sectors, loadout, 'HARVEST', modifiers.botanistCount, sectorProbabilities),
+			steaks: this._calculateWithConvolution(sectors, loadout, 'PROVISION', modifiers.survivalCount, sectorProbabilities),
+			fuel: this._calculateFuelWithConvolution(sectors, loadout, modifiers.drillerCount, sectorProbabilities),
+			oxygen: this._calculateOxygen(sectors, loadout, sectorProbabilities),
+			artefacts: this._calculateArtefacts(sectors, loadout, sectorProbabilities),
+			mapFragments: this._calculateMapFragments(sectors, loadout, sectorProbabilities)
 		};
 	},
 
@@ -41,8 +42,8 @@ const ResourceCalculator = {
 	 * Calculates oxygen with pessimist always = 0 (worst case: find nothing)
 	 * @private
 	 */
-	_calculateOxygen(sectors, loadout) {
-		const result = this._calculateWithConvolution(sectors, loadout, 'OXYGEN', 0);
+	_calculateOxygen(sectors, loadout, sectorProbabilities = null) {
+		const result = this._calculateWithConvolution(sectors, loadout, 'OXYGEN', 0, sectorProbabilities);
 		// Pessimist for O2 is always 0 (you might find nothing)
 		result.pessimist = 0;
 		return result;
@@ -52,11 +53,11 @@ const ResourceCalculator = {
 	 * Calculates resource using convolution with additive bonus.
 	 * @private
 	 */
-	_calculateWithConvolution(sectors, loadout, eventPrefix, bonusPerEvent) {
+	_calculateWithConvolution(sectors, loadout, eventPrefix, bonusPerEvent, sectorProbabilities = null) {
 		const distributions = [];
 
 		for (const sectorName of sectors) {
-			const dist = this._buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent);
+			const dist = this._buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent, sectorProbabilities);
 			distributions.push(dist);
 		}
 
@@ -73,8 +74,8 @@ const ResourceCalculator = {
 	 * Applies bonus to each resource event.
 	 * @private
 	 */
-	_buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent) {
-		const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+	_buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent, sectorProbabilities = null) {
+		const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		const dist = new Map();
 		let resourceProb = 0;
 
@@ -105,12 +106,12 @@ const ResourceCalculator = {
 	 * Calculates fuel with multiplicative bonus (driller = x2).
 	 * @private
 	 */
-	_calculateFuelWithConvolution(sectors, loadout, drillerCount) {
+	_calculateFuelWithConvolution(sectors, loadout, drillerCount, sectorProbabilities = null) {
 		const multiplier = Math.pow(2, drillerCount);
 		const distributions = [];
 
 		for (const sectorName of sectors) {
-			const dist = this._buildFuelDistribution(sectorName, loadout, multiplier);
+			const dist = this._buildFuelDistribution(sectorName, loadout, multiplier, sectorProbabilities);
 			distributions.push(dist);
 		}
 
@@ -126,8 +127,8 @@ const ResourceCalculator = {
 	 * Builds fuel distribution for a single sector with multiplier.
 	 * @private
 	 */
-	_buildFuelDistribution(sectorName, loadout, multiplier) {
-		const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+	_buildFuelDistribution(sectorName, loadout, multiplier, sectorProbabilities = null) {
+		const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		const dist = new Map();
 		let fuelProb = 0;
 
@@ -156,11 +157,11 @@ const ResourceCalculator = {
 	 * Calculates artefacts (8/9 of ARTEFACT events).
 	 * @private
 	 */
-	_calculateArtefacts(sectors, loadout) {
+	_calculateArtefacts(sectors, loadout, sectorProbabilities = null) {
 		const distributions = [];
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			const dist = new Map();
 			let artefactProb = 0;
 
@@ -198,12 +199,12 @@ const ResourceCalculator = {
 	 * If any ARTEFACT exists, optimist is at least 0.1 (important for ending)
 	 * @private
 	 */
-	_calculateMapFragments(sectors, loadout) {
+	_calculateMapFragments(sectors, loadout, sectorProbabilities = null) {
 		const distributions = [];
 		let hasArtefact = false;
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			const dist = new Map();
 			let mapProb = 0;
 

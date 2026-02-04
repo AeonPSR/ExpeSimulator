@@ -37,9 +37,10 @@ const FightCalculator = {
 	 * @param {Object} loadout - { abilities: [], items: [], projects: [] }
 	 * @param {Array<Object>} players - Raw player data
 	 * @param {Set<string>} worstCaseExclusions - Sectors to exclude from worst case (where event damage "wins")
+	 * @param {Map} sectorProbabilities - Precomputed sector probabilities (optional)
 	 * @returns {Object} Fight data with occurrence and damage info
 	 */
-	calculate(sectors, loadout = {}, players = [], worstCaseExclusions = null) {
+	calculate(sectors, loadout = {}, players = [], worstCaseExclusions = null, sectorProbabilities = null) {
 		if (!sectors || sectors.length === 0) {
 			return this._emptyResult();
 		}
@@ -50,12 +51,12 @@ const FightCalculator = {
 		const playerCount = players.length || 1;
 
 		// Calculate occurrence for each fight type, tracking which sectors can produce each type
-		const fightTypes = this._getAllFightTypes(sectors, loadout);
+		const fightTypes = this._getAllFightTypes(sectors, loadout, sectorProbabilities);
 		const occurrence = {};
 		const sectorsByFightType = {};  // Track which sectors can produce each fight type
 		
 		for (const fightType of fightTypes) {
-			const occResult = this._calculateOccurrenceWithSources(sectors, loadout, fightType);
+			const occResult = this._calculateOccurrenceWithSources(sectors, loadout, fightType, sectorProbabilities);
 			occurrence[fightType] = occResult.occurrence;
 			sectorsByFightType[fightType] = occResult.sectors;
 		}
@@ -68,7 +69,7 @@ const FightCalculator = {
 			worstCaseOccurrence = {};
 			worstCaseSectorsByFightType = {};
 			for (const fightType of fightTypes) {
-				const occResult = this._calculateOccurrenceWithSources(filteredSectors, loadout, fightType);
+				const occResult = this._calculateOccurrenceWithSources(filteredSectors, loadout, fightType, sectorProbabilities);
 				worstCaseOccurrence[fightType] = occResult.occurrence;
 				worstCaseSectorsByFightType[fightType] = occResult.sectors;
 			}
@@ -101,13 +102,13 @@ const FightCalculator = {
 	 * Also returns the list of sectors that can produce this fight type.
 	 * @private
 	 */
-	_calculateOccurrenceWithSources(sectors, loadout, fightType) {
+	_calculateOccurrenceWithSources(sectors, loadout, fightType, sectorProbabilities = null) {
 		const distributions = [];
 		const fightEvent = `FIGHT_${fightType}`;
 		const sectorsWithFight = [];  // Track which sectors can produce this fight
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			let fightProb = 0;
 
 			for (const [eventName, prob] of probs) {
@@ -157,19 +158,19 @@ const FightCalculator = {
 	 * @deprecated Use _calculateOccurrenceWithSources instead
 	 * @private
 	 */
-	_calculateOccurrence(sectors, loadout, fightType) {
-		return this._calculateOccurrenceWithSources(sectors, loadout, fightType).occurrence;
+	_calculateOccurrence(sectors, loadout, fightType, sectorProbabilities = null) {
+		return this._calculateOccurrenceWithSources(sectors, loadout, fightType, sectorProbabilities).occurrence;
 	},
 
 	/**
 	 * Gets all fight types present in the selected sectors.
 	 * @private
 	 */
-	_getAllFightTypes(sectors, loadout) {
+	_getAllFightTypes(sectors, loadout, sectorProbabilities = null) {
 		const fightTypes = new Set();
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			
 			for (const [eventName] of probs) {
 				if (eventName.startsWith('FIGHT_')) {

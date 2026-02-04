@@ -28,6 +28,11 @@ const EventDamageCalculator = {
 			min: 3, max: 5, average: 4,
 			affectsAll: false  // Only affects one player
 		},
+		'ACCIDENT_ROPE_3_5': { 
+			min: 3, max: 5, average: 4,
+			affectsAll: false,  // Only affects one player
+			ropeImmune: true    // Can be negated by rope
+		},
 		'DISASTER_3_5': { 
 			min: 3, max: 5, average: 4,
 			affectsAll: true
@@ -41,9 +46,10 @@ const EventDamageCalculator = {
 	 * @param {Object} loadout - { abilities: [], items: [], projects: [] }
 	 * @param {Array<Object>} players - Raw player data
 	 * @param {Set<string>} worstCaseExclusions - Sectors to exclude from worst case (where fight damage "wins")
+	 * @param {Map} sectorProbabilities - Precomputed sector probabilities (optional)
 	 * @returns {Object} Event damage data with scenarios
 	 */
-	calculate(sectors, loadout = {}, players = [], worstCaseExclusions = null) {
+	calculate(sectors, loadout = {}, players = [], worstCaseExclusions = null, sectorProbabilities = null) {
 		if (!sectors || sectors.length === 0) {
 			return this._emptyResult();
 		}
@@ -51,10 +57,10 @@ const EventDamageCalculator = {
 		const playerCount = players.length || 1;
 
 		// Calculate occurrences with source tracking for each event type
-		const occurrenceWithSources = this._calculateOccurrencesWithSources(sectors, loadout);
+		const occurrenceWithSources = this._calculateOccurrencesWithSources(sectors, loadout, sectorProbabilities);
 
 		// Build per-sector damage distributions, then convolve
-		const damageResult = this._calculateDamageWithConvolution(sectors, loadout, playerCount, worstCaseExclusions);
+		const damageResult = this._calculateDamageWithConvolution(sectors, loadout, playerCount, worstCaseExclusions, sectorProbabilities);
 
 		// Build damage instances for per-player distribution
 		const damageInstances = this._buildDamageInstances(occurrenceWithSources, playerCount, worstCaseExclusions);
@@ -71,8 +77,9 @@ const EventDamageCalculator = {
 			damageInstances,  // Per-scenario damage instances with sources
 			playerCount,
 			// Legacy format for backward compatibility
+			// Combine both accident types for display
 			tired: occurrence.TIRED_2?.average || 0,
-			accident: occurrence.ACCIDENT_3_5?.average || 0,
+			accident: (occurrence.ACCIDENT_3_5?.average || 0) + (occurrence.ACCIDENT_ROPE_3_5?.average || 0),
 			disaster: occurrence.DISASTER_3_5?.average || 0,
 			scenarios: damageResult,  // Alias for display
 			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
@@ -91,14 +98,15 @@ const EventDamageCalculator = {
 	 * @param {Object} loadout - Player loadout
 	 * @param {number} playerCount - Number of players
 	 * @param {Set<string>} fightWinExclusions - Sectors where fight damage > event damage
+	 * @param {Map} sectorProbabilities - Precomputed sector probabilities (optional)
 	 * @private
 	 */
-	_calculateDamageWithConvolution(sectors, loadout, playerCount, fightWinExclusions = null) {
+	_calculateDamageWithConvolution(sectors, loadout, playerCount, fightWinExclusions = null, sectorProbabilities = null) {
 		const allDistributions = [];
 		const filteredDistributions = [];
 
 		for (const sectorName of sectors) {
-			const dist = this._buildSectorDamageDistribution(sectorName, loadout, playerCount);
+			const dist = this._buildSectorDamageDistribution(sectorName, loadout, playerCount, sectorProbabilities);
 			allDistributions.push(dist);
 			
 			// For pessimist/worst case, skip sectors where fight damage "wins"
@@ -152,8 +160,8 @@ const EventDamageCalculator = {
 	 * Considers all damage events as mutually exclusive outcomes.
 	 * @private
 	 */
-	_buildSectorDamageDistribution(sectorName, loadout, playerCount) {
-		const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+	_buildSectorDamageDistribution(sectorName, loadout, playerCount, sectorProbabilities = null) {
+		const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		const dist = new Map();
 		let totalDamageProb = 0;
 
@@ -223,12 +231,12 @@ const EventDamageCalculator = {
 	 * Calculates occurrence counts for each event type with source tracking.
 	 * @private
 	 */
-	_calculateOccurrencesWithSources(sectors, loadout) {
-		const eventTypes = ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5'];
+	_calculateOccurrencesWithSources(sectors, loadout, sectorProbabilities = null) {
+		const eventTypes = ['TIRED_2', 'ACCIDENT_3_5', 'ACCIDENT_ROPE_3_5', 'DISASTER_3_5'];
 		const result = {};
 
 		for (const eventType of eventTypes) {
-			result[eventType] = this._calculateEventOccurrenceWithSources(sectors, loadout, eventType);
+			result[eventType] = this._calculateEventOccurrenceWithSources(sectors, loadout, eventType, sectorProbabilities);
 		}
 
 		return result;
@@ -238,12 +246,12 @@ const EventDamageCalculator = {
 	 * Calculates occurrence for a specific event type with source tracking.
 	 * @private
 	 */
-	_calculateEventOccurrenceWithSources(sectors, loadout, eventType) {
+	_calculateEventOccurrenceWithSources(sectors, loadout, eventType, sectorProbabilities = null) {
 		const distributions = [];
 		const sectorsWithEvent = [];
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			let eventProb = 0;
 
 			for (const [eventName, prob] of probs) {

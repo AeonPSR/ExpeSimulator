@@ -95,9 +95,13 @@ const EventWeightCalculator = {
 			sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
 		}
 
+		// OPTIMIZATION: Precompute all sector probabilities ONCE
+		// This map is passed to all sub-calculators to avoid redundant recalculation
+		const sectorProbabilities = this._precomputeSectorProbabilities(sectors, loadout);
+
 		// Calculate resources using ResourceCalculator (convolution-based)
 		const resources = typeof ResourceCalculator !== 'undefined'
-			? ResourceCalculator.calculate(sectors, loadout, players)
+			? ResourceCalculator.calculate(sectors, loadout, players, sectorProbabilities)
 			: this._legacyResourceCalculation(sectors, loadout);
 
 		// Use DamageComparator to determine which sectors should have fight vs event damage
@@ -111,7 +115,7 @@ const EventWeightCalculator = {
 			const grenadeCount = FightingPowerService.countGrenades(players);
 			
 			const evaluation = DamageComparator.evaluateExpedition(
-				sectors, loadout, playerCount, fightingPower, grenadeCount
+				sectors, loadout, playerCount, fightingPower, grenadeCount, sectorProbabilities
 			);
 			
 			fightExclusions = new Set();
@@ -132,19 +136,19 @@ const EventWeightCalculator = {
 
 		// Calculate fights using FightCalculator (convolution-based)
 		const combat = typeof FightCalculator !== 'undefined'
-			? FightCalculator.calculate(sectors, loadout, players, fightExclusions)
+			? FightCalculator.calculate(sectors, loadout, players, fightExclusions, sectorProbabilities)
 			: this._legacyFightCalculation(sectors, loadout);
 
 		// Calculate event damage using EventDamageCalculator (convolution-based)
 		const eventDamage = typeof EventDamageCalculator !== 'undefined'
-			? EventDamageCalculator.calculate(sectors, loadout, players, eventExclusions)
+			? EventDamageCalculator.calculate(sectors, loadout, players, eventExclusions, sectorProbabilities)
 			: this._legacyEventDamageCalculation(sectors, loadout);
 
 		// Aggregate non-resource, non-fight, non-damage events
-		const aggregated = this._aggregateEvents(sectors, loadout);
+		const aggregated = this._aggregateEvents(sectors, sectorProbabilities);
 
-		// Build sector breakdown
-		const sectorBreakdown = this._buildSectorBreakdown(sectorCounts, loadout);
+		// Build sector breakdown (reuse precomputed probabilities)
+		const sectorBreakdown = this._buildSectorBreakdownFromCache(sectorCounts, sectorProbabilities);
 
 		return {
 			resources: resources,
@@ -265,6 +269,43 @@ const EventWeightCalculator = {
 	// ========================================
 
 	/**
+	 * Precomputes sector probabilities for all unique sectors.
+	 * This is called ONCE at the start of calculate() and the result is passed
+	 * to all sub-calculators to avoid redundant recalculation.
+	 * 
+	 * @param {Array<string>} sectors - Array of sector names
+	 * @param {Object} loadout - Player loadout
+	 * @returns {Map<string, Map<string, number>>} sectorName → (eventName → probability)
+	 * @private
+	 */
+	_precomputeSectorProbabilities(sectors, loadout) {
+		const cache = new Map();
+		const uniqueSectors = [...new Set(sectors)];
+		
+		for (const sectorName of uniqueSectors) {
+			cache.set(sectorName, this.getModifiedProbabilities(sectorName, loadout));
+		}
+		
+		return cache;
+	},
+
+	/**
+	 * Gets probabilities for a sector, using cache if available.
+	 * This is the preferred method for sub-calculators to use.
+	 * 
+	 * @param {string} sectorName - Sector name
+	 * @param {Object} loadout - Player loadout (used only if cache miss)
+	 * @param {Map} sectorProbabilities - Precomputed cache (optional)
+	 * @returns {Map<string, number>} eventName → probability
+	 */
+	getSectorProbabilities(sectorName, loadout, sectorProbabilities = null) {
+		if (sectorProbabilities && sectorProbabilities.has(sectorName)) {
+			return sectorProbabilities.get(sectorName);
+		}
+		return this.getModifiedProbabilities(sectorName, loadout);
+	},
+
+	/**
 	 * @private
 	 */
 	_getTotalWeight(events) {
@@ -272,9 +313,9 @@ const EventWeightCalculator = {
 	},
 
 	/**
-	 * @private - Aggregates non-resource events across all sectors
+	 * @private - Aggregates non-resource events across all sectors (using cache)
 	 */
-	_aggregateEvents(sectors, loadout) {
+	_aggregateEvents(sectors, sectorProbabilities) {
 		const result = {
 			fights: {},
 			tired: 0, accident: 0, disaster: 0,
@@ -283,7 +324,7 @@ const EventWeightCalculator = {
 		};
 
 		for (const sectorName of sectors) {
-			const probs = this.getModifiedProbabilities(sectorName, loadout);
+			const probs = sectorProbabilities.get(sectorName);
 			
 			for (const [eventName, prob] of probs) {
 				this._categorizeEvent(eventName, prob, result);
@@ -333,7 +374,32 @@ const EventWeightCalculator = {
 	},
 
 	/**
-	 * @private - Builds sector breakdown with event probabilities
+	 * @private - Builds sector breakdown with event probabilities (using cache)
+	 */
+	_buildSectorBreakdownFromCache(sectorCounts, sectorProbabilities) {
+		const breakdown = {};
+
+		for (const [sectorName, count] of Object.entries(sectorCounts)) {
+			const probs = sectorProbabilities.get(sectorName);
+			const events = {};
+			
+			if (probs) {
+				for (const [eventName, prob] of probs) {
+					events[eventName] = prob;
+				}
+			}
+
+			breakdown[sectorName] = {
+				count: count,
+				events: events
+			};
+		}
+
+		return breakdown;
+	},
+
+	/**
+	 * @private - Builds sector breakdown with event probabilities (legacy, no cache)
 	 */
 	_buildSectorBreakdown(sectorCounts, loadout) {
 		const breakdown = {};
