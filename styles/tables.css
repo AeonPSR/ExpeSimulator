@@ -118,7 +118,7 @@
 }
 
 .pessimist-col,
-.average-col,
+.median-col,
 .optimist-col {
 	width: 21.66%;
 	text-align: center;

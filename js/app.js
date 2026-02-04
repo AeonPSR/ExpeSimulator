@@ -310,8 +310,8 @@ class ExpeditionSimulatorApp {
 		if (participatingPlayers.length > 0 && results) {
 			results.healthByScenario = DamageSpreader.calculateHealthFromTotals(
 				participatingPlayers,
-				results.combat?.damage || { pessimist: 0, average: 0, optimist: 0, worstCase: 0 },
-				results.eventDamage?.damage || { pessimist: 0, average: 0, optimist: 0, worstCase: 0 }
+				results.combat?.damage || { pessimist: 0, median: 0, optimist: 0, worstCase: 0 },
+				results.eventDamage?.damage || { pessimist: 0, median: 0, optimist: 0, worstCase: 0 }
 			);
 		}
 		
@@ -374,7 +374,7 @@ class ExpeditionSimulatorApp {
 							<div class="expedition-result-health optimist health-stuck">
 								${stuckIcon}
 							</div>
-							<div class="expedition-result-health average health-stuck">
+							<div class="expedition-result-health median health-stuck">
 								${stuckIcon}
 							</div>
 							<div class="expedition-result-health pessimist health-stuck">
@@ -390,7 +390,7 @@ class ExpeditionSimulatorApp {
 			
 			// Get health values for this participating player
 			const optimist = healthByScenario.optimist?.[participatingIndex] ?? player.health;
-			const average = healthByScenario.average?.[participatingIndex] ?? player.health;
+			const median = healthByScenario.median?.[participatingIndex] ?? player.health;
 			const pessimist = healthByScenario.pessimist?.[participatingIndex] ?? player.health;
 			const worst = healthByScenario.worstCase?.[participatingIndex] ?? player.health;
 			
@@ -405,8 +405,8 @@ class ExpeditionSimulatorApp {
 						<div class="expedition-result-health optimist ${this._getHealthClass(optimist)}">
 							${this._renderHealthValue(optimist)}
 						</div>
-						<div class="expedition-result-health average ${this._getHealthClass(average)}">
-							${this._renderHealthValue(average)}
+						<div class="expedition-result-health median ${this._getHealthClass(median)}">
+							${this._renderHealthValue(median)}
 						</div>
 						<div class="expedition-result-health pessimist ${this._getHealthClass(pessimist)}">
 							${this._renderHealthValue(pessimist)}

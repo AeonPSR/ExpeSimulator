@@ -87,24 +87,100 @@ const DistributionCalculator = {
 	},
 
 	/**
-	 * Extracts pessimist/average/optimist from a distribution.
+	 * Extracts pessimist/median/optimist from a distribution.
+	 * Uses percentiles for all three values for consistency:
+	 * - Optimist: 25th percentile (lucky run)
+	 * - Median: 50th percentile (typical run)
+	 * - Pessimist: 75th percentile (unlucky run)
+	 * 
+	 * Also calculates cumulative probability ranges for display:
+	 * - optimistProb: P(value <= optimist) - chance of getting optimist or better
+	 * - medianProb: P(optimist < value < pessimist) - chance of getting between optimist and pessimist
+	 * - pessimistProb: P(pessimist <= value < worst) - chance of getting pessimist but not worst
+	 * - worstProb: P(value = worst) - chance of getting worst case
 	 * 
 	 * @param {Map<number, number>} distribution - Value → probability map
 	 * @param {boolean} [higherIsBetter=true] - If true (resources), higher values are optimist.
 	 *                                          If false (damage/fights), lower values are optimist.
-	 * @returns {{pessimist: number, average: number, optimist: number}}
+	 * @returns {Object} Scenarios with values and cumulative probabilities
 	 */
 	getScenarios(distribution, higherIsBetter = true) {
 		const p25 = this.getPercentile(distribution, 0.25);
+		const p50 = this.getPercentile(distribution, 0.50);
 		const p75 = this.getPercentile(distribution, 0.75);
+		// Keep average for backward compatibility if needed
 		const avg = Math.round(this.getExpectedValue(distribution) * 10) / 10;
 
+		// Sort distribution by value
+		const sorted = [...distribution.entries()].sort((a, b) => a[0] - b[0]);
+		const worst = sorted[sorted.length - 1]?.[0] || 0;
+		const best = sorted[0]?.[0] || 0;
+
+		// Calculate cumulative probability ranges using EXCLUSIVE boundaries
+		// Each value should only be counted in ONE category
+		let optimistCumProb = 0;
+		let medianCumProb = 0;
+		let pessimistCumProb = 0;
+		let worstCumProb = 0;
+
 		if (higherIsBetter) {
-			// Resources: higher = better
-			return { pessimist: p25, average: avg, optimist: p75 };
+			// Resources: higher = better, so optimist is p75, pessimist is p25
+			// worst = lowest value, best = highest value
+			const optimistVal = p75;
+			const pessimistVal = p25;
+			const worstVal = best; // lowest value is worst for resources
+
+			for (const [value, prob] of sorted) {
+				if (value >= optimistVal) {
+					optimistCumProb += prob;  // Optimist: >= p75
+				} else if (value >= pessimistVal && value < optimistVal) {
+					medianCumProb += prob;    // Median: between pessimist and optimist (exclusive)
+				} else if (value > worstVal && value < pessimistVal) {
+					pessimistCumProb += prob; // Pessimist: > worst but < pessimist threshold
+				} else {
+					worstCumProb += prob;     // Worst: = lowest value
+				}
+			}
+
+			return { 
+				pessimist: p25, 
+				median: p50, 
+				optimist: p75, 
+				average: avg,
+				pessimistProb: pessimistCumProb,
+				medianProb: medianCumProb,
+				optimistProb: optimistCumProb,
+				worstProb: worstCumProb
+			};
 		} else {
-			// Damage/Fights: lower = better
-			return { pessimist: p75, average: avg, optimist: p25 };
+			// Damage/Fights: lower = better, so optimist is p25, pessimist is p75
+			// worst = highest value, best = lowest value
+			const optimistVal = p25;
+			const pessimistVal = p75;
+			const worstVal = worst; // highest value is worst for damage
+
+			for (const [value, prob] of sorted) {
+				if (value <= optimistVal) {
+					optimistCumProb += prob;  // Optimist: <= p25
+				} else if (value > optimistVal && value < pessimistVal) {
+					medianCumProb += prob;    // Median: > optimist AND < pessimist
+				} else if (value >= pessimistVal && value < worstVal) {
+					pessimistCumProb += prob; // Pessimist: >= pessimist threshold but < worst
+				} else {
+					worstCumProb += prob;     // Worst: = highest value
+				}
+			}
+
+			return { 
+				pessimist: p75, 
+				median: p50, 
+				optimist: p25, 
+				average: avg,
+				pessimistProb: pessimistCumProb,
+				medianProb: medianCumProb,
+				optimistProb: optimistCumProb,
+				worstProb: worstCumProb
+			};
 		}
 	},
 

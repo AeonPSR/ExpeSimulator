@@ -102,55 +102,38 @@ const EventDamageCalculator = {
 	 * @private
 	 */
 	_calculateDamageWithConvolution(sectors, loadout, playerCount, fightWinExclusions = null, sectorProbabilities = null) {
-		const allDistributions = [];
-		const filteredDistributions = [];
+		const distributions = [];
 
 		for (const sectorName of sectors) {
-			const dist = this._buildSectorDamageDistribution(sectorName, loadout, playerCount, sectorProbabilities);
-			allDistributions.push(dist);
-			
-			// For pessimist/worst case, skip sectors where fight damage "wins"
-			if (!fightWinExclusions || !fightWinExclusions.has(sectorName)) {
-				filteredDistributions.push(dist);
-			}
+			// If fight "wins" for this sector, event damage should be 0
+			// The sector still participates (with its probability), but contributes 0 damage
+			const zeroDamage = fightWinExclusions && fightWinExclusions.has(sectorName);
+			const dist = this._buildSectorDamageDistribution(sectorName, loadout, playerCount, sectorProbabilities, zeroDamage);
+			distributions.push(dist);
 		}
 
-		if (allDistributions.length === 0) {
+		if (distributions.length === 0) {
 			return this._emptyDamageResult();
 		}
 
-		// Full distribution for optimist and average
-		const fullCombined = DistributionCalculator.convolveAll(allDistributions);
+		// Combined distribution with zero damage for excluded sectors
+		const fullCombined = DistributionCalculator.convolveAll(distributions);
 		const fullScenarios = DistributionCalculator.getScenarios(fullCombined, false);
 
-		// Filtered distribution for pessimist and worst case
-		let pessimist = 0;
-		let worstCase = 0;
-		let pessimistProb = 1;
-		let worstCaseProb = 1;
-
-		if (filteredDistributions.length > 0) {
-			const filteredCombined = DistributionCalculator.convolveAll(filteredDistributions);
-			const filteredScenarios = DistributionCalculator.getScenarios(filteredCombined, false);
-			pessimist = filteredScenarios.pessimist;
-			pessimistProb = filteredCombined.get(pessimist) || 0;
-			
-			const sortedEntries = [...filteredCombined.entries()].sort((a, b) => b[0] - a[0]);
-			worstCase = sortedEntries[0]?.[0] || 0;
-			worstCaseProb = sortedEntries[0]?.[1] || 0;
-		}
-
-		// Get probability for optimist from full distribution
-		const optimistProb = fullCombined.get(fullScenarios.optimist) || 0;
+		// Get worst case value (max damage in distribution)
+		const sortedEntries = [...fullCombined.entries()].sort((a, b) => b[0] - a[0]);
+		const worstCase = sortedEntries[0]?.[0] || 0;
 
 		return {
-			pessimist,
-			average: fullScenarios.average,
+			pessimist: fullScenarios.pessimist,
+			median: fullScenarios.median,
+			average: fullScenarios.average,  // Keep for backward compatibility
 			optimist: fullScenarios.optimist,
 			worstCase,
-			pessimistProb,
-			optimistProb,
-			worstCaseProb,
+			pessimistProb: fullScenarios.pessimistProb,
+			medianProb: fullScenarios.medianProb,
+			optimistProb: fullScenarios.optimistProb,
+			worstCaseProb: fullScenarios.worstProb,
 			distribution: fullCombined
 		};
 	},
@@ -158,9 +141,14 @@ const EventDamageCalculator = {
 	/**
 	 * Builds damage distribution for a single sector.
 	 * Considers all damage events as mutually exclusive outcomes.
+	 * @param {string} sectorName - The sector to analyze
+	 * @param {Object} loadout - Player loadout
+	 * @param {number} playerCount - Number of players
+	 * @param {Map} sectorProbabilities - Precomputed sector probabilities (optional)
+	 * @param {boolean} zeroDamage - If true, all damage events contribute 0 damage (fight "wins" for this sector)
 	 * @private
 	 */
-	_buildSectorDamageDistribution(sectorName, loadout, playerCount, sectorProbabilities = null) {
+	_buildSectorDamageDistribution(sectorName, loadout, playerCount, sectorProbabilities = null, zeroDamage = false) {
 		const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		const dist = new Map();
 		let totalDamageProb = 0;
@@ -168,6 +156,14 @@ const EventDamageCalculator = {
 		for (const [eventName, prob] of probs) {
 			const eventInfo = this.EVENT_DAMAGES[eventName];
 			if (!eventInfo) continue;  // Not a damage event
+
+			// If fight "wins" for this sector, damage events contribute 0 damage
+			// but their probability is still accounted for
+			if (zeroDamage) {
+				dist.set(0, (dist.get(0) || 0) + prob);
+				totalDamageProb += prob;
+				continue;
+			}
 
 			// Calculate damage for this event
 			// For "affectsAll" events, multiply by player count

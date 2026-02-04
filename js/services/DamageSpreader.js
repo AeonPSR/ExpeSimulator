@@ -46,13 +46,13 @@ class DamageSpreader {
 	/**
 	 * Distributes all damage for all scenarios.
 	 * 
-	 * @param {Object} fightDamageInstances - { pessimist, average, optimist, worstCase }
-	 * @param {Object} eventDamageInstances - { pessimist, average, optimist, worstCase }
+	 * @param {Object} fightDamageInstances - { pessimist, median, optimist, worstCase }
+	 * @param {Object} eventDamageInstances - { pessimist, median, optimist, worstCase }
 	 * @param {number} playerCount - Number of players
-	 * @returns {Object} - { pessimist, average, optimist, worstCase } each containing array of damage per player
+	 * @returns {Object} - { pessimist, median, optimist, worstCase } each containing array of damage per player
 	 */
 	static distributeAllScenarios(fightDamageInstances, eventDamageInstances, playerCount) {
-		const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
+		const scenarios = ['pessimist', 'median', 'optimist', 'worstCase'];
 		const result = {};
 
 		for (const scenario of scenarios) {
@@ -143,17 +143,17 @@ class DamageSpreader {
 	 * distributing damage evenly among players (accounting for damage reduction).
 	 * 
 	 * @param {Array<Object>} players - Array of player objects with health property
-	 * @param {Object} fightDamage - { pessimist, average, optimist, worstCase } total fight damage
-	 * @param {Object} eventDamage - { pessimist, average, optimist, worstCase } total event damage
+	 * @param {Object} fightDamage - { pessimist, median, optimist, worstCase } total fight damage
+	 * @param {Object} eventDamage - { pessimist, median, optimist, worstCase } total event damage
 	 * @returns {Object} - Final health arrays for each scenario
 	 */
 	static calculateHealthFromTotals(players, fightDamage, eventDamage) {
-		const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
+		const scenarios = ['pessimist', 'median', 'optimist', 'worstCase'];
 		const result = {};
 		const playerCount = players.length;
 
 		if (playerCount === 0) {
-			return { pessimist: [], average: [], optimist: [], worstCase: [] };
+			return { pessimist: [], median: [], optimist: [], worstCase: [] };
 		}
 
 		// Pre-calculate damage reduction for each player
@@ -271,11 +271,11 @@ class DamageSpreader {
 	 * Calculates final health for all scenarios.
 	 * 
 	 * @param {Array<Object>} players - Array of player objects with health property
-	 * @param {Object} damageByScenario - { pessimist, average, optimist, worstCase }
+	 * @param {Object} damageByScenario - { pessimist, median, optimist, worstCase }
 	 * @returns {Object} - Final health arrays for each scenario
 	 */
 	static calculateAllFinalHealth(players, damageByScenario) {
-		const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
+		const scenarios = ['pessimist', 'median', 'optimist', 'worstCase'];
 		const result = {};
 
 		for (const scenario of scenarios) {
