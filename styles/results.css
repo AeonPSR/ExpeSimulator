@@ -101,7 +101,7 @@
 	background: rgba(231, 76, 60, 0.3);
 }
 
-.expedition-result-health.average {
+.expedition-result-health.median {
 	border-color: #f39c12;
 	background: rgba(243, 156, 18, 0.3);
 }
@@ -218,7 +218,7 @@
 	background: rgba(231, 76, 60, 0.3);
 }
 
-.legend-color.average {
+.legend-color.median {
 	border-color: #f39c12;
 	background: rgba(243, 156, 18, 0.3);
 }

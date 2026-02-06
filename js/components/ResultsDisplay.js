@@ -95,8 +95,8 @@ class ResultsDisplay extends Component {
 						<span class="legend-text">Optimist</span>
 					</div>
 					<div class="legend-item">
-						<div class="legend-color average"></div>
-						<span class="legend-text">Average</span>
+						<div class="legend-color median"></div>
+						<span class="legend-text">Median</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color pessimist"></div>

@@ -61,11 +61,12 @@ const DamageComparator = {
 	 * @param {number} playerCount - Number of players in expedition
 	 * @param {number} fightingPower - Team's total fighting power
 	 * @param {number} grenadesAvailable - Grenades available for this sector
+	 * @param {Map} sectorProbabilities - Precomputed sector probabilities (optional)
 	 * @returns {Object} { worstEvent, score, grenadesUsed, eventType: 'fight'|'event' }
 	 */
-	getWorstEvent(sectorName, loadout, playerCount, fightingPower, grenadesAvailable = 0) {
+	getWorstEvent(sectorName, loadout, playerCount, fightingPower, grenadesAvailable = 0, sectorProbabilities = null) {
 		// Get the ACTUAL events present on this sector after ability modifications
-		const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+		const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		
 		if (!probs || probs.size === 0) {
 			return { worstEvent: null, score: 0, grenadesUsed: 0, eventType: null };
@@ -146,9 +147,10 @@ const DamageComparator = {
 	 * @param {number} playerCount - Number of players
 	 * @param {number} fightingPower - Team's fighting power
 	 * @param {number} totalGrenades - Total grenades available
+	 * @param {Map} sectorProbabilities - Precomputed sector probabilities (optional)
 	 * @returns {Object} { sectorResults: Map<sectorName, worstEventInfo>, grenadesUsed: number }
 	 */
-	evaluateExpedition(sectors, loadout, playerCount, fightingPower, totalGrenades) {
+	evaluateExpedition(sectors, loadout, playerCount, fightingPower, totalGrenades, sectorProbabilities = null) {
 		const sectorResults = new Map();
 		let grenadesRemaining = totalGrenades;
 
@@ -156,7 +158,7 @@ const DamageComparator = {
 		const sectorEventInfo = [];
 		
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getModifiedProbabilities(sectorName, loadout);
+			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			let hasFight = false;
 			let hasDamageEvent = false;
 			let maxFightDamage = 0;
@@ -194,7 +196,8 @@ const DamageComparator = {
 				loadout,
 				playerCount, 
 				fightingPower, 
-				grenadesRemaining
+				grenadesRemaining,
+				sectorProbabilities
 			);
 			
 			sectorResults.set(info.sectorName, result);
