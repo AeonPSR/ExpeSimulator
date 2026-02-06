@@ -12,35 +12,44 @@
 class DamageSpreader {
 	/**
 	 * Distributes all damage to players for a given scenario.
+	 * Returns per-player damage attribution breakdown.
 	 * 
 	 * @param {Array} fightInstances - Damage instances from FightCalculator
 	 * @param {Array} eventInstances - Damage instances from EventDamageCalculator
 	 * @param {number} playerCount - Number of players
-	 * @returns {Array<number>} - Array of damage per player (indexed by player position)
+	 * @returns {Object} - { totalDamage: Array<number>, breakdown: Array<Array> }
+	 *   breakdown[playerIndex] = [{ type, source, damage }, ...]
 	 */
 	static distribute(fightInstances, eventInstances, playerCount) {
 		if (playerCount <= 0) {
-			return [];
+			return {
+				totalDamage: [],
+				breakdown: []
+			};
 		}
 
-		// Initialize damage array for each player
-		const playerDamage = new Array(playerCount).fill(0);
+		// Initialize damage breakdown for each player
+		const playerBreakdown = Array.from({ length: playerCount }, () => []);
+		const playerDamageTotals = new Array(playerCount).fill(0);
 
 		// Distribute fight damage
 		if (fightInstances && Array.isArray(fightInstances)) {
 			for (const instance of fightInstances) {
-				this._distributeFightDamage(instance, playerDamage);
+				this._distributeFightDamage(instance, playerBreakdown, playerDamageTotals);
 			}
 		}
 
 		// Distribute event damage
 		if (eventInstances && Array.isArray(eventInstances)) {
 			for (const instance of eventInstances) {
-				this._distributeEventDamage(instance, playerDamage);
+				this._distributeEventDamage(instance, playerBreakdown, playerDamageTotals);
 			}
 		}
 
-		return playerDamage;
+		return {
+			totalDamage: playerDamageTotals,
+			breakdown: playerBreakdown
+		};
 	}
 
 	/**
@@ -49,7 +58,7 @@ class DamageSpreader {
 	 * @param {Object} fightDamageInstances - { pessimist, average, optimist, worstCase }
 	 * @param {Object} eventDamageInstances - { pessimist, average, optimist, worstCase }
 	 * @param {number} playerCount - Number of players
-	 * @returns {Object} - { pessimist, average, optimist, worstCase } each containing array of damage per player
+	 * @returns {Object} - { pessimist, average, optimist, worstCase } each containing { totalDamage, breakdown }
 	 */
 	static distributeAllScenarios(fightDamageInstances, eventDamageInstances, playerCount) {
 		const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
@@ -67,60 +76,112 @@ class DamageSpreader {
 	/**
 	 * Distributes damage from a fight instance.
 	 * Combat damage: each unit of damage is randomly assigned to a player.
+	 * Tracks attribution for each damage instance.
 	 * 
-	 * @param {Object} instance - { type, count, damagePerInstance, totalDamage, sources }
-	 * @param {Array<number>} playerDamage - Array to update with damage
+	 * @param {Object} instance - { type, count, damagePerInstance, sources }
+	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
+	 * @param {Array<number>} playerDamageTotals - Totals to update
 	 * @private
 	 */
-	static _distributeFightDamage(instance, playerDamage) {
-		const playerCount = playerDamage.length;
+	static _distributeFightDamage(instance, playerBreakdown, playerDamageTotals) {
+		const playerCount = playerBreakdown.length;
 		if (playerCount === 0) return;
 
-		const { count, damagePerInstance } = instance;
+		const { type, count, damagePerInstance, sources } = instance;
 
 		// For each fight instance
 		for (let i = 0; i < count; i++) {
 			// Total damage from this fight
 			const totalDamage = Math.round(damagePerInstance);
+			const source = sources?.[i]?.sectorName || 'UNKNOWN';
 
 			// Distribute each unit of damage randomly
 			for (let d = 0; d < totalDamage; d++) {
 				const targetPlayer = Math.floor(Math.random() * playerCount);
-				playerDamage[targetPlayer]++;
+				playerBreakdown[targetPlayer].push({
+					type: type,
+					source: source,
+					damage: 1
+				});
+				playerDamageTotals[targetPlayer]++;
 			}
 		}
 	}
 
 	/**
 	 * Distributes damage from an event instance.
-	 * - ACCIDENT_3_5: Single random player
+	 * - ACCIDENT_3_5, ROPE: Single random player
 	 * - TIRED_2, DISASTER_3_5: All players
+	 * Tracks attribution for each damage instance.
 	 * 
 	 * @param {Object} instance - { type, count, damagePerInstance, sources }
-	 * @param {Array<number>} playerDamage - Array to update with damage
+	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
+	 * @param {Array<number>} playerDamageTotals - Totals to update
 	 * @private
 	 */
-	static _distributeEventDamage(instance, playerDamage) {
-		const playerCount = playerDamage.length;
+	static _distributeEventDamage(instance, playerBreakdown, playerDamageTotals) {
+		const playerCount = playerBreakdown.length;
 		if (playerCount === 0) return;
 
-		const { type, count, damagePerInstance } = instance;
+		const { type, count, damagePerInstance, sources } = instance;
 
 		// For each event instance
 		for (let i = 0; i < count; i++) {
 			const damage = Math.round(damagePerInstance);
+			const source = sources?.[i]?.sectorName || 'UNKNOWN';
 
-			if (type === 'ACCIDENT_3_5') {
-				// Accident: single random player takes all damage
+			if (type === 'ACCIDENT_3_5' || type === 'ROPE') {
+				// Accident & Rope: single random player takes all damage
 				const targetPlayer = Math.floor(Math.random() * playerCount);
-				playerDamage[targetPlayer] += damage;
+				playerBreakdown[targetPlayer].push({
+					type: type,
+					source: source,
+					damage: damage
+				});
+				playerDamageTotals[targetPlayer] += damage;
 			} else {
 				// TIRED_2 and DISASTER_3_5: all players take the damage
 				for (let p = 0; p < playerCount; p++) {
-					playerDamage[p] += damage;
+					playerBreakdown[p].push({
+						type: type,
+						source: source,
+						damage: damage
+					});
+					playerDamageTotals[p] += damage;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Applies Survival ability reduction to damage breakdown.
+	 * Survival reduces each damage instance by 1 (minimum 0 per instance).
+	 * 
+	 * @param {Array<Object>} players - Player objects
+	 * @param {Array<Array>} damageBreakdown - Damage breakdown per player
+	 * @returns {Array<Array>} - Modified damage breakdown with Survival applied
+	 */
+	static applySurvivalReduction(players, damageBreakdown) {
+		return damageBreakdown.map((playerBreakdown, playerIndex) => {
+			const player = players[playerIndex];
+			
+			// Check if player has Survival ability
+			const hasSurvival = player?.abilities?.some(ability => {
+				if (!ability) return false;
+				const id = ability.replace(/\.(png|jpg|gif)$/i, '').toLowerCase();
+				return id === 'survival';
+			});
+			
+			if (!hasSurvival) {
+				return playerBreakdown;
+			}
+			
+			// Apply -1 to each damage instance (minimum 0 per instance)
+			return playerBreakdown.map(instance => ({
+				...instance,
+				damage: Math.max(0, instance.damage - 1)
+			}));
+		});
 	}
 
 	/**
@@ -135,136 +196,6 @@ class DamageSpreader {
 			const damage = damagePerPlayer[index] || 0;
 			return Math.max(0, player.health - damage);
 		});
-	}
-
-	/**
-	 * Calculates final health for all scenarios using total damage values.
-	 * This method uses the pre-calculated scenario damage totals directly,
-	 * distributing damage evenly among players (accounting for damage reduction).
-	 * 
-	 * @param {Array<Object>} players - Array of player objects with health property
-	 * @param {Object} fightDamage - { pessimist, average, optimist, worstCase } total fight damage
-	 * @param {Object} eventDamage - { pessimist, average, optimist, worstCase } total event damage
-	 * @returns {Object} - Final health arrays for each scenario
-	 */
-	static calculateHealthFromTotals(players, fightDamage, eventDamage) {
-		const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
-		const result = {};
-		const playerCount = players.length;
-
-		if (playerCount === 0) {
-			return { pessimist: [], average: [], optimist: [], worstCase: [] };
-		}
-
-		// Pre-calculate damage reduction for each player
-		const playerReductions = this._calculatePlayerReductions(players);
-
-		for (const scenario of scenarios) {
-			// Round damage values to integers
-			const totalFightDamage = Math.round(fightDamage?.[scenario] || 0);
-			const totalEventDamage = Math.round(eventDamage?.[scenario] || 0);
-
-			// Distribute damage to players
-			const damagePerPlayer = this._distributeScenarioDamage(
-				totalFightDamage,
-				totalEventDamage,
-				playerCount,
-				playerReductions
-			);
-
-			result[scenario] = players.map((player, index) => {
-				// Ensure health is always an integer
-				const damage = Math.round(damagePerPlayer[index]);
-				return Math.max(0, player.health - damage);
-			});
-		}
-
-		return result;
-	}
-
-	/**
-	 * Calculates damage reduction values for each player.
-	 * - Survival: -1 to all damage
-	 * - Plastenite Armor: -1 to fight damage
-	 * 
-	 * @param {Array<Object>} players - Player objects
-	 * @returns {Array<Object>} - Array of { allReduction, fightReduction } per player
-	 * @private
-	 */
-	static _calculatePlayerReductions(players) {
-		return players.map(player => {
-			let allReduction = 0;
-			let fightReduction = 0;
-
-			// Check abilities for Survival
-			if (player.abilities) {
-				for (const ability of player.abilities) {
-					if (ability) {
-						const id = ability.replace(/\.(png|jpg|gif)$/i, '').toUpperCase();
-						if (id === 'SURVIVAL') {
-							allReduction += 1;
-						}
-					}
-				}
-			}
-
-			// Check items for Plastenite Armor
-			if (player.items) {
-				for (const item of player.items) {
-					if (item) {
-						const id = item.replace(/\.(png|jpg|gif)$/i, '').toUpperCase();
-						if (id === 'PLASTENITE_ARMOR') {
-							fightReduction += 1;
-						}
-					}
-				}
-			}
-
-			return { allReduction, fightReduction };
-		});
-	}
-
-	/**
-	 * Distributes scenario damage totals to players.
-	 * Fight damage is distributed evenly, event damage affects all players.
-	 * Damage reduction is applied per-player.
-	 * All values are rounded to integers.
-	 * 
-	 * @param {number} totalFightDamage - Total fight damage for the scenario
-	 * @param {number} totalEventDamage - Total event damage for the scenario
-	 * @param {number} playerCount - Number of players
-	 * @param {Array<Object>} playerReductions - Damage reduction per player
-	 * @returns {Array<number>} - Damage per player (integers)
-	 * @private
-	 */
-	static _distributeScenarioDamage(totalFightDamage, totalEventDamage, playerCount, playerReductions) {
-		const damagePerPlayer = new Array(playerCount).fill(0);
-
-		// Fight damage: distributed evenly among players
-		// Each player's share = totalFightDamage / playerCount (rounded)
-		// Then apply damage reduction (Survival + Plastenite Armor)
-		const fightDamagePerPlayer = Math.round(totalFightDamage / playerCount);
-		
-		for (let i = 0; i < playerCount; i++) {
-			const fightReduction = playerReductions[i] 
-				? (playerReductions[i].allReduction + playerReductions[i].fightReduction)
-				: 0;
-			const reducedFightDamage = Math.max(0, fightDamagePerPlayer - fightReduction);
-			damagePerPlayer[i] += reducedFightDamage;
-		}
-
-		// Event damage: affects all players equally
-		// Each player receives their share of event damage (rounded)
-		// Apply Survival reduction per player
-		const eventDamagePerPlayer = Math.round(totalEventDamage / playerCount);
-		
-		for (let i = 0; i < playerCount; i++) {
-			const eventReduction = playerReductions[i]?.allReduction || 0;
-			const reducedEventDamage = Math.max(0, eventDamagePerPlayer - eventReduction);
-			damagePerPlayer[i] += reducedEventDamage;
-		}
-
-		return damagePerPlayer;
 	}
 
 	/**

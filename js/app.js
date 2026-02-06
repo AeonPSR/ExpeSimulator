@@ -308,11 +308,30 @@ class ExpeditionSimulatorApp {
 		
 		// Add player health calculations to the results (only for participating players)
 		if (participatingPlayers.length > 0 && results) {
-			results.healthByScenario = DamageSpreader.calculateHealthFromTotals(
-				participatingPlayers,
-				results.combat?.damage || { pessimist: 0, average: 0, optimist: 0, worstCase: 0 },
-				results.eventDamage?.damage || { pessimist: 0, average: 0, optimist: 0, worstCase: 0 }
+			// Distribute damage with attribution
+			const damageDistribution = DamageSpreader.distributeAllScenarios(
+				results.combat?.damageInstances || { pessimist: [], average: [], optimist: [], worstCase: [] },
+				results.eventDamage?.damageInstances || { pessimist: [], average: [], optimist: [], worstCase: [] },
+				participatingPlayers.length
 			);
+			
+			// Apply Survival reduction to each scenario
+			const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
+			const finalHealth = {};
+			
+			for (const scenario of scenarios) {
+				const breakdown = damageDistribution[scenario]?.breakdown || [];
+				const withSurvival = DamageSpreader.applySurvivalReduction(participatingPlayers, breakdown);
+				
+				// Recalculate totals from modified breakdown
+				const damagePerPlayer = withSurvival.map(playerBreakdown => 
+					playerBreakdown.reduce((total, instance) => total + instance.damage, 0)
+				);
+				
+				finalHealth[scenario] = DamageSpreader.calculateFinalHealth(participatingPlayers, damagePerPlayer);
+			}
+			
+			results.healthByScenario = finalHealth;
 		}
 		
 		// Store participation info for rendering
