@@ -56,7 +56,8 @@ const FightCalculator = {
 		const sectorsByFightType = {};  // Track which sectors can produce each fight type
 		
 		for (const fightType of fightTypes) {
-			const occResult = this._calculateOccurrenceWithSources(sectors, loadout, fightType, sectorProbabilities);
+			const fightEvent = `FIGHT_${fightType}`;
+			const occResult = OccurrenceCalculator.calculateForType(sectors, loadout, fightEvent, sectorProbabilities);
 			occurrence[fightType] = occResult.occurrence;
 			sectorsByFightType[fightType] = occResult.sectors;
 		}
@@ -90,67 +91,13 @@ const FightCalculator = {
 
 	/**
 	 * Calculates fight occurrence for a specific fight type using convolution.
-	 * Also returns the list of sectors that can produce this fight type.
+	 * Delegates to OccurrenceCalculator (shared with EventDamageCalculator).
+	 * @deprecated Use OccurrenceCalculator.calculateForType directly
 	 * @private
 	 */
 	_calculateOccurrenceWithSources(sectors, loadout, fightType, sectorProbabilities = null) {
-		const distributions = [];
 		const fightEvent = `FIGHT_${fightType}`;
-		const sectorsWithFight = [];  // Track which sectors can produce this fight
-
-		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
-			let fightProb = 0;
-
-			for (const [eventName, prob] of probs) {
-				if (eventName === fightEvent) {
-					fightProb = prob;
-					break;
-				}
-			}
-
-			// Each sector: either 0 fights (1-p) or 1 fight (p)
-			if (fightProb > 0) {
-				distributions.push(new Map([
-					[0, 1 - fightProb],
-					[1, fightProb]
-				]));
-				sectorsWithFight.push({
-					sectorName,
-					probability: fightProb
-				});
-			}
-		}
-
-		if (distributions.length === 0) {
-			return { 
-				occurrence: { pessimist: 0, average: 0, optimist: 0, distribution: new Map([[0, 1]]) },
-				sectors: []
-			};
-		}
-
-		// Convolve all sector distributions
-		const combined = DistributionCalculator.convolveAll(distributions);
-		// For fights: lower count = better (optimist), so higherIsBetter = false
-		const scenarios = DistributionCalculator.getScenarios(combined, false);
-
-		return {
-			occurrence: {
-				...scenarios,
-				distribution: combined,
-				maxPossible: distributions.length
-			},
-			sectors: sectorsWithFight
-		};
-	},
-
-	/**
-	 * Calculates fight occurrence for a specific fight type using convolution.
-	 * @deprecated Use _calculateOccurrenceWithSources instead
-	 * @private
-	 */
-	_calculateOccurrence(sectors, loadout, fightType, sectorProbabilities = null) {
-		return this._calculateOccurrenceWithSources(sectors, loadout, fightType, sectorProbabilities).occurrence;
+		return OccurrenceCalculator.calculateForType(sectors, loadout, fightEvent, sectorProbabilities);
 	},
 
 	/**
@@ -357,23 +304,16 @@ const FightCalculator = {
 		});
 
 		// Build combined occurrence distribution for probability calculation
-		const occurrenceDistributions = [];
+		// Uses OccurrenceCalculator to combine per-type distributions
+		const perTypeForCombine = {};
 		for (const fightType of sortedTypes) {
-			const occ = occurrence[fightType];
-			if (occ.distribution) {
-				occurrenceDistributions.push(occ.distribution);
-			}
+			perTypeForCombine[fightType] = { occurrence: occurrence[fightType] };
 		}
-
-		// Get cumulative probabilities from combined occurrence distribution
-		if (occurrenceDistributions.length > 0) {
-			const combinedOccurrence = DistributionCalculator.convolveAll(occurrenceDistributions);
-			const occScenarios = DistributionCalculator.getScenarios(combinedOccurrence, false);
-			damage.optimistProb = occScenarios.optimistProb;
-			damage.averageProb = occScenarios.averageProb;
-			damage.pessimistProb = occScenarios.pessimistProb;
-			damage.worstCaseProb = occScenarios.worstProb;
-		}
+		const combined = OccurrenceCalculator.combineOccurrences(perTypeForCombine);
+		damage.optimistProb = combined.scenarios.optimistProb;
+		damage.averageProb = combined.scenarios.averageProb;
+		damage.pessimistProb = combined.scenarios.pessimistProb;
+		damage.worstCaseProb = combined.scenarios.worstProb;
 
 		for (const fightType of sortedTypes) {
 			const occ = occurrence[fightType];

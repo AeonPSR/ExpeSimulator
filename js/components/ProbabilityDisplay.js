@@ -327,10 +327,11 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		// Format probability percentages - show "<0.1%" for very small non-zero values
+		// Format probability percentages - show "(0%)" for zero like Combat does
 		const formatProb = (prob) => {
-			if (prob === undefined || prob === 0) return '';
+			if (prob === undefined) return '';
 			const pct = prob * 100;
+			if (pct === 0) return '(0%)';
 			if (pct < 0.1) return '(<0.1%)';
 			return `(${pct.toFixed(1)}%)`;
 		};
