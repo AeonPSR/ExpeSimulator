@@ -55,13 +55,13 @@ class DamageSpreader {
 	/**
 	 * Distributes all damage for all scenarios.
 	 * 
-	 * @param {Object} fightDamageInstances - { pessimist, median, optimist, worstCase }
-	 * @param {Object} eventDamageInstances - { pessimist, median, optimist, worstCase }
+	 * @param {Object} fightDamageInstances - { pessimist, average, optimist, worstCase }
+	 * @param {Object} eventDamageInstances - { pessimist, average, optimist, worstCase }
 	 * @param {number} playerCount - Number of players
 	 * @returns {Object} - { pessimist, average, optimist, worstCase } each containing { totalDamage, breakdown }
 	 */
 	static distributeAllScenarios(fightDamageInstances, eventDamageInstances, playerCount) {
-		const scenarios = ['pessimist', 'median', 'optimist', 'worstCase'];
+		const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
 		const result = {};
 
 		for (const scenario of scenarios) {
@@ -202,11 +202,11 @@ class DamageSpreader {
 	 * Calculates final health for all scenarios.
 	 * 
 	 * @param {Array<Object>} players - Array of player objects with health property
-	 * @param {Object} damageByScenario - { pessimist, median, optimist, worstCase }
+	 * @param {Object} damageByScenario - { pessimist, average, optimist, worstCase }
 	 * @returns {Object} - Final health arrays for each scenario
 	 */
 	static calculateAllFinalHealth(players, damageByScenario) {
-		const scenarios = ['pessimist', 'median', 'optimist', 'worstCase'];
+		const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
 		const result = {};
 
 		for (const scenario of scenarios) {

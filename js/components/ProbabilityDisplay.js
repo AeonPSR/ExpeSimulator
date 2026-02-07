@@ -75,23 +75,23 @@ class ProbabilityDisplay extends Component {
 			{ name: 'Map Fragments', icon: 'pictures/items/super_map.jpg', data: resources.mapFragments }
 		];
 
-		// Sort: items with values first (check both median and optimist)
+		// Sort: items with values first (check both average and optimist)
 		items.sort((a, b) => {
-			const aHasValue = (a.data.median > 0 || a.data.optimist > 0) ? 1 : 0;
-			const bHasValue = (b.data.median > 0 || b.data.optimist > 0) ? 1 : 0;
+			const aHasValue = (a.data.average > 0 || a.data.optimist > 0) ? 1 : 0;
+			const bHasValue = (b.data.average > 0 || b.data.optimist > 0) ? 1 : 0;
 			return bHasValue - aHasValue;
 		});
 
 		const rows = items.map(r => {
 			const icon = this._icon(r.icon);
-			// Show "none" only if both median AND optimist are 0
-			if (r.data.median === 0 && r.data.optimist === 0) {
+			// Show "none" only if both average AND optimist are 0
+			if (r.data.average === 0 && r.data.optimist === 0) {
 				return `<tr><td class="icon-cell">${icon}</td><td colspan="3" class="neutral none-row">none</td></tr>`;
 			}
 			return `<tr>
 				<td class="icon-cell">${icon}</td>
 				<td class="warning">${this._formatResourceValue(r.data.pessimist)}</td>
-				<td class="neutral">${this._formatResourceValue(r.data.median)}</td>
+				<td class="neutral">${this._formatResourceValue(r.data.average)}</td>
 				<td class="positive">${this._formatResourceValue(r.data.optimist)}</td>
 			</tr>`;
 		}).join('');
@@ -104,7 +104,7 @@ class ProbabilityDisplay extends Component {
 						<tr>
 							<th>Resource</th>
 						<th class="pessimist-col">Pessimist</th>
-						<th class="median-col">Median</th>
+						<th class="average-col">Average</th>
 						<th class="optimist-col">Optimist</th>
 						</tr>
 					</thead>
@@ -183,7 +183,7 @@ class ProbabilityDisplay extends Component {
 		const hpIcon = this._icon('pictures/astro/hp.png', 'hp-icon');
 		const damage = combat?.damage;
 		
-		if (!damage || (damage.pessimist === 0 && damage.median === 0 && damage.optimist === 0 && damage.worstCase === 0)) {
+		if (!damage || (damage.pessimist === 0 && damage.average === 0 && damage.optimist === 0 && damage.worstCase === 0)) {
 			return `
 				<div class="outcome-category">
 					<h5>Combat Damage</h5>
@@ -209,8 +209,8 @@ class ProbabilityDisplay extends Component {
 					<span class="positive">${hpIcon}<strong>${Math.round(damage.optimist)}</strong></span>
 				</div>
 				<div class="damage-item">
-					<span>Median Scenario: ${formatProb(damage.medianProb)}</span>
-					<span class="danger">${hpIcon}<strong>${Math.round(damage.median)}</strong></span>
+					<span>Average Scenario: ${formatProb(damage.averageProb)}</span>
+					<span class="danger">${hpIcon}<strong>${Math.round(damage.average)}</strong></span>
 				</div>
 				<div class="damage-item">
 					<span>Pessimist Scenario: ${formatProb(damage.pessimistProb)}</span>
@@ -282,8 +282,8 @@ class ProbabilityDisplay extends Component {
 					<span class="positive">${hpIcon}<strong>${Math.round(scenarios.optimist)}</strong></span>
 				</div>
 				<div class="damage-item">
-					<span>Median Scenario: ${formatProb(scenarios.medianProb)}</span>
-					<span class="danger">${hpIcon}<strong>${Math.round(scenarios.median)}</strong></span>
+					<span>Average Scenario: ${formatProb(scenarios.averageProb)}</span>
+					<span class="danger">${hpIcon}<strong>${Math.round(scenarios.average)}</strong></span>
 				</div>
 				<div class="damage-item">
 					<span>Pessimist Scenario: ${formatProb(scenarios.pessimistProb)}</span>

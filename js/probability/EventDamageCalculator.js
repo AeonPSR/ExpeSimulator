@@ -126,12 +126,11 @@ const EventDamageCalculator = {
 
 		return {
 			pessimist: fullScenarios.pessimist,
-			median: fullScenarios.median,
-			average: fullScenarios.average,  // Keep for backward compatibility
+			average: fullScenarios.average,
 			optimist: fullScenarios.optimist,
 			worstCase,
 			pessimistProb: fullScenarios.pessimistProb,
-			medianProb: fullScenarios.medianProb,
+			averageProb: fullScenarios.averageProb,
 			optimistProb: fullScenarios.optimistProb,
 			worstCaseProb: fullScenarios.worstProb,
 			distribution: fullCombined

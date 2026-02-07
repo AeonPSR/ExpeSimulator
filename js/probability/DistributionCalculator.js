@@ -144,11 +144,10 @@ const DistributionCalculator = {
 
 			return { 
 				pessimist: p25, 
-				median: p50, 
+				average: p50,
 				optimist: p75, 
-				average: avg,
 				pessimistProb: pessimistCumProb,
-				medianProb: medianCumProb,
+				averageProb: medianCumProb,
 				optimistProb: optimistCumProb,
 				worstProb: worstCumProb
 			};
@@ -163,7 +162,7 @@ const DistributionCalculator = {
 				if (value <= optimistVal) {
 					optimistCumProb += prob;  // Optimist: <= p25
 				} else if (value > optimistVal && value < pessimistVal) {
-					medianCumProb += prob;    // Median: > optimist AND < pessimist
+					medianCumProb += prob;    // Average: > optimist AND < pessimist
 				} else if (value >= pessimistVal && value < worstVal) {
 					pessimistCumProb += prob; // Pessimist: >= pessimist threshold but < worst
 				} else {
@@ -173,11 +172,10 @@ const DistributionCalculator = {
 
 			return { 
 				pessimist: p75, 
-				median: p50, 
-				optimist: p25, 
-				average: avg,
+				average: p50, 
+				optimist: p25,
 				pessimistProb: pessimistCumProb,
-				medianProb: medianCumProb,
+				averageProb: medianCumProb,
 				optimistProb: optimistCumProb,
 				worstProb: worstCumProb
 			};
