@@ -63,13 +63,21 @@ const EventDamageCalculator = {
 		const damageResult = this._calculateDamageWithConvolution(sectors, loadout, playerCount, worstCaseExclusions, sectorProbabilities);
 
 		// Build damage instances for per-player distribution
-		const damageInstances = this._buildDamageInstances(occurrenceWithSources, playerCount, worstCaseExclusions);
+		// Pass damageResult so instances are scaled to match scenario totals
+		const damageInstances = this._buildDamageInstances(occurrenceWithSources, playerCount, worstCaseExclusions, damageResult);
 
 		// Legacy occurrence format (without sources)
 		const occurrence = {};
 		for (const eventType of Object.keys(occurrenceWithSources)) {
 			occurrence[eventType] = occurrenceWithSources[eventType].occurrence;
 		}
+
+		// DEBUG
+		console.log('occurrenceWithSources:', occurrenceWithSources);
+		console.log('occurrence:', occurrence);
+		console.log('tired:', occurrence.TIRED_2?.average);
+		console.log('accident:', occurrence.ACCIDENT_3_5?.average);
+		console.log('disaster:', occurrence.DISASTER_3_5?.average);
 
 		return {
 			occurrence,
@@ -94,6 +102,9 @@ const EventDamageCalculator = {
 	 * (since fight and event are mutually exclusive - we count fight damage there instead).
 	 * For optimist and average: uses full distribution.
 	 * 
+	 * IMPORTANT: Scenario percentages are based on TOTAL EVENT OCCURRENCES, not damage values.
+	 * This ensures percentages don't change when multiplying by playerCount.
+	 * 
 	 * @param {Array<string>} sectors - Sector names
 	 * @param {Object} loadout - Player loadout
 	 * @param {number} playerCount - Number of players
@@ -102,38 +113,76 @@ const EventDamageCalculator = {
 	 * @private
 	 */
 	_calculateDamageWithConvolution(sectors, loadout, playerCount, fightWinExclusions = null, sectorProbabilities = null) {
-		const distributions = [];
+		// Build occurrence distributions (independent of playerCount)
+		// for scenario percentile calculation
+		const occurrenceDistributions = [];
 
 		for (const sectorName of sectors) {
-			// If fight "wins" for this sector, event damage should be 0
-			// The sector still participates (with its probability), but contributes 0 damage
 			const zeroDamage = fightWinExclusions && fightWinExclusions.has(sectorName);
-			const dist = this._buildSectorDamageDistribution(sectorName, loadout, playerCount, sectorProbabilities, zeroDamage);
-			distributions.push(dist);
+			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			
+			// Build occurrence distribution (0 or 1 per sector, probability-weighted)
+			let hasEvent = false;
+			for (const [eventName, prob] of probs) {
+				const eventInfo = this.EVENT_DAMAGES[eventName];
+				if (eventInfo && !zeroDamage) {
+					hasEvent = true;
+					break;
+				}
+			}
+			
+			if (hasEvent) {
+				// Total probability of ANY damage event in this sector
+				let eventProb = 0;
+				for (const [eventName, prob] of probs) {
+					if (this.EVENT_DAMAGES[eventName]) {
+						eventProb += prob;
+					}
+				}
+				occurrenceDistributions.push(new Map([
+					[0, 1 - eventProb],
+					[1, eventProb]
+				]));
+			}
 		}
 
-		if (distributions.length === 0) {
+		// Build damage distributions (with playerCount multiplier)
+		const damageDistributions = [];
+
+		for (const sectorName of sectors) {
+			const zeroDamage = fightWinExclusions && fightWinExclusions.has(sectorName);
+			const dist = this._buildSectorDamageDistribution(sectorName, loadout, playerCount, sectorProbabilities, zeroDamage);
+			damageDistributions.push(dist);
+		}
+
+		if (damageDistributions.length === 0) {
 			return this._emptyDamageResult();
 		}
 
-		// Combined distribution with zero damage for excluded sectors
-		const fullCombined = DistributionCalculator.convolveAll(distributions);
-		const fullScenarios = DistributionCalculator.getScenarios(fullCombined, false);
+		// Combine BOTH distributions
+		const occurrenceCombined = occurrenceDistributions.length > 0 ? DistributionCalculator.convolveAll(occurrenceDistributions) : new Map([[0, 1]]);
+		const damageCombined = DistributionCalculator.convolveAll(damageDistributions);
+		
+		// Calculate scenarios from OCCURRENCE distribution (percentages don't change with playerCount)
+		const occurrenceScenarios = DistributionCalculator.getScenarios(occurrenceCombined, false);
+		
+		// Get actual damage values from DAMAGE distribution
+		const damageScenarios = DistributionCalculator.getScenarios(damageCombined, false);
 
 		// Get worst case value (max damage in distribution)
-		const sortedEntries = [...fullCombined.entries()].sort((a, b) => b[0] - a[0]);
+		const sortedEntries = [...damageCombined.entries()].sort((a, b) => b[0] - a[0]);
 		const worstCase = sortedEntries[0]?.[0] || 0;
 
 		return {
-			pessimist: fullScenarios.pessimist,
-			average: fullScenarios.average,
-			optimist: fullScenarios.optimist,
+			pessimist: damageScenarios.pessimist,
+			average: damageScenarios.average,
+			optimist: damageScenarios.optimist,
 			worstCase,
-			pessimistProb: fullScenarios.pessimistProb,
-			averageProb: fullScenarios.averageProb,
-			optimistProb: fullScenarios.optimistProb,
-			worstCaseProb: fullScenarios.worstProb,
-			distribution: fullCombined
+			pessimistProb: occurrenceScenarios.pessimistProb,  // From occurrence, not damage
+			averageProb: occurrenceScenarios.averageProb,      // From occurrence, not damage
+			optimistProb: occurrenceScenarios.optimistProb,    // From occurrence, not damage
+			worstCaseProb: occurrenceScenarios.worstProb,      // From occurrence, not damage
+			distribution: damageCombined
 		};
 	},
 
@@ -245,6 +294,8 @@ const EventDamageCalculator = {
 		const distributions = [];
 		const sectorsWithEvent = [];
 
+		console.log(`[OccurrenceCalc] Event: ${eventType}, Sectors: ${sectors.length}`, sectors);
+
 		for (const sectorName of sectors) {
 			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			let eventProb = 0;
@@ -255,6 +306,8 @@ const EventDamageCalculator = {
 					break;
 				}
 			}
+
+			console.log(`  Sector ${sectorName}: ${eventType} prob = ${eventProb}`);
 
 			if (eventProb > 0) {
 				distributions.push(new Map([
@@ -268,6 +321,8 @@ const EventDamageCalculator = {
 			}
 		}
 
+		console.log(`  Found ${distributions.length} sectors with ${eventType}`);
+
 		if (distributions.length === 0) {
 			return { 
 				occurrence: { pessimist: 0, average: 0, optimist: 0, distribution: new Map([[0, 1]]) },
@@ -277,6 +332,9 @@ const EventDamageCalculator = {
 
 		const combined = DistributionCalculator.convolveAll(distributions);
 		const scenarios = DistributionCalculator.getScenarios(combined, false);
+
+		console.log(`[OccurrenceCalc] ${eventType} - Combined:`, combined);
+		console.log(`[OccurrenceCalc] ${eventType} - Scenarios:`, scenarios);
 
 		return {
 			occurrence: {
@@ -290,9 +348,14 @@ const EventDamageCalculator = {
 
 	/**
 	 * Builds damage instances for each scenario with source information.
+	 * Instances are scaled so their total matches the convolution-based scenario totals.
+	 * @param {Object} occurrenceWithSources - Occurrence data with sector sources
+	 * @param {number} playerCount - Number of players
+	 * @param {Set|null} worstCaseExclusions - Sectors to exclude from worst case
+	 * @param {Object} damageResult - The scenario totals from convolution (source of truth)
 	 * @private
 	 */
-	_buildDamageInstances(occurrenceWithSources, playerCount, worstCaseExclusions = null) {
+	_buildDamageInstances(occurrenceWithSources, playerCount, worstCaseExclusions = null, damageResult = null) {
 		const damageInstances = {
 			pessimist: [],
 			average: [],
@@ -346,6 +409,33 @@ const EventDamageCalculator = {
 					damagePerInstance: worstCaseDamage,
 					sources: sources
 				});
+			}
+		}
+
+		// Scale instances to match convolution totals (source of truth)
+		if (damageResult) {
+			for (const scenario of [...scenarios, 'worstCase']) {
+				const targetTotal = damageResult[scenario] || 0;
+				const instances = damageInstances[scenario];
+				
+				// Calculate current total from instances
+				let instanceTotal = 0;
+				for (const inst of instances) {
+					instanceTotal += inst.count * inst.damagePerInstance;
+				}
+				
+				// Scale each instance's damage to match target
+				if (instanceTotal > 0 && targetTotal > 0) {
+					const scaleFactor = targetTotal / instanceTotal;
+					for (const inst of instances) {
+						inst.damagePerInstance = inst.damagePerInstance * scaleFactor;
+					}
+				} else if (targetTotal === 0) {
+					// No damage expected, zero out instances
+					for (const inst of instances) {
+						inst.damagePerInstance = 0;
+					}
+				}
 			}
 		}
 

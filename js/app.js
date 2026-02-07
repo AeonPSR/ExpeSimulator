@@ -306,31 +306,47 @@ class ExpeditionSimulatorApp {
 		// Single source of truth for all calculations (only participating players)
 		const results = EventWeightCalculator.calculate(sectors, loadout, participatingPlayers);
 		
+		// DEBUG: Log what we're getting from calculators
+		console.log('=== DAMAGE DEBUG ===');
+		console.log('Combat damage:', results?.combat?.damage);
+		console.log('Event damage:', results?.eventDamage?.damage);
+		
 		// Add player health calculations to the results (only for participating players)
 		if (participatingPlayers.length > 0 && results) {
-			// Distribute damage with attribution
-			const damageDistribution = DamageSpreader.distributeAllScenarios(
-				results.combat?.damageInstances || { pessimist: [], average: [], optimist: [], worstCase: [] },
-				results.eventDamage?.damageInstances || { pessimist: [], average: [], optimist: [], worstCase: [] },
-				participatingPlayers.length
-			);
-			
-			// Apply Survival reduction to each scenario
 			const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
 			const finalHealth = {};
 			
 			for (const scenario of scenarios) {
-				const breakdown = damageDistribution[scenario]?.breakdown || [];
-				const withSurvival = DamageSpreader.applySurvivalReduction(participatingPlayers, breakdown);
+				// Get total damage from convolution results (source of truth)
+				const combatDamage = results.combat?.damage?.[scenario] || 0;
+				const eventDamage = results.eventDamage?.damage?.[scenario] || 0;
+				const totalDamage = combatDamage + eventDamage;
 				
-				// Recalculate totals from modified breakdown
-				const damagePerPlayer = withSurvival.map(playerBreakdown => 
-					playerBreakdown.reduce((total, instance) => total + instance.damage, 0)
-				);
+				console.log(`${scenario}: combat=${combatDamage}, event=${eventDamage}, total=${totalDamage}`);
 				
-				finalHealth[scenario] = DamageSpreader.calculateFinalHealth(participatingPlayers, damagePerPlayer);
+				// Distribute damage evenly among players
+				const baseDamagePerPlayer = totalDamage / participatingPlayers.length;
+				
+				// Calculate final health for each player
+				finalHealth[scenario] = participatingPlayers.map(player => {
+					let damage = baseDamagePerPlayer;
+					
+					// Apply Survival reduction (-1 damage per damage instance)
+					// Simplified: treat as single reduction since we don't track instances
+					const hasSurvival = player?.abilities?.some(ability => {
+						if (!ability) return false;
+						const id = ability.replace(/\.(png|jpg|gif)$/i, '').toLowerCase();
+						return id === 'survival';
+					});
+					if (hasSurvival && damage > 0) {
+						damage = Math.max(0, damage - 1);
+					}
+					
+					return Math.max(0, Math.round(player.health - damage));
+				});
 			}
 			
+			console.log('Final health by scenario:', finalHealth);
 			results.healthByScenario = finalHealth;
 		}
 		

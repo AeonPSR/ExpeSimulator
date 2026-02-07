@@ -184,22 +184,20 @@ const FightCalculator = {
 	 */
 	_calculateDamage(occurrence, worstCaseOccurrence, fightingPower, grenadeCount) {
 		// For each scenario (pessimist/median/optimist), calculate total damage
-		const scenarios = ['pessimist', 'median', 'optimist'];
+		const scenarios = ['pessimist', 'average', 'optimist'];
 		const result = {
 			pessimist: 0,
-			median: 0,
-			average: 0,  // Keep for backward compatibility
+			average: 0,
 			optimist: 0,
 			worstCase: 0,
 			// Probabilities will be set from occurrence distributions
 			pessimistProb: 0,
-			medianProb: 0,
+			averageProb: 0,
 			optimistProb: 0,
 			worstCaseProb: 0,
 			breakdown: {
 				pessimist: [],
-				median: [],
-				average: [],  // Keep for backward compatibility
+				average: [],
 				optimist: [],
 				worstCase: []
 			}
@@ -208,7 +206,6 @@ const FightCalculator = {
 		// Track grenades used per scenario
 		const grenadesRemaining = {
 			pessimist: grenadeCount,
-			median: grenadeCount,
 			average: grenadeCount,
 			optimist: grenadeCount,
 			worstCase: grenadeCount
@@ -235,7 +232,7 @@ const FightCalculator = {
 			const combinedOccurrence = DistributionCalculator.convolveAll(occurrenceDistributions);
 			const occScenarios = DistributionCalculator.getScenarios(combinedOccurrence, false);
 			result.optimistProb = occScenarios.optimistProb;
-			result.medianProb = occScenarios.medianProb;
+			result.averageProb = occScenarios.averageProb;
 			result.pessimistProb = occScenarios.pessimistProb;
 			result.worstCaseProb = occScenarios.worstProb;
 		}
@@ -317,22 +314,20 @@ const FightCalculator = {
 	 * @private
 	 */
 	_calculateDamageWithInstances(occurrence, fightingPower, grenadeCount, playerCount, sectorsByFightType, eventWinExclusions = null) {
-		const scenarios = ['pessimist', 'median', 'optimist'];
+		const scenarios = ['pessimist', 'average', 'optimist'];
 		
 		const damage = {
 			pessimist: 0,
-			median: 0,
-			average: 0,  // Keep for backward compatibility
+			average: 0,
 			optimist: 0,
 			worstCase: 0,
 			pessimistProb: 0,
-			medianProb: 0,
+			averageProb: 0,
 			optimistProb: 0,
 			worstCaseProb: 0,
 			breakdown: {
 				pessimist: [],
-				median: [],
-				average: [],  // Keep for backward compatibility
+				average: [],
 				optimist: [],
 				worstCase: []
 			}
@@ -341,8 +336,7 @@ const FightCalculator = {
 		// Damage instances for per-player distribution
 		const damageInstances = {
 			pessimist: [],
-			median: [],
-			average: [],  // Keep for backward compatibility
+			average: [],
 			optimist: [],
 			worstCase: []
 		};
@@ -350,8 +344,7 @@ const FightCalculator = {
 		// Track grenades and used sectors per scenario
 		const grenadesRemaining = {
 			pessimist: grenadeCount,
-			median: grenadeCount,
-			average: grenadeCount,  // Keep for backward compatibility
+			average: grenadeCount,
 			optimist: grenadeCount,
 			worstCase: grenadeCount
 		};
@@ -377,7 +370,7 @@ const FightCalculator = {
 			const combinedOccurrence = DistributionCalculator.convolveAll(occurrenceDistributions);
 			const occScenarios = DistributionCalculator.getScenarios(combinedOccurrence, false);
 			damage.optimistProb = occScenarios.optimistProb;
-			damage.medianProb = occScenarios.medianProb;
+			damage.averageProb = occScenarios.averageProb;
 			damage.pessimistProb = occScenarios.pessimistProb;
 			damage.worstCaseProb = occScenarios.worstProb;
 		}
@@ -631,13 +624,11 @@ const FightCalculator = {
 			occurrence: {},
 			damage: {
 				pessimist: 0,
-				median: 0,
 				average: 0,
 				optimist: 0,
 				worstCase: 0,
 				breakdown: {
 					pessimist: [],
-					median: [],
 					average: [],
 					optimist: [],
 					worstCase: []
@@ -645,7 +636,6 @@ const FightCalculator = {
 			},
 			damageInstances: {
 				pessimist: [],
-				median: [],
 				average: [],
 				optimist: [],
 				worstCase: []

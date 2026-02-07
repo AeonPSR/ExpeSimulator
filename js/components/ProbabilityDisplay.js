@@ -225,9 +225,38 @@ class ProbabilityDisplay extends Component {
 	}
 
 	_renderEventRisks(eventDamage) {
-		const hasEvents = eventDamage.tired > 0 || eventDamage.accident > 0 || eventDamage.disaster > 0;
+		// Use occurrence data for per-event-type display (like Combat Risks)
+		const occurrence = eventDamage?.occurrence || {};
+		
+		// Event type display configuration
+		const eventConfig = {
+			'TIRED_2': { name: 'Fatigue', damage: '2 dmg to all', cssClass: 'neutral' },
+			'ACCIDENT_3_5': { name: 'Accident', damage: '3-5 dmg', cssClass: 'warning' },
+			'ACCIDENT_ROPE_3_5': { name: 'Accident (rope)', damage: '3-5 dmg', cssClass: 'warning' },
+			'DISASTER_3_5': { name: 'Disaster', damage: '3-5 dmg to all', cssClass: 'danger' }
+		};
 
-		if (!hasEvents) {
+		// Format probability percentages - show "<0.1%" for very small non-zero values
+		const formatProb = (prob) => {
+			if (prob === undefined || prob === 0) return '';
+			const pct = prob * 100;
+			if (pct < 0.1) return '<0.1%';
+			return `${pct.toFixed(1)}%`;
+		};
+
+		// Get event types that have any probability
+		const activeEvents = Object.keys(occurrence).filter(type => {
+			const occ = occurrence[type];
+			// Check if there's any non-zero probability in distribution
+			if (occ?.distribution) {
+				for (const [count, prob] of occ.distribution) {
+					if (count > 0 && prob > 0) return true;
+				}
+			}
+			return false;
+		});
+
+		if (activeEvents.length === 0) {
 			return `
 				<div class="outcome-category">
 					<h5>Event Risks</h5>
@@ -236,16 +265,43 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		let entries = '';
-		if (eventDamage.tired > 0) {
-			entries += `<div class="outcome-item"><span>Fatigue (2 dmg):</span><span class="neutral">Expected: ${eventDamage.tired.toFixed(2)}</span></div>`;
-		}
-		if (eventDamage.accident > 0) {
-			entries += `<div class="outcome-item"><span>Accident (3-5 dmg):</span><span class="warning">Expected: ${eventDamage.accident.toFixed(2)}</span></div>`;
-		}
-		if (eventDamage.disaster > 0) {
-			entries += `<div class="outcome-item"><span>Disaster (3-5 dmg):</span><span class="danger">Expected: ${eventDamage.disaster.toFixed(2)}</span></div>`;
-		}
+		// Sort by danger level (disaster > accident > tired)
+		const dangerOrder = ['DISASTER_3_5', 'ACCIDENT_3_5', 'ACCIDENT_ROPE_3_5', 'TIRED_2'];
+		activeEvents.sort((a, b) => dangerOrder.indexOf(a) - dangerOrder.indexOf(b));
+
+		const entries = activeEvents.map(type => {
+			const occ = occurrence[type];
+			const config = eventConfig[type] || { name: type, damage: '', cssClass: 'neutral' };
+			
+			// Build distribution string for events with probability > 1%
+			let distStr = '';
+			if (occ.distribution && occ.distribution.size > 0) {
+				const distParts = [];
+				const sortedEntries = Array.from(occ.distribution.entries()).sort((a, b) => a[0] - b[0]);
+				for (const [count, prob] of sortedEntries) {
+					if (count > 0 && prob > 0) {
+						distParts.push(`${count}: ${formatProb(prob)}`);
+					}
+				}
+				distStr = distParts.join(' | ');
+			}
+
+			// Calculate expected value for display
+			let expectedValue = 0;
+			if (occ.distribution) {
+				for (const [count, prob] of occ.distribution) {
+					expectedValue += count * prob;
+				}
+			}
+			
+			return `<div class="outcome-item">
+				<span>${config.name} (${config.damage}):</span>
+				<div class="fight-stats ${config.cssClass}">
+					<div class="expected-fights">Expected: ${expectedValue.toFixed(2)} (${occ.optimist || 0}-${occ.pessimist || 0})</div>
+					${distStr ? `<div class="fight-distribution">${distStr}</div>` : ''}
+				</div>
+			</div>`;
+		}).join('');
 
 		return `
 			<div class="outcome-category">
@@ -259,8 +315,8 @@ class ProbabilityDisplay extends Component {
 		const hpIcon = this._icon('pictures/astro/hp.png', 'hp-icon');
 		const scenarios = eventDamage?.scenarios;
 		
-		// Check if there's any event damage
-		const hasEventDamage = eventDamage && (eventDamage.tired > 0 || eventDamage.accident > 0 || eventDamage.disaster > 0);
+		// Check if there's any event damage by looking at the damage scenarios
+		const hasEventDamage = scenarios && (scenarios.pessimist > 0 || scenarios.worstCase > 0);
 		
 		if (!hasEventDamage || !scenarios) {
 			return `
@@ -271,8 +327,13 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		// Format probability percentages
-		const formatProb = (prob) => prob !== undefined ? `(${(prob * 100).toFixed(1)}%)` : '';
+		// Format probability percentages - show "<0.1%" for very small non-zero values
+		const formatProb = (prob) => {
+			if (prob === undefined || prob === 0) return '';
+			const pct = prob * 100;
+			if (pct < 0.1) return '(<0.1%)';
+			return `(${pct.toFixed(1)}%)`;
+		};
 
 		return `
 			<div class="outcome-category">
