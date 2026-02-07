@@ -134,9 +134,10 @@ const EventDamageCalculator = {
 		damage.pessimistProb = combined.scenarios.pessimistProb;
 		damage.worstCaseProb = combined.scenarios.worstProb;
 
-		// Track per-sector worst single event for worst case
+		// Track per-sector worst single event for worst case AND pessimist
 		// (events are mutually exclusive per sector — only ONE can happen per step)
 		const sectorWorstCase = new Map();
+		const sectorPessimist = new Map();
 
 		for (const eventType of eventTypes) {
 			const eventData = occurrenceWithSources[eventType];
@@ -148,13 +149,13 @@ const EventDamageCalculator = {
 
 			const multiplier = eventInfo.affectsAll ? playerCount : 1;
 
-			// Filter sectors (exclude sectors where fight wins)
+			// Filter sectors for worst case only (exclude sectors where fight wins)
 			const nonExcludedSectors = worstCaseExclusions
 				? sectors.filter(s => !worstCaseExclusions.has(s.sectorName))
 				: sectors;
 
-			// Standard scenarios: arithmetic damage from occurrence counts
-			for (const scenario of scenarios) {
+			// Optimist and Average: no per-sector picking needed (low occurrence, minimal overlap)
+			for (const scenario of ['optimist', 'average']) {
 				const eventCount = Math.round(occurrence[scenario]);
 				if (eventCount <= 0) continue;
 
@@ -162,7 +163,6 @@ const EventDamageCalculator = {
 				const totalDamage = eventCount * damagePerEvent * multiplier;
 				damage[scenario] += totalDamage;
 
-				// Build damage instances with sources
 				const sources = this._assignSourcesToInstances(eventCount, sectors);
 				damageInstances[scenario].push({
 					type: eventType,
@@ -173,41 +173,99 @@ const EventDamageCalculator = {
 				});
 			}
 
-			// Worst case: track per-sector worst single event
-			// (events are mutually exclusive per sector — only ONE can happen)
+			// Pessimist: track per-sector best event (no fight exclusions)
+			// Use sectorIndex as key to handle duplicate sector names (e.g., 4x COLD)
+			const pessimistDamage = this._getDamageForScenario(eventType, 'pessimist') * multiplier;
+			for (const sector of sectors) {
+				const current = sectorPessimist.get(sector.sectorIndex);
+				if (!current || pessimistDamage > current.damage) {
+					sectorPessimist.set(sector.sectorIndex, {
+						damage: pessimistDamage,
+						eventType: eventType,
+						damagePerInstance: pessimistDamage,
+						probability: sector.probability,
+						sectorName: sector.sectorName
+					});
+				}
+			}
+
+			// Worst case: track per-sector best event (with fight exclusions)
+			// Use sectorIndex as key to handle duplicate sector names
 			const worstCaseDamage = this._getDamageForScenario(eventType, 'worstCase') * multiplier;
 
 			for (const sector of nonExcludedSectors) {
-				const current = sectorWorstCase.get(sector.sectorName);
+				const current = sectorWorstCase.get(sector.sectorIndex);
 				if (!current || worstCaseDamage > current.damage) {
-					sectorWorstCase.set(sector.sectorName, {
+					sectorWorstCase.set(sector.sectorIndex, {
 						damage: worstCaseDamage,
 						eventType: eventType,
 						damagePerInstance: worstCaseDamage,
-						probability: sector.probability
+						probability: sector.probability,
+						sectorName: sector.sectorName
 					});
 				}
 			}
 		}
 
-		// Build worst case from per-sector best-of picks
+		// Build pessimist from per-sector best-of picks
+		// Sort sectors by probability (descending) and pick based on combined occurrence count
+		const pessimistSectors = [...sectorPessimist.entries()]
+			.sort((a, b) => b[1].probability - a[1].probability);
+		
+		// Get combined occurrence count for pessimist (how many sectors fire ANY damage event)
+		const combinedPessimistCount = Math.round(combined.scenarios.pessimist || 0);
+		
+		// Group by event type for instances, limiting to top N sectors
+		const pessimistByType = new Map();
+		let sectorsUsed = 0;
+		for (const [sectorIndex, info] of pessimistSectors) {
+			if (sectorsUsed >= combinedPessimistCount) break;
+			
+			if (!pessimistByType.has(info.eventType)) {
+				pessimistByType.set(info.eventType, []);
+			}
+			pessimistByType.get(info.eventType).push({ 
+				sectorIndex, 
+				sectorName: info.sectorName, 
+				probability: info.probability,
+				damagePerInstance: info.damagePerInstance
+			});
+			damage.pessimist += info.damage;
+			sectorsUsed++;
+		}
+
+		for (const [eventType, sectorList] of pessimistByType) {
+			damageInstances.pessimist.push({
+				type: eventType,
+				count: sectorList.length,
+				damagePerInstance: sectorList[0].damagePerInstance,
+				totalDamage: sectorList.length * sectorList[0].damagePerInstance,
+				sources: sectorList.map(s => ({ sectorName: s.sectorName, probability: s.probability }))
+			});
+		}
+
+		// Build worst case from per-sector best-of picks (100% fire rate)
 		// Group sectors by their worst event type for instances
 		const worstByType = new Map();
-		for (const [sectorName, info] of sectorWorstCase) {
+		for (const [sectorIndex, info] of sectorWorstCase) {
 			if (!worstByType.has(info.eventType)) {
 				worstByType.set(info.eventType, []);
 			}
-			worstByType.get(info.eventType).push({ sectorName, probability: info.probability });
+			worstByType.get(info.eventType).push({ 
+				sectorIndex, 
+				sectorName: info.sectorName, 
+				probability: info.probability,
+				damagePerInstance: info.damagePerInstance
+			});
 			damage.worstCase += info.damage;
 		}
 
 		for (const [eventType, sectorList] of worstByType) {
-			const info = sectorWorstCase.get(sectorList[0].sectorName);
 			damageInstances.worstCase.push({
 				type: eventType,
 				count: sectorList.length,
-				damagePerInstance: info.damagePerInstance,
-				totalDamage: sectorList.length * info.damagePerInstance,
+				damagePerInstance: sectorList[0].damagePerInstance,
+				totalDamage: sectorList.length * sectorList[0].damagePerInstance,
 				sources: sectorList.map(s => ({ sectorName: s.sectorName, probability: s.probability }))
 			});
 		}

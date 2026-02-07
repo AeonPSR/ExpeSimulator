@@ -31,7 +31,8 @@ const OccurrenceCalculator = {
 		const distributions = [];
 		const sectorsWithEvent = [];
 
-		for (const sectorName of sectors) {
+		for (let i = 0; i < sectors.length; i++) {
+			const sectorName = sectors[i];
 			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			let eventProb = 0;
 
@@ -48,6 +49,7 @@ const OccurrenceCalculator = {
 					[1, eventProb]
 				]));
 				sectorsWithEvent.push({
+					sectorIndex: i,  // Track original position for uniqueness
 					sectorName,
 					probability: eventProb
 				});
