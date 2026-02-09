@@ -105,16 +105,11 @@ const DistributionCalculator = {
 	 * @returns {Object} Scenarios with values and cumulative probabilities
 	 */
 	getScenarios(distribution, higherIsBetter = true) {
+		const p0 = this.getPercentile(distribution, 0);
 		const p25 = this.getPercentile(distribution, 0.25);
 		const p50 = this.getPercentile(distribution, 0.50);
 		const p75 = this.getPercentile(distribution, 0.75);
-		// Keep average for backward compatibility if needed
-		const avg = Math.round(this.getExpectedValue(distribution) * 10) / 10;
-
-		// Sort distribution by value
-		const sorted = [...distribution.entries()].sort((a, b) => a[0] - b[0]);
-		const worst = sorted[sorted.length - 1]?.[0] || 0;
-		const best = sorted[0]?.[0] || 0;
+		const p100 = this.getPercentile(distribution, 1.0);
 
 		// Calculate cumulative probability ranges using EXCLUSIVE boundaries
 		// Each value should only be counted in ONE category
@@ -123,12 +118,15 @@ const DistributionCalculator = {
 		let pessimistCumProb = 0;
 		let worstCumProb = 0;
 
+		// Sort distribution for iteration
+		const sorted = [...distribution.entries()].sort((a, b) => a[0] - b[0]);
+
 		if (higherIsBetter) {
 			// Resources: higher = better, so optimist is p75, pessimist is p25
-			// worst = lowest value, best = highest value
+			// worst = p0 (lowest), best = p100 (highest)
 			const optimistVal = p75;
 			const pessimistVal = p25;
-			const worstVal = best; // lowest value is worst for resources
+			const worstVal = p0;
 
 			for (const [value, prob] of sorted) {
 				if (value >= optimistVal) {
@@ -138,14 +136,15 @@ const DistributionCalculator = {
 				} else if (value > worstVal && value < pessimistVal) {
 					pessimistCumProb += prob; // Pessimist: > worst but < pessimist threshold
 				} else {
-					worstCumProb += prob;     // Worst: = lowest value
+					worstCumProb += prob;     // Worst: <= p0 value
 				}
 			}
 
 			return { 
 				pessimist: p25, 
 				average: p50,
-				optimist: p75, 
+				optimist: p75,
+				worst: p0,
 				pessimistProb: pessimistCumProb,
 				averageProb: medianCumProb,
 				optimistProb: optimistCumProb,
@@ -153,10 +152,10 @@ const DistributionCalculator = {
 			};
 		} else {
 			// Damage/Fights: lower = better, so optimist is p25, pessimist is p75
-			// worst = highest value, best = lowest value
+			// worst = p100 (highest damage), best = p0 (lowest damage)
 			const optimistVal = p25;
 			const pessimistVal = p75;
-			const worstVal = worst; // highest value is worst for damage
+			const worstVal = p100;
 
 			for (const [value, prob] of sorted) {
 				if (value <= optimistVal) {
@@ -166,7 +165,7 @@ const DistributionCalculator = {
 				} else if (value >= pessimistVal && value < worstVal) {
 					pessimistCumProb += prob; // Pessimist: >= pessimist threshold but < worst
 				} else {
-					worstCumProb += prob;     // Worst: = highest value
+					worstCumProb += prob;     // Worst: >= p100 value
 				}
 			}
 
@@ -174,6 +173,7 @@ const DistributionCalculator = {
 				pessimist: p75, 
 				average: p50, 
 				optimist: p25,
+				worst: p100,
 				pessimistProb: pessimistCumProb,
 				averageProb: medianCumProb,
 				optimistProb: optimistCumProb,
