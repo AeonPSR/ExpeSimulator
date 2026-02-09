@@ -418,7 +418,7 @@ class ExpeditionSimulatorApp {
 			
 			// Get health values for this participating player
 			const optimist = healthByScenario.optimist?.[participatingIndex] ?? player.health;
-			const median = healthByScenario.median?.[participatingIndex] ?? player.health;
+			const average = healthByScenario.average?.[participatingIndex] ?? player.health;
 			const pessimist = healthByScenario.pessimist?.[participatingIndex] ?? player.health;
 			const worst = healthByScenario.worstCase?.[participatingIndex] ?? player.health;
 			
@@ -433,8 +433,8 @@ class ExpeditionSimulatorApp {
 						<div class="expedition-result-health optimist ${this._getHealthClass(optimist)}">
 							${this._renderHealthValue(optimist)}
 						</div>
-						<div class="expedition-result-health median ${this._getHealthClass(median)}">
-							${this._renderHealthValue(median)}
+						<div class="expedition-result-health median ${this._getHealthClass(average)}">
+							${this._renderHealthValue(average)}
 						</div>
 						<div class="expedition-result-health pessimist ${this._getHealthClass(pessimist)}">
 							${this._renderHealthValue(pessimist)}
