@@ -48,7 +48,7 @@ const FightCalculator = {
 		// Get fighting power
 		const fightingPower = this._getFightingPower(players);
 		const grenadeCount = this._getGrenadeCount(players);
-		const playerCount = players.length || 1;
+		const playerCount = players.length;
 
 		// Calculate occurrence for each fight type, tracking which sectors can produce each type
 		const fightTypes = this._getAllFightTypes(sectors, loadout, sectorProbabilities);

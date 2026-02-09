@@ -57,7 +57,7 @@ const EventDamageCalculator = {
 			return this._emptyResult();
 		}
 
-		const playerCount = players.length || 1;
+		const playerCount = players.length;
 
 		// Calculate occurrences with source tracking for each event type
 		// Delegates to OccurrenceCalculator (shared with FightCalculator)

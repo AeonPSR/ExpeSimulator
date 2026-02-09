@@ -110,7 +110,7 @@ const EventWeightCalculator = {
 		let eventExclusions = null;  // Sectors where fight damage "wins" (exclude from event worst case)
 		
 		if (typeof DamageComparator !== 'undefined' && typeof FightingPowerService !== 'undefined') {
-			const playerCount = players.length || 1;
+			const playerCount = players.length;
 			const fightingPower = FightingPowerService.calculateBaseFightingPower(players);
 			const grenadeCount = FightingPowerService.countGrenades(players);
 			
