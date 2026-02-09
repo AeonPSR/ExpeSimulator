@@ -273,14 +273,14 @@ class ProbabilityDisplay extends Component {
 			const occ = occurrence[type];
 			const config = eventConfig[type] || { name: type, damage: '', cssClass: 'neutral' };
 			
-			// Build distribution string for events with probability > 1%
+			// Build distribution string for events with probability >= 1% (include 0 count like fights)
 			let distStr = '';
 			if (occ.distribution && occ.distribution.size > 0) {
 				const distParts = [];
 				const sortedEntries = Array.from(occ.distribution.entries()).sort((a, b) => a[0] - b[0]);
 				for (const [count, prob] of sortedEntries) {
-					if (count > 0 && prob > 0) {
-						distParts.push(`${count}: ${formatProb(prob)}`);
+					if (prob >= 0.01) {
+						distParts.push(`${count}: ${(prob * 100).toFixed(0)}%`);
 					}
 				}
 				distStr = distParts.join(' | ');
