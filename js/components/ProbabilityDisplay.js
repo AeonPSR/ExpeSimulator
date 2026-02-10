@@ -138,6 +138,127 @@ class ProbabilityDisplay extends Component {
 		return `(${pct.toFixed(1)}%)`;
 	}
 
+	/**
+	 * Builds HTML rows for damage scenarios, collapsing rows when rounded
+	 * damage values are identical.  Shared by Combat Damage and Event Damage.
+	 *
+	 * @private
+	 * @param {Object} data - Damage object with optimist/average/pessimist/worstCase
+	 *                        and their *Prob counterparts
+	 * @param {string} hpIcon - Pre-rendered HP icon HTML
+	 * @returns {string[]} Array of HTML row strings
+	 */
+	_buildDamageScenarioRows(data, hpIcon) {
+		const optimistDmg = Math.round(data.optimist);
+		const averageDmg = Math.round(data.average);
+		const pessimistDmg = Math.round(data.pessimist);
+		const worstDmg = Math.round(data.worstCase);
+
+		const rows = [];
+
+		const optimistEqualsAverage = optimistDmg === averageDmg;
+		const averageEqualsPessimist = averageDmg === pessimistDmg;
+		const allThreeEqual = optimistEqualsAverage && averageEqualsPessimist;
+
+		// --- Optimist / Average / Pessimist ---
+		if (allThreeEqual) {
+			const combinedProb = (data.optimistProb || 0) + (data.averageProb || 0) + (data.pessimistProb || 0);
+			rows.push(`
+				<div class="damage-item">
+					<span>Optimist, Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
+					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
+				</div>
+			`);
+		} else if (optimistEqualsAverage) {
+			const combinedProb = (data.optimistProb || 0) + (data.averageProb || 0);
+			rows.push(`
+				<div class="damage-item">
+					<span>Optimist and Average Scenario: ${this._formatProb(combinedProb)}</span>
+					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
+				</div>
+			`);
+			rows.push(`
+				<div class="damage-item">
+					<span>Pessimist Scenario: ${this._formatProb(data.pessimistProb)}</span>
+					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
+				</div>
+			`);
+		} else if (averageEqualsPessimist) {
+			rows.push(`
+				<div class="damage-item">
+					<span>Optimist Scenario: ${this._formatProb(data.optimistProb)}</span>
+					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
+				</div>
+			`);
+			const combinedProb = (data.averageProb || 0) + (data.pessimistProb || 0);
+			rows.push(`
+				<div class="damage-item">
+					<span>Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
+					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
+				</div>
+			`);
+		} else {
+			rows.push(`
+				<div class="damage-item">
+					<span>Optimist Scenario: ${this._formatProb(data.optimistProb)}</span>
+					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
+				</div>
+			`);
+			rows.push(`
+				<div class="damage-item">
+					<span>Average Scenario: ${this._formatProb(data.averageProb)}</span>
+					<span class="danger">${hpIcon}<strong>${averageDmg}</strong></span>
+				</div>
+			`);
+			rows.push(`
+				<div class="damage-item">
+					<span>Pessimist Scenario: ${this._formatProb(data.pessimistProb)}</span>
+					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
+				</div>
+			`);
+		}
+
+		// --- Worst case merging ---
+		const worstEqualsPessimist = worstDmg === pessimistDmg;
+		if (worstEqualsPessimist) {
+			if (allThreeEqual) {
+				const combinedProb = (data.optimistProb || 0) + (data.averageProb || 0) + (data.pessimistProb || 0) + (data.worstCaseProb || 0);
+				rows.length = 0;
+				rows.push(`
+				<div class="damage-item">
+					<span>All Scenarios: ${this._formatProb(combinedProb)}</span>
+					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
+				</div>
+				`);
+			} else if (averageEqualsPessimist) {
+				const combinedProb = (data.averageProb || 0) + (data.pessimistProb || 0) + (data.worstCaseProb || 0);
+				rows[rows.length - 1] = `
+				<div class="damage-item">
+					<span>Average, Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
+					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
+				</div>
+				`;
+			} else {
+				const combinedProb = (data.pessimistProb || 0) + (data.worstCaseProb || 0);
+				rows[rows.length - 1] = `
+				<div class="damage-item">
+					<span>Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
+					<span class="critical bold-damage">${hpIcon}<strong>${pessimistDmg}</strong></span>
+				</div>
+				`;
+			}
+		} else {
+			rows.push(`
+				<div class="damage-item">
+					<span>Worst Case Scenario: ${this._formatProb(data.worstCaseProb)}</span>
+					<span class="critical bold-damage">${hpIcon}<strong>${worstDmg}</strong></span>
+				</div>
+			`);
+		}
+
+		return rows;
+	}
+
 	_renderCombatRisks(combat) {
 		// Handle both new format (combat.occurrence) and legacy format
 		const occurrence = combat?.occurrence || {};
@@ -206,127 +327,7 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		// Round damage values for comparison
-		const optimistDmg = Math.round(damage.optimist);
-		const averageDmg = Math.round(damage.average);
-		const pessimistDmg = Math.round(damage.pessimist);
-		const worstDmg = Math.round(damage.worstCase);
-
-		// Build scenario rows, collapsing when damage values are the same
-		const rows = [];
-
-		// Check for collapses between optimist, average, pessimist
-		const optimistEqualsAverage = optimistDmg === averageDmg;
-		const averageEqualsPessimist = averageDmg === pessimistDmg;
-		const allThreeEqual = optimistEqualsAverage && averageEqualsPessimist;
-
-		if (allThreeEqual) {
-			// All three scenarios have same damage - collapse into one
-			const combinedProb = (damage.optimistProb || 0) + (damage.averageProb || 0) + (damage.pessimistProb || 0);
-			rows.push(`
-				<div class="damage-item">
-					<span>Optimist, Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-			`);
-		} else if (optimistEqualsAverage) {
-			// Optimist and Average collapsed
-			const combinedProb = (damage.optimistProb || 0) + (damage.averageProb || 0);
-			rows.push(`
-				<div class="damage-item">
-					<span>Optimist and Average Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-			`);
-			// Pessimist separate
-			rows.push(`
-				<div class="damage-item">
-					<span>Pessimist Scenario: ${this._formatProb(damage.pessimistProb)}</span>
-					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
-				</div>
-			`);
-		} else if (averageEqualsPessimist) {
-			// Optimist separate
-			rows.push(`
-				<div class="damage-item">
-					<span>Optimist Scenario: ${this._formatProb(damage.optimistProb)}</span>
-					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-			`);
-			// Average and Pessimist collapsed
-			const combinedProb = (damage.averageProb || 0) + (damage.pessimistProb || 0);
-			rows.push(`
-				<div class="damage-item">
-					<span>Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
-				</div>
-			`);
-		} else {
-			// No collapse - show all three separately
-			rows.push(`
-				<div class="damage-item">
-					<span>Optimist Scenario: ${this._formatProb(damage.optimistProb)}</span>
-					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-			`);
-			rows.push(`
-				<div class="damage-item">
-					<span>Average Scenario: ${this._formatProb(damage.averageProb)}</span>
-					<span class="danger">${hpIcon}<strong>${averageDmg}</strong></span>
-				</div>
-			`);
-			rows.push(`
-				<div class="damage-item">
-					<span>Pessimist Scenario: ${this._formatProb(damage.pessimistProb)}</span>
-					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
-				</div>
-			`);
-		}
-
-		// Worst case merging with the last row
-		// If worst == pessimist (or the merged block containing pessimist), merge the label
-		const worstEqualsPessimist = worstDmg === pessimistDmg;
-		if (worstEqualsPessimist) {
-			// Merge worst case into whatever row already contains pessimist
-			// Find the last row and update its label to include "Worst Case"
-			if (allThreeEqual) {
-				// All four are the same
-				const combinedProb = (damage.optimistProb || 0) + (damage.averageProb || 0) + (damage.pessimistProb || 0) + (damage.worstCaseProb || 0);
-				rows.length = 0;
-				rows.push(`
-				<div class="damage-item">
-					<span>All Scenarios: ${this._formatProb(combinedProb)}</span>
-					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-				`);
-			} else if (averageEqualsPessimist) {
-				// Last row is "Average and Pessimist" → becomes "Average, Pessimist and Worst Case"
-				const combinedProb = (damage.averageProb || 0) + (damage.pessimistProb || 0) + (damage.worstCaseProb || 0);
-				rows[rows.length - 1] = `
-				<div class="damage-item">
-					<span>Average, Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
-				</div>
-				`;
-			} else {
-				// Last row is standalone "Pessimist" → becomes "Pessimist and Worst Case"
-				const combinedProb = (damage.pessimistProb || 0) + (damage.worstCaseProb || 0);
-				rows[rows.length - 1] = `
-				<div class="damage-item">
-					<span>Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="critical bold-damage">${hpIcon}<strong>${pessimistDmg}</strong></span>
-				</div>
-				`;
-			}
-		} else {
-			// Worst case is different from pessimist, show separately
-			rows.push(`
-				<div class="damage-item">
-					<span>Worst Case Scenario: ${this._formatProb(damage.worstCaseProb)}</span>
-					<span class="critical bold-damage">${hpIcon}<strong>${worstDmg}</strong></span>
-				</div>
-			`);
-		}
+		const rows = this._buildDamageScenarioRows(damage, hpIcon);
 
 		return `
 			<div class="outcome-category">
@@ -431,113 +432,7 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		// Round damage values for comparison
-		const optimistDmg = Math.round(scenarios.optimist);
-		const averageDmg = Math.round(scenarios.average);
-		const pessimistDmg = Math.round(scenarios.pessimist);
-		const worstDmg = Math.round(scenarios.worstCase);
-
-		// Build scenario rows with merging (same logic as Combat Damage)
-		const rows = [];
-
-		const optimistEqualsAverage = optimistDmg === averageDmg;
-		const averageEqualsPessimist = averageDmg === pessimistDmg;
-		const allThreeEqual = optimistEqualsAverage && averageEqualsPessimist;
-
-		if (allThreeEqual) {
-			const combinedProb = (scenarios.optimistProb || 0) + (scenarios.averageProb || 0) + (scenarios.pessimistProb || 0);
-			rows.push(`
-				<div class="damage-item">
-					<span>Optimist, Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-			`);
-		} else if (optimistEqualsAverage) {
-			const combinedProb = (scenarios.optimistProb || 0) + (scenarios.averageProb || 0);
-			rows.push(`
-				<div class="damage-item">
-					<span>Optimist and Average Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-			`);
-			rows.push(`
-				<div class="damage-item">
-					<span>Pessimist Scenario: ${this._formatProb(scenarios.pessimistProb)}</span>
-					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
-				</div>
-			`);
-		} else if (averageEqualsPessimist) {
-			rows.push(`
-				<div class="damage-item">
-					<span>Optimist Scenario: ${this._formatProb(scenarios.optimistProb)}</span>
-					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-			`);
-			const combinedProb = (scenarios.averageProb || 0) + (scenarios.pessimistProb || 0);
-			rows.push(`
-				<div class="damage-item">
-					<span>Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
-				</div>
-			`);
-		} else {
-			rows.push(`
-				<div class="damage-item">
-					<span>Optimist Scenario: ${this._formatProb(scenarios.optimistProb)}</span>
-					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-			`);
-			rows.push(`
-				<div class="damage-item">
-					<span>Average Scenario: ${this._formatProb(scenarios.averageProb)}</span>
-					<span class="danger">${hpIcon}<strong>${averageDmg}</strong></span>
-				</div>
-			`);
-			rows.push(`
-				<div class="damage-item">
-					<span>Pessimist Scenario: ${this._formatProb(scenarios.pessimistProb)}</span>
-					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
-				</div>
-			`);
-		}
-
-		// Worst case merging
-		const worstEqualsPessimist = worstDmg === pessimistDmg;
-		if (worstEqualsPessimist) {
-			if (allThreeEqual) {
-				const combinedProb = (scenarios.optimistProb || 0) + (scenarios.averageProb || 0) + (scenarios.pessimistProb || 0) + (scenarios.worstCaseProb || 0);
-				rows.length = 0;
-				rows.push(`
-				<div class="damage-item">
-					<span>All Scenarios: ${this._formatProb(combinedProb)}</span>
-					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
-				</div>
-				`);
-			} else if (averageEqualsPessimist) {
-				const combinedProb = (scenarios.averageProb || 0) + (scenarios.pessimistProb || 0) + (scenarios.worstCaseProb || 0);
-				rows[rows.length - 1] = `
-				<div class="damage-item">
-					<span>Average, Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
-				</div>
-				`;
-			} else {
-				const combinedProb = (scenarios.pessimistProb || 0) + (scenarios.worstCaseProb || 0);
-				rows[rows.length - 1] = `
-				<div class="damage-item">
-					<span>Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
-					<span class="critical bold-damage">${hpIcon}<strong>${pessimistDmg}</strong></span>
-				</div>
-				`;
-			}
-		} else {
-			rows.push(`
-				<div class="damage-item">
-					<span>Worst Case Scenario: ${this._formatProb(scenarios.worstCaseProb)}</span>
-					<span class="critical bold-damage">${hpIcon}<strong>${worstDmg}</strong></span>
-				</div>
-			`);
-		}
+		const rows = this._buildDamageScenarioRows(scenarios, hpIcon);
 
 		return `
 			<div class="outcome-category">
