@@ -2,162 +2,212 @@
 
 > Last updated: 2026-02-10
 
-All duplication issues have been resolved across 4 batches.
-Descriptions are preserved below as a reference for future maintenance.
+## History
 
-- **Section C** (Duplicated Calculation Logic): 6 items — all fixed.
-- **Batch 1** (A1, A4, A5, A6, F6): tiny quick wins + side effects (F4, A2/A3 arrays).
-- **Batch 2** (A2, A3, A7): small constants + A3 loop-bound bug fix.
-- **Batch 3** (A9, B1/E3, F2, F5): small structural cleanups.
-- **Batch 4** (D1, B2/E1, E2, B3, F3): medium refactors.
-
+Round 1 (batches 1–4) resolved all A, B, C, D, E, F items. See git history
+for details. Round 2 findings below (G-series).
 
 ---
-## B. Duplicated Data Structures / Lookups
+## G. Remaining Duplications & Inconsistencies
 ---
 
-### B2. World names list — ✅ DONE (Batch 4)
+### G1. config.js effect schemas vs hardcoded *Modifiers.js — dual source of truth
 
-**Size: Medium** — 15 minutes, 1 file refactored.
+**Size: Large** — ~60 min, 4+ files. Needs design decision.
 
-`WorldData.js` defines world configurations + `getAvailableWorlds()`.
-`ExampleWorlds.js` has its own hardcoded 2D array of the same names.
-Must update both files when adding/removing a world.
+`config.js` declares detailed effect schemas for every ability and item
+(`AbilityEffects`, `ItemEffects`, `ProjectEffects`): which events to remove,
+which sectors are affected, multipliers, etc. But **none of the actual
+calculator code reads these configs**. Instead, each modifier file hardcodes
+the exact same logic:
 
-**Fix:** Refactor `ExampleWorlds.js` to read world names from
-`WorldData.getAvailableWorlds()` instead of maintaining its own list.
-Same issue as E1.
+| Config declaration                                              | Hardcoded implementation                                         |
+| --------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `AbilityEffects.pilot.sectorModifications.LANDING.removeEvents` | `AbilityModifiers.applyPilot()` removes same 3 events           |
+| `AbilityEffects.diplomacy.removeCombatEvents`                   | `AbilityModifiers.applyDiplomacy()` removes `FIGHT_*`           |
+| `AbilityEffects.tracker` (config says "reveal sectors")         | `AbilityModifiers.applyTracker()` removes `KILL_LOST` from LOST |
+| `ItemEffects.white_flag.removeCombatEvents`                     | `ItemModifiers.applyWhiteFlag()` removes `FIGHT_*` from INTELLIGENT only (config doesn't mention sector restriction!) |
+| `ItemEffects.quad_compass.removeEvents: ['AGAIN']`              | `ItemModifiers.applyQuadCompass()` removes `AGAIN`              |
+| `ItemEffects.trad_module.sectorEventBonus`                      | `ItemModifiers.applyTradModule()` doubles ARTEFACT in INTELLIGENT |
+| `ProjectEffects.antigrav_propeller.sectorEventModifier`         | `ProjectModifiers.applyAntigravPropeller()` doubles NOTHING_TO_REPORT in LANDING |
 
-### B3. Event display config in ProbabilityDisplay — ✅ DONE (Batch 4)
+Two sources of truth. Updating one doesn't update the other.
+Note: the Tracker config is also **wrong** — it describes "reveal unexplored
+sectors" but the code actually removes `KILL_LOST` from `LOST`.
 
-**Size: Medium** — 20 minutes, 2 files. Needs some design.
+**Fix (option A — data-driven):** Make `ModifierApplicator` read from
+`AbilityEffects`/`ItemEffects`/`ProjectEffects` and dynamically apply
+`removeEvents`, `removeEventsByPrefix`, `multiplyEventWeight`, etc.
+Delete `AbilityModifiers.js`, `ItemModifiers.js`, `ProjectModifiers.js`.
 
-`ProbabilityDisplay._renderEventRisks()` has a local `eventConfig` map with
-`{ name, damage, cssClass }` for each event type. The damage descriptions
-(`'2 dmg to all'`, `'3-5 dmg to all'`, etc.) duplicate knowledge already in
-`EventDamageCalculator.EVENT_DAMAGES` (which has `min`, `max`, `affectsAll`).
+**Fix (option B — code-only):** Delete the effect schemas from `config.js`
+(`AbilityEffects`, `ItemEffects`, `ProjectEffects`) and keep the modifier
+files as the single source. Simpler, but loses the nice declarative config.
 
-The complication: `cssClass` and display `name` don't exist in the backend
-data. Either the backend gets display hints, or a shared lookup bridges both.
+### G2. Skillful ability — effects scattered across two unrelated files
 
-**Fix:** Add `displayName` and `cssClass` to `EVENT_DAMAGES`, or build the
-display config by reading `min`/`max`/`affectsAll` from the backend and
-deriving the damage description string programmatically.
+**Size: Small** — ~10 min, 2 files.
 
+Skillful has two distinct effects, each hardcoded in a different place:
 
----
-## D. Formatting / Transformation Duplicated
----
+1. **Grants Diplomacy** — `LoadoutBuilder._collectAbilities()`:
+   `if (id === 'SKILLFUL') abilities.add('DIPLOMACY')`
+2. **Counts as Botanic** (fruit bonus) — `ResourceCalculator._countModifiers()`:
+   `if (id === 'BOTANIC' || id === 'SKILLFUL') botanistCount++`
 
-### D1. Filename → ID conversion — 6+ independent copies — ✅ DONE (Batch 4)
+Neither reads from config. Skillful doesn't have an entry in `AbilityEffects`
+at all. Adding a third side-effect means hunting through unrelated files.
 
-**Size: Medium** — 20 minutes, 6 files, ~15 lines changed.
+**Fix:** Centralize Skillful's "alias" effects in one place (e.g. an
+`ABILITY_ALIASES` map: `{ SKILLFUL: ['DIPLOMACY', 'BOTANIC'] }`) and have
+both `LoadoutBuilder` and `ResourceCalculator` read it.
 
-`LoadoutBuilder.filenameToId()` is the canonical version (strips
-`.png/.jpg/.gif`, uppercases). But **5 other files** do the same inline:
-- `ResourceCalculator._countModifiers()`
-- `FightingPowerService` (5 call sites)
-- `OxygenService.playerHasSpacesuit()`
-- `DamageSpreader.applySurvivalReduction()`
+### G3. `ACCIDENT_ROPE_3_5` — phantom event type with no source data
 
-None of them call `LoadoutBuilder.filenameToId()`.
+**Size: Small** — ~10 min, 2 files.
 
-The main risk is load-order: all files rely on `<script>` tag ordering
-in `manifest.json`. `LoadoutBuilder` must load before any caller. Currently
-it does — but this creates a cross-layer dependency (services calling a
-builder utility). A cleaner option is to move `filenameToId` to `helpers.js`
-(already a shared utility file that loads early).
+`EventDamageCalculator.EVENT_DAMAGES` defines `ACCIDENT_ROPE_3_5` (with
+`ropeImmune: true`). `ProbabilityDisplay._renderEventRisks()` references it
+in its sort order. But **no sector in `PlanetSectorConfigData`** ever emits
+this event — all sectors use plain `ACCIDENT_3_5`. The rope item's config
+uses `sectorSpecificImmunity` (sector-level filtering) instead.
 
-**Fix:** Move `filenameToId()` to `helpers.js`, replace all 6+ inline
-conversions with calls to it. This also resolves D2 (regex inconsistency)
-and F1 (casing split) since everyone will use the same function.
+Result: `ACCIDENT_ROPE_3_5` is dead code. It will never appear in any
+occurrence distribution.
 
-### D2. Extension-stripping regex — inconsistent variants — ✅ absorbed by D1
+**Fix:** Remove `ACCIDENT_ROPE_3_5` from `EVENT_DAMAGES` and the display
+sort order. If rope immunity needs separate tracking, implement it via the
+config's `sectorSpecificImmunity` approach or add the event to sector configs.
 
-**Size: absorbed by D1** — no separate work needed.
+### G4. Rope item — config declares `sectorSpecificImmunity`, no code reads it
 
-Three different regexes for the same operation:
-- `/\.(png|jpg|gif)$/i` — LoadoutBuilder, ResourceCalculator, DamageSpreader, OxygenService
-- `/\.(jpg|png)$/i` — FightingPowerService (×5)
-- `/\.(jpg|png)$/` — FightCalculator fallback (no `i` flag, no `gif`)
+**Size: Medium** — ~20 min, 2+ files.
 
-The FightingPowerService and FightCalculator variants would fail silently on
-`.gif` files, and the FightCalculator one is also case-sensitive.
+`ItemEffects.rope.effects.sectorSpecificImmunity` says rope removes
+`ACCIDENT_3_5` from `SEISMIC_ACTIVITY`, `CAVE`, and `MOUNTAIN`. But:
+- `ItemModifiers.js` has **no `applyRope()` function**.
+- `ModifierApplicator._applyItems()` doesn't list `'ROPE'` in its item map.
 
-**Fix:** Absorbed by D1 — all sites will use the single shared function.
+The rope effect is declared in config but completely unimplemented.
 
+**Fix:** Implement `applyRope()` in `ItemModifiers.js` and wire it into
+`ModifierApplicator`, or remove the config entry if rope immunity isn't
+meant to affect probability output.
 
----
-## E. Lists Maintained in Multiple Places
----
+### G5. Plastenite Armor / Sprint / Traitor — configured but not implemented
 
-### E1. World names — ✅ DONE (same as B2)
+**Size: Medium** — ~25 min, 3+ files.
 
-**Size: same as B2** — see B2.
+These items/abilities have config entries in `config.js` but zero
+calculation code:
 
-`WorldData.getAvailableWorlds()` returns the list, but `ExampleWorlds.js` has
-its own hardcoded 2D array. Must update both when adding worlds.
+| Config entry                                         | Expected effect                    | Implemented? |
+| ---------------------------------------------------- | ---------------------------------- | ------------ |
+| `ItemEffects.plastenite_armor.fightDamageReduction=1` | Reduce fight damage per player     | No           |
+| `AbilityEffects.sprint.additionalSectors=1`          | Extra sector explored              | No           |
+| `AbilityEffects.traitor.doubleNegativeEvents=true`   | Double all negative event weights  | No           |
 
-### E2. Sectors-with-fight roster — ✅ DONE (Batch 4)
+The `NegativeEvents` array in `config.js` exists to support Traitor but is
+never referenced by any code.
 
-**Size: Medium** — 15 minutes, 1 file. Needs verification.
+These are either TODO features or orphaned config. Either way, a developer
+might think these effects are working when they aren't.
 
-`SectorData.sectorsWithFight` is a hardcoded array. The actual sector configs
-in `PlanetSectorConfigData` have `FIGHT_*` events. Two sources of truth.
+**Fix:** Either implement them, or mark them clearly as
+`// NOT YET IMPLEMENTED` in config and delete any supporting dead code
+(e.g., the `NegativeEvents` array if Traitor isn't planned).
 
-**Fix:** Derive `sectorsWithFight` from `PlanetSectorConfigData` at load time
-by scanning each sector's events for `FIGHT_*` keys. Delete the hardcoded
-array. Risk: must verify that `PlanetSectorConfigData` is loaded before
-`SectorData` references it (check `manifest.json` order).
+### G6. Event categorization logic duplicated in backend and frontend
 
+**Size: Small** — ~15 min, 2 files.
 
----
-## F. Structural Inconsistencies
----
+Both methods classify events by prefix using near-identical if/else chains:
 
-### F3. Dual damage instance format — ✅ DONE (Batch 4)
+- `EventWeightCalculator._categorizeEvent()` (backend) routes event names
+  into buckets (fights, tired, accident, disease, playerLost, etc.).
+- `ProbabilityDisplay._getEventColorClass()` (frontend) maps the same
+  prefixes to CSS classes (`positive`, `warning`, `danger`, `neutral`).
 
-**Size: Medium** — 20 minutes, 2 files. Needs care.
+Same classification tree in two places. Adding a new event type means
+updating both.
 
-`DamageDistributionEngine` produces `{type:'COMBINED', count:null, totalDamage}`.
-`DamageSpreader` must branch on `count === null` to handle this vs the legacy
-`{type, count, damagePerInstance}` format.
+**Fix:** Create a shared `EventClassifier` utility that returns
+`{ category, cssClass }` for any event name. Both files call it.
 
-**Fix:** Standardize on one format. Either always use `totalDamage` (simpler)
-or always provide `count`+`damagePerInstance` (backward compat). Touches
-`DamageDistributionEngine.buildDamageInstances()` and
-`DamageSpreader._spreadDamage()`.
+### G7. PlayerCard instantiation — identical options block in `app.js`
+
+**Size: Small** — ~10 min, 1 file.
+
+`_renderInitialPlayers()` and `_onAddPlayer()` in `app.js` both create
+`new PlayerCard({...})` with the exact same 6-line callback wiring block.
+Only the `player` source differs.
+
+**Fix:** Extract a `_createPlayerCard(player)` factory method and call it
+from both sites.
+
+### G8. `SectorData.sectors` fallback duplicates `PlanetSectorConfigData`
+
+**Size: Small** — ~5 min, 1 file.
+
+`SectorData.js` has a `get sectors()` that reads `PlanetSectorConfigData`
+when available but keeps a 24-entry hardcoded fallback array with the same
+sector names, `maxPerPlanet`, and `weightAtPlanetGeneration` values. Same for
+`sectorsWithFight` (8-entry fallback). These fallbacks will silently drift
+if config.js is updated.
+
+**Fix:** Since `PlanetSectorConfigData` is always loaded before `SectorData`
+(by manifest.json order), remove the fallback arrays and throw/warn if the
+config is missing.
+
+### G9. `_calculateExpeditionResults()` called twice per state change
+
+**Size: Small** — ~5 min, 1 file.
+
+Every state change triggers `_updateDisplays()` which calls both
+`_updateProbabilityDisplay()` and `_updateResultsDisplay()`. Each of those
+independently calls `_calculateExpeditionResults()` — running the full
+probability engine **twice** for the same inputs.
+
+**Fix:** Call `_calculateExpeditionResults()` once in `_updateDisplays()`,
+store the result, and pass it to both display update methods.
 
 
 ---
 ## Summary
 ---
 
-### Overlap map
-
-- **B2 = E1** (world names) — fix once
-- **D1 absorbs D2 + F1** (filename→ID + regex + casing) — one refactor
-
-After deduplication: **0 unique items** remain — all resolved.
-
 ### At a glance
 
 ```
-ID   Description                        Size    Time     Risk     Status
-──── ────────────────────────────────── ─────── ──────── ──────── ────────
-B2   World names list (=E1)             Medium  ~15 min  Low      ✅ DONE
-B3   Event display config               Medium  ~20 min  Low      ✅ DONE
-D1   filenameToId (absorbs D2+F1)       Medium  ~20 min  Low      ✅ DONE
-E2   Sectors-with-fight roster          Medium  ~15 min  Low      ✅ DONE
-F3   Dual damage instance format        Medium  ~20 min  Medium   ✅ DONE
+ID   Description                               Size     Time     Risk
+──── ───────────────────────────────────────── ──────── ──────── ────────
+G1   config.js vs *Modifiers.js dual truth     Large    ~60 min  Medium
+G2   Skillful effects scattered                Small    ~10 min  Low
+G3   ACCIDENT_ROPE_3_5 phantom event           Small    ~10 min  Low
+G4   Rope item config unimplemented            Medium   ~20 min  Medium
+G5   Plastenite/Sprint/Traitor unimplemented   Medium   ~25 min  Low
+G6   Event categorization duplicated           Small    ~15 min  Low
+G7   PlayerCard factory duplicated in app.js   Small    ~10 min  Low
+G8   SectorData fallback duplicates config     Small    ~5 min   Low
+G9   Double calculation per state change       Small    ~5 min   Low
 ```
 
-### Batch history
+### Overlap map
 
-**Batch 1 — ✅ DONE** (A1, A4, A5, A6, F6 + side-effect: A3 arrays, A2 in PlayerCard, F4)
+- **G1 partially absorbs G4 + G5** — if option A (data-driven) is chosen,
+  rope/plastenite/sprint/traitor implementation naturally follows from
+  making the engine read config. If option B (code-only) is chosen, G4/G5
+  become separate items.
+- **G3 relates to G4** — the phantom `ACCIDENT_ROPE_3_5` event was likely
+  an attempt to implement rope that went a different direction.
 
-**Batch 2 — ✅ DONE** (A2 in CharacterData, A3 bug fix, A7)
+### Suggested batch order
 
-**Batch 3 — ✅ DONE** (A9, B1/E3, F2, F5)
+**Batch 5 — Quick wins (G7, G8, G9):** ~20 min, low risk, immediate value.
 
-**Batch 4 — ✅ DONE** (D1 absorbs D2+F1, B2/E1, E2, B3, F3)
+**Batch 6 — Dead code cleanup (G3, G6):** ~25 min, low risk.
+
+**Batch 7 — Skillful + config decision (G2, G1):** ~70 min. G1 requires a
+design decision (option A vs B) before starting. G2 can be done independently.
+
+**Batch 8 — Unimplemented effects (G4, G5):** ~45 min. Depends on G1 decision.
