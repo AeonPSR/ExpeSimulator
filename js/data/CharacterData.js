@@ -9,10 +9,10 @@ const CharacterData = {
 		'finola.png', 'frieda.png', 'gioele.png', 'hua.png', 'ian.png',
 		'janice.png', 'jin_su.png', 'kuan_ti.png', 'paola.png',
 		'raluca.png', 'roland.png', 'stephen.png', 'terrence.png',
-		'lambda_f.png' // Lambda at the end as default
+		Constants.DEFAULT_AVATAR // Lambda at the end as default
 	],
 
-	default: 'lambda_f.png',
+	default: Constants.DEFAULT_AVATAR,
 
 	/**
 	 * Gets all characters as selection items

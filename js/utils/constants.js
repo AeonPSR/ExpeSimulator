@@ -9,7 +9,7 @@ const Constants = {
 	// Player defaults
 	DEFAULT_HEALTH: 14,
 	DEFAULT_AVATAR: 'lambda_f.png',
-	ABILITY_SLOTS: 5,
+	ABILITY_SLOTS: 4,
 	ITEM_SLOTS: 3,
 
 	// Grid settings

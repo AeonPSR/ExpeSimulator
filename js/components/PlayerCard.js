@@ -109,7 +109,7 @@ class PlayerCard extends Component {
 	_createAbilitiesRow() {
 		const abilitiesDiv = this.createElement('div', { className: 'player-abilities' });
 
-		for (let i = 0; i < 4; i++) {
+		for (let i = 0; i < Constants.ABILITY_SLOTS; i++) {
 			const ability = this.player.abilities[i];
 
 			const slot = this.createElement('div', {

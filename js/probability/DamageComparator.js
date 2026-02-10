@@ -218,11 +218,12 @@ const DamageComparator = {
 
 		// Use grenade if it reduces damage
 		if (grenadesAvailable > 0) {
+			const grenadePower = FightingPowerService.getGrenadePower();
 			const damageWithoutGrenade = Math.max(0, baseDamage - fightingPower);
-			const damageWithGrenade = Math.max(0, baseDamage - fightingPower - 3);
+			const damageWithGrenade = Math.max(0, baseDamage - fightingPower - grenadePower);
 			
 			if (damageWithGrenade < damageWithoutGrenade) {
-				effectiveFP += 3;
+				effectiveFP += grenadePower;
 				grenadesUsed = 1;
 			}
 		}

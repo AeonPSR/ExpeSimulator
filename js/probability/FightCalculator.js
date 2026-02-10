@@ -161,7 +161,7 @@ const FightCalculator = {
 			return distribution;
 		}
 		
-		const grenadePower = 3;
+		const grenadePower = FightingPowerService.getGrenadePower();
 		const maxReduction = grenadeCount * grenadePower;
 		
 		const adjusted = new Map();

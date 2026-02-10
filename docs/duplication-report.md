@@ -3,52 +3,17 @@
 > Last updated: 2026-02-10
 
 Only remaining (unfixed) issues are listed. Fixed items have been removed.
-Sections C (Duplicated Calculation Logic) and Batch 1 (A1, A4, A5, A6, F6)
-have been fully resolved.
+Sections C (Duplicated Calculation Logic), Batch 1 (A1, A4, A5, A6, F6),
+and Batch 2 (A2, A3, A7) have been fully resolved.
+
+Batch 1 side effects also resolved: F4 (player defaults from Constants).
+Batch 2 also fixed **A3 bug**: `PlayerCard._createAbilitiesRow()` looped
+`i < 4` instead of `i < Constants.ABILITY_SLOTS`, hiding the 5th ability slot.
 
 
 ---
 ## A. Hardcoded Constants Repeated Across Files
 ---
-
-### A2. Default avatar `'lambda_f.png'`
-
-**Size: Tiny** — 1 minute, 1 file, 1 line changed.
-
-`CharacterData.js` still has `default: 'lambda_f.png'` instead of reading
-`Constants.DEFAULT_AVATAR`. (The `PlayerCard.js` occurrence was fixed as a
-side effect of Batch 1.)
-
-**Fix:** Replace the inline string in `CharacterData.js` with
-`Constants.DEFAULT_AVATAR`.
-
-### A3. Ability slots `5` — **bug only**
-
-**Size: Tiny** — 5 minutes, 1 file, 1 line changed. **Medium risk**
-(the bug fix changes visible behavior — a 5th slot will appear).
-
-The hardcoded `[null,null,null,null,null]` arrays everywhere have been
-replaced by `Array(Constants.ABILITY_SLOTS).fill(null)` (done in Batch 1
-as a side effect of A4).
-
-**Remaining bug:** `PlayerCard._createAbilitiesRow()` loops `i < 4` — only
-renders **4 slots** out of 5. The 5th ability is invisible.
-
-**Fix:** Change the loop bound to `i < Constants.ABILITY_SLOTS`.
-
-### A7. Grenade power `3`
-
-**Size: Small** — 5 minutes, 2 files, 2 lines changed.
-
-Three independent hardcodings:
-- `FightingPowerService.getGrenadePower()` → reads config or falls back to `3`
-- `FightCalculator._applyGrenadesToDistribution()` → `const grenadePower = 3`
-- `DamageComparator._scoreFightEvent()` → `baseDamage - fightingPower - 3`
-
-Neither `FightCalculator` nor `DamageComparator` calls `FightingPowerService`.
-
-**Fix:** Have `FightCalculator` and `DamageComparator` call
-`FightingPowerService.getGrenadePower()` instead of hardcoding `3`.
 
 ### A9. Scenario labels array
 
@@ -255,16 +220,13 @@ Some items describe the same underlying issue from different angles:
 - **B1 = E3** (event type list) — fix once
 - **D1 absorbs D2 + F1** (filename→ID + regex + casing) — one refactor
 
-After deduplication: **12 unique items** remain.
+After deduplication: **9 unique items** remain.
 
 ### At a glance
 
 ```
 ID   Description                        Size    Time     Risk     Files
 ──── ────────────────────────────────── ─────── ──────── ──────── ──────
-A2   Default avatar                     Tiny    ~1 min   Low      1
-A3   Ability slots BUG (i<4)            Tiny    ~5 min   Medium   1
-A7   Grenade power 3                    Small   ~5 min   Low      2
 A9   Scenario labels array              Small   ~10 min  Low      5
 B1   Event type string list (=E3)       Small   ~10 min  Low      2
 B2   World names list (=E1)             Medium  ~15 min  Low      1
@@ -280,8 +242,7 @@ F5   damage vs scenarios alias          Small   ~10 min  Low      3
 
 **Batch 1 — ✅ DONE** (A1, A4, A5, A6, F6 + side-effect: A3 arrays, A2 in PlayerCard, F4)
 
-**Batch 2 — Small constants** (~10 min total, low risk except A3 bug):
-A2, A3 (bug fix only), A7
+**Batch 2 — ✅ DONE** (A2 in CharacterData, A3 bug fix, A7)
 
 **Batch 3 — Small structural** (~30 min total, low risk):
 A9, B1, F2, F5
