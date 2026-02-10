@@ -88,8 +88,8 @@ const DamageDistributionEngine = {
 		const scenarios = DistributionCalculator.getScenarios(totalDistribution, false);
 
 		// Debug logging
-		console.log(`[${logLabel}] Damage distribution scenarios: optimist=${scenarios.optimist}, average=${scenarios.average}, pessimist=${scenarios.pessimist}, worst=${scenarios.worst}`);
-		console.log(`[${logLabel}] Damage distribution probabilities: optimistProb=${(scenarios.optimistProb * 100).toFixed(1)}%, averageProb=${(scenarios.averageProb * 100).toFixed(1)}%, pessimistProb=${(scenarios.pessimistProb * 100).toFixed(1)}%, worstProb=${(scenarios.worstProb * 100).toFixed(1)}%`);
+		console.log(`[${logLabel}] Damage distribution scenarios: optimist=${scenarios.optimist}, average=${scenarios.average}, pessimist=${scenarios.pessimist}, worstCase=${scenarios.worstCase}`);
+		console.log(`[${logLabel}] Damage distribution probabilities: optimistProb=${(scenarios.optimistProb * 100).toFixed(1)}%, averageProb=${(scenarios.averageProb * 100).toFixed(1)}%, pessimistProb=${(scenarios.pessimistProb * 100).toFixed(1)}%, worstCaseProb=${(scenarios.worstCaseProb * 100).toFixed(1)}%`);
 
 		// Step 4: Build standard damage result (all 4 from one distribution)
 		const damage = this.buildDamageResult(scenarios, totalDistribution);
@@ -141,11 +141,11 @@ const DamageDistributionEngine = {
 			optimist: scenarios.optimist,
 			average: scenarios.average,
 			pessimist: scenarios.pessimist,
-			worstCase: scenarios.worst,
+			worstCase: scenarios.worstCase,
 			optimistProb: scenarios.optimistProb,
 			averageProb: scenarios.averageProb,
 			pessimistProb: scenarios.pessimistProb,
-			worstCaseProb: scenarios.worstProb,
+			worstCaseProb: scenarios.worstCaseProb,
 			distribution: distribution
 		};
 	},
@@ -165,8 +165,7 @@ const DamageDistributionEngine = {
 			worstCase: []
 		};
 
-		const scenarioKeys = ['optimist', 'average', 'pessimist'];
-		for (const key of scenarioKeys) {
+		for (const key of Constants.SCENARIO_KEYS) {
 			if (scenarios[key] > 0) {
 				damageInstances[key].push({
 					type: 'COMBINED',
@@ -176,16 +175,6 @@ const DamageDistributionEngine = {
 					sources: []
 				});
 			}
-		}
-
-		if (scenarios.worst > 0) {
-			damageInstances.worstCase.push({
-				type: 'COMBINED',
-				count: null,
-				damagePerInstance: null,
-				totalDamage: scenarios.worst,
-				sources: []
-			});
 		}
 
 		return damageInstances;

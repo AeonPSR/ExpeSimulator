@@ -17,6 +17,9 @@ const Constants = {
 	SELECTED_GRID_COLUMNS: 5,
 	CHARACTER_GRID_COLUMNS: 6,
 
+	// Scenario keys (used across probability and display layers)
+	SCENARIO_KEYS: ['pessimist', 'average', 'optimist', 'worstCase'],
+
 	// CSS Classes
 	CSS: {
 		DIPLOMACY_ACTIVE: 'diplomacy-active',

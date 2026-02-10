@@ -318,7 +318,7 @@ class ExpeditionSimulatorApp {
 			);
 
 			// Apply Survival reduction per-instance (-1 per damage instance, min 0)
-			const scenarios = ['pessimist', 'average', 'optimist', 'worstCase'];
+			const scenarios = Constants.SCENARIO_KEYS;
 			const finalHealth = {};
 
 			for (const scenario of scenarios) {

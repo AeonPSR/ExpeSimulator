@@ -418,7 +418,7 @@ class ProbabilityDisplay extends Component {
 
 	_renderEventDamage(eventDamage) {
 		const hpIcon = this._icon('pictures/astro/hp.png', 'hp-icon');
-		const scenarios = eventDamage?.scenarios;
+		const scenarios = eventDamage?.damage;
 		
 		// Check if there's any event damage by looking at the damage scenarios
 		const hasEventDamage = scenarios && (scenarios.pessimist > 0 || scenarios.worstCase > 0);

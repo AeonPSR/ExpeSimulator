@@ -87,7 +87,7 @@ const EventDamageCalculator = {
 
 		// Calculate occurrences with source tracking for each event type
 		// Delegates to OccurrenceCalculator (shared with FightCalculator)
-		const eventTypes = ['TIRED_2', 'ACCIDENT_3_5', 'ACCIDENT_ROPE_3_5', 'DISASTER_3_5'];
+		const eventTypes = Object.keys(this.EVENT_DAMAGES);
 		const occurrenceWithSources = {};
 		for (const eventType of eventTypes) {
 			occurrenceWithSources[eventType] = OccurrenceCalculator.calculateForType(sectors, loadout, eventType, sectorProbabilities);
@@ -135,7 +135,6 @@ const EventDamageCalculator = {
 			tired: occurrence.TIRED_2?.average || 0,
 			accident: (occurrence.ACCIDENT_3_5?.average || 0) + (occurrence.ACCIDENT_ROPE_3_5?.average || 0),
 			disaster: occurrence.DISASTER_3_5?.average || 0,
-			scenarios: damageResult,  // Alias for display
 			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
 		};
 	},
@@ -152,8 +151,7 @@ const EventDamageCalculator = {
 			playerCount: 0,
 			tired: 0,
 			accident: 0,
-			disaster: 0,
-			scenarios: DamageDistributionEngine.emptyDamageResult()
+			disaster: 0
 		};
 	}
 };

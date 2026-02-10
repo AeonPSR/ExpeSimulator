@@ -96,8 +96,8 @@ const DistributionCalculator = {
 	 * Also calculates cumulative probability ranges for display:
 	 * - optimistProb: P(value <= optimist) - chance of getting optimist or better
 	 * - medianProb: P(optimist < value < pessimist) - chance of getting between optimist and pessimist
-	 * - pessimistProb: P(pessimist <= value < worst) - chance of getting pessimist but not worst
-	 * - worstProb: P(value = worst) - chance of getting worst case
+	 * - pessimistProb: P(pessimist <= value < worstCase) - chance of getting pessimist but not worst
+	 * - worstCaseProb: P(value = worstCase) - chance of getting worst case
 	 * 
 	 * @param {Map<number, number>} distribution - Value → probability map
 	 * @param {boolean} [higherIsBetter=true] - If true (resources), higher values are optimist.
@@ -144,11 +144,11 @@ const DistributionCalculator = {
 				pessimist: p25, 
 				average: p50,
 				optimist: p75,
-				worst: p0,
+				worstCase: p0,
 				pessimistProb: pessimistCumProb,
 				averageProb: medianCumProb,
 				optimistProb: optimistCumProb,
-				worstProb: worstCumProb
+				worstCaseProb: worstCumProb
 			};
 		} else {
 			// Damage/Fights: lower = better, so optimist is p25, pessimist is p75
@@ -173,11 +173,11 @@ const DistributionCalculator = {
 				pessimist: p75, 
 				average: p50, 
 				optimist: p25,
-				worst: p100,
+				worstCase: p100,
 				pessimistProb: pessimistCumProb,
 				averageProb: medianCumProb,
 				optimistProb: optimistCumProb,
-				worstProb: worstCumProb
+				worstCaseProb: worstCumProb
 			};
 		}
 	},
