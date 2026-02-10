@@ -24,7 +24,7 @@ const DamageDistributionEngine = {
 	 * @param {Array<string>} options.sectors - Sector names
 	 * @param {Object} options.loadout - Player loadout
 	 * @param {Map} options.sectorProbabilities - Precomputed sector probabilities
-	 * @param {Set<string>|null} options.worstCaseExclusions - Sectors to exclude from worst case
+	 * @param {Set<string>|null} options.exclusions - Sectors to exclude (mutually exclusive events)
 	 * @param {Function} options.getSectorDamageDist - (sectorName, probs) => { dist: Map<damage, prob>, totalProb: number }
 	 *   Called for each sector. Should return the raw damage distribution entries
 	 *   and the total probability of any relevant event on that sector.
@@ -45,40 +45,33 @@ const DamageDistributionEngine = {
 		} = options;
 
 		// Step 1: Build per-sector damage distributions
+		// Excluded sectors (mutually exclusive events where the other type wins)
+		// contribute 0 damage to ALL scenarios.
 		const sectorDists = [];
-		const sectorDistsWorstCase = [];
 
 		for (let i = 0; i < sectors.length; i++) {
 			const sectorName = sectors[i];
 			const isExcluded = worstCaseExclusions && worstCaseExclusions.has(sectorName);
+
+			if (isExcluded) {
+				// Excluded: 100% chance of 0 damage for this sector
+				sectorDists.push(new Map([[0, 1]]));
+				continue;
+			}
+
 			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 
 			// Let the caller build the damage entries for this sector
 			const { dist: damageEntries, totalProb } = getSectorDamageDist(sectorName, probs);
 
-			// Build sector distribution (normal + worst case)
+			// Build sector distribution
 			const sectorDist = new Map(damageEntries);
-			const sectorDistWorstCase = new Map();
-
-			// Copy entries to worst case (unless excluded)
-			if (!isExcluded) {
-				for (const [damageVal, prob] of damageEntries) {
-					sectorDistWorstCase.set(damageVal, prob);
-				}
-			}
 
 			// Add probability of nothing happening (0 damage)
 			const noEventProb = Math.max(0, 1 - totalProb);
 			sectorDist.set(0, (sectorDist.get(0) || 0) + noEventProb);
 
-			if (isExcluded) {
-				sectorDistWorstCase.set(0, 1);
-			} else {
-				sectorDistWorstCase.set(0, (sectorDistWorstCase.get(0) || 0) + noEventProb);
-			}
-
 			sectorDists.push(sectorDist);
-			sectorDistsWorstCase.push(sectorDistWorstCase);
 		}
 
 		// Step 2: Convolve all sector distributions
@@ -86,52 +79,46 @@ const DamageDistributionEngine = {
 			? DistributionCalculator.convolveAll(sectorDists)
 			: new Map([[0, 1]]);
 
-		let totalDistributionWorstCase = sectorDistsWorstCase.length > 0
-			? DistributionCalculator.convolveAll(sectorDistsWorstCase)
-			: new Map([[0, 1]]);
-
 		// Optional post-processing (e.g., grenade reduction)
 		if (postProcessDistribution) {
 			totalDistribution = postProcessDistribution(totalDistribution);
-			totalDistributionWorstCase = postProcessDistribution(totalDistributionWorstCase);
 		}
 
 		// Step 3: Extract scenarios (lower is better for damage)
 		const scenarios = DistributionCalculator.getScenarios(totalDistribution, false);
-		const worstCaseScenarios = DistributionCalculator.getScenarios(totalDistributionWorstCase, false);
 
 		// Debug logging
 		console.log(`[${logLabel}] Damage distribution scenarios: optimist=${scenarios.optimist}, average=${scenarios.average}, pessimist=${scenarios.pessimist}, worst=${scenarios.worst}`);
 		console.log(`[${logLabel}] Damage distribution probabilities: optimistProb=${(scenarios.optimistProb * 100).toFixed(1)}%, averageProb=${(scenarios.averageProb * 100).toFixed(1)}%, pessimistProb=${(scenarios.pessimistProb * 100).toFixed(1)}%, worstProb=${(scenarios.worstProb * 100).toFixed(1)}%`);
 
-		// Step 4: Build standard damage result
-		const damage = this.buildDamageResult(scenarios, worstCaseScenarios, totalDistribution);
+		// Step 4: Build standard damage result (all 4 from one distribution)
+		const damage = this.buildDamageResult(scenarios, totalDistribution);
 
 		// Step 5: Build damage instances for display layer
-		const damageInstances = this.buildDamageInstances(scenarios, worstCaseScenarios);
+		const damageInstances = this.buildDamageInstances(scenarios);
 
 		return { damage, damageInstances, damageDistribution: totalDistribution };
 	},
 
 	/**
 	 * Builds the standard damage result object from scenarios.
-	 * Handles the worst → worstCase remapping in one place.
+	 * All 4 values (optimist/average/pessimist/worstCase) come from ONE distribution
+	 * that already accounts for mutual-exclusivity exclusions.
 	 * 
 	 * @param {Object} scenarios - From DistributionCalculator.getScenarios()
-	 * @param {Object} worstCaseScenarios - From DistributionCalculator.getScenarios()
 	 * @param {Map} distribution - The full damage distribution
 	 * @returns {Object} Standard damage result
 	 */
-	buildDamageResult(scenarios, worstCaseScenarios, distribution) {
+	buildDamageResult(scenarios, distribution) {
 		return {
 			optimist: scenarios.optimist,
 			average: scenarios.average,
 			pessimist: scenarios.pessimist,
-			worstCase: worstCaseScenarios.worst,
+			worstCase: scenarios.worst,
 			optimistProb: scenarios.optimistProb,
 			averageProb: scenarios.averageProb,
 			pessimistProb: scenarios.pessimistProb,
-			worstCaseProb: worstCaseScenarios.worstProb,
+			worstCaseProb: scenarios.worstProb,
 			distribution: distribution
 		};
 	},
@@ -140,11 +127,10 @@ const DamageDistributionEngine = {
 	 * Builds simplified damage instances for the display layer.
 	 * Uses 'COMBINED' type since distribution-based approach doesn't track per-type counts.
 	 * 
-	 * @param {Object} scenarios - Normal scenarios
-	 * @param {Object} worstCaseScenarios - Worst case scenarios
+	 * @param {Object} scenarios - Scenarios from DistributionCalculator.getScenarios()
 	 * @returns {Object} { pessimist: [], average: [], optimist: [], worstCase: [] }
 	 */
-	buildDamageInstances(scenarios, worstCaseScenarios) {
+	buildDamageInstances(scenarios) {
 		const damageInstances = {
 			pessimist: [],
 			average: [],
@@ -165,12 +151,12 @@ const DamageDistributionEngine = {
 			}
 		}
 
-		if (worstCaseScenarios.worst > 0) {
+		if (scenarios.worst > 0) {
 			damageInstances.worstCase.push({
 				type: 'COMBINED',
 				count: null,
 				damagePerInstance: null,
-				totalDamage: worstCaseScenarios.worst,
+				totalDamage: scenarios.worst,
 				sources: []
 			});
 		}

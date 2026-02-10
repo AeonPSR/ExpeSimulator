@@ -2,6 +2,8 @@
  * DamageComparator
  * 
  * UTILITY: Compares damage events to determine which is "worse" for worst-case calculations.
+ * Reads damage data from FightCalculator.FIGHT_DAMAGES and EventDamageCalculator.EVENT_DAMAGES
+ * (single sources of truth — no mirrored copies).
  * 
  * Key insight: Concentrated damage is worse than spread damage.
  * - 5 damage to ONE player is worse than 10 damage spread across 4 players
@@ -22,34 +24,17 @@
 const DamageComparator = {
 
 	/**
-	 * Damage event definitions (mirrored from EventDamageCalculator)
+	 * Returns the worst-case base damage for a fight type,
+	 * reading from FightCalculator.FIGHT_DAMAGES (single source of truth).
+	 * @param {string} fightType - e.g. '12', '8_10_12_15_18_32'
+	 * @returns {number}
+	 * @private
 	 */
-	EVENT_DAMAGES: {
-		'TIRED_2': { 
-			min: 2, max: 2, 
-			affectsAll: true 
-		},
-		'ACCIDENT_3_5': { 
-			min: 3, max: 5, 
-			affectsAll: false  // Only ONE player
-		},
-		'DISASTER_3_5': { 
-			min: 3, max: 5, 
-			affectsAll: true 
-		}
-	},
-
-	/**
-	 * Fight damage definitions (mirrored from FightCalculator)
-	 */
-	FIGHT_DAMAGES: {
-		'8': 8,
-		'10': 10,
-		'12': 12,
-		'15': 15,
-		'18': 18,
-		'32': 32,
-		'8_10_12_15_18_32': 32  // Worst case for variable fight
+	_getBaseFightDamage(fightType) {
+		const info = FightCalculator.FIGHT_DAMAGES[fightType];
+		if (!info) return parseInt(fightType) || 0;
+		if (info.variable) return info.max || Math.max(...info.values);
+		return info.fixed || 0;
 	},
 
 	/**
@@ -94,7 +79,7 @@ const DamageComparator = {
 				});
 			}
 			// Is it a damage event?
-			else if (this.EVENT_DAMAGES[eventName]) {
+			else if (EventDamageCalculator.EVENT_DAMAGES[eventName]) {
 				const eventScore = this._scoreDamageEvent(eventName, playerCount);
 				candidates.push({
 					event: eventName,
@@ -169,9 +154,9 @@ const DamageComparator = {
 				if (eventName.startsWith('FIGHT_')) {
 					hasFight = true;
 					const fightType = eventName.replace('FIGHT_', '');
-					const damage = this.FIGHT_DAMAGES[fightType] || parseInt(fightType) || 0;
+					const damage = this._getBaseFightDamage(fightType);
 					maxFightDamage = Math.max(maxFightDamage, damage);
-				} else if (this.EVENT_DAMAGES[eventName]) {
+				} else if (EventDamageCalculator.EVENT_DAMAGES[eventName]) {
 					hasDamageEvent = true;
 				}
 			}
@@ -225,7 +210,7 @@ const DamageComparator = {
 	 */
 	_scoreFightEvent(fightEvent, playerCount, fightingPower, grenadesAvailable) {
 		const fightType = fightEvent.replace('FIGHT_', '');
-		const baseDamage = this.FIGHT_DAMAGES[fightType] || parseInt(fightType) || 0;
+		const baseDamage = this._getBaseFightDamage(fightType);
 
 		// Calculate effective FP (with potential grenade use)
 		let effectiveFP = fightingPower;
@@ -270,7 +255,7 @@ const DamageComparator = {
 	 * @private
 	 */
 	_scoreDamageEvent(eventName, playerCount) {
-		const eventInfo = this.EVENT_DAMAGES[eventName];
+		const eventInfo = EventDamageCalculator.EVENT_DAMAGES[eventName];
 		if (!eventInfo) {
 			return { score: 0, maxDamageToOne: 0, totalDamage: 0, grenadesUsed: 0 };
 		}
@@ -314,7 +299,7 @@ const DamageComparator = {
 		for (const [eventName, prob] of probs) {
 			if (prob <= 0) continue;
 			if (eventName.startsWith('FIGHT_')) hasFight = true;
-			if (this.EVENT_DAMAGES[eventName]) hasDamageEvent = true;
+			if (EventDamageCalculator.EVENT_DAMAGES[eventName]) hasDamageEvent = true;
 		}
 
 		return hasFight && hasDamageEvent;
@@ -330,7 +315,7 @@ const DamageComparator = {
 		let damageEventCount = 0;
 
 		for (const [eventName, prob] of probs) {
-			if (prob > 0 && this.EVENT_DAMAGES[eventName]) {
+			if (prob > 0 && EventDamageCalculator.EVENT_DAMAGES[eventName]) {
 				damageEventCount++;
 			}
 		}
@@ -366,7 +351,7 @@ const DamageComparator = {
 		const events = [];
 
 		for (const [eventName, prob] of probs) {
-			if (prob > 0 && this.EVENT_DAMAGES[eventName]) {
+			if (prob > 0 && EventDamageCalculator.EVENT_DAMAGES[eventName]) {
 				events.push(eventName);
 			}
 		}
