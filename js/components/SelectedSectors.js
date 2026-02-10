@@ -22,7 +22,7 @@ class SelectedSectors extends Component {
 	 */
 	constructor(options = {}) {
 		super(options);
-		this.maxSectors = options.maxSectors || 20;
+		this.maxSectors = options.maxSectors;
 		this.onSectorRemove = options.onSectorRemove || null;
 		this.onClearAll = options.onClearAll || null;
 		this.getResourceURL = options.getResourceURL || ((path) => path);

@@ -23,7 +23,7 @@ class PlayerSection extends Component {
 	 */
 	constructor(options = {}) {
 		super(options);
-		this.maxPlayers = options.maxPlayers || 8;
+		this.maxPlayers = options.maxPlayers;
 		this.onAddPlayer = options.onAddPlayer || null;
 		this.onModeToggle = options.onModeToggle || null;
 		this.onAntigravToggle = options.onAntigravToggle || null;
@@ -40,7 +40,6 @@ class PlayerSection extends Component {
 		this._addPlayerBtn = null;
 		this._fightingPowerBtn = null;
 		this._fightingPowerValue = null;
-		this._fightingPowerBtn = null;
 		this._modeBtn = null;
 		this._antigravToggle = null;
 		this._baseToggle = null;

@@ -24,7 +24,7 @@ class PlayerCard extends Component {
 	 */
 	constructor(options = {}) {
 		super(options);
-		this.player = options.player || { id: 0, avatar: 'lambda_f.png', abilities: [null, null, null, null, null], items: [null, null, null], health: 14 };
+		this.player = options.player || { id: 0, avatar: Constants.DEFAULT_AVATAR, abilities: Array(Constants.ABILITY_SLOTS).fill(null), items: Array(Constants.ITEM_SLOTS).fill(null), health: Constants.DEFAULT_HEALTH };
 		this.onAvatarClick = options.onAvatarClick || null;
 		this.onAbilityClick = options.onAbilityClick || null;
 		this.onItemClick = options.onItemClick || null;

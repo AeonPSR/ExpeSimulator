@@ -28,8 +28,8 @@ class ExpeditionState {
 		this._players.push({
 			id: this._nextPlayerId++,
 			avatar: Constants.DEFAULT_AVATAR,
-			abilities: ['pilot.png', null, null, null, null],
-			items: [null, null, null],
+			abilities: ['pilot.png', ...Array(Constants.ABILITY_SLOTS - 1).fill(null)],
+			items: Array(Constants.ITEM_SLOTS).fill(null),
 			health: Constants.DEFAULT_HEALTH
 		});
 
@@ -38,8 +38,8 @@ class ExpeditionState {
 			this._players.push({
 				id: this._nextPlayerId++,
 				avatar: Constants.DEFAULT_AVATAR,
-				abilities: [null, null, null, null, null],
-				items: [null, null, null],
+				abilities: Array(Constants.ABILITY_SLOTS).fill(null),
+				items: Array(Constants.ITEM_SLOTS).fill(null),
 				health: Constants.DEFAULT_HEALTH
 			});
 		}
@@ -102,8 +102,8 @@ class ExpeditionState {
 		const player = {
 			id: this._nextPlayerId++,
 			avatar: Constants.DEFAULT_AVATAR,
-			abilities: [null, null, null, null, null],
-			items: [null, null, null],
+			abilities: Array(Constants.ABILITY_SLOTS).fill(null),
+			items: Array(Constants.ITEM_SLOTS).fill(null),
 			health: Constants.DEFAULT_HEALTH
 		};
 		this._players.push(player);
