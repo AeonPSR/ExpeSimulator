@@ -69,15 +69,32 @@ const FightCalculator = {
 			sectorsByFightType[fightType] = occResult.sectors;
 		}
 
-		// NEW: Build full damage distribution and derive scenarios from it
-		const { damage: damageResult, damageInstances, damageDistribution } = this._calculateDamageFromDistribution(
+		// Build full damage distribution via shared engine
+		const { damage: damageResult, damageInstances, damageDistribution } = DamageDistributionEngine.calculate({
 			sectors,
 			loadout,
-			fightingPower,
-			grenadeCount,
+			sectorProbabilities,
 			worstCaseExclusions,
-			sectorProbabilities
-		);
+			getSectorDamageDist: (sectorName, probs) => {
+				const dist = new Map();
+				let totalProb = 0;
+				for (const [eventName, eventProb] of probs) {
+					if (!eventName.startsWith('FIGHT_')) continue;
+					if (eventProb <= 0) continue;
+					totalProb += eventProb;
+					const fightType = eventName.replace('FIGHT_', '');
+					const damageDistForFight = this._getFightDamageDistribution(fightType, fightingPower);
+					for (const [damageVal, damageProb] of damageDistForFight) {
+						dist.set(damageVal, (dist.get(damageVal) || 0) + eventProb * damageProb);
+					}
+				}
+				return { dist, totalProb };
+			},
+			postProcessDistribution: (dist) => this._applyGrenadesToDistribution(dist, grenadeCount),
+			logLabel: 'FightDamage'
+		});
+		// Add breakdown for backward compatibility
+		damageResult.breakdown = { pessimist: [], average: [], optimist: [], worstCase: [] };
 
 		return {
 			occurrence,      // { "12": { pessimist, average, optimist, distribution }, ... }
@@ -89,134 +106,6 @@ const FightCalculator = {
 			playerCount,
 			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
 		};
-	},
-
-	/**
-	 * NEW: Calculates damage scenarios from full damage distribution.
-	 * 
-	 * This builds a complete probability distribution over total damage values
-	 * by convolving per-sector damage distributions. The scenarios (P25/P50/P75/P100)
-	 * are then extracted from this damage distribution, ensuring all displayed
-	 * damage values are actually achievable.
-	 * 
-	 * For each sector:
-	 *   - Get probability of each fight type
-	 *   - Calculate damage after fighting power for each fight type
-	 *   - Build sector damage distribution (weighted by fight probabilities)
-	 *   - Include "0 damage" with probability (1 - sum of fight probs)
-	 * 
-	 * Then convolve all sector distributions to get total damage distribution.
-	 * 
-	 * @param {Array<string>} sectors - Sector names
-	 * @param {Object} loadout - Player loadout
-	 * @param {number} fightingPower - Team's fighting power
-	 * @param {number} grenadeCount - Available grenades
-	 * @param {Set<string>} worstCaseExclusions - Sectors to exclude from worst case
-	 * @param {Map} sectorProbabilities - Precomputed sector probabilities
-	 * @returns {{ damage: Object, damageInstances: Object, damageDistribution: Map }}
-	 * @private
-	 */
-	_calculateDamageFromDistribution(sectors, loadout, fightingPower, grenadeCount, worstCaseExclusions = null, sectorProbabilities = null) {
-		// Build per-sector damage distributions
-		const sectorDamageDistributions = [];
-		const sectorDamageDistributionsWorstCase = [];
-		
-		// For grenade usage, we need to be smart: grenades should be used on highest-damage fights first
-		// For the distribution, we'll compute damage WITHOUT grenades first, then apply grenade reduction
-		// as a post-processing step on the scenarios (since grenade usage depends on which fights occur)
-		
-		for (let i = 0; i < sectors.length; i++) {
-			const sectorName = sectors[i];
-			const isExcluded = worstCaseExclusions && worstCaseExclusions.has(sectorName);
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
-			
-			// Build this sector's damage distribution
-			const sectorDist = new Map();
-			const sectorDistWorstCase = new Map();
-			let totalFightProb = 0;
-			
-			for (const [eventName, eventProb] of probs) {
-				if (!eventName.startsWith('FIGHT_')) continue;
-				if (eventProb <= 0) continue;
-				
-				totalFightProb += eventProb;
-				
-				const fightType = eventName.replace('FIGHT_', '');
-				const damageDistForFight = this._getFightDamageDistribution(fightType, fightingPower);
-				
-				// Add to sector distribution: each damage value gets eventProb Ã— damageProb
-				for (const [damageVal, damageProb] of damageDistForFight) {
-					const combinedProb = eventProb * damageProb;
-					sectorDist.set(damageVal, (sectorDist.get(damageVal) || 0) + combinedProb);
-					
-					// For worst case, excluded sectors contribute 0 damage
-					if (!isExcluded) {
-						sectorDistWorstCase.set(damageVal, (sectorDistWorstCase.get(damageVal) || 0) + combinedProb);
-					}
-				}
-			}
-			
-			// Add probability of no fight (0 damage)
-			const noFightProb = Math.max(0, 1 - totalFightProb);
-			sectorDist.set(0, (sectorDist.get(0) || 0) + noFightProb);
-			
-			// For worst case distribution
-			if (isExcluded) {
-				// Excluded sector: 100% chance of 0 damage
-				sectorDistWorstCase.set(0, 1);
-			} else {
-				sectorDistWorstCase.set(0, (sectorDistWorstCase.get(0) || 0) + noFightProb);
-			}
-			
-			sectorDamageDistributions.push(sectorDist);
-			sectorDamageDistributionsWorstCase.push(sectorDistWorstCase);
-		}
-		
-		// Convolve all sector distributions to get total damage distribution
-		const totalDamageDistribution = sectorDamageDistributions.length > 0
-			? DistributionCalculator.convolveAll(sectorDamageDistributions)
-			: new Map([[0, 1]]);
-		
-		const totalDamageDistributionWorstCase = sectorDamageDistributionsWorstCase.length > 0
-			? DistributionCalculator.convolveAll(sectorDamageDistributionsWorstCase)
-			: new Map([[0, 1]]);
-		
-		// Apply grenade reduction to the distribution
-		// Grenades reduce damage by 3 each, used optimally
-		const adjustedDistribution = this._applyGrenadesToDistribution(totalDamageDistribution, grenadeCount);
-		const adjustedDistributionWorstCase = this._applyGrenadesToDistribution(totalDamageDistributionWorstCase, grenadeCount);
-		
-		// Extract scenarios from the damage distribution (lower is better for damage)
-		const scenarios = DistributionCalculator.getScenarios(adjustedDistribution, false);
-		const worstCaseScenarios = DistributionCalculator.getScenarios(adjustedDistributionWorstCase, false);
-		
-		// Debug logging
-		console.log(`[FightDamage] Damage distribution scenarios: optimist=${scenarios.optimist}, average=${scenarios.average}, pessimist=${scenarios.pessimist}, worst=${scenarios.worst}`);
-		console.log(`[FightDamage] Damage distribution probabilities: optimistProb=${(scenarios.optimistProb * 100).toFixed(1)}%, averageProb=${(scenarios.averageProb * 100).toFixed(1)}%, pessimistProb=${(scenarios.pessimistProb * 100).toFixed(1)}%, worstProb=${(scenarios.worstProb * 100).toFixed(1)}%`);
-		
-		const damage = {
-			optimist: scenarios.optimist,
-			average: scenarios.average,
-			pessimist: scenarios.pessimist,
-			worstCase: worstCaseScenarios.worst,  // Use worst case from the filtered distribution
-			optimistProb: scenarios.optimistProb,
-			averageProb: scenarios.averageProb,
-			pessimistProb: scenarios.pessimistProb,
-			worstCaseProb: worstCaseScenarios.worstProb,
-			// Include distribution for potential detailed display
-			distribution: adjustedDistribution,
-			breakdown: {
-				pessimist: [],
-				average: [],
-				optimist: [],
-				worstCase: []
-			}
-		};
-		
-		// Build simplified damage instances for backward compatibility
-		const damageInstances = this._buildDamageInstancesFromDistribution(scenarios, worstCaseScenarios);
-		
-		return { damage, damageInstances, damageDistribution: adjustedDistribution };
 	},
 
 	/**
@@ -284,62 +173,6 @@ const FightCalculator = {
 		}
 		
 		return adjusted;
-	},
-
-	/**
-	 * Builds damage instances for backward compatibility with the display layer.
-	 * @private
-	 */
-	_buildDamageInstancesFromDistribution(scenarios, worstCaseScenarios) {
-		const damageInstances = {
-			pessimist: [],
-			average: [],
-			optimist: [],
-			worstCase: []
-		};
-		
-		// Provide simplified summary
-		if (scenarios.optimist > 0) {
-			damageInstances.optimist.push({
-				type: 'COMBINED',
-				count: null,
-				damagePerInstance: null,
-				totalDamage: scenarios.optimist,
-				sources: []
-			});
-		}
-		
-		if (scenarios.average > 0) {
-			damageInstances.average.push({
-				type: 'COMBINED',
-				count: null,
-				damagePerInstance: null,
-				totalDamage: scenarios.average,
-				sources: []
-			});
-		}
-		
-		if (scenarios.pessimist > 0) {
-			damageInstances.pessimist.push({
-				type: 'COMBINED',
-				count: null,
-				damagePerInstance: null,
-				totalDamage: scenarios.pessimist,
-				sources: []
-			});
-		}
-		
-		if (worstCaseScenarios.worst > 0) {
-			damageInstances.worstCase.push({
-				type: 'COMBINED',
-				count: null,
-				damagePerInstance: null,
-				totalDamage: worstCaseScenarios.worst,
-				sources: []
-			});
-		}
-		
-		return damageInstances;
 	},
 
 	/**
