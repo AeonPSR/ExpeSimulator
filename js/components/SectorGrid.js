@@ -135,7 +135,7 @@ class SectorGrid extends Component {
 		sectorDiv.appendChild(img);
 
 		// Fight icon if sector has fight events
-		if (this._hasFightEvents(sectorName)) {
+		if (SectorData.hasFightEvents(sectorName)) {
 			const fightImg = this.createElement('img', {
 				src: this.getResourceURL('pictures/others/fight.png'),
 				alt: 'Fight Event',
@@ -153,16 +153,6 @@ class SectorGrid extends Component {
 
 		return sectorDiv;
 	}
-	/**
-	 * Checks if a sector has fight events
-	 * @private
-	 * @param {string} sectorName
-	 * @returns {boolean}
-	 */
-	_hasFightEvents(sectorName) {
-		return SectorData.hasFightEvents(sectorName);
-	}
-
 	/**
 	 * Updates sector availability (disabled states)
 	 */

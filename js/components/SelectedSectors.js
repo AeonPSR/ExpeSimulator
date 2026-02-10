@@ -128,7 +128,7 @@ class SelectedSectors extends Component {
 		sectorDiv.appendChild(img);
 
 		// Fight icon if applicable
-		if (this._hasFightEvents(sectorName)) {
+		if (SectorData.hasFightEvents(sectorName)) {
 			const fightImg = this.createElement('img', {
 				src: this.getResourceURL('pictures/others/fight.png'),
 				alt: 'Fight',
@@ -144,16 +144,6 @@ class SelectedSectors extends Component {
 		});
 
 		return sectorDiv;
-	}
-
-	/**
-	 * Checks if a sector has fight events
-	 * @private
-	 * @param {string} sectorName
-	 * @returns {boolean}
-	 */
-	_hasFightEvents(sectorName) {
-		return SectorData.hasFightEvents(sectorName);
 	}
 
 	/**

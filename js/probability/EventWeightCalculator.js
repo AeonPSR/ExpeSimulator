@@ -100,9 +100,7 @@ const EventWeightCalculator = {
 		const sectorProbabilities = this._precomputeSectorProbabilities(sectors, loadout);
 
 		// Calculate resources using ResourceCalculator (convolution-based)
-		const resources = typeof ResourceCalculator !== 'undefined'
-			? ResourceCalculator.calculate(sectors, loadout, players, sectorProbabilities)
-			: this._legacyResourceCalculation(sectors, loadout);
+		const resources = ResourceCalculator.calculate(sectors, loadout, players, sectorProbabilities);
 
 		// Use DamageComparator to determine which sectors should have fight vs event damage
 		// for worst case calculations (mutual exclusivity)
@@ -135,14 +133,10 @@ const EventWeightCalculator = {
 		}
 
 		// Calculate fights using FightCalculator (convolution-based)
-		const combat = typeof FightCalculator !== 'undefined'
-			? FightCalculator.calculate(sectors, loadout, players, fightExclusions, sectorProbabilities)
-			: this._legacyFightCalculation(sectors, loadout);
+		const combat = FightCalculator.calculate(sectors, loadout, players, fightExclusions, sectorProbabilities);
 
 		// Calculate event damage using EventDamageCalculator (convolution-based)
-		const eventDamage = typeof EventDamageCalculator !== 'undefined'
-			? EventDamageCalculator.calculate(sectors, loadout, players, eventExclusions, sectorProbabilities)
-			: this._legacyEventDamageCalculation(sectors, loadout);
+		const eventDamage = EventDamageCalculator.calculate(sectors, loadout, players, eventExclusions, sectorProbabilities);
 
 		// Aggregate non-resource, non-fight, non-damage events
 		const aggregated = this._aggregateEvents(sectors, sectorProbabilities);
@@ -165,102 +159,6 @@ const EventWeightCalculator = {
 				nothing: aggregated.nothing
 			},
 			sectorBreakdown: sectorBreakdown
-		};
-	},
-
-	/**
-	 * Legacy fight calculation (fallback if FightCalculator not loaded).
-	 * @private
-	 */
-	_legacyFightCalculation(sectors, loadout) {
-		const fights = {};
-		for (const sectorName of sectors) {
-			const probs = this.getModifiedProbabilities(sectorName, loadout);
-			for (const [eventName, prob] of probs) {
-				if (eventName.startsWith('FIGHT_')) {
-					const fightType = eventName.replace('FIGHT_', '');
-					fights[fightType] = (fights[fightType] || 0) + prob;
-				}
-			}
-		}
-		return {
-			occurrence: {},
-			damage: { pessimist: 0, average: 0, optimist: 0, worstCase: 0 },
-			fightingPower: 0,
-			grenadeCount: 0,
-			_legacyFights: fights  // Keep old format for backward compat
-		};
-	},
-
-	/**
-	 * Legacy resource calculation (fallback if ResourceCalculator not loaded).
-	 * @private
-	 */
-	_legacyResourceCalculation(sectors, loadout) {
-		const zero = { pessimist: 0, average: 0, optimist: 0 };
-		const result = {
-			fruits: { ...zero },
-			steaks: { ...zero },
-			fuel: { ...zero },
-			oxygen: { ...zero },
-			artefacts: { ...zero },
-			mapFragments: { ...zero }
-		};
-
-		for (const sectorName of sectors) {
-			const probs = this.getModifiedProbabilities(sectorName, loadout);
-			for (const [eventName, prob] of probs) {
-				if (eventName.startsWith('HARVEST_')) {
-					result.fruits.average += prob * (parseInt(eventName.split('_')[1]) || 1);
-				} else if (eventName.startsWith('PROVISION_')) {
-					result.steaks.average += prob * (parseInt(eventName.split('_')[1]) || 1);
-				} else if (eventName.startsWith('FUEL_')) {
-					result.fuel.average += prob * (parseInt(eventName.split('_')[1]) || 1);
-				} else if (eventName.startsWith('OXYGEN_')) {
-					result.oxygen.average += prob * (parseInt(eventName.split('_')[1]) || 1);
-				} else if (eventName === 'ARTEFACT') {
-					result.artefacts.average += prob * (8/9);
-					result.mapFragments.average += prob * (1/9);
-				} else if (eventName === 'STARMAP') {
-					result.mapFragments.average += prob;
-				}
-			}
-		}
-
-		return result;
-	},
-
-	/**
-	 * Legacy event damage calculation (fallback if EventDamageCalculator not loaded).
-	 * @private
-	 */
-	_legacyEventDamageCalculation(sectors, loadout) {
-		let tired = 0, accident = 0, disaster = 0;
-		
-		for (const sectorName of sectors) {
-			const probs = this.getModifiedProbabilities(sectorName, loadout);
-			for (const [eventName, prob] of probs) {
-				if (eventName === 'TIRED_2') tired += prob;
-				else if (eventName === 'ACCIDENT_3_5') accident += prob;
-				else if (eventName === 'DISASTER_3_5') disaster += prob;
-			}
-		}
-		
-		// Calculate rough damage estimates (assumes 1 player)
-		const avgDamage = (tired * 2) + (accident * 4) + (disaster * 4);
-		
-		return {
-			occurrence: {},
-			damage: { 
-				pessimist: Math.round(avgDamage * 1.5), 
-				average: Math.round(avgDamage), 
-				optimist: Math.round(avgDamage * 0.5), 
-				worstCase: Math.round(avgDamage * 2)
-			},
-			tired,
-			accident,
-			disaster,
-			scenarios: { pessimist: 0, average: 0, optimist: 0, worstCase: 0 }
 		};
 	},
 

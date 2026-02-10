@@ -212,22 +212,7 @@ const FightCalculator = {
 	 * @private
 	 */
 	_getGrenadeCount(players) {
-		if (typeof FightingPowerService !== 'undefined') {
-			return FightingPowerService.countGrenades(players);
-		}
-		
-		// Fallback: count grenades manually
-		let count = 0;
-		for (const player of players) {
-			if (player.items) {
-				for (const item of player.items) {
-					if (item && item.replace(/\.(jpg|png)$/, '') === 'grenade') {
-						count++;
-					}
-				}
-			}
-		}
-		return count;
+		return FightingPowerService.countGrenades(players);
 	},
 
 	/**

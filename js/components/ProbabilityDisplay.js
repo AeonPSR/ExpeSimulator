@@ -123,6 +123,21 @@ class ProbabilityDisplay extends Component {
 		return value.toFixed(1);
 	}
 
+	/**
+	 * Formats a probability as a percentage string with parentheses.
+	 * Shows "<0.1%" for very small non-zero values.
+	 * @private
+	 * @param {number|undefined} prob - Probability (0-1)
+	 * @returns {string}
+	 */
+	_formatProb(prob) {
+		if (prob === undefined) return '';
+		const pct = prob * 100;
+		if (pct === 0) return '(0%)';
+		if (pct < 0.1) return '(<0.1%)';
+		return `(${pct.toFixed(1)}%)`;
+	}
+
 	_renderCombatRisks(combat) {
 		// Handle both new format (combat.occurrence) and legacy format
 		const occurrence = combat?.occurrence || {};
@@ -191,15 +206,6 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		// Format probability percentages - show "<0.1%" for very small non-zero values
-		const formatProb = (prob) => {
-			if (prob === undefined) return '';
-			const pct = prob * 100;
-			if (pct === 0) return '(0%)';
-			if (pct < 0.1) return '(<0.1%)';
-			return `(${pct.toFixed(1)}%)`;
-		};
-
 		// Round damage values for comparison
 		const optimistDmg = Math.round(damage.optimist);
 		const averageDmg = Math.round(damage.average);
@@ -219,7 +225,7 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (damage.optimistProb || 0) + (damage.averageProb || 0) + (damage.pessimistProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist, Average and Pessimist Scenario: ${formatProb(combinedProb)}</span>
+					<span>Optimist, Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
@@ -228,14 +234,14 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (damage.optimistProb || 0) + (damage.averageProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist and Average Scenario: ${formatProb(combinedProb)}</span>
+					<span>Optimist and Average Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			// Pessimist separate
 			rows.push(`
 				<div class="damage-item">
-					<span>Pessimist Scenario: ${formatProb(damage.pessimistProb)}</span>
+					<span>Pessimist Scenario: ${this._formatProb(damage.pessimistProb)}</span>
 					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 			`);
@@ -243,7 +249,7 @@ class ProbabilityDisplay extends Component {
 			// Optimist separate
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist Scenario: ${formatProb(damage.optimistProb)}</span>
+					<span>Optimist Scenario: ${this._formatProb(damage.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
@@ -251,7 +257,7 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (damage.averageProb || 0) + (damage.pessimistProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Average and Pessimist Scenario: ${formatProb(combinedProb)}</span>
+					<span>Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 			`);
@@ -259,19 +265,19 @@ class ProbabilityDisplay extends Component {
 			// No collapse - show all three separately
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist Scenario: ${formatProb(damage.optimistProb)}</span>
+					<span>Optimist Scenario: ${this._formatProb(damage.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>Average Scenario: ${formatProb(damage.averageProb)}</span>
+					<span>Average Scenario: ${this._formatProb(damage.averageProb)}</span>
 					<span class="danger">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>Pessimist Scenario: ${formatProb(damage.pessimistProb)}</span>
+					<span>Pessimist Scenario: ${this._formatProb(damage.pessimistProb)}</span>
 					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 			`);
@@ -289,7 +295,7 @@ class ProbabilityDisplay extends Component {
 				rows.length = 0;
 				rows.push(`
 				<div class="damage-item">
-					<span>All Scenarios: ${formatProb(combinedProb)}</span>
+					<span>All Scenarios: ${this._formatProb(combinedProb)}</span>
 					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 				`);
@@ -298,7 +304,7 @@ class ProbabilityDisplay extends Component {
 				const combinedProb = (damage.averageProb || 0) + (damage.pessimistProb || 0) + (damage.worstCaseProb || 0);
 				rows[rows.length - 1] = `
 				<div class="damage-item">
-					<span>Average, Pessimist and Worst Case Scenario: ${formatProb(combinedProb)}</span>
+					<span>Average, Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 				`;
@@ -307,7 +313,7 @@ class ProbabilityDisplay extends Component {
 				const combinedProb = (damage.pessimistProb || 0) + (damage.worstCaseProb || 0);
 				rows[rows.length - 1] = `
 				<div class="damage-item">
-					<span>Pessimist and Worst Case Scenario: ${formatProb(combinedProb)}</span>
+					<span>Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="critical bold-damage">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 				`;
@@ -316,7 +322,7 @@ class ProbabilityDisplay extends Component {
 			// Worst case is different from pessimist, show separately
 			rows.push(`
 				<div class="damage-item">
-					<span>Worst Case Scenario: ${formatProb(damage.worstCaseProb)}</span>
+					<span>Worst Case Scenario: ${this._formatProb(damage.worstCaseProb)}</span>
 					<span class="critical bold-damage">${hpIcon}<strong>${worstDmg}</strong></span>
 				</div>
 			`);
@@ -340,14 +346,6 @@ class ProbabilityDisplay extends Component {
 			'ACCIDENT_3_5': { name: 'Accident', damage: '3-5 dmg', cssClass: 'warning' },
 			'ACCIDENT_ROPE_3_5': { name: 'Accident (rope)', damage: '3-5 dmg', cssClass: 'warning' },
 			'DISASTER_3_5': { name: 'Disaster', damage: '3-5 dmg to all', cssClass: 'danger' }
-		};
-
-		// Format probability percentages - show "<0.1%" for very small non-zero values
-		const formatProb = (prob) => {
-			if (prob === undefined || prob === 0) return '';
-			const pct = prob * 100;
-			if (pct < 0.1) return '<0.1%';
-			return `${pct.toFixed(1)}%`;
 		};
 
 		// Get event types that have any probability
@@ -433,15 +431,6 @@ class ProbabilityDisplay extends Component {
 			`;
 		}
 
-		// Format probability percentages - show "(0%)" for zero like Combat does
-		const formatProb = (prob) => {
-			if (prob === undefined) return '';
-			const pct = prob * 100;
-			if (pct === 0) return '(0%)';
-			if (pct < 0.1) return '(<0.1%)';
-			return `(${pct.toFixed(1)}%)`;
-		};
-
 		// Round damage values for comparison
 		const optimistDmg = Math.round(scenarios.optimist);
 		const averageDmg = Math.round(scenarios.average);
@@ -459,7 +448,7 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (scenarios.optimistProb || 0) + (scenarios.averageProb || 0) + (scenarios.pessimistProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist, Average and Pessimist Scenario: ${formatProb(combinedProb)}</span>
+					<span>Optimist, Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
@@ -467,46 +456,46 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (scenarios.optimistProb || 0) + (scenarios.averageProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist and Average Scenario: ${formatProb(combinedProb)}</span>
+					<span>Optimist and Average Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>Pessimist Scenario: ${formatProb(scenarios.pessimistProb)}</span>
+					<span>Pessimist Scenario: ${this._formatProb(scenarios.pessimistProb)}</span>
 					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 			`);
 		} else if (averageEqualsPessimist) {
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist Scenario: ${formatProb(scenarios.optimistProb)}</span>
+					<span>Optimist Scenario: ${this._formatProb(scenarios.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			const combinedProb = (scenarios.averageProb || 0) + (scenarios.pessimistProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Average and Pessimist Scenario: ${formatProb(combinedProb)}</span>
+					<span>Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 			`);
 		} else {
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist Scenario: ${formatProb(scenarios.optimistProb)}</span>
+					<span>Optimist Scenario: ${this._formatProb(scenarios.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>Average Scenario: ${formatProb(scenarios.averageProb)}</span>
+					<span>Average Scenario: ${this._formatProb(scenarios.averageProb)}</span>
 					<span class="danger">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>Pessimist Scenario: ${formatProb(scenarios.pessimistProb)}</span>
+					<span>Pessimist Scenario: ${this._formatProb(scenarios.pessimistProb)}</span>
 					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 			`);
@@ -520,7 +509,7 @@ class ProbabilityDisplay extends Component {
 				rows.length = 0;
 				rows.push(`
 				<div class="damage-item">
-					<span>All Scenarios: ${formatProb(combinedProb)}</span>
+					<span>All Scenarios: ${this._formatProb(combinedProb)}</span>
 					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 				`);
@@ -528,7 +517,7 @@ class ProbabilityDisplay extends Component {
 				const combinedProb = (scenarios.averageProb || 0) + (scenarios.pessimistProb || 0) + (scenarios.worstCaseProb || 0);
 				rows[rows.length - 1] = `
 				<div class="damage-item">
-					<span>Average, Pessimist and Worst Case Scenario: ${formatProb(combinedProb)}</span>
+					<span>Average, Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 				`;
@@ -536,7 +525,7 @@ class ProbabilityDisplay extends Component {
 				const combinedProb = (scenarios.pessimistProb || 0) + (scenarios.worstCaseProb || 0);
 				rows[rows.length - 1] = `
 				<div class="damage-item">
-					<span>Pessimist and Worst Case Scenario: ${formatProb(combinedProb)}</span>
+					<span>Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
 					<span class="critical bold-damage">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 				`;
@@ -544,7 +533,7 @@ class ProbabilityDisplay extends Component {
 		} else {
 			rows.push(`
 				<div class="damage-item">
-					<span>Worst Case Scenario: ${formatProb(scenarios.worstCaseProb)}</span>
+					<span>Worst Case Scenario: ${this._formatProb(scenarios.worstCaseProb)}</span>
 					<span class="critical bold-damage">${hpIcon}<strong>${worstDmg}</strong></span>
 				</div>
 			`);
