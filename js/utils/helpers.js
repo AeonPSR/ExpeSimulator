@@ -96,6 +96,18 @@ function generateId(prefix = 'id') {
 	return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
+/**
+ * Converts an image filename to a backend identifier.
+ * Strips the file extension (.png, .jpg, .gif) and uppercases.
+ * e.g. 'pilot.png' → 'PILOT', 'white_flag.jpg' → 'WHITE_FLAG'
+ * 
+ * @param {string} filename - The image filename
+ * @returns {string} The uppercase identifier
+ */
+function filenameToId(filename) {
+	return filename.replace(/\.(png|jpg|gif)$/i, '').toUpperCase();
+}
+
 // Export for use in other modules
 if (typeof window !== 'undefined') {
 	window.getResourceURL = getResourceURL;
@@ -104,4 +116,5 @@ if (typeof window !== 'undefined') {
 	window.debounce = debounce;
 	window.clamp = clamp;
 	window.generateId = generateId;
+	window.filenameToId = filenameToId;
 }

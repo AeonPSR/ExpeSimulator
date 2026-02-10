@@ -77,9 +77,7 @@ const LoadoutBuilder = {
 	 * @returns {string} The identifier (e.g., 'PILOT')
 	 */
 	filenameToId(filename) {
-		return filename
-			.replace(/\.(png|jpg|gif)$/i, '')
-			.toUpperCase();
+		return filenameToId(filename);
 	},
 
 	/**

@@ -76,9 +76,8 @@ class DamageSpreader {
 	/**
 	 * Distributes damage from a fight instance.
 	 * Combat damage: each unit of damage is randomly assigned to a player.
-	 * Tracks attribution for each damage instance.
 	 * 
-	 * @param {Object} instance - { type, count, damagePerInstance, sources }
+	 * @param {Object} instance - { type, totalDamage, sources }
 	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
 	 * @param {Array<number>} playerDamageTotals - Totals to update
 	 * @private
@@ -87,51 +86,25 @@ class DamageSpreader {
 		const playerCount = playerBreakdown.length;
 		if (playerCount === 0) return;
 
-		const { type, count, damagePerInstance, totalDamage, sources } = instance;
+		const { type, totalDamage, sources } = instance;
+		const damage = Math.round(totalDamage || 0);
 
-		// Handle new distribution-based format where count is null but totalDamage is set
-		if (count === null || count === undefined) {
-			// Distribute totalDamage directly (each unit randomly to a player)
-			const damage = Math.round(totalDamage || 0);
-			for (let d = 0; d < damage; d++) {
-				const targetPlayer = Math.floor(Math.random() * playerCount);
-				playerBreakdown[targetPlayer].push({
-					type: type || 'FIGHT',
-					source: 'COMBINED',
-					damage: 1
-				});
-				playerDamageTotals[targetPlayer]++;
-			}
-			return;
-		}
-
-		// Legacy format: For each fight instance
-		for (let i = 0; i < count; i++) {
-			// Total damage from this fight
-			const damage = Math.round(damagePerInstance);
-			const source = sources?.[i]?.sectorName || 'UNKNOWN';
-
-			// Distribute each unit of damage randomly
-			for (let d = 0; d < damage; d++) {
-				const targetPlayer = Math.floor(Math.random() * playerCount);
-				playerBreakdown[targetPlayer].push({
-					type: type,
-					source: source,
-					damage: 1
-				});
-				playerDamageTotals[targetPlayer]++;
-			}
+		for (let d = 0; d < damage; d++) {
+			const targetPlayer = Math.floor(Math.random() * playerCount);
+			playerBreakdown[targetPlayer].push({
+				type: type || 'FIGHT',
+				source: sources?.[0]?.sectorName || 'COMBINED',
+				damage: 1
+			});
+			playerDamageTotals[targetPlayer]++;
 		}
 	}
 
 	/**
 	 * Distributes damage from an event instance.
-	 * - ACCIDENT_3_5, ACCIDENT_ROPE_3_5: Single random player
-	 * - TIRED_2, DISASTER_3_5: All players
-	 * - COMBINED (from distribution): Distributed based on total damage
-	 * Tracks attribution for each damage instance.
+	 * Distributes evenly among all players.
 	 * 
-	 * @param {Object} instance - { type, count, damagePerInstance, totalDamage, sources }
+	 * @param {Object} instance - { type, totalDamage, sources }
 	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
 	 * @param {Array<number>} playerDamageTotals - Totals to update
 	 * @private
@@ -140,57 +113,24 @@ class DamageSpreader {
 		const playerCount = playerBreakdown.length;
 		if (playerCount === 0) return;
 
-		const { type, count, damagePerInstance, totalDamage, sources } = instance;
+		const { type, totalDamage, sources } = instance;
+		const damage = Math.round(totalDamage || 0);
+		if (damage <= 0) return;
 
-		// Handle new distribution-based format where count is null but totalDamage is set
-		if (count === null || count === undefined) {
-			const damage = Math.round(totalDamage || 0);
-			if (damage <= 0) return;
-			
-			// For COMBINED type from distribution, we don't know exact event breakdown
-			// Distribute as a mix: assume some goes to all players, some to random
-			// A reasonable heuristic: divide evenly among players (simulating average spread)
-			const perPlayer = Math.floor(damage / playerCount);
-			const remainder = damage % playerCount;
-			
-			for (let p = 0; p < playerCount; p++) {
-				const playerDamage = perPlayer + (p < remainder ? 1 : 0);
-				if (playerDamage > 0) {
-					playerBreakdown[p].push({
-						type: type || 'EVENT',
-						source: 'COMBINED',
-						damage: playerDamage
-					});
-					playerDamageTotals[p] += playerDamage;
-				}
-			}
-			return;
-		}
+		// For COMBINED type from distribution, we don't know exact event breakdown
+		// Distribute evenly among players (simulating average spread)
+		const perPlayer = Math.floor(damage / playerCount);
+		const remainder = damage % playerCount;
 
-		// Legacy format: For each event instance
-		for (let i = 0; i < count; i++) {
-			const damage = Math.round(damagePerInstance);
-			const source = sources?.[i]?.sectorName || 'UNKNOWN';
-
-			if (type === 'ACCIDENT_3_5' || type === 'ACCIDENT_ROPE_3_5' || type === 'ROPE') {
-				// Accident & Rope: single random player takes all damage
-				const targetPlayer = Math.floor(Math.random() * playerCount);
-				playerBreakdown[targetPlayer].push({
-					type: type,
-					source: source,
-					damage: damage
+		for (let p = 0; p < playerCount; p++) {
+			const playerDamage = perPlayer + (p < remainder ? 1 : 0);
+			if (playerDamage > 0) {
+				playerBreakdown[p].push({
+					type: type || 'EVENT',
+					source: sources?.[0]?.sectorName || 'COMBINED',
+					damage: playerDamage
 				});
-				playerDamageTotals[targetPlayer] += damage;
-			} else {
-				// TIRED_2 and DISASTER_3_5: all players take the damage
-				for (let p = 0; p < playerCount; p++) {
-					playerBreakdown[p].push({
-						type: type,
-						source: source,
-						damage: damage
-					});
-					playerDamageTotals[p] += damage;
-				}
+				playerDamageTotals[p] += playerDamage;
 			}
 		}
 	}
@@ -210,8 +150,7 @@ class DamageSpreader {
 			// Check if player has Survival ability
 			const hasSurvival = player?.abilities?.some(ability => {
 				if (!ability) return false;
-				const id = ability.replace(/\.(png|jpg|gif)$/i, '').toLowerCase();
-				return id === 'survival';
+				return filenameToId(ability) === 'SURVIVAL';
 			});
 			
 			if (!hasSurvival) {

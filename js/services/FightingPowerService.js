@@ -56,7 +56,7 @@ class FightingPowerService {
 			if (player.items && Array.isArray(player.items)) {
 				player.items.forEach(itemIcon => {
 					if (itemIcon) {
-						const itemName = itemIcon.replace(/\.(jpg|png)$/i, '').toLowerCase();
+						const itemName = filenameToId(itemIcon).toLowerCase();
 						if (itemName === 'grenade') {
 							count++;
 						}
@@ -83,7 +83,7 @@ class FightingPowerService {
 				player.items.forEach(itemIcon => {
 					// Skip null/empty items and grenades (grenades handled separately)
 					if (itemIcon) {
-						const itemName = itemIcon.replace(/\.(jpg|png)$/i, '').toLowerCase();
+						const itemName = filenameToId(itemIcon).toLowerCase();
 						if (itemName !== 'grenade') {
 							totalPower += this.getItemPower(itemIcon, centauriActive);
 						}
@@ -124,7 +124,7 @@ class FightingPowerService {
 	 * @returns {number} Item power
 	 */
 	static getItemPower(itemIcon, centauriActive = false) {
-		const itemName = itemIcon.replace(/\.(jpg|png)$/i, '').toLowerCase();
+		const itemName = filenameToId(itemIcon).toLowerCase();
 		const itemConfig = ItemEffects[itemName];
 		
 		let power = itemConfig?.effects?.combatPowerBonus || 0;
@@ -144,7 +144,7 @@ class FightingPowerService {
 	 * @returns {number} Ability power
 	 */
 	static getAbilityPower(abilityIcon, player) {
-		const abilityName = abilityIcon.replace(/\.(jpg|png)$/i, '').toLowerCase();
+		const abilityName = filenameToId(abilityIcon).toLowerCase();
 		const abilityConfig = AbilityEffects[abilityName];
 		
 		if (!abilityConfig?.effects) return 0;
@@ -173,8 +173,7 @@ class FightingPowerService {
 		// Check if player has any gun (normalize item names by removing extension)
 		const hasGun = player.items.some(item => {
 			if (!item) return false;
-			// Remove both .jpg and .png extensions
-			const itemName = item.replace(/\.(jpg|png)$/i, '').toLowerCase();
+			const itemName = filenameToId(item).toLowerCase();
 			return gunTypes.includes(itemName);
 		});
 		

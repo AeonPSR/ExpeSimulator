@@ -47,12 +47,29 @@ const SectorData = {
 	},
 
 	/**
-	 * Sectors that have fight events
+	 * Sectors that have fight events — derived from PlanetSectorConfigData.
+	 * Falls back to a static list if PlanetSectorConfigData is unavailable.
 	 */
-	sectorsWithFight: [
-		'RUINS', 'WRECK', 'CRISTAL_FIELD', 'RUMINANT',
-		'PREDATOR', 'INTELLIGENT', 'INSECT', 'MANKAROG'
-	],
+	get sectorsWithFight() {
+		if (typeof PlanetSectorConfigData !== 'undefined') {
+			const set = new Set();
+			for (const sector of PlanetSectorConfigData) {
+				const events = sector.explorationEvents || {};
+				for (const key of Object.keys(events)) {
+					if (key.startsWith('FIGHT_')) {
+						set.add(sector.sectorName);
+						break;
+					}
+				}
+			}
+			return [...set];
+		}
+		// Fallback if config not loaded
+		return [
+			'RUINS', 'WRECK', 'CRISTAL_FIELD', 'RUMINANT',
+			'PREDATOR', 'INTELLIGENT', 'INSECT', 'MANKAROG'
+		];
+	},
 
 	/**
 	 * Special sectors that don't count towards the 20 sector limit

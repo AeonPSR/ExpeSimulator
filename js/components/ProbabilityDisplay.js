@@ -341,13 +341,16 @@ class ProbabilityDisplay extends Component {
 		// Use occurrence data for per-event-type display (like Combat Risks)
 		const occurrence = eventDamage?.occurrence || {};
 		
-		// Event type display configuration
-		const eventConfig = {
-			'TIRED_2': { name: 'Fatigue', damage: '2 dmg to all', cssClass: 'neutral' },
-			'ACCIDENT_3_5': { name: 'Accident', damage: '3-5 dmg', cssClass: 'warning' },
-			'ACCIDENT_ROPE_3_5': { name: 'Accident (rope)', damage: '3-5 dmg', cssClass: 'warning' },
-			'DISASTER_3_5': { name: 'Disaster', damage: '3-5 dmg to all', cssClass: 'danger' }
-		};
+		// Event type display configuration — derived from EVENT_DAMAGES
+		const eventConfig = {};
+		for (const [type, info] of Object.entries(EventDamageCalculator.EVENT_DAMAGES)) {
+			const dmgStr = info.min === info.max ? `${info.min} dmg` : `${info.min}-${info.max} dmg`;
+			eventConfig[type] = {
+				name: info.displayName || type,
+				damage: info.affectsAll ? `${dmgStr} to all` : dmgStr,
+				cssClass: info.cssClass || 'neutral'
+			};
+		}
 
 		// Get event types that have any probability
 		const activeEvents = Object.keys(occurrence).filter(type => {

@@ -262,7 +262,7 @@ const ResourceCalculator = {
 			if (player.abilities) {
 				for (const ability of player.abilities) {
 					if (ability) {
-						const id = ability.replace(/\.(png|jpg|gif)$/i, '').toUpperCase();
+						const id = filenameToId(ability);
 						if (id === 'BOTANIC' || id === 'SKILLFUL') botanistCount++;
 						if (id === 'SURVIVAL') survivalCount++;
 					}
@@ -271,7 +271,7 @@ const ResourceCalculator = {
 			if (player.items) {
 				for (const item of player.items) {
 					if (item) {
-						const id = item.replace(/\.(png|jpg|gif)$/i, '').toUpperCase();
+						const id = filenameToId(item);
 						if (id === 'DRILLER') drillerCount++;
 					}
 				}

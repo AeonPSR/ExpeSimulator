@@ -32,12 +32,16 @@ const EventDamageCalculator = {
 		'TIRED_2': { 
 			min: 2, max: 2, average: 2,
 			affectsAll: true,
+			displayName: 'Fatigue',
+			cssClass: 'neutral',
 			// Damage distribution: 100% chance of 2 damage
 			getDamageDistribution: (playerCount) => new Map([[2 * playerCount, 1]])
 		},
 		'ACCIDENT_3_5': { 
 			min: 3, max: 5, average: 4,
 			affectsAll: false,  // Only affects one player
+			displayName: 'Accident',
+			cssClass: 'warning',
 			// Damage distribution: equal chance of 3, 4, or 5 damage
 			getDamageDistribution: (playerCount) => new Map([
 				[3, 1/3],
@@ -49,6 +53,8 @@ const EventDamageCalculator = {
 			min: 3, max: 5, average: 4,
 			affectsAll: false,  // Only affects one player
 			ropeImmune: true,   // Can be negated by rope
+			displayName: 'Accident (rope)',
+			cssClass: 'warning',
 			// Damage distribution: equal chance of 3, 4, or 5 damage
 			getDamageDistribution: (playerCount) => new Map([
 				[3, 1/3],
@@ -59,7 +65,9 @@ const EventDamageCalculator = {
 		'DISASTER_3_5': { 
 			min: 3, max: 5, average: 4,
 			affectsAll: true,
-			// Damage distribution: equal chance of 3, 4, or 5 damage Ã— playerCount
+			displayName: 'Disaster',
+			cssClass: 'danger',
+			// Damage distribution: equal chance of 3, 4, or 5 damage × playerCount
 			getDamageDistribution: (playerCount) => new Map([
 				[3 * playerCount, 1/3],
 				[4 * playerCount, 1/3],

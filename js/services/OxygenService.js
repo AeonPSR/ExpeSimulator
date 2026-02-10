@@ -30,7 +30,7 @@ class OxygenService {
 
 		return player.items.some(item => {
 			if (!item) return false;
-			const itemName = item.replace(/\.(jpg|png|gif)$/i, '').toLowerCase();
+			const itemName = filenameToId(item).toLowerCase();
 			return itemName === 'space_suit';
 		});
 	}

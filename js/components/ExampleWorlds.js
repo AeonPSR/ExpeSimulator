@@ -12,12 +12,12 @@ class ExampleWorlds extends Component {
 		super(options);
 		this.onWorldSelect = options.onWorldSelect || null;
 
-		// Predefined worlds
-		this.worlds = [
-			['Rocky World', 'Fugubos', 'Vie Heureuse'],
-			[',̶ ̶\'̶ ̶,̶ ̶|̶ ̶,̶\'̶_̶\'̶', 'Nurgle\'s Throne', 'Thousands Cuts'],
-			['Polyphemus', 'Museum', 'America\'s Dream']
-		];
+		// Predefined worlds — read from WorldData, displayed in rows of 3
+		const allWorlds = WorldData.getAvailableWorlds();
+		this.worlds = [];
+		for (let i = 0; i < allWorlds.length; i += 3) {
+			this.worlds.push(allWorlds.slice(i, i + 3));
+		}
 	}
 
 	/**

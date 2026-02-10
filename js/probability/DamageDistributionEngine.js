@@ -169,8 +169,6 @@ const DamageDistributionEngine = {
 			if (scenarios[key] > 0) {
 				damageInstances[key].push({
 					type: 'COMBINED',
-					count: null,
-					damagePerInstance: null,
 					totalDamage: scenarios[key],
 					sources: []
 				});
