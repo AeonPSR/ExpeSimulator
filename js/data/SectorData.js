@@ -10,40 +10,15 @@ const SectorData = {
 	 * Pulled from PlanetSectorConfigData
 	 */
 	get sectors() {
-		if (typeof PlanetSectorConfigData !== 'undefined') {
-			return PlanetSectorConfigData.map(sector => ({
-				sectorName: sector.sectorName,
-				maxPerPlanet: sector.maxPerPlanet,
-				weightAtPlanetGeneration: sector.weightAtPlanetGeneration
-			}));
+		if (typeof PlanetSectorConfigData === 'undefined') {
+			console.warn('SectorData: PlanetSectorConfigData is not loaded. Ensure config.js is loaded before SectorData.js.');
+			return [];
 		}
-		// Fallback data if config not loaded
-		return [
-			{ sectorName: 'CAVE', maxPerPlanet: 4, weightAtPlanetGeneration: 4 },
-			{ sectorName: 'MOUNTAIN', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'FOREST', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'DESERT', maxPerPlanet: 4, weightAtPlanetGeneration: 12 },
-			{ sectorName: 'OCEAN', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'SWAMP', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'RUINS', maxPerPlanet: 4, weightAtPlanetGeneration: 2 },
-			{ sectorName: 'WRECK', maxPerPlanet: 4, weightAtPlanetGeneration: 2 },
-			{ sectorName: 'CRISTAL_FIELD', maxPerPlanet: 1, weightAtPlanetGeneration: 2 },
-			{ sectorName: 'FRUIT_TREES', maxPerPlanet: 4, weightAtPlanetGeneration: 3 },
-			{ sectorName: 'RUMINANT', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'PREDATOR', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'INTELLIGENT', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'INSECT', maxPerPlanet: 4, weightAtPlanetGeneration: 10 },
-			{ sectorName: 'MANKAROG', maxPerPlanet: 1, weightAtPlanetGeneration: 2 },
-			{ sectorName: 'SEISMIC_ACTIVITY', maxPerPlanet: 4, weightAtPlanetGeneration: 3 },
-			{ sectorName: 'VOLCANIC_ACTIVITY', maxPerPlanet: 4, weightAtPlanetGeneration: 3 },
-			{ sectorName: 'COLD', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'HOT', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'STRONG_WIND', maxPerPlanet: 4, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'OXYGEN', maxPerPlanet: 1, weightAtPlanetGeneration: 8 },
-			{ sectorName: 'HYDROCARBON', maxPerPlanet: 2, weightAtPlanetGeneration: 5 },
-			{ sectorName: 'LANDING', maxPerPlanet: 1, weightAtPlanetGeneration: 0 },
-			{ sectorName: 'LOST', maxPerPlanet: 15, weightAtPlanetGeneration: 0 }
-		];
+		return PlanetSectorConfigData.map(sector => ({
+			sectorName: sector.sectorName,
+			maxPerPlanet: sector.maxPerPlanet,
+			weightAtPlanetGeneration: sector.weightAtPlanetGeneration
+		}));
 	},
 
 	/**
@@ -51,24 +26,21 @@ const SectorData = {
 	 * Falls back to a static list if PlanetSectorConfigData is unavailable.
 	 */
 	get sectorsWithFight() {
-		if (typeof PlanetSectorConfigData !== 'undefined') {
-			const set = new Set();
-			for (const sector of PlanetSectorConfigData) {
-				const events = sector.explorationEvents || {};
-				for (const key of Object.keys(events)) {
-					if (key.startsWith('FIGHT_')) {
-						set.add(sector.sectorName);
-						break;
-					}
+		if (typeof PlanetSectorConfigData === 'undefined') {
+			console.warn('SectorData: PlanetSectorConfigData is not loaded. Ensure config.js is loaded before SectorData.js.');
+			return [];
+		}
+		const set = new Set();
+		for (const sector of PlanetSectorConfigData) {
+			const events = sector.explorationEvents || {};
+			for (const key of Object.keys(events)) {
+				if (key.startsWith('FIGHT_')) {
+					set.add(sector.sectorName);
+					break;
 				}
 			}
-			return [...set];
 		}
-		// Fallback if config not loaded
-		return [
-			'RUINS', 'WRECK', 'CRISTAL_FIELD', 'RUMINANT',
-			'PREDATOR', 'INTELLIGENT', 'INSECT', 'MANKAROG'
-		];
+		return [...set];
 	},
 
 	/**

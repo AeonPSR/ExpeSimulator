@@ -89,17 +89,27 @@ class ExpeditionSimulatorApp {
 	_renderInitialPlayers() {
 		const players = this._state.getPlayers();
 		for (const player of players) {
-			const card = new PlayerCard({
-				player: player,
-				getResourceURL: getResourceURL,
-				onAvatarClick: (id) => this._onAvatarClick(id),
-				onAbilityClick: (id, slot) => this._onAbilityClick(id, slot),
-				onItemClick: (id, slot) => this._onItemClick(id, slot),
-				onHealthClick: (id) => this._onHealthClick(id),
-				onRemove: (id) => this._onRemovePlayer(id)
-			});
+			const card = this._createPlayerCard(player);
 			this._playerSection.addPlayerCard(card);
 		}
+	}
+
+	/**
+	 * Creates a PlayerCard instance with standard callback wiring
+	 * @param {Object} player - Player data object
+	 * @returns {PlayerCard}
+	 * @private
+	 */
+	_createPlayerCard(player) {
+		return new PlayerCard({
+			player: player,
+			getResourceURL: getResourceURL,
+			onAvatarClick: (id) => this._onAvatarClick(id),
+			onAbilityClick: (id, slot) => this._onAbilityClick(id, slot),
+			onItemClick: (id, slot) => this._onItemClick(id, slot),
+			onHealthClick: (id) => this._onHealthClick(id),
+			onRemove: (id) => this._onRemovePlayer(id)
+		});
 	}
 
 	// ========================================
@@ -169,15 +179,7 @@ class ExpeditionSimulatorApp {
 		if (this._state.getPlayerCount() >= Constants.MAX_PLAYERS) return;
 
 		const player = this._state.addPlayer();
-		const card = new PlayerCard({
-			player: player,
-			getResourceURL: getResourceURL,
-			onAvatarClick: (id) => this._onAvatarClick(id),
-			onAbilityClick: (id, slot) => this._onAbilityClick(id, slot),
-			onItemClick: (id, slot) => this._onItemClick(id, slot),
-			onHealthClick: (id) => this._onHealthClick(id),
-			onRemove: (id) => this._onRemovePlayer(id)
-		});
+		const card = this._createPlayerCard(player);
 		this._playerSection.addPlayerCard(card);
 	}
 
@@ -265,8 +267,9 @@ class ExpeditionSimulatorApp {
 	_updateDisplays() {
 		this._sectorGrid?.updateSectorAvailability?.();
 		this._updateFightingPower();
-		this._updateProbabilityDisplay();
-		this._updateResultsDisplay();
+		const results = this._calculateExpeditionResults();
+		this._updateProbabilityDisplay(results);
+		this._updateResultsDisplay(results);
 	}
 
 	_updateFightingPower() {
@@ -349,8 +352,7 @@ class ExpeditionSimulatorApp {
 		return results;
 	}
 
-	_updateProbabilityDisplay() {
-		const results = this._calculateExpeditionResults();
+	_updateProbabilityDisplay(results) {
 		if (!results) {
 			this._probabilityDisplay.clear();
 			return;
@@ -358,9 +360,8 @@ class ExpeditionSimulatorApp {
 		this._probabilityDisplay.update(results);
 	}
 
-	_updateResultsDisplay() {
+	_updateResultsDisplay(results) {
 		const players = this._state.getPlayers();
-		const results = this._calculateExpeditionResults();
 		
 		if (players.length > 0 && results) {
 			const resultsHTML = this._renderExpeditionResults(
