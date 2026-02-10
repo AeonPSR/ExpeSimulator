@@ -47,7 +47,6 @@ class ProbabilityDisplay extends Component {
 		html += this._renderEventRisks(data.eventDamage);
 		html += this._renderEventDamage(data.eventDamage);
 		html += this._renderNegativeEvents(data.negativeEvents);
-		html += this._renderSectorBreakdown(data.sectorBreakdown);
 
 		this._contentElement.innerHTML = html;
 	}
@@ -473,28 +472,6 @@ class ProbabilityDisplay extends Component {
 				</table>
 			</div>
 		`;
-	}
-
-	_renderSectorBreakdown(sectorBreakdown) {
-		let html = '<div class="outcome-category" style="opacity: 0.7; font-size: 11px;">';
-		html += '<h5 style="font-size: 12px;">Debug: Sector Breakdown</h5>';
-
-		for (const [sectorName, data] of Object.entries(sectorBreakdown)) {
-			const countLabel = data.count > 1 ? ` (×${data.count})` : '';
-			html += `<div style="margin-bottom: 8px;"><strong>${sectorName}${countLabel}</strong>`;
-
-			for (const [eventName, prob] of Object.entries(data.events)) {
-				const colorClass = this._getEventColorClass(eventName);
-				html += `<div class="outcome-item" style="padding: 2px 0;">`;
-				html += `<span class="outcome-label" style="font-size: 11px;">${eventName}</span>`;
-				html += `<span class="outcome-value ${colorClass}" style="font-size: 11px;">${(prob * 100).toFixed(1)}%</span>`;
-				html += `</div>`;
-			}
-			html += '</div>';
-		}
-
-		html += '</div>';
-		return html;
 	}
 
 	// ========================================
