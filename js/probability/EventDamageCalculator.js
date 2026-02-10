@@ -141,41 +141,19 @@ const EventDamageCalculator = {
 	},
 
 	/**
-	 * Returns empty damage result structure.
-	 * @private
-	 */
-	_emptyDamageResult() {
-		return {
-			pessimist: 0,
-			average: 0,
-			optimist: 0,
-			worstCase: 0,
-			pessimistProb: 1,
-			optimistProb: 1,
-			worstCaseProb: 1,
-			distribution: new Map([[0, 1]])
-		};
-	},
-
-	/**
 	 * Returns empty result structure.
 	 * @private
 	 */
 	_emptyResult() {
 		return {
 			occurrence: {},
-			damage: this._emptyDamageResult(),
-			damageInstances: {
-				pessimist: [],
-				average: [],
-				optimist: [],
-				worstCase: []
-			},
+			damage: DamageDistributionEngine.emptyDamageResult(),
+			damageInstances: DamageDistributionEngine.emptyDamageInstances(),
 			playerCount: 0,
 			tired: 0,
 			accident: 0,
 			disaster: 0,
-			scenarios: this._emptyDamageResult()
+			scenarios: DamageDistributionEngine.emptyDamageResult()
 		};
 	}
 };

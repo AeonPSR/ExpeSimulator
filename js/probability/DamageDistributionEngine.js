@@ -101,6 +101,33 @@ const DamageDistributionEngine = {
 	},
 
 	/**
+	 * Returns a zeroed damage result matching the shape of buildDamageResult().
+	 * Probability 1 on the 0-damage bucket (certain no damage).
+	 * @returns {Object}
+	 */
+	emptyDamageResult() {
+		return {
+			pessimist: 0,
+			average: 0,
+			optimist: 0,
+			worstCase: 0,
+			pessimistProb: 1,
+			averageProb: 1,
+			optimistProb: 1,
+			worstCaseProb: 1,
+			distribution: new Map([[0, 1]])
+		};
+	},
+
+	/**
+	 * Returns an empty damage-instances object (no instances in any scenario).
+	 * @returns {Object} { pessimist: [], average: [], optimist: [], worstCase: [] }
+	 */
+	emptyDamageInstances() {
+		return { pessimist: [], average: [], optimist: [], worstCase: [] };
+	},
+
+	/**
 	 * Builds the standard damage result object from scenarios.
 	 * All 4 values (optimist/average/pessimist/worstCase) come from ONE distribution
 	 * that already accounts for mutual-exclusivity exclusions.

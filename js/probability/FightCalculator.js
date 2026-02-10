@@ -220,26 +220,12 @@ const FightCalculator = {
 	 * @private
 	 */
 	_emptyResult() {
+		const damage = DamageDistributionEngine.emptyDamageResult();
+		damage.breakdown = { pessimist: [], average: [], optimist: [], worstCase: [] };
 		return {
 			occurrence: {},
-			damage: {
-				pessimist: 0,
-				average: 0,
-				optimist: 0,
-				worstCase: 0,
-				breakdown: {
-					pessimist: [],
-					average: [],
-					optimist: [],
-					worstCase: []
-				}
-			},
-			damageInstances: {
-				pessimist: [],
-				average: [],
-				optimist: [],
-				worstCase: []
-			},
+			damage,
+			damageInstances: DamageDistributionEngine.emptyDamageInstances(),
 			fightingPower: 0,
 			grenadeCount: 0,
 			playerCount: 0
