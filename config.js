@@ -22,7 +22,7 @@ const PlanetSectorConfigData = [
 		weightAtPlanetExploration: 8,
 		maxPerPlanet: 4,
 		explorationEvents: {
-			'ACCIDENT_3_5': 4,
+			'ACCIDENT_ROPE_3_5': 4,
 			'FUEL_1': 3,
 			'TIRED_2': 2,
 			'HARVEST_1': 1
@@ -77,7 +77,7 @@ const PlanetSectorConfigData = [
 		maxPerPlanet: 4,
 		explorationEvents: {
 			'FUEL_2': 4,
-			'ACCIDENT_3_5': 3,
+			'ACCIDENT_ROPE_3_5': 3,
 			'AGAIN': 2,
 			'ARTEFACT': 1
 		}
@@ -262,7 +262,7 @@ const PlanetSectorConfigData = [
 		explorationEvents: {
 			'NOTHING_TO_REPORT': 4,
 			'BACK': 3,
-			'ACCIDENT_3_5': 2,
+			'ACCIDENT_ROPE_3_5': 2,
 			'KILL_RANDOM': 1
 		}
 	},
@@ -341,6 +341,7 @@ const EventDescriptions = {
 	'NOTHING_TO_REPORT': 'Nothing to Report',
 	'TIRED_2': 'Tired (-2 HP to all players)',
 	'ACCIDENT_3_5': 'Accident (3-5 damage to one player)',
+	'ACCIDENT_ROPE_3_5': 'Accident (3-5 damage, rope immune)',
 	'DISASTER_3_5': 'Disaster (3-5 damage to all players)',
 	'HARVEST_1': 'Harvest +1 Alien Fruit',
 	'HARVEST_2': 'Harvest +2 Alien Fruits',
@@ -386,7 +387,7 @@ const AbilityEffects = {
 		description: 'Reduces damage taken from all sources by 1 point, increases steak gains by 1, and prevents being targeted by single-player execution events',
 		effects: {
 			damageReduction: 1,
-			appliesTo: ['ACCIDENT_3_5', 'DISASTER_3_5', 'TIRED_2', 'FIGHT_8', 'FIGHT_10', 'FIGHT_12', 'FIGHT_15', 'FIGHT_18', 'FIGHT_32', 'FIGHT_8_10_12_15_18_32'],
+			appliesTo: ['ACCIDENT_3_5', 'ACCIDENT_ROPE_3_5', 'DISASTER_3_5', 'TIRED_2', 'FIGHT_8', 'FIGHT_10', 'FIGHT_12', 'FIGHT_15', 'FIGHT_18', 'FIGHT_32', 'FIGHT_8_10_12_15_18_32'],
 			steakBonus: 1,
 			immuneToSingleTargetExecution: true
 		}
@@ -452,6 +453,7 @@ const AbilityEffects = {
 const NegativeEvents = [
 	'TIRED_2',
 	'ACCIDENT_3_5',
+	'ACCIDENT_ROPE_3_5',
 	'DISASTER_3_5',
 	'DISEASE',
 	'PLAYER_LOST',
@@ -566,11 +568,10 @@ const ItemEffects = {
 	'rope': {
 		name: 'Rope',
 		effects: {
-			sectorSpecificImmunity: {
-				'SEISMIC_ACTIVITY': ['ACCIDENT_3_5'],
-				'CAVE': ['ACCIDENT_3_5'],
-				'MOUNTAIN': ['ACCIDENT_3_5']
-			}
+			// Rope immunity is encoded in the event type: ACCIDENT_ROPE_3_5
+			// sectors MOUNTAIN, CAVE, SEISMIC_ACTIVITY emit ACCIDENT_ROPE_3_5 instead of ACCIDENT_3_5
+			// During damage distribution, players carrying a rope are immune to ACCIDENT_ROPE_3_5
+			eventImmunity: ['ACCIDENT_ROPE_3_5']
 		}
 	},
 	'sniper_riffle': {

@@ -236,39 +236,27 @@ const EventWeightCalculator = {
 	 * @private - Categorizes a single event into the result structure
 	 */
 	_categorizeEvent(eventName, prob, result) {
-		// Combat
-		if (eventName.startsWith('FIGHT_')) {
-			const fightType = eventName.replace('FIGHT_', '');
-			result.fights[fightType] = (result.fights[fightType] || 0) + prob;
+		const { category } = EventClassifier.classify(eventName);
+
+		switch (category) {
+			case 'fight': {
+				const fightType = eventName.replace('FIGHT_', '');
+				result.fights[fightType] = (result.fights[fightType] || 0) + prob;
+				break;
+			}
+			case 'tired':      result.tired += prob; break;
+			case 'accident':   result.accident += prob; break;
+			case 'disaster':   result.disaster += prob; break;
+			case 'disease':    result.disease += prob; break;
+			case 'playerLost': result.playerLost += prob; break;
+			case 'again':      result.again += prob; break;
+			case 'itemLost':   result.itemLost += prob; break;
+			case 'killAll':    result.killAll += prob; break;
+			case 'killOne':    result.killOne += prob; break;
+			case 'mushTrap':   result.mushTrap += prob; break;
+			case 'nothing':    result.nothing += prob; break;
+			// Resource events handled by ResourceCalculator
 		}
-		// Damage events
-		else if (eventName.startsWith('TIRED_')) {
-			result.tired += prob;
-		} else if (eventName.startsWith('ACCIDENT_')) {
-			result.accident += prob;
-		} else if (eventName.startsWith('DISASTER_')) {
-			result.disaster += prob;
-		}
-		// Negative events
-		else if (eventName === 'DISEASE') {
-			result.disease += prob;
-		} else if (eventName === 'PLAYER_LOST') {
-			result.playerLost += prob;
-		} else if (eventName === 'AGAIN') {
-			result.again += prob;
-		} else if (eventName === 'ITEM_LOST') {
-			result.itemLost += prob;
-		} else if (eventName === 'KILL_ALL') {
-			result.killAll += prob;
-		} else if (eventName === 'KILL_RANDOM') {
-			result.killOne += prob;
-		} else if (eventName === 'MUSH_TRAP') {
-			result.mushTrap += prob;
-		} else if (eventName === 'NOTHING_TO_REPORT') {
-			result.nothing += prob;
-		}
-		// Note: Resource events (HARVEST_, PROVISION_, FUEL_, OXYGEN_, ARTEFACT, STARMAP)
-		// are handled by ResourceCalculator
 	},
 
 	/**

@@ -13,6 +13,7 @@
         "config.js",
         "js/utils/constants.js",
         "js/utils/helpers.js",
+        "js/utils/EventClassifier.js",
         "js/data/SectorData.js",
         "js/data/CharacterData.js",
         "js/data/AbilityData.js",

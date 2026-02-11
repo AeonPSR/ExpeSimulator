@@ -505,23 +505,7 @@ class ProbabilityDisplay extends Component {
 	}
 
 	_getEventColorClass(eventName) {
-		if (eventName.startsWith('HARVEST_') || eventName.startsWith('PROVISION_') ||
-			eventName.startsWith('FUEL_') || eventName.startsWith('OXYGEN_') ||
-			eventName === 'ARTEFACT') {
-			return 'positive';
-		}
-		if (eventName === 'NOTHING_TO_REPORT' || eventName === 'AGAIN') {
-			return 'neutral';
-		}
-		if (eventName.startsWith('TIRED_') || eventName.startsWith('ACCIDENT_') ||
-			eventName === 'DISEASE') {
-			return 'warning';
-		}
-		if (eventName.startsWith('FIGHT_') || eventName.startsWith('KILL_') ||
-			eventName === 'PLAYER_LOST' || eventName.startsWith('DISASTER_')) {
-			return 'danger';
-		}
-		return 'neutral';
+		return EventClassifier.getCssClass(eventName);
 	}
 }
 
