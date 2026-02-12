@@ -69,6 +69,18 @@
 	object-fit: cover;
 }
 
+/* Result Effects (card-level icons for effects that triggered in one scenario) */
+.expedition-result-effects {
+	gap: 4px;
+	justify-content: center;
+	margin-top: 4px;
+	position: absolute;
+	bottom: -10px;
+	left: -10px;
+	display: flex;
+	flex-direction: column;
+}
+
 /* ==========================================================================
    Health Display
    ========================================================================== */
@@ -168,6 +180,14 @@
 .expedition-result-health .stuck-icon {
 	width: 20px;
 	height: 20px;
+}
+
+/* Effect Icons (rope, survival, etc.) */
+.expedition-result-effects .effect-icon {
+	width: 18px;
+	height: 18px;
+	border-radius: 3px;
+	filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }
 
 /* ==========================================================================

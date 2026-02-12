@@ -16,21 +16,24 @@ class DamageSpreader {
 	 * 
 	 * @param {Array} fightInstances - Damage instances from FightCalculator
 	 * @param {Array} eventInstances - Damage instances from EventDamageCalculator
-	 * @param {number} playerCount - Number of players
+	 * @param {Array<Object>} players - Array of player objects (for item checks)
 	 * @returns {Object} - { totalDamage: Array<number>, breakdown: Array<Array> }
 	 *   breakdown[playerIndex] = [{ type, source, damage }, ...]
 	 */
-	static distribute(fightInstances, eventInstances, playerCount) {
+	static distribute(fightInstances, eventInstances, players) {
+		const playerCount = players.length;
 		if (playerCount <= 0) {
 			return {
 				totalDamage: [],
-				breakdown: []
+				breakdown: [],
+				appliedEffects: []
 			};
 		}
 
-		// Initialize damage breakdown for each player
+		// Initialize damage breakdown and applied effects for each player
 		const playerBreakdown = Array.from({ length: playerCount }, () => []);
 		const playerDamageTotals = new Array(playerCount).fill(0);
+		const appliedEffects = Array.from({ length: playerCount }, () => []);
 
 		// Distribute fight damage
 		if (fightInstances && Array.isArray(fightInstances)) {
@@ -42,13 +45,14 @@ class DamageSpreader {
 		// Distribute event damage
 		if (eventInstances && Array.isArray(eventInstances)) {
 			for (const instance of eventInstances) {
-				this._distributeEventDamage(instance, playerBreakdown, playerDamageTotals);
+				this._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects);
 			}
 		}
 
 		return {
 			totalDamage: playerDamageTotals,
-			breakdown: playerBreakdown
+			breakdown: playerBreakdown,
+			appliedEffects: appliedEffects
 		};
 	}
 
@@ -57,17 +61,18 @@ class DamageSpreader {
 	 * 
 	 * @param {Object} fightDamageInstances - { pessimist, average, optimist, worstCase }
 	 * @param {Object} eventDamageInstances - { pessimist, average, optimist, worstCase }
-	 * @param {number} playerCount - Number of players
+	 * @param {Array<Object>} players - Array of player objects (for item checks like rope)
 	 * @returns {Object} - { pessimist, average, optimist, worstCase } each containing { totalDamage, breakdown }
 	 */
-	static distributeAllScenarios(fightDamageInstances, eventDamageInstances, playerCount) {
+	static distributeAllScenarios(fightDamageInstances, eventDamageInstances, players) {
 		const scenarios = Constants.SCENARIO_KEYS;
 		const result = {};
+		const playerCount = players.length;
 
 		for (const scenario of scenarios) {
 			const fightInstances = fightDamageInstances?.[scenario] || [];
 			const eventInstances = eventDamageInstances?.[scenario] || [];
-			result[scenario] = this.distribute(fightInstances, eventInstances, playerCount);
+			result[scenario] = this.distribute(fightInstances, eventInstances, players);
 		}
 
 		// Debug logging
@@ -98,7 +103,7 @@ class DamageSpreader {
 	 * Distributes damage from a fight instance.
 	 * Combat damage: each unit of damage is randomly assigned to a player.
 	 * 
-	 * @param {Object} instance - { type, totalDamage, sources }
+	 * @param {Object} instance - { sources: [{ eventType, sector, damage }] }
 	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
 	 * @param {Array<number>} playerDamageTotals - Totals to update
 	 * @private
@@ -107,33 +112,18 @@ class DamageSpreader {
 		const playerCount = playerBreakdown.length;
 		if (playerCount === 0) return;
 
-		const { type, totalDamage, sources } = instance;
+		const { sources } = instance;
 
-		// If we have detailed sources from path sampling, use them
-		if (sources && sources.length > 0 && sources[0].eventType) {
-			for (const source of sources) {
-				const damage = Math.round(source.damage || 0);
-				if (damage <= 0) continue;
+		for (const source of sources) {
+			const damage = Math.round(source.damage || 0);
+			if (damage <= 0) continue;
 
-				// Fight damage: distribute each point randomly
-				for (let d = 0; d < damage; d++) {
-					const targetPlayer = Math.floor(Math.random() * playerCount);
-					playerBreakdown[targetPlayer].push({
-						type: source.eventType,
-						source: source.sector,
-						damage: 1
-					});
-					playerDamageTotals[targetPlayer]++;
-				}
-			}
-		} else {
-			// Fallback: COMBINED type without detailed sources
-			const damage = Math.round(totalDamage || 0);
+			// Fight damage: distribute each point randomly
 			for (let d = 0; d < damage; d++) {
 				const targetPlayer = Math.floor(Math.random() * playerCount);
 				playerBreakdown[targetPlayer].push({
-					type: type || 'FIGHT',
-					source: sources?.[0]?.sectorName || 'COMBINED',
+					type: source.eventType,
+					source: source.sector,
 					damage: 1
 				});
 				playerDamageTotals[targetPlayer]++;
@@ -147,72 +137,62 @@ class DamageSpreader {
 	 * - affectsAll: true → all players take the full damage
 	 * - affectsAll: false → one random player takes all damage
 	 * 
-	 * @param {Object} instance - { type, totalDamage, sources }
+	 * @param {Object} instance - { sources: [{ eventType, sector, damage }] }
 	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
 	 * @param {Array<number>} playerDamageTotals - Totals to update
+	 * @param {Array<Object>} players - Array of player objects (for item immunity checks)
+	 * @param {Array<Array>} appliedEffects - Effects that triggered (e.g., rope immunity)
 	 * @private
 	 */
-	static _distributeEventDamage(instance, playerBreakdown, playerDamageTotals) {
+	static _distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players = [], appliedEffects = []) {
 		const playerCount = playerBreakdown.length;
 		if (playerCount === 0) return;
 
-		const { type, totalDamage, sources } = instance;
+		const { sources } = instance;
 
-		// If we have detailed sources from path sampling, use them
-		if (sources && sources.length > 0 && sources[0].eventType) {
-			for (const source of sources) {
-				const damage = Math.round(source.damage || 0);
-				if (damage <= 0) continue;
+		for (const source of sources) {
+			const damage = Math.round(source.damage || 0);
+			if (damage <= 0) continue;
 
-				const eventType = source.eventType;
-				const eventInfo = this._getEventInfo(eventType);
-				const affectsAll = eventInfo?.affectsAll ?? false;
+			const eventType = source.eventType;
+			const eventInfo = this._getEventInfo(eventType);
+			const affectsAll = eventInfo?.affectsAll ?? false;
 
-				if (affectsAll) {
-					// TIRED_2, DISASTER_3_5: All players take damage
-					// The damage value from path sampling is already total (perPlayer × playerCount)
-					// So we divide back to get per-player damage
-					const perPlayerDamage = Math.round(damage / playerCount);
-					for (let p = 0; p < playerCount; p++) {
-						if (perPlayerDamage > 0) {
-							playerBreakdown[p].push({
-								type: eventType,
-								source: source.sector,
-								damage: perPlayerDamage
-							});
-							playerDamageTotals[p] += perPlayerDamage;
-						}
+			if (affectsAll) {
+				// TIRED_2, DISASTER_3_5: All players take damage
+				// The damage value from path sampling is already total (perPlayer × playerCount)
+				// So we divide back to get per-player damage
+				const perPlayerDamage = Math.round(damage / playerCount);
+				for (let p = 0; p < playerCount; p++) {
+					if (perPlayerDamage > 0) {
+						playerBreakdown[p].push({
+							type: eventType,
+							source: source.sector,
+							damage: perPlayerDamage
+						});
+						playerDamageTotals[p] += perPlayerDamage;
 					}
-				} else {
-					// ACCIDENT_3_5, ACCIDENT_ROPE_3_5: One random player takes all damage
-					const targetPlayer = Math.floor(Math.random() * playerCount);
-					playerBreakdown[targetPlayer].push({
-						type: eventType,
-						source: source.sector,
-						damage: damage
-					});
-					playerDamageTotals[targetPlayer] += damage;
 				}
-			}
-		} else {
-			// Fallback: COMBINED type without detailed sources
-			// Distribute evenly (legacy behavior)
-			const damage = Math.round(totalDamage || 0);
-			if (damage <= 0) return;
-
-			const perPlayer = Math.floor(damage / playerCount);
-			const remainder = damage % playerCount;
-
-			for (let p = 0; p < playerCount; p++) {
-				const playerDamage = perPlayer + (p < remainder ? 1 : 0);
-				if (playerDamage > 0) {
-					playerBreakdown[p].push({
-						type: type || 'EVENT',
-						source: sources?.[0]?.sectorName || 'COMBINED',
-						damage: playerDamage
-					});
-					playerDamageTotals[p] += playerDamage;
+			} else {
+				// ACCIDENT_3_5, ACCIDENT_ROPE_3_5: One random player takes all damage
+				const targetPlayer = Math.floor(Math.random() * playerCount);
+				
+				// Check for rope immunity: if ACCIDENT_ROPE_3_5 and target has rope, no damage
+				if (eventType === 'ACCIDENT_ROPE_3_5' && this._playerHasRope(players[targetPlayer])) {
+					console.log(`[DamageSpreader] P${targetPlayer + 1} immune to rope damage (has rope)`);
+					// Track the applied effect
+					if (appliedEffects[targetPlayer]) {
+						appliedEffects[targetPlayer].push({ type: 'ROPE', damagePrevented: damage, sector: source.sector });
+					}
+					continue; // Skip this damage
 				}
+				
+				playerBreakdown[targetPlayer].push({
+					type: eventType,
+					source: source.sector,
+					damage: damage
+				});
+				playerDamageTotals[targetPlayer] += damage;
 			}
 		}
 	}
@@ -230,6 +210,22 @@ class DamageSpreader {
 			return EventDamageCalculator.EVENT_DAMAGES[eventType] || null;
 		}
 		return null;
+	}
+
+	/**
+	 * Checks if a player has a rope item.
+	 * 
+	 * @param {Object} player - Player object with items array
+	 * @returns {boolean} - True if player has a rope
+	 * @private
+	 */
+	static _playerHasRope(player) {
+		if (!player || !player.items) return false;
+		return player.items.some(item => {
+			if (!item) return false;
+			const itemId = typeof filenameToId === 'function' ? filenameToId(item) : item.toUpperCase().replace(/\.(png|jpg|gif)$/i, '');
+			return itemId === 'ROPE';
+		});
 	}
 
 	/**

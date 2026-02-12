@@ -317,20 +317,39 @@ class ExpeditionSimulatorApp {
 			const eventInstances = results.eventDamage?.damageInstances || {};
 
 			const damageByScenario = DamageSpreader.distributeAllScenarios(
-				fightInstances, eventInstances, participatingPlayers.length
+				fightInstances, eventInstances, participatingPlayers
 			);
 
 			// Apply Survival reduction per-instance (-1 per damage instance, min 0)
 			const scenarios = Constants.SCENARIO_KEYS;
 			const finalHealth = {};
+			const effectsByScenario = {};
 
 			for (const scenario of scenarios) {
 				const scenarioResult = damageByScenario[scenario];
 				
-				// Apply Survival ability reduction
+				// Start with effects from damage distribution (e.g., rope immunity)
+				const playerEffects = scenarioResult.appliedEffects.map(arr => [...arr]);
+				
+				// Apply Survival ability reduction and track it as an effect
 				const reducedBreakdown = DamageSpreader.applySurvivalReduction(
 					participatingPlayers, scenarioResult.breakdown
 				);
+				
+				// Track Survival reductions as effects
+				for (let i = 0; i < participatingPlayers.length; i++) {
+					const player = participatingPlayers[i];
+					const hasSurvival = player.abilities?.some(a => {
+						if (!a) return false;
+						const id = typeof filenameToId === 'function' ? filenameToId(a) : a.toUpperCase().replace(/\.(png|jpg|gif)$/i, '');
+						return id === 'SURVIVAL';
+					});
+					if (hasSurvival && scenarioResult.breakdown[i]?.length > 0) {
+						// Survival triggered - it reduced some damage
+						const reductions = scenarioResult.breakdown[i].length;
+						playerEffects[i].push({ type: 'SURVIVAL', reductions });
+					}
+				}
 
 				// Calculate per-player total damage after Survival
 				const damagePerPlayer = reducedBreakdown.map(breakdown =>
@@ -341,9 +360,11 @@ class ExpeditionSimulatorApp {
 				finalHealth[scenario] = DamageSpreader.calculateFinalHealth(
 					participatingPlayers, damagePerPlayer
 				);
+				effectsByScenario[scenario] = playerEffects;
 			}
 
 			results.healthByScenario = finalHealth;
+			results.effectsByScenario = effectsByScenario;
 		}
 		
 		// Store participation info for rendering
@@ -367,7 +388,8 @@ class ExpeditionSimulatorApp {
 			const resultsHTML = this._renderExpeditionResults(
 				players, 
 				results.healthByScenario || {}, 
-				results.participationStatus || []
+				results.participationStatus || [],
+				results.effectsByScenario || {}
 			);
 			this._resultsDisplay.setContent(resultsHTML);
 			this._resultsDisplay.showDefaultLegend();
@@ -381,9 +403,10 @@ class ExpeditionSimulatorApp {
 	 * @param {Array} players - Array of player objects
 	 * @param {Object} healthByScenario - { pessimist, average, optimist, worstCase } health arrays
 	 * @param {Array} participationStatus - Participation status for each player
+	 * @param {Object} effectsByScenario - { pessimist, average, optimist, worstCase } effect arrays per player
 	 * @returns {string} - HTML string for expedition results
 	 */
-	_renderExpeditionResults(players, healthByScenario, participationStatus) {
+	_renderExpeditionResults(players, healthByScenario, participationStatus, effectsByScenario = {}) {
 		// Build a map of participating player indices for health lookup
 		let participatingIndex = 0;
 		
@@ -423,6 +446,25 @@ class ExpeditionSimulatorApp {
 			const pessimist = healthByScenario.pessimist?.[participatingIndex] ?? player.health;
 			const worst = healthByScenario.worstCase?.[participatingIndex] ?? player.health;
 			
+			// Get effects for this participating player
+			const optimistEffects = effectsByScenario.optimist?.[participatingIndex] || [];
+			const averageEffects = effectsByScenario.average?.[participatingIndex] || [];
+			const pessimistEffects = effectsByScenario.pessimist?.[participatingIndex] || [];
+			const worstEffects = effectsByScenario.worstCase?.[participatingIndex] || [];
+			
+			// Collect all unique effects for card-level display (deduplicated by type)
+			const allEffects = [optimistEffects, averageEffects, pessimistEffects, worstEffects];
+			const cardLevelEffects = [];
+			const seenCardTypes = new Set();
+			for (const scenarioEffects of allEffects) {
+				for (const effect of scenarioEffects) {
+					if (!seenCardTypes.has(effect.type)) {
+						seenCardTypes.add(effect.type);
+						cardLevelEffects.push(effect);
+					}
+				}
+			}
+			
 			participatingIndex++;
 
 			return `
@@ -444,6 +486,7 @@ class ExpeditionSimulatorApp {
 							${this._renderHealthValue(worst)}
 						</div>
 					</div>
+					${cardLevelEffects.length > 0 ? `<div class="expedition-result-effects">${this._renderEffectIcons(cardLevelEffects)}</div>` : ''}
 				</div>
 			`;
 		}).join('');
@@ -459,6 +502,42 @@ class ExpeditionSimulatorApp {
 			return `<img src="${getResourceURL('pictures/others/dead.png')}" alt="Dead" class="dead-icon" />`;
 		}
 		return `${health}<img src="${getResourceURL('pictures/astro/hp.png')}" alt="HP" class="hp-icon" />`;
+	}
+
+	/**
+	 * Renders effect icons for items/abilities that triggered
+	 * @param {Array} effects - Array of { type, ... } effect objects
+	 * @returns {string} - HTML string with effect icons
+	 */
+	_renderEffectIcons(effects) {
+		if (!effects || effects.length === 0) return '';
+		
+		// Map effect types to their icon paths
+		const effectIcons = {
+			'ROPE': 'pictures/items_exploration/rope.jpg',
+			'SURVIVAL': 'pictures/abilities/survival.png'
+		};
+		
+		// Deduplicate effects by type
+		const seenTypes = new Set();
+		const uniqueEffects = effects.filter(e => {
+			if (seenTypes.has(e.type)) return false;
+			seenTypes.add(e.type);
+			return true;
+		});
+		
+		return uniqueEffects.map(effect => {
+			const iconPath = effectIcons[effect.type];
+			if (!iconPath) return '';
+			
+			const title = effect.type === 'ROPE' 
+				? `Rope blocked ${effect.damagePrevented || '?'} damage`
+				: effect.type === 'SURVIVAL'
+				? `Survival reduced damage (${effect.reductions || '?'} instances)`
+				: effect.type;
+			
+			return `<img src="${getResourceURL(iconPath)}" alt="${effect.type}" class="effect-icon" title="${title}" />`;
+		}).join('');
 	}
 
 	/**
