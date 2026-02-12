@@ -101,8 +101,11 @@ const EventDamageCalculator = {
 			occurrenceWithSources[eventType] = OccurrenceCalculator.calculateForType(sectors, loadout, eventType, sectorProbabilities);
 		}
 
+		// Reference to this for closures
+		const self = this;
+
 		// Build full damage distribution via shared engine
-		const { damage: damageResult, damageInstances, damageDistribution } = DamageDistributionEngine.calculate({
+		const { damage: damageResult, damageInstances, damageDistribution, sampledPaths } = DamageDistributionEngine.calculate({
 			sectors,
 			loadout,
 			sectorProbabilities,
@@ -114,7 +117,7 @@ const EventDamageCalculator = {
 					const eventProb = probs.get(eventType) || 0;
 					if (eventProb <= 0) continue;
 					totalProb += eventProb;
-					const eventInfo = this.EVENT_DAMAGES[eventType];
+					const eventInfo = self.EVENT_DAMAGES[eventType];
 					if (!eventInfo || !eventInfo.getDamageDistribution) continue;
 					const damageDist = eventInfo.getDamageDistribution(playerCount);
 					for (const [damageVal, damageProb] of damageDist) {
@@ -122,6 +125,32 @@ const EventDamageCalculator = {
 					}
 				}
 				return { dist, totalProb };
+			},
+			// Detailed outcomes for path sampling - includes event types
+			getDetailedSectorOutcomes: (sectorName, probs) => {
+				const outcomes = [];
+				let totalProb = 0;
+				for (const eventType of eventTypes) {
+					const eventProb = probs.get(eventType) || 0;
+					if (eventProb <= 0) continue;
+					totalProb += eventProb;
+					const eventInfo = self.EVENT_DAMAGES[eventType];
+					if (!eventInfo || !eventInfo.getDamageDistribution) continue;
+					const damageDist = eventInfo.getDamageDistribution(playerCount);
+					for (const [damageVal, damageProb] of damageDist) {
+						outcomes.push({
+							eventType: eventType,
+							damage: damageVal,
+							probability: eventProb * damageProb
+						});
+					}
+				}
+				// Add "no event" case
+				const noEventProb = Math.max(0, 1 - totalProb);
+				if (noEventProb > 0.0001) {
+					outcomes.push({ eventType: null, damage: 0, probability: noEventProb });
+				}
+				return outcomes;
 			},
 			logLabel: 'EventDamage'
 		});
@@ -137,6 +166,7 @@ const EventDamageCalculator = {
 			damage: damageResult,
 			damageInstances,  // Per-scenario damage instances with sources
 			damageDistribution,  // Full damage distribution for advanced analysis
+			sampledPaths,  // Sampled explaining paths for each scenario
 			playerCount,
 			// Legacy format for backward compatibility
 			// Combine both accident types for display

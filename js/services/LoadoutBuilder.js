@@ -31,11 +31,14 @@ const LoadoutBuilder = {
 			projects.push('ANTIGRAV_PROPELLER');
 		}
 
-		return {
+		const result = {
 			abilities: [...abilities],
 			items: [...items],
 			projects: projects
 		};
+		
+		console.log('[LoadoutBuilder] Built loadout:', result);
+		return result;
 	},
 
 	/**

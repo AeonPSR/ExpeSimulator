@@ -19,6 +19,7 @@ const AbilityModifiers = {
 		if (sectorName !== 'LANDING') {
 			return events;
 		}
+		console.log('[AbilityModifiers] Pilot active: removing TIRED_2, ACCIDENT_3_5, DISASTER_3_5 from LANDING');
 		return EventModifier.removeEvents(events, ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5']);
 	},
 

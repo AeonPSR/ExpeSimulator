@@ -19,6 +19,12 @@ const ModifierApplicator = {
 	apply(sectorConfig, sectorName, loadout) {
 		const config = EventModifier.cloneSectorConfig(sectorConfig);
 		
+		console.log(`[ModifierApplicator] Applying modifiers for ${sectorName}:`, {
+			abilities: loadout.abilities || [],
+			items: loadout.items || [],
+			projects: loadout.projects || []
+		});
+		
 		this._applyAbilities(config.explorationEvents, sectorName, loadout.abilities || []);
 		this._applyItems(config.explorationEvents, sectorName, loadout.items || []);
 		this._applyProjects(config.explorationEvents, sectorName, loadout.projects || []);

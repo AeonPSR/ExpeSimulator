@@ -69,8 +69,11 @@ const FightCalculator = {
 			sectorsByFightType[fightType] = occResult.sectors;
 		}
 
+		// Reference to this for closures
+		const self = this;
+
 		// Build full damage distribution via shared engine
-		const { damage: damageResult, damageInstances, damageDistribution } = DamageDistributionEngine.calculate({
+		const { damage: damageResult, damageInstances, damageDistribution, sampledPaths } = DamageDistributionEngine.calculate({
 			sectors,
 			loadout,
 			sectorProbabilities,
@@ -83,14 +86,39 @@ const FightCalculator = {
 					if (eventProb <= 0) continue;
 					totalProb += eventProb;
 					const fightType = eventName.replace('FIGHT_', '');
-					const damageDistForFight = this._getFightDamageDistribution(fightType, fightingPower);
+					const damageDistForFight = self._getFightDamageDistribution(fightType, fightingPower);
 					for (const [damageVal, damageProb] of damageDistForFight) {
 						dist.set(damageVal, (dist.get(damageVal) || 0) + eventProb * damageProb);
 					}
 				}
 				return { dist, totalProb };
 			},
-			postProcessDistribution: (dist) => this._applyGrenadesToDistribution(dist, grenadeCount),
+			// Detailed outcomes for path sampling - includes fight types
+			getDetailedSectorOutcomes: (sectorName, probs) => {
+				const outcomes = [];
+				let totalProb = 0;
+				for (const [eventName, eventProb] of probs) {
+					if (!eventName.startsWith('FIGHT_')) continue;
+					if (eventProb <= 0) continue;
+					totalProb += eventProb;
+					const fightType = eventName.replace('FIGHT_', '');
+					const damageDistForFight = self._getFightDamageDistribution(fightType, fightingPower);
+					for (const [damageVal, damageProb] of damageDistForFight) {
+						outcomes.push({
+							eventType: eventName,
+							damage: damageVal,
+							probability: eventProb * damageProb
+						});
+					}
+				}
+				// Add "no fight" case
+				const noFightProb = Math.max(0, 1 - totalProb);
+				if (noFightProb > 0.0001) {
+					outcomes.push({ eventType: null, damage: 0, probability: noFightProb });
+				}
+				return outcomes;
+			},
+			postProcessDistribution: (dist) => self._applyGrenadesToDistribution(dist, grenadeCount),
 			logLabel: 'FightDamage'
 		});
 		// Add breakdown for backward compatibility
@@ -101,6 +129,7 @@ const FightCalculator = {
 			damage: damageResult,
 			damageInstances,  // Per-scenario damage instances with sources
 			damageDistribution,  // Full damage distribution for advanced analysis
+			sampledPaths,  // Sampled explaining paths for each scenario
 			fightingPower,
 			grenadeCount,
 			playerCount,
