@@ -5,9 +5,9 @@
  * 
  * Distribution rules:
  * - Combat (FIGHT_*): Each unit of damage is randomly assigned to a player
- * - ACCIDENT_3_5: Single random player takes all damage
- * - TIRED_2: All players take the damage
- * - DISASTER_3_5: All players take the damage
+ * - ACCIDENT_3_5 / ACCIDENT_ROPE_3_5: Single random player takes all damage
+ * - TIRED_2: All players take the damage (2 each)
+ * - DISASTER_3_5: All players take the damage (3-5 each)
  */
 class DamageSpreader {
 	/**
@@ -70,6 +70,27 @@ class DamageSpreader {
 			result[scenario] = this.distribute(fightInstances, eventInstances, playerCount);
 		}
 
+		// Debug logging
+		if (playerCount > 0) {
+			console.log('[DamageSpreader] === DAMAGE ATTRIBUTION ===');
+			for (const scenario of scenarios) {
+				const totals = result[scenario].totalDamage;
+				const breakdown = result[scenario].breakdown;
+				const totalSum = totals.reduce((a, b) => a + b, 0);
+				if (totalSum > 0) {
+					const playerDesc = totals.map((dmg, i) => `P${i + 1}:${dmg}`).join(' ');
+					console.log(`[DamageSpreader] ${scenario} (total=${totalSum}): ${playerDesc}`);
+					// Show breakdown details for first player with damage
+					for (let i = 0; i < breakdown.length; i++) {
+						if (breakdown[i].length > 0) {
+							const details = breakdown[i].map(b => `${b.type}@${b.source}(${b.damage})`).join(', ');
+							console.log(`[DamageSpreader]   P${i + 1}: ${details}`);
+						}
+					}
+				}
+			}
+		}
+
 		return result;
 	}
 
@@ -87,22 +108,44 @@ class DamageSpreader {
 		if (playerCount === 0) return;
 
 		const { type, totalDamage, sources } = instance;
-		const damage = Math.round(totalDamage || 0);
 
-		for (let d = 0; d < damage; d++) {
-			const targetPlayer = Math.floor(Math.random() * playerCount);
-			playerBreakdown[targetPlayer].push({
-				type: type || 'FIGHT',
-				source: sources?.[0]?.sectorName || 'COMBINED',
-				damage: 1
-			});
-			playerDamageTotals[targetPlayer]++;
+		// If we have detailed sources from path sampling, use them
+		if (sources && sources.length > 0 && sources[0].eventType) {
+			for (const source of sources) {
+				const damage = Math.round(source.damage || 0);
+				if (damage <= 0) continue;
+
+				// Fight damage: distribute each point randomly
+				for (let d = 0; d < damage; d++) {
+					const targetPlayer = Math.floor(Math.random() * playerCount);
+					playerBreakdown[targetPlayer].push({
+						type: source.eventType,
+						source: source.sector,
+						damage: 1
+					});
+					playerDamageTotals[targetPlayer]++;
+				}
+			}
+		} else {
+			// Fallback: COMBINED type without detailed sources
+			const damage = Math.round(totalDamage || 0);
+			for (let d = 0; d < damage; d++) {
+				const targetPlayer = Math.floor(Math.random() * playerCount);
+				playerBreakdown[targetPlayer].push({
+					type: type || 'FIGHT',
+					source: sources?.[0]?.sectorName || 'COMBINED',
+					damage: 1
+				});
+				playerDamageTotals[targetPlayer]++;
+			}
 		}
 	}
 
 	/**
 	 * Distributes damage from an event instance.
-	 * Distributes evenly among all players.
+	 * Uses event type information to determine distribution:
+	 * - affectsAll: true → all players take the full damage
+	 * - affectsAll: false → one random player takes all damage
 	 * 
 	 * @param {Object} instance - { type, totalDamage, sources }
 	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
@@ -114,25 +157,79 @@ class DamageSpreader {
 		if (playerCount === 0) return;
 
 		const { type, totalDamage, sources } = instance;
-		const damage = Math.round(totalDamage || 0);
-		if (damage <= 0) return;
 
-		// For COMBINED type from distribution, we don't know exact event breakdown
-		// Distribute evenly among players (simulating average spread)
-		const perPlayer = Math.floor(damage / playerCount);
-		const remainder = damage % playerCount;
+		// If we have detailed sources from path sampling, use them
+		if (sources && sources.length > 0 && sources[0].eventType) {
+			for (const source of sources) {
+				const damage = Math.round(source.damage || 0);
+				if (damage <= 0) continue;
 
-		for (let p = 0; p < playerCount; p++) {
-			const playerDamage = perPlayer + (p < remainder ? 1 : 0);
-			if (playerDamage > 0) {
-				playerBreakdown[p].push({
-					type: type || 'EVENT',
-					source: sources?.[0]?.sectorName || 'COMBINED',
-					damage: playerDamage
-				});
-				playerDamageTotals[p] += playerDamage;
+				const eventType = source.eventType;
+				const eventInfo = this._getEventInfo(eventType);
+				const affectsAll = eventInfo?.affectsAll ?? false;
+
+				if (affectsAll) {
+					// TIRED_2, DISASTER_3_5: All players take damage
+					// The damage value from path sampling is already total (perPlayer × playerCount)
+					// So we divide back to get per-player damage
+					const perPlayerDamage = Math.round(damage / playerCount);
+					for (let p = 0; p < playerCount; p++) {
+						if (perPlayerDamage > 0) {
+							playerBreakdown[p].push({
+								type: eventType,
+								source: source.sector,
+								damage: perPlayerDamage
+							});
+							playerDamageTotals[p] += perPlayerDamage;
+						}
+					}
+				} else {
+					// ACCIDENT_3_5, ACCIDENT_ROPE_3_5: One random player takes all damage
+					const targetPlayer = Math.floor(Math.random() * playerCount);
+					playerBreakdown[targetPlayer].push({
+						type: eventType,
+						source: source.sector,
+						damage: damage
+					});
+					playerDamageTotals[targetPlayer] += damage;
+				}
+			}
+		} else {
+			// Fallback: COMBINED type without detailed sources
+			// Distribute evenly (legacy behavior)
+			const damage = Math.round(totalDamage || 0);
+			if (damage <= 0) return;
+
+			const perPlayer = Math.floor(damage / playerCount);
+			const remainder = damage % playerCount;
+
+			for (let p = 0; p < playerCount; p++) {
+				const playerDamage = perPlayer + (p < remainder ? 1 : 0);
+				if (playerDamage > 0) {
+					playerBreakdown[p].push({
+						type: type || 'EVENT',
+						source: sources?.[0]?.sectorName || 'COMBINED',
+						damage: playerDamage
+					});
+					playerDamageTotals[p] += playerDamage;
+				}
 			}
 		}
+	}
+
+	/**
+	 * Gets event info from EventDamageCalculator.
+	 * Returns null if event type not found.
+	 * 
+	 * @param {string} eventType - The event type (e.g., 'TIRED_2', 'ACCIDENT_3_5')
+	 * @returns {Object|null} - Event info with affectsAll, min, max, etc.
+	 * @private
+	 */
+	static _getEventInfo(eventType) {
+		if (typeof EventDamageCalculator !== 'undefined' && EventDamageCalculator.EVENT_DAMAGES) {
+			return EventDamageCalculator.EVENT_DAMAGES[eventType] || null;
+		}
+		return null;
 	}
 
 	/**
