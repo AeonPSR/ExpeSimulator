@@ -230,7 +230,8 @@ class DamageSpreader {
 
 	/**
 	 * Applies Survival ability reduction to damage breakdown.
-	 * Survival reduces each damage instance by 1 (minimum 0 per instance).
+	 * Survival reduces damage by 1 from the FIRST instance of each unique damage source.
+	 * Works on ALL damage types (combat, accidents, disasters).
 	 * 
 	 * @param {Array<Object>} players - Player objects
 	 * @param {Array<Array>} damageBreakdown - Damage breakdown per player
@@ -250,11 +251,76 @@ class DamageSpreader {
 				return playerBreakdown;
 			}
 			
-			// Apply -1 to each damage instance (minimum 0 per instance)
-			return playerBreakdown.map(instance => ({
-				...instance,
-				damage: Math.max(0, instance.damage - 1)
-			}));
+			// Track which sources we've already reduced
+			const reducedSources = new Set();
+			
+			return playerBreakdown.map(instance => {
+				// Create unique key for this damage source
+				const sourceKey = `${instance.type}@${instance.source}`;
+				
+				// If this is the first instance from this source, reduce it by 1
+				if (!reducedSources.has(sourceKey)) {
+					reducedSources.add(sourceKey);
+					return {
+						...instance,
+						damage: Math.max(0, instance.damage - 1)
+					};
+				}
+				
+				// Keep subsequent instances unchanged
+				return instance;
+			}).filter(inst => inst.damage > 0);  // Remove instances with 0 damage
+		});
+	}
+
+	/**
+	 * Applies Armor item reduction to damage breakdown.
+	 * Armor reduces damage by 1 from the FIRST combat instance from each unique fight.
+	 * Only affects FIGHT_* events, not accidents or disasters.
+	 * 
+	 * @param {Array<Object>} players - Player objects
+	 * @param {Array<Array>} damageBreakdown - Damage breakdown per player
+	 * @returns {Array<Array>} - Modified damage breakdown with Armor applied
+	 */
+	static applyArmorReduction(players, damageBreakdown) {
+		return damageBreakdown.map((playerBreakdown, playerIndex) => {
+			const player = players[playerIndex];
+			
+			// Check if player has Armor item
+			const hasArmor = player?.items?.some(item => {
+				if (!item) return false;
+				return filenameToId(item) === 'PLASTENITE_ARMOR';
+			});
+			
+			if (!hasArmor) {
+				return playerBreakdown;
+			}
+			
+			// Track which fights we've already reduced
+			const reducedFights = new Set();
+			
+			return playerBreakdown.map(instance => {
+				// Only reduce combat damage
+				const isCombat = instance.type?.startsWith('FIGHT_');
+				if (!isCombat) {
+					return instance;  // Keep non-combat unchanged
+				}
+				
+				// Create unique key for this fight encounter
+				const fightKey = `${instance.type}@${instance.source}`;
+				
+				// If this is the first instance from this fight, reduce it by 1
+				if (!reducedFights.has(fightKey)) {
+					reducedFights.add(fightKey);
+					return {
+						...instance,
+						damage: Math.max(0, instance.damage - 1)
+					};
+				}
+				
+				// Keep subsequent instances unchanged
+				return instance;
+			}).filter(inst => inst.damage > 0);  // Remove instances with 0 damage
 		});
 	}
 

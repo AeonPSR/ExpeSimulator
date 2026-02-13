@@ -331,12 +331,15 @@ class ExpeditionSimulatorApp {
 				// Start with effects from damage distribution (e.g., rope immunity)
 				const playerEffects = scenarioResult.appliedEffects.map(arr => [...arr]);
 				
+				// Track original breakdown for comparison
+				const originalBreakdown = scenarioResult.breakdown;
+				
 				// Apply Survival ability reduction and track it as an effect
-				const reducedBreakdown = DamageSpreader.applySurvivalReduction(
-					participatingPlayers, scenarioResult.breakdown
+				let modifiedBreakdown = DamageSpreader.applySurvivalReduction(
+					participatingPlayers, originalBreakdown
 				);
 				
-				// Track Survival reductions as effects
+				// Track Survival reductions as effects (compare before/after)
 				for (let i = 0; i < participatingPlayers.length; i++) {
 					const player = participatingPlayers[i];
 					const hasSurvival = player.abilities?.some(a => {
@@ -344,15 +347,44 @@ class ExpeditionSimulatorApp {
 						const id = typeof filenameToId === 'function' ? filenameToId(a) : a.toUpperCase().replace(/\.(png|jpg|gif)$/i, '');
 						return id === 'SURVIVAL';
 					});
-					if (hasSurvival && scenarioResult.breakdown[i]?.length > 0) {
-						// Survival triggered - it reduced some damage
-						const reductions = scenarioResult.breakdown[i].length;
-						playerEffects[i].push({ type: 'SURVIVAL', reductions });
+					if (hasSurvival) {
+						const originalDamage = originalBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
+						const afterSurvivalDamage = modifiedBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
+						const damageReduced = originalDamage - afterSurvivalDamage;
+						if (damageReduced > 0) {
+							playerEffects[i].push({ type: 'SURVIVAL', reductions: damageReduced });
+						}
 					}
 				}
 
-				// Calculate per-player total damage after Survival
-				const damagePerPlayer = reducedBreakdown.map(breakdown =>
+				// Store breakdown after Survival for Armor comparison
+				const afterSurvivalBreakdown = modifiedBreakdown;
+				
+				// Apply Armor item reduction (only to combat damage)
+				modifiedBreakdown = DamageSpreader.applyArmorReduction(
+					participatingPlayers, modifiedBreakdown
+				);
+				
+				// Track Armor reductions as effects (compare before/after)
+				for (let i = 0; i < participatingPlayers.length; i++) {
+					const player = participatingPlayers[i];
+					const hasArmor = player.items?.some(item => {
+						if (!item) return false;
+						const id = typeof filenameToId === 'function' ? filenameToId(item) : item.toUpperCase().replace(/\.(png|jpg|gif)$/i, '');
+						return id === 'PLASTENITE_ARMOR';
+					});
+					if (hasArmor) {
+						const beforeArmorDamage = afterSurvivalBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
+						const afterArmorDamage = modifiedBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
+						const damageReduced = beforeArmorDamage - afterArmorDamage;
+						if (damageReduced > 0) {
+							playerEffects[i].push({ type: 'PLASTENITE_ARMOR', reductions: damageReduced });
+						}
+					}
+				}
+
+				// Calculate per-player total damage after all reductions
+				const damagePerPlayer = modifiedBreakdown.map(breakdown =>
 					breakdown.reduce((sum, inst) => sum + inst.damage, 0)
 				);
 
@@ -515,7 +547,8 @@ class ExpeditionSimulatorApp {
 		// Map effect types to their icon paths
 		const effectIcons = {
 			'ROPE': 'pictures/items_exploration/rope.jpg',
-			'SURVIVAL': 'pictures/abilities/survival.png'
+			'SURVIVAL': 'pictures/abilities/survival.png',
+			'PLASTENITE_ARMOR': 'pictures/items_exploration/plastenite_armor.jpg'
 		};
 		
 		// Deduplicate effects by type
@@ -533,7 +566,9 @@ class ExpeditionSimulatorApp {
 			const title = effect.type === 'ROPE' 
 				? `Rope blocked ${effect.damagePrevented || '?'} damage`
 				: effect.type === 'SURVIVAL'
-				? `Survival reduced damage (${effect.reductions || '?'} instances)`
+				? `Survival reduced ${effect.reductions || '?'} damage`
+				: effect.type === 'PLASTENITE_ARMOR'
+				? `Armor reduced ${effect.reductions || '?'} combat damage`
 				: effect.type;
 			
 			return `<img src="${getResourceURL(iconPath)}" alt="${effect.type}" class="effect-icon" title="${title}" />`;
