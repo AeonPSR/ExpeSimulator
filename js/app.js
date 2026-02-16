@@ -331,52 +331,34 @@ class ExpeditionSimulatorApp {
 				// Start with effects from damage distribution (e.g., rope immunity)
 				const playerEffects = scenarioResult.appliedEffects.map(arr => [...arr]);
 				
-				// Track original breakdown for comparison
-				const originalBreakdown = scenarioResult.breakdown;
-				
-				// Apply Survival ability reduction and track it as an effect
-				let modifiedBreakdown = DamageSpreader.applySurvivalReduction(
-					participatingPlayers, originalBreakdown
-				);
-				
-				// Track Survival reductions as effects (compare before/after)
-				for (let i = 0; i < participatingPlayers.length; i++) {
-					const player = participatingPlayers[i];
-					const hasSurvival = player.abilities?.some(a => {
-						if (!a) return false;
-						return filenameToId(a) === 'SURVIVAL';
-					});
-					if (hasSurvival) {
-						const originalDamage = originalBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
-						const afterSurvivalDamage = modifiedBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
-						const damageReduced = originalDamage - afterSurvivalDamage;
-						if (damageReduced > 0) {
-							playerEffects[i].push({ type: 'SURVIVAL', reductions: damageReduced });
-						}
+				// Reduction steps: each applies a reduction and tracks it as an effect
+				const reductionSteps = [
+					{
+						apply: (players, breakdown) => DamageSpreader.applySurvivalReduction(players, breakdown),
+						hasEffect: player => player.abilities?.some(a => a && filenameToId(a) === 'SURVIVAL'),
+						effectType: 'SURVIVAL'
+					},
+					{
+						apply: (players, breakdown) => DamageSpreader.applyArmorReduction(players, breakdown),
+						hasEffect: player => player.items?.some(item => item && filenameToId(item) === 'PLASTENITE_ARMOR'),
+						effectType: 'PLASTENITE_ARMOR'
 					}
-				}
+				];
 
-				// Store breakdown after Survival for Armor comparison
-				const afterSurvivalBreakdown = modifiedBreakdown;
-				
-				// Apply Armor item reduction (only to combat damage)
-				modifiedBreakdown = DamageSpreader.applyArmorReduction(
-					participatingPlayers, modifiedBreakdown
-				);
-				
-				// Track Armor reductions as effects (compare before/after)
-				for (let i = 0; i < participatingPlayers.length; i++) {
-					const player = participatingPlayers[i];
-					const hasArmor = player.items?.some(item => {
-						if (!item) return false;
-						return filenameToId(item) === 'PLASTENITE_ARMOR';
-					});
-					if (hasArmor) {
-						const beforeArmorDamage = afterSurvivalBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
-						const afterArmorDamage = modifiedBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
-						const damageReduced = beforeArmorDamage - afterArmorDamage;
-						if (damageReduced > 0) {
-							playerEffects[i].push({ type: 'PLASTENITE_ARMOR', reductions: damageReduced });
+				let modifiedBreakdown = scenarioResult.breakdown;
+				for (const step of reductionSteps) {
+					const beforeBreakdown = modifiedBreakdown;
+					modifiedBreakdown = step.apply(participatingPlayers, beforeBreakdown);
+					
+					// Track reductions as effects (compare before/after)
+					for (let i = 0; i < participatingPlayers.length; i++) {
+						if (step.hasEffect(participatingPlayers[i])) {
+							const beforeDamage = beforeBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
+							const afterDamage = modifiedBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
+							const damageReduced = beforeDamage - afterDamage;
+							if (damageReduced > 0) {
+								playerEffects[i].push({ type: step.effectType, reductions: damageReduced });
+							}
 						}
 					}
 				}
