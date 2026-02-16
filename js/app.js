@@ -337,10 +337,27 @@ class ExpeditionSimulatorApp {
 
 	_updateDisplays() {
 		this._sectorGrid?.updateSectorAvailability?.();
+		this._updateExploredSectors();
 		this._updateFightingPower();
 		const results = this._calculateExpeditionResults();
 		this._updateProbabilityDisplay(results);
 		this._updateResultsDisplay(results);
+	}
+
+	_updateExploredSectors() {
+		// Base sectors: 9 for icarus, 3 for patrol
+		const mode = this._playerSection?.getMode?.() || 'icarus';
+		let sectors = mode === 'icarus' ? 9 : 3;
+
+		// +1 for each player with the Sprint ability
+		const allPlayers = this._state.getPlayers();
+		for (const player of allPlayers) {
+			if (player.abilities && player.abilities.includes('sprint.png')) {
+				sectors += 1;
+			}
+		}
+
+		this._playerSection?.setExploredSectors?.(sectors);
 	}
 
 	_updateFightingPower() {

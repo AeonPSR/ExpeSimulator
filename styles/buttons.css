@@ -477,6 +477,45 @@
 }
 
 /* ==========================================================================
+   Explored Sectors Button
+   ========================================================================== */
+
+.explored-sectors-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #3498db;
+	border-radius: 4px;
+	background: rgba(52, 152, 219, 0.3);
+	cursor: default;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	margin-left: 5px;
+	font-size: 14px;
+	font-weight: bold;
+	color: #ecf0f1;
+}
+
+.explored-sectors-btn .explored-sectors-icon {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	bottom: -5px;
+	left: -5px;
+	pointer-events: none;
+	z-index: 2;
+	border-radius: 0;
+	object-fit: contain;
+}
+
+.explored-sectors-btn:hover {
+	border-color: #2980b9;
+	background: rgba(52, 152, 219, 0.5);
+}
+
+/* ==========================================================================
    Fighting Power Button
    ========================================================================== */
 
@@ -492,7 +531,6 @@
 	align-items: center;
 	justify-content: center;
 	position: relative;
-	margin-left: 5px;
 	font-size: 14px;
 	font-weight: bold;
 	color: #ecf0f1;

@@ -33,11 +33,14 @@ class PlayerSection extends Component {
 		// State
 		this._currentMode = 'icarus';
 		this._fightingPower = 0;
+		this._exploredSectors = 9;
 		this._playerCards = [];
 
 		// Internal references
 		this._playersContainer = null;
 		this._addPlayerBtn = null;
+		this._exploredSectorsBtn = null;
+		this._exploredSectorsValue = null;
 		this._fightingPowerBtn = null;
 		this._fightingPowerValue = null;
 		this._modeBtn = null;
@@ -85,6 +88,21 @@ class PlayerSection extends Component {
 
 		// Controls container
 		const controls = this.createElement('div', { className: 'players-controls' });
+
+		// Explored sectors button (display only)
+		this._exploredSectorsBtn = this.createElement('button', {
+			id: 'explored-sectors-btn',
+			className: 'explored-sectors-btn'
+		});
+		this._exploredSectorsValue = this.createElement('span', { id: 'explored-sectors-value' }, '9');
+		this._exploredSectorsBtn.appendChild(this._exploredSectorsValue);
+		const esIcon = this.createElement('img', {
+			src: this.getResourceURL('pictures/abilities/sprint.png'),
+			alt: 'Explored Sectors',
+			className: 'explored-sectors-icon'
+		});
+		this._exploredSectorsBtn.appendChild(esIcon);
+		controls.appendChild(this._exploredSectorsBtn);
 
 		// Fighting power button (display only)
 		this._fightingPowerBtn = this.createElement('button', {
@@ -222,6 +240,28 @@ class PlayerSection extends Component {
 		if (this._addPlayerBtn) {
 			this._addPlayerBtn.style.display = this._playerCards.length >= this.maxPlayers ? 'none' : 'flex';
 		}
+	}
+
+	/**
+	 * Updates the explored sectors display
+	 * @param {number} count
+	 */
+	setExploredSectors(count) {
+		this._exploredSectors = count;
+		if (this._exploredSectorsValue) {
+			this._exploredSectorsValue.textContent = count.toString();
+			console.log('Explored sectors UI updated to:', count);
+		} else {
+			console.warn('_exploredSectorsValue element not found');
+		}
+	}
+
+	/**
+	 * Gets the current explored sectors count
+	 * @returns {number}
+	 */
+	getExploredSectors() {
+		return this._exploredSectors;
 	}
 
 	/**

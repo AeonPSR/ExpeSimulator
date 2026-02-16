@@ -102,6 +102,20 @@ class PlayerCard extends Component {
 	}
 
 	/**
+	 * Gets the display icon for an ability, applying easter eggs
+	 * @private
+	 * @param {string} abilityFile - The ability filename (e.g. 'sprint.png')
+	 * @returns {string} The icon path to use
+	 */
+	_getAbilityIcon(abilityFile) {
+		// Easter egg: Terrence + Sprint = sprinter_disabled
+		if (abilityFile === 'sprint.png' && this.player.avatar === 'terrence.png') {
+			return this.getResourceURL('pictures/abilities/sprinter_disabled.png');
+		}
+		return this.getResourceURL(`pictures/abilities/${abilityFile}`);
+	}
+
+	/**
 	 * Creates the abilities row
 	 * @private
 	 * @returns {HTMLElement}
@@ -123,7 +137,7 @@ class PlayerCard extends Component {
 
 			if (ability) {
 				const img = this.createElement('img', {
-					src: this.getResourceURL(`pictures/abilities/${ability}`),
+					src: this._getAbilityIcon(ability),
 					alt: 'Ability'
 				});
 				slot.appendChild(img);
@@ -226,6 +240,16 @@ class PlayerCard extends Component {
 		if (img) {
 			img.src = this.getResourceURL(`pictures/characters/${avatarFile}`);
 		}
+		// Refresh ability icons (easter egg: Terrence + Sprint)
+		for (let i = 0; i < this.player.abilities.length; i++) {
+			const ability = this.player.abilities[i];
+			if (ability === 'sprint.png') {
+				const slot = this.element?.querySelector(`[data-type="ability"][data-slot="${i}"] img`);
+				if (slot) {
+					slot.src = this._getAbilityIcon(ability);
+				}
+			}
+		}
 	}
 
 	/**
@@ -240,7 +264,7 @@ class PlayerCard extends Component {
 			slot.innerHTML = '';
 			if (abilityFile) {
 				const img = this.createElement('img', {
-					src: this.getResourceURL(`pictures/abilities/${abilityFile}`),
+					src: this._getAbilityIcon(abilityFile),
 					alt: 'Ability'
 				});
 				slot.appendChild(img);
