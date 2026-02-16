@@ -212,17 +212,19 @@
 	text-align: center;
 }
 
-.legend-items {
-	display: flex;
-	justify-content: space-between;
-	gap: 5px;
+.expedition-legend .legend-items {
+	display: flex !important;
+	flex-direction: row !important;
+	justify-content: space-between !important;
+	gap: 5px !important;
+	align-items: stretch !important;
 }
 
-.legend-item {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	flex: 1;
+.expedition-legend .legend-item {
+	display: flex !important;
+	flex-direction: column !important;
+	align-items: center !important;
+	flex: 1 !important;
 }
 
 .legend-color {
