@@ -14,6 +14,7 @@ class ExpeditionSimulatorApp {
 		this._sectorGrid = null;
 		this._selectedSectorsComponent = null;
 		this._exampleWorlds = null;
+		this._tabContainer = null;
 		this._playerSection = null;
 		this._probabilityDisplay = null;
 		this._resultsDisplay = null;
@@ -65,6 +66,26 @@ class ExpeditionSimulatorApp {
 		});
 		this._exampleWorlds.mount(contentArea);
 
+		// Tabs: Planetary Review (future) and Expedition Simulation
+		this._tabContainer = new TabContainer({
+			tabs: [
+				{ id: 'planetary-review', label: 'Planetary Review' },
+				{ id: 'expedition-sim', label: 'Expedition Simulation' }
+			],
+			activeTab: 'expedition-sim'
+		});
+		this._tabContainer.mount(contentArea);
+
+		const reviewPanel = this._tabContainer.getTabPanel('planetary-review');
+		const simPanel = this._tabContainer.getTabPanel('expedition-sim');
+
+		// Planetary Review tab — placeholder for now
+		const placeholder = document.createElement('p');
+		placeholder.style.cssText = 'color: #95a5a6; font-style: italic; text-align: center; padding: 20px 0;';
+		placeholder.textContent = 'Coming soon — planetary analysis will appear here.';
+		reviewPanel.appendChild(placeholder);
+
+		// Expedition Simulation tab — existing components
 		this._playerSection = new PlayerSection({
 			maxPlayers: Constants.MAX_PLAYERS,
 			getResourceURL: getResourceURL,
@@ -73,13 +94,13 @@ class ExpeditionSimulatorApp {
 			onAntigravToggle: (active) => this._state.setAntigravActive(active),
 			onBaseToggle: (active) => this._state.setCentauriActive(active)
 		});
-		this._playerSection.mount(contentArea);
+		this._playerSection.mount(simPanel);
 
 		this._probabilityDisplay = new ProbabilityDisplay();
-		this._probabilityDisplay.mount(contentArea);
+		this._probabilityDisplay.mount(simPanel);
 
 		this._resultsDisplay = new ResultsDisplay();
-		this._resultsDisplay.mount(contentArea);
+		this._resultsDisplay.mount(simPanel);
 
 		this._selectedSectorsComponent.update(this._state.getSectors());
 		
