@@ -154,6 +154,11 @@ class Modal extends Component {
 	 * @returns {Modal} this for chaining
 	 */
 	open() {
+		// Keep the panel open while modal is visible
+		const panel = document.getElementById('expedition-simulator');
+		if (panel) {
+			panel.classList.add('modal-open');
+		}
 		this.mount(document.body);
 		return this;
 	}
@@ -163,6 +168,16 @@ class Modal extends Component {
 	 * @param {*} [result] - Optional result to pass to onClose callback
 	 */
 	close(result = null) {
+		// Keep panel open for 2s after modal closes
+		const panel = document.getElementById('expedition-simulator');
+		if (panel) {
+			setTimeout(() => {
+				// Only remove if no other modal is still open
+				if (!document.querySelector('.character-selection-modal')) {
+					panel.classList.remove('modal-open');
+				}
+			}, 2000);
+		}
 		if (this.onCloseCallback) {
 			this.onCloseCallback(result);
 		}

@@ -14,7 +14,7 @@
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	color: #ecf0f1;
 	transform: translateX(-400px); /* Comment to lock panel open */
-	transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s;
 	overflow: visible;
 	display: flex;
 	pointer-events: auto;
@@ -30,6 +30,7 @@
 
 #expedition-simulator:hover {
 	transform: translateX(0);
+	transition-delay: 0s;
 }
 
 #expedition-simulator.collapsed {
@@ -43,6 +44,11 @@
 
 /* Import mode - temporarily force panel open */
 #expedition-simulator.import-open {
+	transform: translateX(0);
+}
+
+/* Modal open - keep panel open while a modal is visible */
+#expedition-simulator.modal-open {
 	transform: translateX(0);
 }
 
