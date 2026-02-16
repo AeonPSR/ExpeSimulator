@@ -391,9 +391,13 @@ const AbilityEffects = {
 	},
 	'tracker': {
 		name: 'Tracker',
-		description: 'Allows to see the content of unexplored sectors',
+		description: 'Removes KILL_LOST event from LOST sector',
 		effects: {
-			revealUnexploredSectors: true
+			sectorModifications: {
+				'LOST': {
+					removeEvents: ['KILL_LOST']
+				}
+			}
 		}
 	},
 	'traitor': {

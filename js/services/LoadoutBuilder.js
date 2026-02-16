@@ -43,7 +43,7 @@ const LoadoutBuilder = {
 
 	/**
 	 * Collects abilities from a player, converting to identifiers.
-	 * Skillful expands to include DIPLOMACY effect.
+	 * Expands ability aliases (e.g. Skillful → Diplomacy + Botanic).
 	 * @private
 	 */
 	_collectAbilities(player, abilities) {
@@ -51,9 +51,12 @@ const LoadoutBuilder = {
 			if (ability) {
 				const id = filenameToId(ability);
 				abilities.add(id);
-				// Skillful grants Diplomacy effect
-				if (id === 'SKILLFUL') {
-					abilities.add('DIPLOMACY');
+				// Expand aliases (e.g. SKILLFUL → DIPLOMACY, BOTANIC)
+				const aliases = Constants.ABILITY_ALIASES[id];
+				if (aliases) {
+					for (const alias of aliases) {
+						abilities.add(alias);
+					}
 				}
 			}
 		}

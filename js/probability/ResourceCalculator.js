@@ -250,7 +250,7 @@ const ResourceCalculator = {
 
 	/**
 	 * Counts modifiers from raw player data.
-	 * Skillful counts as Botanic for fruit bonus.
+	 * Uses ABILITY_ALIASES to expand abilities (e.g. Skillful counts as Botanic).
 	 * @private
 	 */
 	_countModifiers(players) {
@@ -263,8 +263,12 @@ const ResourceCalculator = {
 				for (const ability of player.abilities) {
 					if (ability) {
 						const id = filenameToId(ability);
-						if (id === 'BOTANIC' || id === 'SKILLFUL') botanistCount++;
-						if (id === 'SURVIVAL') survivalCount++;
+						// Collect this ability + any aliases it grants
+						const effectiveAbilities = [id, ...(Constants.ABILITY_ALIASES[id] || [])];
+						for (const eid of effectiveAbilities) {
+							if (eid === 'BOTANIC') botanistCount++;
+							if (eid === 'SURVIVAL') survivalCount++;
+						}
 					}
 				}
 			}

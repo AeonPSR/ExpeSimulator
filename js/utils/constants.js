@@ -24,6 +24,11 @@ const Constants = {
 	CSS: {
 		DIPLOMACY_ACTIVE: 'diplomacy-active',
 		SECTOR_DISABLED: 'sector-disabled'
+	},
+
+	// Ability aliases: abilities that grant effects of other abilities
+	ABILITY_ALIASES: {
+		SKILLFUL: ['DIPLOMACY', 'BOTANIC']
 	}
 };
 
