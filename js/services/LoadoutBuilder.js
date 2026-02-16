@@ -49,7 +49,7 @@ const LoadoutBuilder = {
 	_collectAbilities(player, abilities) {
 		for (const ability of player.abilities || []) {
 			if (ability) {
-				const id = this.filenameToId(ability);
+				const id = filenameToId(ability);
 				abilities.add(id);
 				// Skillful grants Diplomacy effect
 				if (id === 'SKILLFUL') {
@@ -66,22 +66,12 @@ const LoadoutBuilder = {
 	_collectItems(player, items) {
 		for (const item of player.items || []) {
 			if (item) {
-				items.add(this.filenameToId(item));
+				items.add(filenameToId(item));
 			}
 		}
 	},
 
-	/**
-	 * Converts a filename to a backend identifier.
-	 * 'pilot.png' -> 'PILOT'
-	 * 'white_flag.jpg' -> 'WHITE_FLAG'
-	 * 
-	 * @param {string} filename - The filename (e.g., 'pilot.png')
-	 * @returns {string} The identifier (e.g., 'PILOT')
-	 */
-	filenameToId(filename) {
-		return filenameToId(filename);
-	},
+
 
 	/**
 	 * Converts an identifier back to a filename.

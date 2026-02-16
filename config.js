@@ -336,50 +336,6 @@ const PlanetSectorConfigData = [
 	},
 ];
 
-// Event descriptions for better UX
-const EventDescriptions = {
-	'NOTHING_TO_REPORT': 'Nothing to Report',
-	'TIRED_2': 'Tired (-2 HP to all players)',
-	'ACCIDENT_3_5': 'Accident (3-5 damage to one player)',
-	'ACCIDENT_ROPE_3_5': 'Accident (3-5 damage, rope immune)',
-	'DISASTER_3_5': 'Disaster (3-5 damage to all players)',
-	'HARVEST_1': 'Harvest +1 Alien Fruit',
-	'HARVEST_2': 'Harvest +2 Alien Fruits',
-	'HARVEST_3': 'Harvest +3 Alien Fruits',
-	'AGAIN': 'Sector Unexplored (reroll needed)',
-	'DISEASE': 'Disease',
-	'PLAYER_LOST': 'Player Lost (adds Lost event)',
-	'FUEL_1': 'Fuel +1',
-	'FUEL_2': 'Fuel +2',
-	'FUEL_3': 'Fuel +3',
-	'FUEL_4': 'Fuel +4',
-	'FUEL_5': 'Fuel +5',
-	'FUEL_6': 'Fuel +6',
-	'PROVISION_1': 'Provision +1 Steak',
-	'PROVISION_2': 'Provision +2 Steaks',
-	'PROVISION_3': 'Provision +3 Steaks',
-	'PROVISION_4': 'Provision +4 Steaks',
-	'ARTEFACT': 'Artefact Found',
-	'FIGHT_8': 'Fight (8 damage split among players)',
-	'FIGHT_10': 'Fight (10 damage split among players)',
-	'FIGHT_12': 'Fight (12 damage split among players)',
-	'FIGHT_15': 'Fight (15 damage split among players)',
-	'FIGHT_18': 'Fight (18 damage split among players)',
-	'FIGHT_32': 'Fight (32 damage split among players)',
-	'FIGHT_8_10_12_15_18_32': 'Fight (8-32 damage split among players)',
-	'ITEM_LOST': 'Item Lost',
-	'KILL_RANDOM': 'Kill Random Player',
-	'BACK': 'Go Back (forced retreat)',
-	'KILL_ALL': 'Kill All Players',
-	'FIND_LOST': 'Find Lost Player',
-	'KILL_LOST': 'Kill Lost Player',
-	'MUSH_TRAP': 'Mush Trap',
-	'STARMAP': 'Starmap Found',
-	'OXYGEN_8': 'Oxygen +8',
-	'OXYGEN_16': 'Oxygen +16',
-	'OXYGEN_24': 'Oxygen +24'
-};
-
 // Ability Effects Configuration
 const AbilityEffects = {
 	'survival': {
@@ -448,28 +404,6 @@ const AbilityEffects = {
 		}
 	}
 };
-
-// Negative Events Configuration - events that are considered harmful/negative
-const NegativeEvents = [
-	'TIRED_2',
-	'ACCIDENT_3_5',
-	'ACCIDENT_ROPE_3_5',
-	'DISASTER_3_5',
-	'DISEASE',
-	'PLAYER_LOST',
-	'FIGHT_8',
-	'FIGHT_10',
-	'FIGHT_12',
-	'FIGHT_15',
-	'FIGHT_18',
-	'FIGHT_32',
-	'FIGHT_8_10_12_15_18_32',
-	'ITEM_LOST',
-	'KILL_RANDOM',
-	'KILL_ALL',
-	'KILL_LOST',
-	'MUSH_TRAP'
-];
 
 // Base Effects Configuration
 const BaseEffects = {

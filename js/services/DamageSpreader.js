@@ -223,8 +223,7 @@ class DamageSpreader {
 		if (!player || !player.items) return false;
 		return player.items.some(item => {
 			if (!item) return false;
-			const itemId = typeof filenameToId === 'function' ? filenameToId(item) : item.toUpperCase().replace(/\.(png|jpg|gif)$/i, '');
-			return itemId === 'ROPE';
+				return filenameToId(item) === 'ROPE';
 		});
 	}
 

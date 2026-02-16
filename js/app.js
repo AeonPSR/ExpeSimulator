@@ -344,8 +344,7 @@ class ExpeditionSimulatorApp {
 					const player = participatingPlayers[i];
 					const hasSurvival = player.abilities?.some(a => {
 						if (!a) return false;
-						const id = typeof filenameToId === 'function' ? filenameToId(a) : a.toUpperCase().replace(/\.(png|jpg|gif)$/i, '');
-						return id === 'SURVIVAL';
+						return filenameToId(a) === 'SURVIVAL';
 					});
 					if (hasSurvival) {
 						const originalDamage = originalBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
@@ -370,8 +369,7 @@ class ExpeditionSimulatorApp {
 					const player = participatingPlayers[i];
 					const hasArmor = player.items?.some(item => {
 						if (!item) return false;
-						const id = typeof filenameToId === 'function' ? filenameToId(item) : item.toUpperCase().replace(/\.(png|jpg|gif)$/i, '');
-						return id === 'PLASTENITE_ARMOR';
+						return filenameToId(item) === 'PLASTENITE_ARMOR';
 					});
 					if (hasArmor) {
 						const beforeArmorDamage = afterSurvivalBreakdown[i]?.reduce((sum, inst) => sum + inst.damage, 0) || 0;
