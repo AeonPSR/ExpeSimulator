@@ -102,6 +102,9 @@ const EventWeightCalculator = {
 		// Calculate resources using ResourceCalculator (convolution-based)
 		const resources = ResourceCalculator.calculate(sectors, loadout, players, sectorProbabilities);
 
+		// Calculate negative events using NegativeEventCalculator (convolution-based)
+		const negativeEvents = NegativeEventCalculator.calculate(sectors, loadout, sectorProbabilities);
+
 		// Use DamageComparator to determine which sectors should have fight vs event damage
 		// for worst case calculations (mutual exclusivity)
 		let fightExclusions = null;  // Sectors where event damage "wins" (exclude from fight worst case)
@@ -138,9 +141,6 @@ const EventWeightCalculator = {
 		// Calculate event damage using EventDamageCalculator (convolution-based)
 		const eventDamage = EventDamageCalculator.calculate(sectors, loadout, players, eventExclusions, sectorProbabilities);
 
-		// Aggregate non-resource, non-fight, non-damage events
-		const aggregated = this._aggregateEvents(sectors, sectorProbabilities);
-
 		// Build sector breakdown (reuse precomputed probabilities)
 		const sectorBreakdown = this._buildSectorBreakdownFromCache(sectorCounts, sectorProbabilities);
 
@@ -148,16 +148,7 @@ const EventWeightCalculator = {
 			resources: resources,
 			combat: combat,  // Full fight data with occurrence + damage
 			eventDamage: eventDamage,  // Full event damage data with occurrence + scenarios
-			negativeEvents: {
-				disease: aggregated.disease,
-				playerLost: aggregated.playerLost,
-				again: aggregated.again,
-				itemLost: aggregated.itemLost,
-				killAll: aggregated.killAll,
-				killOne: aggregated.killOne,
-				mushTrap: aggregated.mushTrap,
-				nothing: aggregated.nothing
-			},
+			negativeEvents: negativeEvents,  // Convolution-based pessimist/average/optimist per event type
 			sectorBreakdown: sectorBreakdown
 		};
 	},
@@ -208,55 +199,6 @@ const EventWeightCalculator = {
 	 */
 	_getTotalWeight(events) {
 		return Object.values(events).reduce((sum, weight) => sum + weight, 0);
-	},
-
-	/**
-	 * @private - Aggregates non-resource events across all sectors (using cache)
-	 */
-	_aggregateEvents(sectors, sectorProbabilities) {
-		const result = {
-			fights: {},
-			tired: 0, accident: 0, disaster: 0,
-			disease: 0, playerLost: 0, again: 0, itemLost: 0,
-			killAll: 0, killOne: 0, mushTrap: 0, nothing: 0
-		};
-
-		for (const sectorName of sectors) {
-			const probs = sectorProbabilities.get(sectorName);
-			
-			for (const [eventName, prob] of probs) {
-				this._categorizeEvent(eventName, prob, result);
-			}
-		}
-
-		return result;
-	},
-
-	/**
-	 * @private - Categorizes a single event into the result structure
-	 */
-	_categorizeEvent(eventName, prob, result) {
-		const { category } = EventClassifier.classify(eventName);
-
-		switch (category) {
-			case 'fight': {
-				const fightType = eventName.replace('FIGHT_', '');
-				result.fights[fightType] = (result.fights[fightType] || 0) + prob;
-				break;
-			}
-			case 'tired':      result.tired += prob; break;
-			case 'accident':   result.accident += prob; break;
-			case 'disaster':   result.disaster += prob; break;
-			case 'disease':    result.disease += prob; break;
-			case 'playerLost': result.playerLost += prob; break;
-			case 'again':      result.again += prob; break;
-			case 'itemLost':   result.itemLost += prob; break;
-			case 'killAll':    result.killAll += prob; break;
-			case 'killOne':    result.killOne += prob; break;
-			case 'mushTrap':   result.mushTrap += prob; break;
-			case 'nothing':    result.nothing += prob; break;
-			// Resource events handled by ResourceCalculator
-		}
 	},
 
 	/**

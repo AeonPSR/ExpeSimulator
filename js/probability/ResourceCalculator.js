@@ -66,7 +66,7 @@ const ResourceCalculator = {
 		}
 
 		const combined = DistributionCalculator.convolveAll(distributions);
-		return DistributionCalculator.getScenarios(combined);
+		return this._getTailScenarios(combined);
 	},
 
 	/**
@@ -120,7 +120,7 @@ const ResourceCalculator = {
 		}
 
 		const combined = DistributionCalculator.convolveAll(distributions);
-		return DistributionCalculator.getScenarios(combined);
+		return this._getTailScenarios(combined);
 	},
 
 	/**
@@ -191,7 +191,7 @@ const ResourceCalculator = {
 		}
 
 		const combined = DistributionCalculator.convolveAll(distributions);
-		return DistributionCalculator.getScenarios(combined);
+		return this._getTailScenarios(combined);
 	},
 
 	/**
@@ -238,7 +238,7 @@ const ResourceCalculator = {
 		}
 
 		const combined = DistributionCalculator.convolveAll(distributions);
-		const result = DistributionCalculator.getScenarios(combined);
+		const result = this._getTailScenarios(combined);
 
 		// If any artefact exists, optimist should be at least 0.1 (starmaps are important for endings)
 		if (hasArtefact && result.optimist < 0.1) {
@@ -246,6 +246,61 @@ const ResourceCalculator = {
 		}
 
 		return result;
+	},
+
+	/**
+	 * Computes conditional tail expectations from a distribution.
+	 * Uses the same approach as NegativeEventCalculator but for resources:
+	 * higher is better, so optimist = top tail, pessimist = bottom tail.
+	 *
+	 * - average  = E[X]
+	 * - optimist = E[X | top 25%]      (most resources = best)
+	 * - pessimist = E[X | bottom 25%]  (fewest resources = worst)
+	 *
+	 * @private
+	 * @param {Map<number, number>} distribution - value → probability
+	 * @returns {Object} { pessimist, average, optimist }
+	 */
+	_getTailScenarios(distribution) {
+		const sorted = [...distribution.entries()].sort((a, b) => a[0] - b[0]);
+
+		// Expected value
+		let average = 0;
+		for (const [value, prob] of sorted) {
+			average += value * prob;
+		}
+
+		// Pessimist: conditional expectation of bottom 25% (ascending — fewest resources)
+		const pessimist = this._conditionalExpectation(sorted, 0.25, 'bottom');
+
+		// Optimist: conditional expectation of top 25% (descending — most resources)
+		const optimist = this._conditionalExpectation(sorted, 0.25, 'top');
+
+		return { pessimist, average, optimist };
+	},
+
+	/**
+	 * Computes the conditional expected value of a tail of the distribution.
+	 *
+	 * @private
+	 * @param {Array<[number, number]>} sorted - Entries sorted ascending by value
+	 * @param {number} tailFraction - Fraction of probability mass to include (e.g. 0.25)
+	 * @param {string} side - 'bottom' (ascending from min) or 'top' (descending from max)
+	 * @returns {number} Conditional expected value of the tail
+	 */
+	_conditionalExpectation(sorted, tailFraction, side) {
+		const entries = side === 'top' ? [...sorted].reverse() : sorted;
+		let remaining = tailFraction;
+		let weightedSum = 0;
+
+		for (const [value, prob] of entries) {
+			const take = Math.min(prob, remaining);
+			weightedSum += value * take;
+			remaining -= take;
+			if (remaining <= 1e-10) break;
+		}
+
+		return weightedSum / tailFraction;
 	},
 
 	/**

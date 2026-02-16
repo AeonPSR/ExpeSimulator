@@ -46,6 +46,7 @@
         "js/probability/EventWeightCalculator.js",
         "js/probability/DamageComparator.js",
         "js/probability/ResourceCalculator.js",
+        "js/probability/NegativeEventCalculator.js",
         "js/probability/OccurrenceCalculator.js",
         "js/probability/DamagePathSampler.js",
         "js/probability/DamageDistributionEngine.js",

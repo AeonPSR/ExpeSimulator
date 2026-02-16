@@ -173,11 +173,14 @@ sectorDist = { 0: 0.30, 3: 0.30, 5: 0.40 }  // RUMINANT + Survival
 // 2. Convolve all sector distributions together
 combined = convolve(sector1Dist, sector2Dist, ...)
 
-// 3. Extract statistics from combined distribution
-pessimist = getPercentile(combined, 0.25)
-average = getExpectedValue(combined)
-optimist = getPercentile(combined, 0.75)
+// 3. Extract scenarios using conditional tail expectations
+pessimist = conditionalExpectation(combined, bottom 25%)  // mean of worst quartile
+average   = expectedValue(combined)                       // probability-weighted mean
+optimist  = conditionalExpectation(combined, top 25%)     // mean of best quartile
 ```
+
+See [scenario-methods.md](scenario-methods.md) for why conditional tail expectations
+are used instead of percentiles for resources and negative events.
 
 ---
 
@@ -185,9 +188,9 @@ optimist = getPercentile(combined, 0.75)
 
 | Value | Meaning | Use Case |
 |-------|---------|----------|
-| **Pessimist** | 25th percentile | "Assume bad luck" planning |
+| **Pessimist** | Average of worst 25% of runs | "Assume bad luck" planning |
 | **Average** | Expected value | Long-term planning |
-| **Optimist** | 75th percentile | "Assume good luck" scenarios |
+| **Optimist** | Average of best 25% of runs | "Assume good luck" scenarios |
 
 **Example reading**: "With 4 RUMINANT sectors, expect **6-11 steaks** (pessimist-optimist range), averaging **8.8**."
 

@@ -69,7 +69,7 @@ const OccurrenceCalculator = {
 		}
 
 		const combined = DistributionCalculator.convolveAll(distributions);
-		const scenarios = DistributionCalculator.getScenarios(combined, false);
+		const scenarios = DistributionCalculator.getScenarios(combined);
 
 		return {
 			occurrence: {
@@ -112,7 +112,7 @@ const OccurrenceCalculator = {
 		}
 
 		const combined = DistributionCalculator.convolveAll(distributions);
-		const scenarios = DistributionCalculator.getScenarios(combined, false);
+		const scenarios = DistributionCalculator.getScenarios(combined);
 
 		return { distribution: combined, scenarios };
 	},
@@ -164,7 +164,7 @@ const OccurrenceCalculator = {
 		}
 
 		const combined = DistributionCalculator.convolveAll(distributions);
-		const scenarios = DistributionCalculator.getScenarios(combined, false);
+		const scenarios = DistributionCalculator.getScenarios(combined);
 
 		return { distribution: combined, scenarios };
 	}

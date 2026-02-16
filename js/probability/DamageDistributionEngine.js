@@ -106,7 +106,7 @@ const DamageDistributionEngine = {
 		}
 
 		// Step 3: Extract scenarios (lower is better for damage)
-		const scenarios = DistributionCalculator.getScenarios(totalDistribution, false);
+		const scenarios = DistributionCalculator.getScenarios(totalDistribution);
 
 		// Step 4: Sample explaining paths for each scenario (if detailed outcomes available)
 		let sampledPaths = null;

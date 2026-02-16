@@ -447,26 +447,32 @@ class ProbabilityDisplay extends Component {
 
 	_renderNegativeEvents(events) {
 		const eventList = [
-			{ name: 'Player Lost', value: events.playerLost },
-			{ name: 'Sector Unexplored', value: events.again },
-			{ name: 'Disease', value: events.disease },
-			{ name: 'Item Loss', value: events.itemLost },
-			{ name: 'Kill All', value: events.killAll },
-			{ name: 'Kill One', value: events.killOne },
-			{ name: 'Mush Trap', value: events.mushTrap }
+			{ name: 'Player Lost', data: events.playerLost },
+			{ name: 'Sector Unexplored', data: events.again },
+			{ name: 'Disease', data: events.disease },
+			{ name: 'Item Loss', data: events.itemLost },
+			{ name: 'Kill All', data: events.killAll },
+			{ name: 'Kill One', data: events.killOne },
+			{ name: 'Mush Trap', data: events.mushTrap }
 		];
 
-		eventList.sort((a, b) => (b.value > 0 ? 1 : 0) - (a.value > 0 ? 1 : 0));
+		// Sort: items with values first (check both average and pessimist)
+		eventList.sort((a, b) => {
+			const aHasValue = (a.data.average > 0 || a.data.pessimist > 0) ? 1 : 0;
+			const bHasValue = (b.data.average > 0 || b.data.pessimist > 0) ? 1 : 0;
+			return bHasValue - aHasValue;
+		});
 
 		const rows = eventList.map(e => {
-			if (e.value === 0) {
+			// Show "none" only if both average AND pessimist are 0
+			if (e.data.average === 0 && e.data.pessimist === 0) {
 				return `<tr><td>${e.name}</td><td colspan="3" class="neutral none-row">none</td></tr>`;
 			}
 			return `<tr>
 				<td>${e.name}</td>
-				<td class="warning">-</td>
-				<td class="neutral">${e.value.toFixed(2)}</td>
-				<td class="positive">-</td>
+				<td class="warning">${this._formatResourceValue(e.data.pessimist)}</td>
+				<td class="neutral">${this._formatResourceValue(e.data.average)}</td>
+				<td class="positive">${this._formatResourceValue(e.data.optimist)}</td>
 			</tr>`;
 		}).join('');
 
