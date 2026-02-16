@@ -4,11 +4,11 @@
    ========================================================================== */
 
 /* Players Section Container */
-.players-section {
+#expedition-simulator .players-section {
 	margin: 20px 0;
 }
 
-.players-section h4 {
+#expedition-simulator .players-section h4 {
 	margin: 0 0 15px 0;
 	font-size: 16px;
 	color: #e67e22;
@@ -20,7 +20,7 @@
 }
 
 /* Players Header */
-.players-header {
+#expedition-simulator .players-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -28,14 +28,14 @@
 	flex-direction: row;
 }
 
-.players-header h4 {
+#expedition-simulator .players-header h4 {
 	margin: 0;
 	border-bottom: 2px solid #e67e22;
 	padding-bottom: 8px;
 	flex: 1;
 }
 
-.players-controls {
+#expedition-simulator .players-controls {
 	display: flex;
 	align-items: center;
 	flex-direction: row;
@@ -44,7 +44,7 @@
 }
 
 /* Players Container */
-.players-container {
+#expedition-simulator .players-container {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -54,7 +54,7 @@
    Player Profile Card
    ========================================================================== */
 
-.player-profile {
+#expedition-simulator .player-profile {
 	display: flex;
 	background: rgba(0, 0, 0, 0.2);
 	border: 2px solid #e67e22;
@@ -67,7 +67,7 @@
 }
 
 /* Player Avatar */
-.player-avatar {
+#expedition-simulator .player-avatar {
 	width: 42px;
 	height: 60px;
 	border-radius: 4px;
@@ -81,19 +81,19 @@
 	transition: all 0.3s ease;
 }
 
-.player-avatar:hover {
+#expedition-simulator .player-avatar:hover {
 	border-color: #3498db;
 	transform: scale(1.05);
 }
 
-.player-avatar img {
+#expedition-simulator .player-avatar img {
 	width: auto;
 	height: 100%;
 	object-fit: cover;
 }
 
 /* Player Details */
-.player-details {
+#expedition-simulator .player-details {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
@@ -104,13 +104,13 @@
    Ability Slots
    ========================================================================== */
 
-.player-abilities {
+#expedition-simulator .player-abilities {
 	display: flex;
 	flex-direction: row;
 	gap: 4px;
 }
 
-.ability-slot {
+#expedition-simulator .ability-slot {
 	width: 30px;
 	height: 30px;
 	border: 2px solid #34495e;
@@ -124,13 +124,13 @@
 	overflow: hidden;
 }
 
-.ability-slot:hover {
+#expedition-simulator .ability-slot:hover {
 	border-color: #3498db;
 	background: rgba(52, 152, 219, 0.2);
 }
 
 
-.ability-slot img {
+#expedition-simulator .ability-slot img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
@@ -140,14 +140,14 @@
    Item Slots
    ========================================================================== */
 
-.player-bottom-row {
+#expedition-simulator .player-bottom-row {
 	display: flex;
 	flex-direction: row;
 	gap: 4px;
 	align-items: center;
 }
 
-.item-slot {
+#expedition-simulator .item-slot {
 	width: 30px;
 	height: 30px;
 	border: 2px solid #34495e;
@@ -161,12 +161,12 @@
 	overflow: hidden;
 }
 
-.item-slot:hover {
+#expedition-simulator .item-slot:hover {
 	border-color: #27ae60;
 	background: rgba(39, 174, 96, 0.2);
 }
 
-.item-slot img {
+#expedition-simulator .item-slot img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
@@ -176,8 +176,8 @@
    Health & Morale Slots
    ========================================================================== */
 
-.health-slot,
-.morale-slot {
+#expedition-simulator .health-slot,
+#expedition-simulator .morale-slot {
 	width: 40px;
 	height: 30px;
 	border: 2px solid #e74c3c;
@@ -194,22 +194,22 @@
 	flex-direction: row;
 }
 
-.morale-slot {
+#expedition-simulator .morale-slot {
 	border-color: #f39c12;
 	background: rgba(243, 156, 18, 0.2);
 }
 
-.health-slot:hover {
+#expedition-simulator .health-slot:hover {
 	border-color: #c0392b;
 	background: rgba(231, 76, 60, 0.3);
 }
 
-.morale-slot:hover {
+#expedition-simulator .morale-slot:hover {
 	border-color: #e67e22;
 	background: rgba(243, 156, 18, 0.3);
 }
 
-.hp-icon {
+#expedition-simulator .hp-icon {
 	width: 14px;
 	height: 14px;
 	margin-left: 2px;

@@ -7,27 +7,32 @@
    Status Colors
    ========================================================================== */
 
-.positive {
+#expedition-simulator .positive,
+[data-expe-sim] .positive {
 	color: #2ecc71 !important;
 	font-weight: 600;
 }
 
-.neutral {
+#expedition-simulator .neutral,
+[data-expe-sim] .neutral {
 	color: #95a5a6 !important;
 	font-weight: 600;
 }
 
-.warning {
+#expedition-simulator .warning,
+[data-expe-sim] .warning {
 	color: #f39c12 !important;
 	font-weight: 600;
 }
 
-.danger {
+#expedition-simulator .danger,
+[data-expe-sim] .danger {
 	color: #e67e22 !important;
 	font-weight: 600;
 }
 
-.critical {
+#expedition-simulator .critical,
+[data-expe-sim] .critical {
 	color: #e74c3c !important;
 	font-weight: 600;
 }
@@ -37,14 +42,14 @@
    ========================================================================== */
 
 /* Resource Icons */
-.resource-icon {
+#expedition-simulator .resource-icon {
 	width: 48px;
 	height: 48px;
 	vertical-align: middle;
 }
 
 /* HP Icon */
-.hp-icon {
+#expedition-simulator .hp-icon {
 	width: 16px;
 	height: 16px;
 	vertical-align: middle;
@@ -52,7 +57,7 @@
 }
 
 /* Dead Icon */
-.dead-icon {
+#expedition-simulator .dead-icon {
 	width: 20px;
 	height: 20px;
 	vertical-align: middle;
@@ -63,7 +68,7 @@
    Text Utilities
    ========================================================================== */
 
-.bold-damage {
+#expedition-simulator .bold-damage {
 	font-weight: bold;
 }
 
@@ -72,7 +77,7 @@
    Vertically stacked, centered layout
    ========================================================================== */
 
-.damage-item {
+#expedition-simulator .damage-item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -80,7 +85,7 @@
 	font-size: 12px;
 }
 
-.damage-item span:first-child {
+#expedition-simulator .damage-item span:first-child {
 	color: #ecf0f1;
 	font-weight: 500;
 	margin-bottom: 2px;
@@ -90,8 +95,8 @@
    Selection Prevention (for drag/select issues)
    ========================================================================== */
 
-.sector-item,
-.selected-sector-item {
+#expedition-simulator .sector-item,
+#expedition-simulator .selected-sector-item {
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -100,8 +105,8 @@
 	-webkit-tap-highlight-color: transparent;
 }
 
-.sector-item img,
-.selected-sector-item img {
+#expedition-simulator .sector-item img,
+#expedition-simulator .selected-sector-item img {
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -111,7 +116,7 @@
 	pointer-events: none;
 }
 
-.sector-item:focus,
-.selected-sector-item:focus {
+#expedition-simulator .sector-item:focus,
+#expedition-simulator .selected-sector-item:focus {
 	outline: none;
 }

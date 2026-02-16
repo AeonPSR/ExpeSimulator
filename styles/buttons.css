@@ -7,7 +7,7 @@
    Toggle Button Base (shared by traitor, diplomacy, players, antigrav)
    ========================================================================== */
 
-.toggle-btn-base {
+#expedition-simulator .toggle-btn-base {
 	width: 40px;
 	height: 40px;
 	border: 2px solid #95a5a6;
@@ -21,7 +21,7 @@
 	position: relative;
 }
 
-.toggle-btn-base img {
+#expedition-simulator .toggle-btn-base img {
 	width: 30px;
 	height: 30px;
 	opacity: 0.5;
@@ -29,8 +29,8 @@
 }
 
 /* X mark overlay for inactive state */
-.toggle-btn-base::before,
-.toggle-btn-base::after {
+#expedition-simulator .toggle-btn-base::before,
+#expedition-simulator .toggle-btn-base::after {
 	content: '';
 	position: absolute;
 	top: 50%;
@@ -42,21 +42,21 @@
 	transition: opacity 0.3s ease;
 }
 
-.toggle-btn-base::before {
+#expedition-simulator .toggle-btn-base::before {
 	transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.toggle-btn-base::after {
+#expedition-simulator .toggle-btn-base::after {
 	transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.toggle-btn-base:hover {
+#expedition-simulator .toggle-btn-base:hover {
 	border-color: #7f8c8d;
 	background: rgba(149, 165, 166, 0.5);
 }
 
-.toggle-btn-base:hover::before,
-.toggle-btn-base:hover::after {
+#expedition-simulator .toggle-btn-base:hover::before,
+#expedition-simulator .toggle-btn-base:hover::after {
 	background: #7f8c8d;
 }
 
@@ -64,7 +64,7 @@
    Sectors Toggle Button (Traitor)
    ========================================================================== */
 
-.sectors-toggle-btn {
+#expedition-simulator .sectors-toggle-btn {
 	width: 40px;
 	height: 40px;
 	border: 2px solid #95a5a6;
@@ -78,15 +78,15 @@
 	position: relative;
 }
 
-.sectors-toggle-btn img {
+#expedition-simulator .sectors-toggle-btn img {
 	width: 30px;
 	height: 30px;
 	opacity: 0.5;
 	transition: opacity 0.3s ease;
 }
 
-.sectors-toggle-btn::before,
-.sectors-toggle-btn::after {
+#expedition-simulator .sectors-toggle-btn::before,
+#expedition-simulator .sectors-toggle-btn::after {
 	content: '';
 	position: absolute;
 	top: 50%;
@@ -98,36 +98,36 @@
 	transition: opacity 0.3s ease;
 }
 
-.sectors-toggle-btn::before {
+#expedition-simulator .sectors-toggle-btn::before {
 	transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.sectors-toggle-btn::after {
+#expedition-simulator .sectors-toggle-btn::after {
 	transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.sectors-toggle-btn:hover {
+#expedition-simulator .sectors-toggle-btn:hover {
 	border-color: #7f8c8d;
 	background: rgba(149, 165, 166, 0.5);
 }
 
-.sectors-toggle-btn:hover::before,
-.sectors-toggle-btn:hover::after {
+#expedition-simulator .sectors-toggle-btn:hover::before,
+#expedition-simulator .sectors-toggle-btn:hover::after {
 	background: #7f8c8d;
 }
 
 /* Active State - Pink/Magenta */
 
-.sectors-toggle-btn[data-active="true"] img {
+#expedition-simulator .sectors-toggle-btn[data-active="true"] img {
 	opacity: 1;
 }
 
-.sectors-toggle-btn[data-active="true"]::before,
-.sectors-toggle-btn[data-active="true"]::after {
+#expedition-simulator .sectors-toggle-btn[data-active="true"]::before,
+#expedition-simulator .sectors-toggle-btn[data-active="true"]::after {
 	opacity: 0;
 }
 
-.sectors-toggle-btn[data-active="true"]:hover {
+#expedition-simulator .sectors-toggle-btn[data-active="true"]:hover {
 	border-color: #c2185b;
 	background: rgba(233, 30, 99, 0.5);
 }
@@ -646,4 +646,46 @@
 .player-remove-btn:hover {
 	background: #c0392b;
 	transform: scale(1.1);
+}
+
+/* ==========================================================================
+   Unified Close Button (scoped)
+   Used for: player remove button, modal close button
+   ========================================================================== */
+
+#expedition-simulator .expe-close-btn,
+[data-expe-sim] .expe-close-btn {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	width: 24px;
+	height: 24px;
+	background: #e74c3c;
+	border: 2px solid #c0392b;
+	border-radius: 50%;
+	color: white;
+	font-size: 16px;
+	font-weight: bold;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	line-height: 1;
+	z-index: 10;
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+#expedition-simulator .expe-close-btn:hover,
+[data-expe-sim] .expe-close-btn:hover {
+	background: #c0392b;
+	transform: scale(1.1);
+}
+
+/* Modal close button positioning override */
+[data-expe-sim] .expe-close-btn.modal-close {
+	top: 10px;
+	right: 10px;
 }

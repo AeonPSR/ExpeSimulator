@@ -7,11 +7,11 @@
    Results Container
    ========================================================================== */
 
-.expedition-results {
+#expedition-simulator .expedition-results {
 	margin-top: 20px;
 }
 
-.results-content {
+#expedition-simulator .results-content {
 	background: rgba(0, 0, 0, 0.2);
 	border-radius: 8px;
 	padding: 15px;
@@ -23,11 +23,11 @@
 	gap: 10px;
 }
 
-.results-content::-webkit-scrollbar {
+#expedition-simulator .results-content::-webkit-scrollbar {
 	width: 6px;
 }
 
-.results-content::-webkit-scrollbar-thumb {
+#expedition-simulator .results-content::-webkit-scrollbar-thumb {
 	background: #3498db;
 	border-radius: 3px;
 }
@@ -36,10 +36,10 @@
    Expedition Result Card
    ========================================================================== */
 
-.expedition-result-card {
+#expedition-simulator .expedition-result-card {
 	display: flex;
 	background: rgba(0, 0, 0, 0.2);
-	border: 2px solid #e67e22 !important;
+	border: 2px solid #e67e22;
 	border-radius: 8px;
 	padding: 10px;
 	gap: 10px;
@@ -51,7 +51,7 @@
 }
 
 /* Result Avatar */
-.expedition-result-avatar {
+#expedition-simulator .expedition-result-avatar {
 	width: 42px;
 	height: 60px;
 	border-radius: 4px;
@@ -63,14 +63,14 @@
 	justify-content: center;
 }
 
-.expedition-result-avatar img {
+#expedition-simulator .expedition-result-avatar img {
 	width: auto;
 	height: 100%;
 	object-fit: cover;
 }
 
 /* Result Effects (card-level icons for effects that triggered in one scenario) */
-.expedition-result-effects {
+#expedition-simulator .expedition-result-effects {
 	gap: 4px;
 	justify-content: center;
 	margin-top: 4px;
@@ -85,7 +85,7 @@
    Health Display
    ========================================================================== */
 
-.expedition-result-health {
+#expedition-simulator .expedition-result-health {
 	width: 42px;
 	height: 40px;
 	border: 2px solid #e74c3c;
@@ -100,7 +100,7 @@
 	flex-direction: column;
 }
 
-.expedition-result-health-container {
+#expedition-simulator .expedition-result-health-container {
 	display: flex;
 	flex-direction: column;
 	gap: 3px;
@@ -108,59 +108,59 @@
 }
 
 /* Scenario-based Health Counter Colors */
-.expedition-result-health.pessimist {
+#expedition-simulator .expedition-result-health.pessimist {
 	border-color: #e74c3c;
 	background: rgba(231, 76, 60, 0.3);
 }
 
-.expedition-result-health.median {
+#expedition-simulator .expedition-result-health.median {
 	border-color: #f39c12;
 	background: rgba(243, 156, 18, 0.3);
 }
 
-.expedition-result-health.optimist {
+#expedition-simulator .expedition-result-health.optimist {
 	border-color: #2ecc71;
 	background: rgba(46, 204, 113, 0.3);
 }
 
-.expedition-result-health.worst {
+#expedition-simulator .expedition-result-health.worst {
 	border-color: #e67e22;
 	background: rgba(44, 62, 80, 0.4);
 }
 
 /* Health Status Colors */
-.expedition-result-health.health-critical {
-	color: #e74c3c !important;
+#expedition-simulator .expedition-result-health.health-critical {
+	color: #e74c3c;
 }
 
-.expedition-result-health.health-low {
-	color: #f39c12 !important;
+#expedition-simulator .expedition-result-health.health-low {
+	color: #f39c12;
 }
 
-.expedition-result-health.health-medium {
-	color: #f1c40f !important;
+#expedition-simulator .expedition-result-health.health-medium {
+	color: #f1c40f;
 }
 
-.expedition-result-health.health-high {
-	color: #2ecc71 !important;
+#expedition-simulator .expedition-result-health.health-high {
+	color: #2ecc71;
 }
 
-.expedition-result-health.health-dead {
-	color: #95a5a6 !important;
+#expedition-simulator .expedition-result-health.health-dead {
+	color: #95a5a6;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
 /* HP and Dead Icons */
-.expedition-result-health .hp-icon {
+#expedition-simulator .expedition-result-health .hp-icon {
 	width: 16px;
 	height: 16px;
 	margin-left: 3px;
 	vertical-align: middle;
 }
 
-.expedition-result-health .dead-icon {
+#expedition-simulator .expedition-result-health .dead-icon {
 	width: 20px;
 	height: 20px;
 	filter: grayscale(100%);
@@ -170,20 +170,20 @@
    Stuck in Ship (No Oxygen)
    ========================================================================== */
 
-.expedition-result-health.health-stuck {
-	color: #95a5a6 !important;
+#expedition-simulator .expedition-result-health.health-stuck {
+	color: #95a5a6;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
-.expedition-result-health .stuck-icon {
+#expedition-simulator .expedition-result-health .stuck-icon {
 	width: 20px;
 	height: 20px;
 }
 
 /* Effect Icons (rope, survival, etc.) */
-.expedition-result-effects .effect-icon {
+#expedition-simulator .expedition-result-effects .effect-icon {
 	width: 18px;
 	height: 18px;
 	border-radius: 3px;
@@ -194,7 +194,7 @@
    Expedition Legend
    ========================================================================== */
 
-.expedition-legend {
+#expedition-simulator .expedition-legend {
 	margin-top: 15px;
 	padding: 10px;
 	background: rgba(0, 0, 0, 0.1);
@@ -202,7 +202,7 @@
 	border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.expedition-legend h5 {
+#expedition-simulator .expedition-legend h5 {
 	margin: 0 0 8px 0;
 	font-size: 12px;
 	color: #bdc3c7;
@@ -212,22 +212,22 @@
 	text-align: center;
 }
 
-.expedition-legend .legend-items {
-	display: flex !important;
-	flex-direction: row !important;
-	justify-content: space-between !important;
-	gap: 5px !important;
-	align-items: stretch !important;
+#expedition-simulator .expedition-legend .legend-items {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	gap: 5px;
+	align-items: stretch;
 }
 
-.expedition-legend .legend-item {
-	display: flex !important;
-	flex-direction: column !important;
-	align-items: center !important;
-	flex: 1 !important;
+#expedition-simulator .expedition-legend .legend-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
 }
 
-.legend-color {
+#expedition-simulator .legend-color {
 	width: 20px;
 	height: 15px;
 	border: 2px solid;
@@ -235,27 +235,27 @@
 	margin-bottom: 3px;
 }
 
-.legend-color.pessimist {
+#expedition-simulator .legend-color.pessimist {
 	border-color: #e74c3c;
 	background: rgba(231, 76, 60, 0.3);
 }
 
-.legend-color.median {
+#expedition-simulator .legend-color.median {
 	border-color: #f39c12;
 	background: rgba(243, 156, 18, 0.3);
 }
 
-.legend-color.optimist {
+#expedition-simulator .legend-color.optimist {
 	border-color: #2ecc71;
 	background: rgba(46, 204, 113, 0.3);
 }
 
-.legend-color.worst {
+#expedition-simulator .legend-color.worst {
 	border-color: #e67e22;
 	background: rgba(44, 62, 80, 0.4);
 }
 
-.legend-text {
+#expedition-simulator .legend-text {
 	font-size: 9px;
 	color: #95a5a6;
 	text-align: center;
@@ -266,11 +266,11 @@
    Probability Display
    ========================================================================== */
 
-.probability-display {
+#expedition-simulator .probability-display {
 	margin: 20px 0;
 }
 
-.probability-display h4 {
+#expedition-simulator .probability-display h4 {
 	margin: 0 0 15px 0;
 	font-size: 16px;
 	color: #9b59b6;

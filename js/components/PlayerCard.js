@@ -205,7 +205,7 @@ class PlayerCard extends Component {
 	 */
 	_createRemoveButton() {
 		const removeBtn = this.createElement('div', {
-			className: 'player-remove-btn',
+			className: 'expe-close-btn',
 			dataset: { playerId: this.player.id.toString() }
 		}, '×');
 

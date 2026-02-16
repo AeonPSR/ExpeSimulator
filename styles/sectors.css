@@ -4,10 +4,10 @@
    ========================================================================== */
 
 /* Section Headers */
-.section-selector h4,
-.selected-sectors h4,
-.probability-display h4,
-.expedition-results h4 {
+#expedition-simulator .section-selector h4,
+#expedition-simulator .selected-sectors h4,
+#expedition-simulator .probability-display h4,
+#expedition-simulator .expedition-results h4 {
 	margin: 0 0 15px 0;
 	font-size: 16px;
 	color: #3498db;
@@ -16,7 +16,7 @@
 }
 
 /* Sectors Header with Toggle Buttons */
-.sectors-header {
+#expedition-simulator .sectors-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -24,14 +24,14 @@
 	flex-direction: row;
 }
 
-.sectors-header h4 {
+#expedition-simulator .sectors-header h4 {
 	margin: 0;
 	border-bottom: 2px solid #3498db;
 	padding-bottom: 8px;
 	flex: 1;
 }
 
-.sectors-buttons {
+#expedition-simulator .sectors-buttons {
 	display: flex;
 	flex-direction: row;
 	gap: 5px;
@@ -39,7 +39,7 @@
 }
 
 /* Available Sectors Grid */
-.sector-grid {
+#expedition-simulator .sector-grid {
 	display: grid;
 	grid-template-columns: repeat(5, 1fr);
 	gap: 8px;
@@ -47,7 +47,7 @@
 }
 
 /* Sector Item */
-.sector-item {
+#expedition-simulator .sector-item {
 	background: rgba(255, 255, 255, 0.1);
 	border: 2px solid transparent;
 	border-radius: 8px;
@@ -62,21 +62,21 @@
 	position: relative;
 }
 
-.sector-item:hover {
+#expedition-simulator .sector-item:hover {
 	background: rgba(52, 152, 219, 0.3);
 	border-color: #3498db;
 	transform: translateY(-2px);
 	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-.sector-item img {
+#expedition-simulator .sector-item img {
 	width: 40px;
 	height: 40px;
 	object-fit: cover;
 	border-radius: 4px;
 }
 
-.sector-item img.fight-icon {
+#expedition-simulator .sector-item img.fight-icon {
 	width: 24px;
 	height: 24px;
 	position: absolute;
@@ -88,7 +88,7 @@
 	object-fit: contain;
 }
 
-.sector-item img.negative-level-icon {
+#expedition-simulator .sector-item img.negative-level-icon {
 	width: 24px;
 	height: 24px;
 	position: absolute;
@@ -100,7 +100,7 @@
 	object-fit: contain;
 }
 
-.sector-item span {
+#expedition-simulator .sector-item span {
 	display: block;
 	font-size: 10px;
 	color: #bdc3c7;
@@ -109,31 +109,31 @@
 }
 
 /* Disabled Sector */
-.sector-item.sector-disabled {
+#expedition-simulator .sector-item.sector-disabled {
 	background: rgba(100, 100, 100, 0.1);
 	border-color: rgba(150, 150, 150, 0.3);
 	cursor: not-allowed;
 	opacity: 0.4;
 }
 
-.sector-item.sector-disabled:hover {
+#expedition-simulator .sector-item.sector-disabled:hover {
 	background: rgba(100, 100, 100, 0.1);
 	border-color: rgba(150, 150, 150, 0.3);
 	transform: none;
 	box-shadow: none;
 }
 
-.sector-item.sector-disabled img {
+#expedition-simulator .sector-item.sector-disabled img {
 	filter: grayscale(100%);
 }
 
 /* Selected Sectors Section */
-.selected-sectors {
+#expedition-simulator .selected-sectors {
 	margin-bottom: 20px;
 }
 
 /* Selected Sectors Grid */
-.selected-grid {
+#expedition-simulator .selected-grid {
 	display: grid;
 	grid-template-columns: repeat(5, 55px);
 	gap: 8px;
@@ -145,7 +145,7 @@
 }
 
 /* Selected Sector Item */
-.selected-sector-item {
+#expedition-simulator .selected-sector-item {
 	background: rgba(52, 152, 219, 0.2);
 	border: 2px solid #3498db;
 	border-radius: 8px;
@@ -160,20 +160,20 @@
 	position: relative;
 }
 
-.selected-sector-item:hover {
+#expedition-simulator .selected-sector-item:hover {
 	background: rgba(231, 76, 60, 0.3);
 	border-color: #e74c3c;
 	transform: translateY(-2px);
 	box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
 }
 
-.selected-sector-item img {
+#expedition-simulator .selected-sector-item img {
 	width: 40px;
 	height: 40px;
 	object-fit: cover;
 }
 
-.selected-sector-item img.fight-icon {
+#expedition-simulator .selected-sector-item img.fight-icon {
 	width: 24px;
 	height: 24px;
 	position: absolute;
@@ -185,7 +185,7 @@
 	object-fit: contain;
 }
 
-.selected-sector-item img.negative-level-icon {
+#expedition-simulator .selected-sector-item img.negative-level-icon {
 	width: 24px;
 	height: 24px;
 	position: absolute;

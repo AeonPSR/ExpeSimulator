@@ -45,10 +45,11 @@ class Modal extends Component {
 	 * @returns {HTMLElement}
 	 */
 	render() {
-		// Overlay/backdrop
+		// Overlay/backdrop with data attribute for CSS scoping
 		this.element = this.createElement('div', {
-			className: 'character-selection-modal' // Using existing modal class from CSS
+			className: 'character-selection-modal'
 		});
+		this.element.setAttribute('data-expe-sim', '');
 
 		// Content container
 		const contentClasses = ['character-selection-content', this.modalClassName].filter(Boolean).join(' ');
@@ -59,7 +60,7 @@ class Modal extends Component {
 		// Close button
 		if (this.showCloseButton) {
 			const closeBtn = this.createElement('div', {
-				className: 'character-selection-close',
+				className: 'expe-close-btn modal-close',
 				onClick: () => this.close()
 			}, '×');
 			this._contentContainer.appendChild(closeBtn);
