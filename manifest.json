@@ -52,6 +52,7 @@
         "js/probability/DamageDistributionEngine.js",
         "js/probability/FightCalculator.js",
         "js/probability/EventDamageCalculator.js",
+        "js/services/ChatMessageDetector.js",
         "js/app.js",
         "js/content.js"
       ],

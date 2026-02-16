@@ -17,6 +17,7 @@ class ExpeditionSimulatorApp {
 		this._playerSection = null;
 		this._probabilityDisplay = null;
 		this._resultsDisplay = null;
+		this._chatDetector = null;
 
 		this._init();
 	}
@@ -29,6 +30,12 @@ class ExpeditionSimulatorApp {
 		});
 		this._panel.mount(document.body);
 		this._createSections();
+
+		// Start watching chat for expedition messages
+		this._chatDetector = new ChatMessageDetector({
+			onImport: (sectors) => this._onImportSectors(sectors)
+		});
+		this._chatDetector.start();
 	}
 
 	_createSections() {
@@ -169,6 +176,49 @@ class ExpeditionSimulatorApp {
 		this._state.clearSectors();
 		sectors.filter(s => s !== 'LANDING').forEach(s => this._state.addSector(s));
 		this._selectedSectorsComponent.update(this._state.getSectors());
+	}
+
+	/**
+	 * Imports sectors parsed from a chat message, replacing the current planet
+	 * @param {string[]} sectorIds - Array of sector IDs (LANDING is always included automatically)
+	 * @private
+	 */
+	_onImportSectors(sectorIds) {
+		if (sectorIds.length === 0) return;
+
+		// Open the panel temporarily
+		const panel = this._panel.element;
+		panel.classList.add('import-open');
+
+		this._state.clearSectors();
+		sectorIds
+			.filter(s => s !== 'LANDING')
+			.forEach(s => this._state.addSector(s));
+		this._selectedSectorsComponent.update(this._state.getSectors());
+
+		// Scroll the selected sectors into view and highlight
+		const grid = this._selectedSectorsComponent.element?.querySelector('.selected-grid');
+		if (grid) {
+			grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			grid.classList.remove('import-highlight');
+			// Force reflow so the animation replays
+			void grid.offsetWidth;
+			grid.classList.add('import-highlight');
+			grid.addEventListener('animationend', () => {
+				grid.classList.remove('import-highlight');
+				// Close the panel after the highlight unless it's pinned
+				if (!panel.classList.contains('pinned')) {
+					panel.classList.remove('import-open');
+				}
+			}, { once: true });
+		} else {
+			// Fallback: close after a delay if grid not found
+			setTimeout(() => {
+				if (!panel.classList.contains('pinned')) {
+					panel.classList.remove('import-open');
+				}
+			}, 2000);
+		}
 	}
 
 	// ========================================

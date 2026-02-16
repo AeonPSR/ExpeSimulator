@@ -689,3 +689,35 @@
 	top: 10px;
 	right: 10px;
 }
+
+/* ==========================================================================
+   Chat Import Button (matches game's action-button style)
+   ========================================================================== */
+
+.expe-import-btn {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	margin: .2rem;
+	flex-flow: row wrap;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	padding: 1px 4px 3px;
+	border: none;
+	border-radius: 1px;
+	color: #fff;
+	font-size: 1rem;
+	font-weight: 700;
+	font-variant: small-caps;
+	letter-spacing: .05em;
+	text-decoration: none;
+	text-align: center;
+	text-shadow: 0 0 4px rgb(21, 39, 60), 0 0 4px rgb(21, 39, 60);
+	box-shadow: 0 0 0 1px #0c120d;
+	background: #0074df;
+	background: linear-gradient(0deg, #003bc3 2%, #0074df 6% 46%, #008ee5 54% 94%, #499ae5 96%);
+	cursor: pointer;
+	z-index: 10;
+}

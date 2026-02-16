@@ -26,6 +26,7 @@ class Panel extends Component {
 		// References to key internal elements
 		this._contentArea = null;
 		this._tongue = null;
+		this._pinned = false;
 	}
 
 	/**
@@ -104,7 +105,38 @@ class Panel extends Component {
 		const title = this.createElement('h3', {}, this.title);
 		header.appendChild(title);
 
+		// Pin button to lock the panel open
+		const pinBtn = this.createElement('button', {
+			className: 'panel-pin-btn',
+			title: 'Pin panel open'
+		});
+		const pinImg = this.createElement('img', {
+			src: this.getResourceURL('pictures/others/pin.png'),
+			alt: 'Pin'
+		});
+		pinBtn.appendChild(pinImg);
+		this.addEventListener(pinBtn, 'click', () => this._togglePin(pinBtn));
+		header.appendChild(pinBtn);
+
 		return header;
+	}
+
+	/**
+	 * Toggles the pinned state of the panel
+	 * @private
+	 * @param {HTMLElement} pinBtn
+	 */
+	_togglePin(pinBtn) {
+		this._pinned = !this._pinned;
+		if (this._pinned) {
+			this.element.classList.add('pinned');
+			pinBtn.classList.add('active');
+			pinBtn.title = 'Unpin panel';
+		} else {
+			this.element.classList.remove('pinned');
+			pinBtn.classList.remove('active');
+			pinBtn.title = 'Pin panel open';
+		}
 	}
 
 	/**
