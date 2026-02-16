@@ -334,6 +334,15 @@ const PlanetSectorConfigData = [
 			'KILL_LOST': 1
 		}
 	},
+	{
+		name: 'UNKNOWN_default',
+		sectorName: 'UNKNOWN',
+		weightAtPlanetGeneration: 0,
+		weightAtPlanetAnalysis: 0,
+		weightAtPlanetExploration: 0,
+		maxPerPlanet: 20,
+		explorationEvents: {}
+	},
 ];
 
 // Ability Effects Configuration

@@ -12,15 +12,15 @@
  * Populate each array with the sector names as they appear in-game.
  */
 const SECTOR_NAMES_EN = [
-	'Landing', 'Hydrocarbon Deposits', 'Oxygen', 'Insects', 'Mankarogs', 'MIA', 'Predators', 'Ruminants', 'Intelligent Life', 'Cristalite', 'Desert', 'Shipwreck', 'Forest', 'Orchard', 'Caverns', 'Swamps', 'Mountains', 'Oceanic', 'Ruins', 'Siesmic Activity', 'Low Temperatures', 'High Temperatures', 'Strong Winds', 'Volcanoes'
+	'Landing', 'Hydrocarbon Deposits', 'Oxygen', 'Insects', 'Mankarogs', 'MIA', 'Predators', 'Ruminants', 'Intelligent Life', 'Cristalite', 'Desert', 'Shipwreck', 'Forest', 'Orchard', 'Caverns', 'Swamps', 'Mountains', 'Oceanic', 'Ruins', 'Siesmic Activity', 'Low Temperatures', 'High Temperatures', 'Strong Winds', 'Volcanoes', '???'
 ];
 
 const SECTOR_NAMES_FR = [
-	'Atterrissage', 'Hydrocarbures', 'Oxygène', 'Insectes', 'Mankarog', 'Perdu', 'Prédateurs', 'Ruminants', 'Vie Intelligente', 'Cristalite', 'Désert', 'Épave', 'Forêt', 'Vergers', 'Grottes', 'Marais', 'Montagnes', 'Océan', 'Ruines', 'Sismique', 'Température basse', 'Température élevée', 'Vents forts', 'Volcan'
+	'Atterrissage', 'Hydrocarbures', 'Oxygène', 'Insectes', 'Mankarog', 'Perdu', 'Prédateurs', 'Ruminants', 'Vie Intelligente', 'Cristalite', 'Désert', 'Épave', 'Forêt', 'Vergers', 'Grottes', 'Marais', 'Montagnes', 'Océan', 'Ruines', 'Sismique', 'Température basse', 'Température élevée', 'Vents forts', 'Volcan', '???'
 ];
 
 const SECTOR_NAMES_ES = [
-	'Aterrizaje', 'Hidrocarburo', 'Oxígeno', 'Insectos', 'Mankarog', 'Extraviados', 'Predador', 'Rumiante', 'Vida inteligente', 'Cristalitas', 'Desierto', 'Restos de nave', 'Jungla', 'Huerta', 'Gruta', 'Pantano', 'Montaña', 'Océano', 'Ruina', 'Sísmico', 'Temperatura baja', 'Temperatura alta', 'Viento fuerte', 'Volcán'
+	'Aterrizaje', 'Hidrocarburo', 'Oxígeno', 'Insectos', 'Mankarog', 'Extraviados', 'Predador', 'Rumiante', 'Vida inteligente', 'Cristalitas', 'Desierto', 'Restos de nave', 'Jungla', 'Huerta', 'Gruta', 'Pantano', 'Montaña', 'Océano', 'Ruina', 'Sísmico', 'Temperatura baja', 'Temperatura alta', 'Viento fuerte', 'Volcán', '???'
 ];
 
 const ALL_SECTOR_NAMES = [
@@ -38,7 +38,7 @@ const SECTOR_ID_ORDER = [
 	'PREDATOR', 'RUMINANT', 'INTELLIGENT', 'CRISTAL_FIELD', 'DESERT',
 	'WRECK', 'FOREST', 'FRUIT_TREES', 'CAVE', 'SWAMP', 'MOUNTAIN',
 	'OCEAN', 'RUINS', 'SEISMIC_ACTIVITY', 'COLD', 'HOT', 'STRONG_WIND',
-	'VOLCANIC_ACTIVITY'
+	'VOLCANIC_ACTIVITY', 'UNKNOWN'
 ];
 
 /**
