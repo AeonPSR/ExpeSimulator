@@ -394,8 +394,39 @@ class ExpeditionSimulatorApp {
 			antigravActive: this._state.isAntigravActive()
 		});
 
-		// Single source of truth for all calculations (only participating players)
-		const results = EventWeightCalculator.calculate(sectors, loadout, participatingPlayers);
+		// Get explored sector count (movement speed)
+		const exploredCount = this._playerSection?.getExploredSectors?.() || 9;
+
+		// Build sector counts map (excluding special sectors like LANDING)
+		const sectorCounts = {};
+		const alwaysInclude = [];
+		for (const sector of sectors) {
+			if (SectorData.isSpecialSector(sector)) {
+				// LANDING is always visited for free, LOST appears based on oxygen
+				alwaysInclude.push(sector);
+			} else {
+				sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+			}
+		}
+
+		// Calculate total explorable sectors (excluding special sectors)
+		const totalExplorableSectors = Object.values(sectorCounts).reduce((a, b) => a + b, 0);
+
+		// Use sampling if movement speed < total explorable sectors
+		let results;
+		if (exploredCount < totalExplorableSectors) {
+			console.log(`[SectorSampling] Using sampling: ${exploredCount} explored / ${totalExplorableSectors} total`);
+			results = EventWeightCalculator.calculateWithSampling(
+				sectorCounts,
+				exploredCount,
+				loadout,
+				participatingPlayers,
+				{ alwaysInclude }
+			);
+		} else {
+			// Standard calculation - visit all sectors
+			results = EventWeightCalculator.calculate(sectors, loadout, participatingPlayers);
+		}
 
 		// Add player health calculations to the results (only for participating players)
 		if (participatingPlayers.length > 0 && results) {

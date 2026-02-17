@@ -339,9 +339,11 @@ const PlanetSectorConfigData = [
 		sectorName: 'UNKNOWN',
 		weightAtPlanetGeneration: 0,
 		weightAtPlanetAnalysis: 0,
-		weightAtPlanetExploration: 0,
+		weightAtPlanetExploration: 8,
 		maxPerPlanet: 20,
-		explorationEvents: {}
+		explorationEvents: {
+			'NOTHING_TO_REPORT': 1
+		}
 	},
 ];
 
@@ -445,8 +447,8 @@ const ItemEffects = {
 	'echo_sounder': {
 		name: 'Echo Sounder',
 		effects: {
-			sectorDiscoveryBonus: {
-				'HYDROCARBON': 4
+			sectorDiscoveryMultiplier: {
+				'HYDROCARBON': 5
 			}
 		}
 	},
@@ -460,12 +462,13 @@ const ItemEffects = {
 	'heat_seeker': {
 		name: 'Heat Seeker',
 		effects: {
-			sectorDiscoveryBonus: {
-				'RUMINANT': 4,
-				'MANKAROG': 4,
-				'INSECT': 4,
-				'PREDATOR': 4,
-				'INTELLIGENT': 4
+			sectorDiscoveryMultiplier: {
+				'LOST': 5,
+				'INTELLIGENT': 5,
+				'RUMINANT': 5,
+				'PREDATOR': 5,
+				'INSECT': 5,
+				'MANKAROG': 5
 			}
 		}
 	},

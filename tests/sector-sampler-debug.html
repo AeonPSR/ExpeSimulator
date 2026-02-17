@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SectorSampler Debug</title>
+	<style>
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 20px;
+			background: #1a1a2e;
+			color: #eee;
+		}
+		h1, h2, h3 { color: #00d4ff; }
+		.section {
+			background: #16213e;
+			border-radius: 8px;
+			padding: 20px;
+			margin-bottom: 20px;
+		}
+		.input-group {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 10px;
+			align-items: center;
+		}
+		.input-group label {
+			min-width: 120px;
+		}
+		input, select {
+			background: #0f3460;
+			border: 1px solid #00d4ff;
+			color: #fff;
+			padding: 8px 12px;
+			border-radius: 4px;
+		}
+		input[type="number"] { width: 80px; }
+		button {
+			background: #00d4ff;
+			color: #1a1a2e;
+			border: none;
+			padding: 10px 20px;
+			border-radius: 4px;
+			cursor: pointer;
+			font-weight: bold;
+		}
+		button:hover { background: #00a8cc; }
+		.results {
+			background: #0f3460;
+			padding: 15px;
+			border-radius: 4px;
+			overflow-x: auto;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+		th, td {
+			border: 1px solid #00d4ff33;
+			padding: 8px 12px;
+			text-align: left;
+		}
+		th { background: #00d4ff22; }
+		tr:hover { background: #00d4ff11; }
+		.validation { 
+			padding: 10px; 
+			border-radius: 4px; 
+			margin-top: 10px;
+		}
+		.validation.valid { background: #00ff8822; border: 1px solid #00ff88; }
+		.validation.invalid { background: #ff004422; border: 1px solid #ff0044; }
+		.sector-input {
+			display: flex;
+			gap: 5px;
+			align-items: center;
+			margin: 5px 0;
+		}
+		.sector-input input { width: 60px; }
+		#sectorInputs { 
+			display: grid; 
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+			gap: 10px;
+		}
+		.item-checkbox {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			margin: 5px 10px 5px 0;
+		}
+		.presets { margin-bottom: 15px; }
+		.presets button { margin-right: 10px; margin-bottom: 5px; }
+		.highlight { background: #00d4ff33 !important; }
+		.prob-bar {
+			height: 20px;
+			background: #00d4ff;
+			border-radius: 2px;
+			min-width: 1px;
+		}
+	</style>
+</head>
+<body>
+	<h1>SectorSampler Debug Page</h1>
+	<p>Test the weighted composition generator for sector sampling.</p>
+
+	<div class="section">
+		<h2>Planet Configuration</h2>
+		
+		<div class="presets">
+			<strong>Presets:</strong>
+			<button onclick="loadPreset('nurgle')">Nurgle's Throne (13 sectors)</button>
+			<button onclick="loadPreset('thousandCuts')">Thousand Cuts (21 sectors)</button>
+			<button onclick="loadPreset('simple')">Simple Test (8 sectors)</button>
+		</div>
+
+		<div id="sectorInputs"></div>
+		
+		<div class="input-group" style="margin-top: 15px;">
+			<label>Movement Speed:</label>
+			<input type="number" id="movementSpeed" value="9" min="1" max="30">
+			<span style="color: #888;">(Icarus base: 9, Patrol: 3, +1 per sprinter)</span>
+		</div>
+	</div>
+
+	<div class="section">
+		<h2>Items (Exploration Modifiers)</h2>
+		<div id="itemCheckboxes"></div>
+	</div>
+
+	<div class="section">
+		<button onclick="runCalculation()">Calculate Compositions</button>
+		<button onclick="runValidation()">Validate Probabilities</button>
+	</div>
+
+	<div class="section">
+		<h2>Results</h2>
+		<div id="summary"></div>
+		<div id="validation" class="validation" style="display:none;"></div>
+		<div class="results">
+			<table id="resultsTable">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Composition</th>
+						<th>Probability</th>
+						<th>Visual</th>
+					</tr>
+				</thead>
+				<tbody id="resultsBody">
+					<tr><td colspan="4" style="text-align:center; color:#888;">Click "Calculate Compositions" to see results</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="section">
+		<h2>Effective Weights</h2>
+		<div id="weightsDisplay" class="results">
+			<p style="color:#888;">Run calculation to see effective weights</p>
+		</div>
+	</div>
+
+	<div class="section">
+		<h2>Distribution Mixer Demo</h2>
+		<p style="color:#888;">Demonstrates how per-composition distributions get mixed into a single result.</p>
+		<button onclick="runMixerDemo()">Run Mixer Demo</button>
+		<div id="mixerResults" class="results" style="margin-top: 15px;">
+			<p style="color:#888;">Click "Run Mixer Demo" to see how distributions are mixed</p>
+		</div>
+	</div>
+
+	<div class="section">
+		<h2>Full Integration Test</h2>
+		<p style="color:#888;">Tests the complete sampling pipeline with real EventWeightCalculator.</p>
+		<div class="input-group">
+			<label>Player Count:</label>
+			<input type="number" id="playerCount" value="2" min="1" max="5">
+		</div>
+		<button onclick="runFullIntegration()">Run Full Integration</button>
+		<div id="integrationResults" class="results" style="margin-top: 15px;">
+			<p style="color:#888;">Click "Run Full Integration" to test with real calculators</p>
+		</div>
+	</div>
+
+	<!-- Load dependencies in correct order -->
+	<script src="../config.js"></script>
+	<script src="../js/utils/constants.js"></script>
+	<script src="../js/utils/helpers.js"></script>
+	<script src="../js/utils/EventClassifier.js"></script>
+	<script src="../js/data/SectorData.js"></script>
+	<script src="../js/data/CharacterData.js"></script>
+	<script src="../js/data/AbilityData.js"></script>
+	<script src="../js/data/ItemData.js"></script>
+	<script src="../js/probability/DistributionCalculator.js"></script>
+	<script src="../js/probability/EventModifier.js"></script>
+	<script src="../js/probability/AbilityModifiers.js"></script>
+	<script src="../js/probability/ItemModifiers.js"></script>
+	<script src="../js/probability/ProjectModifiers.js"></script>
+	<script src="../js/probability/ModifierApplicator.js"></script>
+	<script src="../js/probability/OccurrenceCalculator.js"></script>
+	<script src="../js/probability/DamagePathSampler.js"></script>
+	<script src="../js/probability/DamageDistributionEngine.js"></script>
+	<script src="../js/probability/FightCalculator.js"></script>
+	<script src="../js/probability/EventDamageCalculator.js"></script>
+	<script src="../js/probability/ResourceCalculator.js"></script>
+	<script src="../js/probability/NegativeEventCalculator.js"></script>
+	<script src="../js/probability/DamageComparator.js"></script>
+	<script src="../js/services/FightingPowerService.js"></script>
+	<script src="../js/probability/SectorSampler.js"></script>
+	<script src="../js/probability/EventWeightCalculator.js"></script>
+
+	<script>
+		// Available sector types
+		const SECTOR_TYPES = [
+			'LANDING', 'FOREST', 'MOUNTAIN', 'SWAMP', 'DESERT', 'OCEAN', 'CAVE', 
+			'RUINS', 'CRISTAL_FIELD', 'OXYGEN', 'SISMIC_ACTIVITY', 'VOLCANIC_ACTIVITY',
+			'PREDATOR', 'RUMINANT', 'INSECT', 'INTELLIGENT', 'MANKAROG', 'HYDROCARBON', 'LOST'
+		];
+
+		// Items with sector discovery effects
+		const DISCOVERY_ITEMS = ['echo_sounder', 'heat_seeker'];
+
+		// Initialize UI
+		function initUI() {
+			// Sector inputs
+			const container = document.getElementById('sectorInputs');
+			container.innerHTML = SECTOR_TYPES.map(type => `
+				<div class="sector-input">
+					<label>${type}:</label>
+					<input type="number" id="sector_${type}" value="0" min="0" max="10">
+				</div>
+			`).join('');
+
+			// Item checkboxes
+			const itemsContainer = document.getElementById('itemCheckboxes');
+			itemsContainer.innerHTML = DISCOVERY_ITEMS.map(item => {
+				const config = ItemEffects[item];
+				const sectors = config?.effects?.sectorDiscoveryMultiplier 
+					? Object.keys(config.effects.sectorDiscoveryMultiplier).join(', ')
+					: 'none';
+				return `
+					<label class="item-checkbox">
+						<input type="checkbox" id="item_${item}">
+						${config?.name || item} <span style="color:#888;">(×5 on: ${sectors})</span>
+					</label>
+				`;
+			}).join('<br>');
+		}
+
+		// Load preset planet
+		function loadPreset(preset) {
+			// Reset all to 0
+			SECTOR_TYPES.forEach(t => document.getElementById(`sector_${t}`).value = 0);
+
+			if (preset === 'nurgle') {
+				// Nurgle's Throne: 1 LANDING, 4 INSECT, 4 FOREST, 4 SWAMP
+				document.getElementById('sector_LANDING').value = 1;
+				document.getElementById('sector_INSECT').value = 4;
+				document.getElementById('sector_FOREST').value = 4;
+				document.getElementById('sector_SWAMP').value = 4;
+				document.getElementById('movementSpeed').value = 9;
+			} else if (preset === 'thousandCuts') {
+				// Thousand Cuts: More complex planet
+				document.getElementById('sector_LANDING').value = 1;
+				document.getElementById('sector_FOREST').value = 4;
+				document.getElementById('sector_MOUNTAIN').value = 4;
+				document.getElementById('sector_DESERT').value = 4;
+				document.getElementById('sector_CAVE').value = 4;
+				document.getElementById('sector_RUINS').value = 4;
+				document.getElementById('movementSpeed').value = 9;
+			} else if (preset === 'simple') {
+				// Simple test
+				document.getElementById('sector_LANDING').value = 1;
+				document.getElementById('sector_FOREST').value = 3;
+				document.getElementById('sector_DESERT').value = 4;
+				document.getElementById('movementSpeed').value = 5;
+			}
+		}
+
+		// Get current sector counts (excluding LANDING and LOST which are special)
+		function getSectorCounts(includeSpecial = false) {
+			const counts = {};
+			SECTOR_TYPES.forEach(type => {
+				// LANDING is always visited for free, LOST appears based on oxygen
+				if (!includeSpecial && (type === 'LANDING' || type === 'LOST')) {
+					return;
+				}
+				const value = parseInt(document.getElementById(`sector_${type}`).value) || 0;
+				if (value > 0) {
+					counts[type] = value;
+				}
+			});
+			return counts;
+		}
+
+		// Get selected items as loadout
+		function getLoadout() {
+			const items = [];
+			DISCOVERY_ITEMS.forEach(item => {
+				if (document.getElementById(`item_${item}`).checked) {
+					items.push(item + '.jpg');
+				}
+			});
+			return { items };
+		}
+
+		// Run calculation
+		function runCalculation() {
+			const sectorCounts = getSectorCounts();
+			const movementSpeed = parseInt(document.getElementById('movementSpeed').value) || 9;
+			const loadout = getLoadout();
+
+			const totalSectors = Object.values(sectorCounts).reduce((a, b) => a + b, 0);
+
+			// Get LANDING count for display
+			const landingCount = parseInt(document.getElementById('sector_LANDING').value) || 0;
+
+			// Update summary
+			const summary = document.getElementById('summary');
+			summary.innerHTML = `
+				<p><strong>Planet:</strong> ${totalSectors} explorable sectors + ${landingCount} LANDING (free)</p>
+				<p><strong>Movement Speed:</strong> ${movementSpeed}</p>
+				<p><strong>Items:</strong> ${loadout.items.length > 0 ? loadout.items.join(', ') : 'None'}</p>
+			`;
+
+			// Generate compositions
+			const start = performance.now();
+			const results = SectorSampler.generateWeightedCompositions(sectorCounts, movementSpeed, loadout);
+			const elapsed = performance.now() - start;
+
+			summary.innerHTML += `<p><strong>Compositions:</strong> ${results.length} (computed in ${elapsed.toFixed(2)}ms)</p>`;
+
+			// Display effective weights
+			const sectorTypes = Object.keys(sectorCounts);
+			const weights = SectorSampler.getEffectiveWeights(sectorTypes, loadout);
+			const weightsDisplay = document.getElementById('weightsDisplay');
+			weightsDisplay.innerHTML = '<table><tr><th>Sector</th><th>Base Weight</th><th>Effective Weight</th></tr>' +
+				sectorTypes.map(type => {
+					const config = PlanetSectorConfigData?.find(s => s.sectorName === type);
+					const base = config?.weightAtPlanetExploration || 8;
+					const effective = weights[type];
+					const highlight = effective !== base ? 'class="highlight"' : '';
+					return `<tr ${highlight}><td>${type}</td><td>${base}</td><td>${effective}</td></tr>`;
+				}).join('') + '</table>';
+
+			// Display results table
+			const tbody = document.getElementById('resultsBody');
+			if (results.length === 0) {
+				tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">No valid compositions</td></tr>';
+				return;
+			}
+
+			// Sort by probability descending
+			results.sort((a, b) => b.probability - a.probability);
+
+			const maxProb = results[0].probability;
+			tbody.innerHTML = results.map((r, i) => {
+				const compStr = Object.entries(r.composition)
+					.filter(([_, count]) => count > 0)
+					.map(([type, count]) => `${type}: ${count}`)
+					.join(', ');
+				const probPercent = (r.probability * 100).toFixed(4);
+				const barWidth = (r.probability / maxProb * 100).toFixed(1);
+				return `
+					<tr>
+						<td>${i + 1}</td>
+						<td>${compStr}</td>
+						<td>${probPercent}%</td>
+						<td><div class="prob-bar" style="width: ${barWidth}%"></div></td>
+					</tr>
+				`;
+			}).join('');
+		}
+
+		// Validate probabilities sum to 1
+		function runValidation() {
+			const sectorCounts = getSectorCounts();
+			const movementSpeed = parseInt(document.getElementById('movementSpeed').value) || 9;
+			const loadout = getLoadout();
+
+			const results = SectorSampler.generateWeightedCompositions(sectorCounts, movementSpeed, loadout);
+			const validation = SectorSampler.validateProbabilities(results);
+
+			const div = document.getElementById('validation');
+			div.style.display = 'block';
+			div.className = 'validation ' + (validation.valid ? 'valid' : 'invalid');
+			div.innerHTML = `
+				<strong>${validation.valid ? '✓ VALID' : '✗ INVALID'}</strong><br>
+				Sum of probabilities: ${validation.sum.toFixed(15)}<br>
+				Error: ${validation.error.toExponential(4)}
+			`;
+		}
+
+		// Demo: Create a mock damage distribution based on sector composition
+		// More dangerous sectors = higher damage probabilities
+		function createMockDamageDistribution(composition) {
+			const dist = new Map();
+			
+			// Count "dangerous" sectors (simplified model)
+			let dangerScore = 0;
+			const dangerousSectors = ['PREDATOR', 'MANKAROG', 'INSECT', 'RUINS', 'CRISTAL_FIELD'];
+			const safeSectors = ['FOREST', 'DESERT', 'OCEAN'];
+			
+			for (const [type, count] of Object.entries(composition)) {
+				if (dangerousSectors.includes(type)) {
+					dangerScore += count * 2;
+				} else if (!safeSectors.includes(type)) {
+					dangerScore += count;
+				}
+			}
+			
+			// Generate a simple distribution based on danger score
+			// Low damage more likely for safe, high damage more likely for dangerous
+			const totalSectors = Object.values(composition).reduce((a, b) => a + b, 0);
+			const maxDamage = Math.min(totalSectors * 2, 10);
+			
+			let totalProb = 0;
+			for (let dmg = 0; dmg <= maxDamage; dmg++) {
+				// Higher danger = shift distribution right
+				const center = dangerScore / 3;
+				const prob = Math.exp(-Math.pow(dmg - center, 2) / (2 + dangerScore / 2));
+				dist.set(dmg, prob);
+				totalProb += prob;
+			}
+			
+			// Normalize
+			for (const [dmg, prob] of dist) {
+				dist.set(dmg, prob / totalProb);
+			}
+			
+			return dist;
+		}
+
+		// Run mixer demo
+		function runMixerDemo() {
+			const sectorCounts = getSectorCounts();
+			const movementSpeed = parseInt(document.getElementById('movementSpeed').value) || 9;
+			const loadout = getLoadout();
+
+			const compositions = SectorSampler.generateWeightedCompositions(sectorCounts, movementSpeed, loadout);
+			
+			if (compositions.length === 0) {
+				document.getElementById('mixerResults').innerHTML = '<p style="color:#ff6b6b;">No compositions to mix. Configure sectors first.</p>';
+				return;
+			}
+
+			// Create mock distributions for each composition
+			const weightedDistributions = compositions.map(({ composition, probability }) => ({
+				distribution: createMockDamageDistribution(composition),
+				weight: probability
+			}));
+
+			// Mix them
+			const mixed = DistributionCalculator.mixDistributions(weightedDistributions);
+			
+			// Validate
+			const validation = DistributionCalculator.validateDistribution(mixed);
+
+			// Get scenarios
+			const scenarios = DistributionCalculator.getScenarios(mixed);
+
+			// Build output
+			let html = '<h3>Per-Composition Distributions (first 5)</h3>';
+			html += '<table><tr><th>Composition</th><th>Weight</th><th>Distribution Preview</th></tr>';
+			
+			const displayComps = compositions.slice(0, 5);
+			for (let i = 0; i < displayComps.length; i++) {
+				const { composition, probability } = displayComps[i];
+				const dist = weightedDistributions[i].distribution;
+				const compStr = Object.entries(composition)
+					.filter(([_, c]) => c > 0)
+					.map(([t, c]) => `${t}:${c}`)
+					.join(', ');
+				
+				const distPreview = [...dist.entries()]
+					.sort((a, b) => a[0] - b[0])
+					.slice(0, 6)
+					.map(([v, p]) => `${v}:${(p*100).toFixed(1)}%`)
+					.join(', ') + '...';
+				
+				html += `<tr><td>${compStr}</td><td>${(probability*100).toFixed(2)}%</td><td>${distPreview}</td></tr>`;
+			}
+			if (compositions.length > 5) {
+				html += `<tr><td colspan="3" style="color:#888;">...and ${compositions.length - 5} more</td></tr>`;
+			}
+			html += '</table>';
+
+			html += '<h3>Mixed Distribution</h3>';
+			html += '<table><tr><th>Damage</th><th>Probability</th><th>Visual</th></tr>';
+			
+			const sortedMixed = [...mixed.entries()].sort((a, b) => a[0] - b[0]);
+			const maxProb = Math.max(...sortedMixed.map(([_, p]) => p));
+			
+			for (const [value, prob] of sortedMixed) {
+				const barWidth = (prob / maxProb * 100).toFixed(1);
+				html += `<tr>
+					<td>${value}</td>
+					<td>${(prob * 100).toFixed(4)}%</td>
+					<td><div class="prob-bar" style="width: ${barWidth}%"></div></td>
+				</tr>`;
+			}
+			html += '</table>';
+
+			html += '<h3>Extracted Scenarios</h3>';
+			html += `<table>
+				<tr><th>Scenario</th><th>Value</th></tr>
+				<tr><td>Optimist (p25)</td><td>${scenarios.optimist}</td></tr>
+				<tr><td>Average (p50)</td><td>${scenarios.average}</td></tr>
+				<tr><td>Pessimist (p75)</td><td>${scenarios.pessimist}</td></tr>
+				<tr><td>Worst Case (p100)</td><td>${scenarios.worstCase}</td></tr>
+			</table>`;
+
+			html += `<div class="validation ${validation.valid ? 'valid' : 'invalid'}" style="margin-top:10px;">
+				<strong>${validation.valid ? '✓ Mixed distribution valid' : '✗ Mixed distribution invalid'}</strong> 
+				(sum: ${validation.sum.toFixed(10)})
+			</div>`;
+
+			document.getElementById('mixerResults').innerHTML = html;
+		}
+
+		// Run full integration test with real calculators
+		function runFullIntegration() {
+			const sectorCounts = getSectorCounts();
+			const movementSpeed = parseInt(document.getElementById('movementSpeed').value) || 9;
+			const loadout = getLoadout();
+			const playerCount = parseInt(document.getElementById('playerCount').value) || 2;
+
+			const totalSectors = Object.values(sectorCounts).reduce((a, b) => a + b, 0);
+			const landingCount = parseInt(document.getElementById('sector_LANDING').value) || 0;
+
+			// Create mock players (minimal data needed)
+			const players = [];
+			for (let i = 0; i < playerCount; i++) {
+				players.push({
+					id: `player_${i}`,
+					name: `Player ${i + 1}`,
+					characterId: 'raluca',
+					healthPoints: 14,
+					abilities: [],
+					items: loadout.items.map(item => ({ id: item }))
+				});
+			}
+
+			// Build alwaysInclude from LANDING
+			const alwaysInclude = [];
+			for (let i = 0; i < landingCount; i++) {
+				alwaysInclude.push('LANDING');
+			}
+
+			const container = document.getElementById('integrationResults');
+
+			// Check if dependencies are loaded
+			if (typeof EventWeightCalculator === 'undefined') {
+				container.innerHTML = '<p style="color:#ff6b6b;">Error: EventWeightCalculator not loaded</p>';
+				return;
+			}
+			if (typeof EventWeightCalculator.calculateWithSampling === 'undefined') {
+				container.innerHTML = '<p style="color:#ff6b6b;">Error: calculateWithSampling method not found</p>';
+				return;
+			}
+
+			let html = `<h3>Input Summary</h3>
+				<p><strong>Sectors:</strong> ${totalSectors} explorable + ${landingCount} LANDING</p>
+				<p><strong>Movement Speed:</strong> ${movementSpeed}</p>
+				<p><strong>Players:</strong> ${playerCount}</p>
+				<p><strong>Items:</strong> ${loadout.items.length > 0 ? loadout.items.join(', ') : 'None'}</p>
+			`;
+
+			try {
+				const start = performance.now();
+				const results = EventWeightCalculator.calculateWithSampling(
+					sectorCounts, 
+					movementSpeed, 
+					loadout, 
+					players,
+					{ alwaysInclude }
+				);
+				const elapsed = performance.now() - start;
+
+				if (!results) {
+					container.innerHTML = html + '<p style="color:#ff6b6b;">No results returned</p>';
+					return;
+				}
+
+				html += `<p><strong>Computed in:</strong> ${elapsed.toFixed(2)}ms</p>`;
+
+				// Show sampling metadata if present
+				if (results._sampling) {
+					html += `<div class="validation valid">
+						<strong>Sampling enabled:</strong> ${results._sampling.compositionCount} compositions analyzed
+					</div>`;
+				} else {
+					html += `<div class="validation" style="background:#00d4ff22; border:1px solid #00d4ff;">
+						<strong>No sampling needed:</strong> movement speed ≥ total sectors
+					</div>`;
+				}
+
+				// Resources
+				html += '<h3>Resources</h3>';
+				html += '<table><tr><th>Resource</th><th>Optimist</th><th>Average</th><th>Pessimist</th></tr>';
+				for (const [key, data] of Object.entries(results.resources || {})) {
+					html += `<tr>
+						<td>${key}</td>
+						<td>${(data.optimist || 0).toFixed(2)}</td>
+						<td>${(data.average || 0).toFixed(2)}</td>
+						<td>${(data.pessimist || 0).toFixed(2)}</td>
+					</tr>`;
+				}
+				html += '</table>';
+
+				// Combat damage
+				html += '<h3>Combat Damage</h3>';
+				const combat = results.combat?.damage || {};
+				html += `<table>
+					<tr><th>Scenario</th><th>Damage</th></tr>
+					<tr><td>Optimist</td><td>${combat.optimist || 0}</td></tr>
+					<tr><td>Average</td><td>${combat.average || 0}</td></tr>
+					<tr><td>Pessimist</td><td>${combat.pessimist || 0}</td></tr>
+					<tr><td>Worst Case</td><td>${combat.worstCase || 0}</td></tr>
+				</table>`;
+
+				// Damage Instances
+				html += '<h3>Combat Damage Instances</h3>';
+				const combatInstances = results.combat?.damageInstances || {};
+				html += '<table><tr><th>Scenario</th><th>Sources</th></tr>';
+				for (const scenario of ['optimist', 'average', 'pessimist', 'worstCase']) {
+					const instances = combatInstances[scenario] || [];
+					let sources = '(none)';
+					if (instances.length > 0) {
+						const allSources = instances.flatMap(inst => inst.sources || []);
+						if (allSources.length > 0) {
+							sources = allSources.map(s => `${s.sector}:${s.eventType}(${s.damage})`).join(', ');
+						} else if (instances[0]?.totalDamage > 0) {
+							sources = `Total: ${instances[0].totalDamage}`;
+						}
+					}
+					html += `<tr><td>${scenario}</td><td>${sources}</td></tr>`;
+				}
+				html += '</table>';
+
+				// Event damage
+				html += '<h3>Event Damage</h3>';
+				const eventDmg = results.eventDamage?.damage || {};
+				html += `<table>
+					<tr><th>Scenario</th><th>Damage</th></tr>
+					<tr><td>Optimist</td><td>${eventDmg.optimist || 0}</td></tr>
+					<tr><td>Average</td><td>${eventDmg.average || 0}</td></tr>
+					<tr><td>Pessimist</td><td>${eventDmg.pessimist || 0}</td></tr>
+					<tr><td>Worst Case</td><td>${eventDmg.worstCase || 0}</td></tr>
+				</table>`;
+
+				// Negative events
+				html += '<h3>Negative Events</h3>';
+				html += '<table><tr><th>Event</th><th>Optimist</th><th>Average</th><th>Pessimist</th></tr>';
+				for (const [key, data] of Object.entries(results.negativeEvents || {})) {
+					if ((data.average || 0) > 0.001 || (data.pessimist || 0) > 0.001) {
+						html += `<tr>
+							<td>${key}</td>
+							<td>${(data.optimist || 0).toFixed(3)}</td>
+							<td>${(data.average || 0).toFixed(3)}</td>
+							<td>${(data.pessimist || 0).toFixed(3)}</td>
+						</tr>`;
+					}
+				}
+				html += '</table>';
+
+				// Sector breakdown (expected counts)
+				html += '<h3>Sector Breakdown (Expected Visits)</h3>';
+				html += '<table><tr><th>Sector</th><th>Expected Count</th><th>Max Possible</th></tr>';
+				for (const [sector, data] of Object.entries(results.sectorBreakdown || {})) {
+					const expected = data.expectedCount !== undefined ? data.expectedCount.toFixed(2) : data.count;
+					html += `<tr>
+						<td>${sector}</td>
+						<td>${expected}</td>
+						<td>${data.count || 0}</td>
+					</tr>`;
+				}
+				html += '</table>';
+
+				container.innerHTML = html;
+
+			} catch (error) {
+				container.innerHTML = html + `<p style="color:#ff6b6b;">Error: ${error.message}</p><pre>${error.stack}</pre>`;
+				console.error(error);
+			}
+		}
+
+		// Initialize on load
+		initUI();
+		loadPreset('nurgle');
+	</script>
+</body>
+</html>

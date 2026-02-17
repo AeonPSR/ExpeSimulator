@@ -159,6 +159,90 @@ const DistributionCalculator = {
 	 */
 	empty() {
 		return new Map([[0, 1]]);
+	},
+
+	/**
+	 * Mixes multiple weighted distributions into a single distribution.
+	 * Used for combining results from different sector compositions.
+	 * 
+	 * For each possible value, the mixed probability is the weighted sum:
+	 * P(value) = Σ(weight_i × P_i(value))
+	 * 
+	 * @param {Array<Object>} weightedDistributions - Array of {distribution: Map, weight: number}
+	 * @returns {Map<number, number>} Combined distribution
+	 */
+	mixDistributions(weightedDistributions) {
+		if (weightedDistributions.length === 0) {
+			return this.empty();
+		}
+
+		if (weightedDistributions.length === 1) {
+			// Single distribution - just return a copy
+			return new Map(weightedDistributions[0].distribution);
+		}
+
+		const result = new Map();
+
+		for (const { distribution, weight } of weightedDistributions) {
+			for (const [value, prob] of distribution) {
+				const weightedProb = prob * weight;
+				result.set(value, (result.get(value) || 0) + weightedProb);
+			}
+		}
+
+		return result;
+	},
+
+	/**
+	 * Mixes multiple weighted scenario objects.
+	 * Each scenario object has properties like pessimist, average, optimist, worstCase.
+	 * The mixed value for each property is the weighted average.
+	 * 
+	 * @param {Array<Object>} weightedScenarios - Array of {scenarios: Object, weight: number}
+	 * @returns {Object} Combined scenarios with weighted averages
+	 */
+	mixScenarios(weightedScenarios) {
+		if (weightedScenarios.length === 0) {
+			return { pessimist: 0, average: 0, optimist: 0, worstCase: 0 };
+		}
+
+		if (weightedScenarios.length === 1) {
+			return { ...weightedScenarios[0].scenarios };
+		}
+
+		const result = {
+			pessimist: 0,
+			average: 0,
+			optimist: 0,
+			worstCase: 0
+		};
+
+		for (const { scenarios, weight } of weightedScenarios) {
+			result.pessimist += (scenarios.pessimist || 0) * weight;
+			result.average += (scenarios.average || 0) * weight;
+			result.optimist += (scenarios.optimist || 0) * weight;
+			result.worstCase += (scenarios.worstCase || 0) * weight;
+		}
+
+		return result;
+	},
+
+	/**
+	 * Validates that a distribution sums to 1 (within tolerance).
+	 * @param {Map<number, number>} distribution
+	 * @returns {Object} {valid: boolean, sum: number, error: number}
+	 */
+	validateDistribution(distribution) {
+		let sum = 0;
+		for (const prob of distribution.values()) {
+			sum += prob;
+		}
+		const error = Math.abs(1.0 - sum);
+		return {
+			valid: error < 1e-9,
+			sum: sum,
+			error: error
+		};
 	}
 };
 
