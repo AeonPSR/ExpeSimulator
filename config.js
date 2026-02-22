@@ -567,3 +567,12 @@ const ProjectEffects = {
 		}
 	}
 };
+
+// Export for use in other modules (including tests)
+if (typeof window !== 'undefined') {
+	window.PlanetSectorConfigData = PlanetSectorConfigData;
+	window.AbilityEffects = AbilityEffects;
+	window.BaseEffects = BaseEffects;
+	window.ItemEffects = ItemEffects;
+	window.ProjectEffects = ProjectEffects;
+}
