@@ -27,6 +27,7 @@ module.exports = {
     '!js/app.js'
   ],
   
-  // Verbose output
-  verbose: true
+  // Custom progress bar reporter (only shows failures verbosely)
+  reporters: ['<rootDir>/tests/progress-reporter.js'],
+  verbose: false
 };
