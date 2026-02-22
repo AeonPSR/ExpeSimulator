@@ -124,22 +124,7 @@ const DamageDistributionEngine = {
 				pessimist: paths[2],
 				worstCase: paths[3]
 			};
-
-			// Console logging for debugging
-			console.log(`[${logLabel}] === SAMPLED PATHS ===`);
-			for (const key of ['optimist', 'average', 'pessimist', 'worstCase']) {
-				const path = sampledPaths[key];
-				const nonZeroSources = path.sources.filter(s => s.damage > 0);
-				const sourceDesc = nonZeroSources.length > 0
-					? nonZeroSources.map(s => `${s.sector}:${s.eventType}(${s.damage})`).join(' + ')
-					: '(no damage)';
-				console.log(`[${logLabel}] ${key} (total=${path.totalDamage}): ${sourceDesc}`);
-			}
 		}
-
-		// Debug logging
-		console.log(`[${logLabel}] Damage distribution scenarios: optimist=${scenarios.optimist}, average=${scenarios.average}, pessimist=${scenarios.pessimist}, worstCase=${scenarios.worstCase}`);
-		console.log(`[${logLabel}] Damage distribution probabilities: optimistProb=${(scenarios.optimistProb * 100).toFixed(1)}%, averageProb=${(scenarios.averageProb * 100).toFixed(1)}%, pessimistProb=${(scenarios.pessimistProb * 100).toFixed(1)}%, worstCaseProb=${(scenarios.worstCaseProb * 100).toFixed(1)}%`);
 
 		// Step 5: Build standard damage result (all 4 from one distribution)
 		const damage = this.buildDamageResult(scenarios, totalDistribution);
