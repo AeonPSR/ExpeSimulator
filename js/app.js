@@ -15,6 +15,7 @@ class ExpeditionSimulatorApp {
 		this._selectedSectorsComponent = null;
 		this._exampleWorlds = null;
 		this._tabContainer = null;
+		this._planetaryReview = null;
 		this._playerSection = null;
 		this._probabilityDisplay = null;
 		this._resultsDisplay = null;
@@ -79,11 +80,11 @@ class ExpeditionSimulatorApp {
 		const reviewPanel = this._tabContainer.getTabPanel('planetary-review');
 		const simPanel = this._tabContainer.getTabPanel('expedition-sim');
 
-		// Planetary Review tab — placeholder for now
-		const placeholder = document.createElement('p');
-		placeholder.style.cssText = 'color: #95a5a6; font-style: italic; text-align: center; padding: 20px 0;';
-		placeholder.textContent = 'Coming soon — planetary analysis will appear here.';
-		reviewPanel.appendChild(placeholder);
+		// Planetary Review tab
+		this._planetaryReview = new PlanetaryReview({
+			getResourceURL: getResourceURL
+		});
+		this._planetaryReview.mount(reviewPanel);
 
 		// Expedition Simulation tab — existing components
 		this._playerSection = new PlayerSection({
@@ -197,6 +198,7 @@ class ExpeditionSimulatorApp {
 		this._state.clearSectors();
 		sectors.filter(s => s !== 'LANDING').forEach(s => this._state.addSector(s));
 		this._selectedSectorsComponent.update(this._state.getSectors());
+		this._planetaryReview?.update(worldName);
 	}
 
 	/**
