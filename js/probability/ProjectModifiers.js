@@ -24,6 +24,5 @@ const ProjectModifiers = {
 };
 
 // Export for use in other modules
-if (typeof window !== 'undefined') {
-	window.ProjectModifiers = ProjectModifiers;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.ProjectModifiers = ProjectModifiers;

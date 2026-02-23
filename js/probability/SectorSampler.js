@@ -180,8 +180,37 @@ const SectorSampler = {
 		// Enumerate all valid compositions
 		const compositions = this.enumerateCompositions(sectorCounts, movementSpeed);
 
-		// Compute probabilities
-		return this.computeProbabilities(compositions, sectorCounts, weights);
+		// Compute probabilities and prune negligible compositions
+		const weighted = this.computeProbabilities(compositions, sectorCounts, weights);
+		return this.pruneCompositions(weighted);
+	},
+
+	/**
+	 * Removes compositions with negligible probability and renormalizes.
+	 * Keeps compositions that together cover at least 99.9% of probability mass.
+	 * 
+	 * @param {Array<Object>} weighted - [{composition, probability}, ...]
+	 * @param {number} threshold - Minimum cumulative coverage (default 0.999)
+	 * @returns {Array<Object>} Pruned and renormalized compositions
+	 */
+	pruneCompositions(weighted, threshold = 0.999) {
+		// Sort descending by probability
+		const sorted = [...weighted].sort((a, b) => b.probability - a.probability);
+		
+		let cumulative = 0;
+		const kept = [];
+		for (const comp of sorted) {
+			kept.push(comp);
+			cumulative += comp.probability;
+			if (cumulative >= threshold) break;
+		}
+
+		// Renormalize so probabilities sum to 1
+		const sum = kept.reduce((s, c) => s + c.probability, 0);
+		return kept.map(c => ({
+			composition: c.composition,
+			probability: c.probability / sum
+		}));
 	},
 
 	/**
@@ -220,6 +249,5 @@ const SectorSampler = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.SectorSampler = SectorSampler;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.SectorSampler = SectorSampler;

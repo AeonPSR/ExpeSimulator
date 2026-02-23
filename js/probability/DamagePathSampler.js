@@ -203,6 +203,5 @@ const DamagePathSampler = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.DamagePathSampler = DamagePathSampler;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.DamagePathSampler = DamagePathSampler;

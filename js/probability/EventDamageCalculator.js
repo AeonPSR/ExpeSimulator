@@ -195,6 +195,5 @@ const EventDamageCalculator = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.EventDamageCalculator = EventDamageCalculator;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.EventDamageCalculator = EventDamageCalculator;

@@ -324,6 +324,5 @@ class DamageSpreader {
 }
 
 // Export for use in other modules
-if (typeof window !== 'undefined') {
-	window.DamageSpreader = DamageSpreader;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.DamageSpreader = DamageSpreader;

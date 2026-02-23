@@ -25,6 +25,5 @@ const AbilityData = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.AbilityData = AbilityData;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.AbilityData = AbilityData;

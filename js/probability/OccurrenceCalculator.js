@@ -171,6 +171,5 @@ const OccurrenceCalculator = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.OccurrenceCalculator = OccurrenceCalculator;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.OccurrenceCalculator = OccurrenceCalculator;

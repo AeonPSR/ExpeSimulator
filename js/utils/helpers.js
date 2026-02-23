@@ -109,12 +109,11 @@ function filenameToId(filename) {
 }
 
 // Export for use in other modules
-if (typeof window !== 'undefined') {
-	window.getResourceURL = getResourceURL;
-	window.formatSectorName = formatSectorName;
-	window.isExtensionContextValid = isExtensionContextValid;
-	window.debounce = debounce;
-	window.clamp = clamp;
-	window.generateId = generateId;
-	window.filenameToId = filenameToId;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.getResourceURL = getResourceURL;
+_global.formatSectorName = formatSectorName;
+_global.isExtensionContextValid = isExtensionContextValid;
+_global.debounce = debounce;
+_global.clamp = clamp;
+_global.generateId = generateId;
+_global.filenameToId = filenameToId;

@@ -74,6 +74,5 @@ const ModifierApplicator = {
 };
 
 // Export for use in other modules
-if (typeof window !== 'undefined') {
-	window.ModifierApplicator = ModifierApplicator;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.ModifierApplicator = ModifierApplicator;

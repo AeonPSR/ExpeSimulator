@@ -91,6 +91,5 @@ const LoadoutBuilder = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.LoadoutBuilder = LoadoutBuilder;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.LoadoutBuilder = LoadoutBuilder;

@@ -225,6 +225,5 @@ const DamageDistributionEngine = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.DamageDistributionEngine = DamageDistributionEngine;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.DamageDistributionEngine = DamageDistributionEngine;

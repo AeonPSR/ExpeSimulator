@@ -643,6 +643,5 @@ const EventWeightCalculator = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.EventWeightCalculator = EventWeightCalculator;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.EventWeightCalculator = EventWeightCalculator;

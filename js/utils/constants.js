@@ -33,6 +33,5 @@ const Constants = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.Constants = Constants;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.Constants = Constants;

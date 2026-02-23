@@ -8,7 +8,8 @@
 class ExpeditionSimulatorApp {
 	constructor() {
 		this._state = new ExpeditionState();
-		this._state.setOnChange(() => this._updateDisplays());
+		this._updateDebounceTimer = null;
+		this._state.setOnChange(() => this._scheduleUpdate());
 
 		this._panel = null;
 		this._sectorGrid = null;
@@ -195,8 +196,8 @@ class ExpeditionSimulatorApp {
 		const sectors = WorldData.getWorldConfiguration(worldName);
 		if (sectors.length === 0) return;
 
-		this._state.clearSectors();
-		sectors.filter(s => s !== 'LANDING').forEach(s => this._state.addSector(s));
+		const filtered = sectors.filter(s => s !== 'LANDING');
+		this._state.setSectors(['LANDING', ...filtered]);
 		this._selectedSectorsComponent.update(this._state.getSectors());
 		this._planetaryReview?.update(worldName);
 	}
@@ -213,10 +214,8 @@ class ExpeditionSimulatorApp {
 		const panel = this._panel.element;
 		panel.classList.add('import-open');
 
-		this._state.clearSectors();
-		sectorIds
-			.filter(s => s !== 'LANDING')
-			.forEach(s => this._state.addSector(s));
+		const filtered = sectorIds.filter(s => s !== 'LANDING');
+		this._state.setSectors(['LANDING', ...filtered]);
 		this._selectedSectorsComponent.update(this._state.getSectors());
 
 		// Scroll the selected sectors into view and highlight
@@ -336,6 +335,16 @@ class ExpeditionSimulatorApp {
 	// ========================================
 	// Display Updates
 	// ========================================
+
+	_scheduleUpdate() {
+		if (this._updateDebounceTimer) {
+			clearTimeout(this._updateDebounceTimer);
+		}
+		this._updateDebounceTimer = setTimeout(() => {
+			this._updateDebounceTimer = null;
+			this._updateDisplays();
+		}, 0);
+	}
 
 	_updateDisplays() {
 		this._sectorGrid?.updateSectorAvailability?.();

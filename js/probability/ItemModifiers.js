@@ -52,6 +52,5 @@ const ItemModifiers = {
 };
 
 // Export for use in other modules
-if (typeof window !== 'undefined') {
-	window.ItemModifiers = ItemModifiers;
-}
+const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.ItemModifiers = ItemModifiers;
