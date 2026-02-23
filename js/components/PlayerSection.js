@@ -250,7 +250,7 @@ class PlayerSection extends Component {
 		this._exploredSectors = count;
 		if (this._exploredSectorsValue) {
 			this._exploredSectorsValue.textContent = count.toString();
-			console.log('Explored sectors UI updated to:', count);
+			// console.log('Explored sectors UI updated to:', count);
 		} else {
 			console.warn('_exploredSectorsValue element not found');
 		}
@@ -272,7 +272,7 @@ class PlayerSection extends Component {
 		this._fightingPower = power;
 		if (this._fightingPowerValue) {
 			this._fightingPowerValue.textContent = power.toString();
-			console.log('Fighting power UI updated to:', power);
+			// console.log('Fighting power UI updated to:', power);
 		} else {
 			console.warn('_fightingPowerValue element not found');
 		}

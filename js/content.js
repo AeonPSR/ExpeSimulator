@@ -27,7 +27,7 @@ function initializeApp() {
 
 		// Create the application
 		window.expeditionSimulator = new ExpeditionSimulatorApp();
-		console.log('Expedition Simulator initialized');
+		// console.log('Expedition Simulator initialized');
 
 	} catch (error) {
 		console.error('Failed to initialize Expedition Simulator:', error);

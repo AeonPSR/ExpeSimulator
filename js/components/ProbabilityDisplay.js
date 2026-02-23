@@ -60,6 +60,24 @@ class ProbabilityDisplay extends Component {
 		}
 	}
 
+	/**
+	 * Shows a loading indicator while the worker calculates
+	 */
+	showLoading() {
+		if (this._contentElement) {
+			this._contentElement.innerHTML = '<div class="loading-spinner">Calculating...</div>';
+		}
+	}
+
+	/**
+	 * Shows an error message when calculation fails
+	 */
+	showError() {
+		if (this._contentElement) {
+			this._contentElement.innerHTML = '<div class="calculation-error">Calculation error</div>';
+		}
+	}
+
 	// ========================================
 	// Render Methods
 	// ========================================

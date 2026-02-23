@@ -569,7 +569,7 @@ const ProjectEffects = {
 };
 
 // Export for use in other modules (including tests)
-const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
 _global.PlanetSectorConfigData = PlanetSectorConfigData;
 _global.AbilityEffects = AbilityEffects;
 _global.BaseEffects = BaseEffects;

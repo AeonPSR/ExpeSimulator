@@ -22,6 +22,11 @@ class ExpeditionSimulatorApp {
 		this._resultsDisplay = null;
 		this._chatDetector = null;
 
+		// Web Worker for background calculation
+		this._worker = null;
+		this._requestId = 0;
+		this._baseURL = '';
+
 		this._init();
 	}
 
@@ -39,6 +44,9 @@ class ExpeditionSimulatorApp {
 			onImport: (sectors) => this._onImportSectors(sectors)
 		});
 		this._chatDetector.start();
+
+		// Initialize worker after all scripts are loaded
+		this._initWorker();
 	}
 
 	_createSections() {
@@ -350,9 +358,7 @@ class ExpeditionSimulatorApp {
 		this._sectorGrid?.updateSectorAvailability?.();
 		this._updateExploredSectors();
 		this._updateFightingPower();
-		const results = this._calculateExpeditionResults();
-		this._updateProbabilityDisplay(results);
-		this._updateResultsDisplay(results);
+		this._requestCalculation();
 	}
 
 	_updateExploredSectors() {
@@ -426,7 +432,7 @@ class ExpeditionSimulatorApp {
 		// Use sampling if movement speed < total explorable sectors
 		let results;
 		if (exploredCount < totalExplorableSectors) {
-			console.log(`[SectorSampling] Using sampling: ${exploredCount} explored / ${totalExplorableSectors} total`);
+			// console.log(`[SectorSampling] Using sampling: ${exploredCount} explored / ${totalExplorableSectors} total`);
 			results = EventWeightCalculator.calculateWithSampling(
 				sectorCounts,
 				exploredCount,
@@ -705,6 +711,95 @@ class ExpeditionSimulatorApp {
 	getSelectedSectors() { return this._state.getSectors(); }
 	getPlayers() { return this._state.getPlayers(); }
 	getPanel() { return this._panel; }
+
+	// ========================================
+	// Web Worker
+	// ========================================
+
+	_initWorker() {
+		if (typeof Worker === 'undefined') {
+			console.warn('[Worker] Web Workers not available, using synchronous fallback');
+			this._worker = null;
+			return;
+		}
+
+		try {
+			// Content scripts can't create workers via chrome.runtime.getURL() directly
+			// (cross-origin restriction). Use a Blob wrapper — importScripts is not
+			// subject to same-origin policy, so it can load extension resources.
+			const workerScriptURL = getResourceURL('js/workers/calculation-worker.js');
+			this._baseURL = getResourceURL('');
+			const blob = new Blob(
+				[`importScripts("${workerScriptURL}");`],
+				{ type: 'application/javascript' }
+			);
+			const blobURL = URL.createObjectURL(blob);
+			this._worker = new Worker(blobURL);
+			URL.revokeObjectURL(blobURL);
+			this._worker.onmessage = (event) => this._onWorkerMessage(event);
+			this._worker.onerror = (error) => this._onWorkerError(error);
+		} catch (error) {
+			console.warn('[Worker] Failed to initialize worker, using synchronous fallback:', error.message);
+			this._worker = null;
+		}
+	}
+
+	_requestCalculation() {
+		const sectors = this._state.getSectors();
+		if (sectors.length === 0) {
+			this._updateProbabilityDisplay(null);
+			this._updateResultsDisplay(null);
+			return;
+		}
+
+		// Cancel any in-flight request by incrementing ID
+		this._requestId++;
+		const requestId = this._requestId;
+
+		// Show loading state
+		this._probabilityDisplay?.showLoading?.();
+
+		// If no worker available, fall back to synchronous calculation
+		if (!this._worker) {
+			const results = this._calculateExpeditionResults();
+			this._updateProbabilityDisplay(results);
+			this._updateResultsDisplay(results);
+			return;
+		}
+
+		// Send calculation to worker
+		this._worker.postMessage({
+			type: 'calculate',
+			requestId,
+			baseURL: this._baseURL,
+			sectors,
+			allPlayers: this._state.getPlayers(),
+			antigravActive: this._state.isAntigravActive(),
+			exploredCount: this._playerSection?.getExploredSectors?.() || 9
+		});
+	}
+
+	_onWorkerMessage(event) {
+		const { type, requestId, results, error } = event.data;
+
+		// Ignore stale results
+		if (requestId !== this._requestId) return;
+
+		if (type === 'result') {
+			this._updateProbabilityDisplay(results);
+			this._updateResultsDisplay(results);
+		} else if (type === 'error') {
+			console.error('[Worker]', error);
+			this._probabilityDisplay?.showError?.();
+		}
+	}
+
+	_onWorkerError(error) {
+		console.error('[Worker] Unhandled error:', error.message);
+		// Fall back to synchronous calculation if the worker crashes
+		this._worker = null;
+		this._requestCalculation();
+	}
 }
 
 // Export

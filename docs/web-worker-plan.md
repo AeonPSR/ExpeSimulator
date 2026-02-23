@@ -78,11 +78,11 @@ if (typeof window !== 'undefined') {
 Change each to:
 
 ```js
-const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
 _global.ModuleName = ModuleName;
 ```
 
-This lets the same file work in both the browser main thread (`window`) and a Web Worker (`self`).
+This lets the same file work in both the browser main thread (`window`) and a Web Worker (`self`). Uses `var` instead of `const` because content scripts share a global scope and `const` cannot be redeclared.
 
 **Files to update (26 total):**
 - `config.js` — exports `PlanetSectorConfigData`, `AbilityEffects`, `BaseEffects`, `ItemEffects`, `ProjectEffects`

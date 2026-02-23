@@ -109,7 +109,7 @@ function filenameToId(filename) {
 }
 
 // Export for use in other modules
-const _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
 _global.getResourceURL = getResourceURL;
 _global.formatSectorName = formatSectorName;
 _global.isExtensionContextValid = isExtensionContextValid;
