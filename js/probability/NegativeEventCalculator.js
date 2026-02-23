@@ -201,6 +201,5 @@ const NegativeEventCalculator = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.NegativeEventCalculator = NegativeEventCalculator;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.NegativeEventCalculator = NegativeEventCalculator;

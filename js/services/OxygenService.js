@@ -90,6 +90,5 @@ class OxygenService {
 }
 
 // Export
-if (typeof window !== 'undefined') {
-	window.OxygenService = OxygenService;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.OxygenService = OxygenService;

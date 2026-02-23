@@ -37,7 +37,7 @@ const LoadoutBuilder = {
 			projects: projects
 		};
 		
-		console.log('[LoadoutBuilder] Built loadout:', result);
+		// console.log('[LoadoutBuilder] Built loadout:', result);
 		return result;
 	},
 
@@ -91,6 +91,5 @@ const LoadoutBuilder = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.LoadoutBuilder = LoadoutBuilder;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.LoadoutBuilder = LoadoutBuilder;

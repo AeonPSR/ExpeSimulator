@@ -27,6 +27,5 @@ const ItemData = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.ItemData = ItemData;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.ItemData = ItemData;

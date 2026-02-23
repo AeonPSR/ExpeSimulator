@@ -97,6 +97,5 @@ const SectorData = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.SectorData = SectorData;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.SectorData = SectorData;

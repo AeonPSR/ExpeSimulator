@@ -34,6 +34,7 @@
         "js/components/ProbabilityDisplay.js",
         "js/components/ResultsDisplay.js",
         "js/components/ExampleWorlds.js",
+        "js/components/PlanetaryReview.js",
         "js/services/FightingPowerService.js",
         "js/services/LoadoutBuilder.js",
         "js/services/DamageSpreader.js",
@@ -73,6 +74,17 @@
   "web_accessible_resources": [
     {
       "resources": ["pictures/astro/*", "pictures/abilities/*", "pictures/characters/*", "pictures/items/*", "pictures/items_exploration/*", "pictures/others/*", "*.png", "*.jpg", "*.gif"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": [
+        "js/workers/calculation-worker.js",
+        "config.js",
+        "js/utils/*.js",
+        "js/data/*.js",
+        "js/services/*.js",
+        "js/probability/*.js"
+      ],
       "matches": ["<all_urls>"]
     }
   ],

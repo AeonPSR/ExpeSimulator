@@ -190,7 +190,7 @@ const FightCalculator = {
 			return distribution;
 		}
 		
-		const grenadePower = FightingPowerService.getGrenadePower();
+		const grenadePower = typeof FightingPowerService !== 'undefined' ? FightingPowerService.getGrenadePower() : 0;
 		const maxReduction = grenadeCount * grenadePower;
 		
 		const adjusted = new Map();
@@ -241,7 +241,10 @@ const FightCalculator = {
 	 * @private
 	 */
 	_getGrenadeCount(players) {
-		return FightingPowerService.countGrenades(players);
+		if (typeof FightingPowerService !== 'undefined') {
+			return FightingPowerService.countGrenades(players);
+		}
+		return 0;
 	},
 
 	/**
@@ -263,6 +266,5 @@ const FightCalculator = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.FightCalculator = FightCalculator;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.FightCalculator = FightCalculator;

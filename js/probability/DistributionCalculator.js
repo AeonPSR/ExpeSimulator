@@ -247,6 +247,5 @@ const DistributionCalculator = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.DistributionCalculator = DistributionCalculator;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.DistributionCalculator = DistributionCalculator;

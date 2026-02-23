@@ -289,6 +289,5 @@ const DamageComparator = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.DamageComparator = DamageComparator;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.DamageComparator = DamageComparator;

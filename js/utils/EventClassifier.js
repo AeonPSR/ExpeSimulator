@@ -94,6 +94,5 @@ const EventClassifier = {
 };
 
 // Export
-if (typeof window !== 'undefined') {
-	window.EventClassifier = EventClassifier;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.EventClassifier = EventClassifier;

@@ -569,10 +569,9 @@ const ProjectEffects = {
 };
 
 // Export for use in other modules (including tests)
-if (typeof window !== 'undefined') {
-	window.PlanetSectorConfigData = PlanetSectorConfigData;
-	window.AbilityEffects = AbilityEffects;
-	window.BaseEffects = BaseEffects;
-	window.ItemEffects = ItemEffects;
-	window.ProjectEffects = ProjectEffects;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.PlanetSectorConfigData = PlanetSectorConfigData;
+_global.AbilityEffects = AbilityEffects;
+_global.BaseEffects = BaseEffects;
+_global.ItemEffects = ItemEffects;
+_global.ProjectEffects = ProjectEffects;

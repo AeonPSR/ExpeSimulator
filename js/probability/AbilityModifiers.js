@@ -49,6 +49,5 @@ const AbilityModifiers = {
 };
 
 // Export for use in other modules
-if (typeof window !== 'undefined') {
-	window.AbilityModifiers = AbilityModifiers;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.AbilityModifiers = AbilityModifiers;

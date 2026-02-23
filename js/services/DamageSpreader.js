@@ -77,19 +77,19 @@ class DamageSpreader {
 
 		// Debug logging
 		if (playerCount > 0) {
-			console.log('[DamageSpreader] === DAMAGE ATTRIBUTION ===');
+			// console.log('[DamageSpreader] === DAMAGE ATTRIBUTION ===');
 			for (const scenario of scenarios) {
 				const totals = result[scenario].totalDamage;
 				const breakdown = result[scenario].breakdown;
 				const totalSum = totals.reduce((a, b) => a + b, 0);
 				if (totalSum > 0) {
 					const playerDesc = totals.map((dmg, i) => `P${i + 1}:${dmg}`).join(' ');
-					console.log(`[DamageSpreader] ${scenario} (total=${totalSum}): ${playerDesc}`);
+					// console.log(`[DamageSpreader] ${scenario} (total=${totalSum}): ${playerDesc}`);
 					// Show breakdown details for first player with damage
 					for (let i = 0; i < breakdown.length; i++) {
 						if (breakdown[i].length > 0) {
 							const details = breakdown[i].map(b => `${b.type}@${b.source}(${b.damage})`).join(', ');
-							console.log(`[DamageSpreader]   P${i + 1}: ${details}`);
+							// console.log(`[DamageSpreader]   P${i + 1}: ${details}`);
 						}
 					}
 				}
@@ -179,7 +179,7 @@ class DamageSpreader {
 				
 				// Check for rope immunity: if ACCIDENT_ROPE_3_5 and target has rope, no damage
 				if (eventType === 'ACCIDENT_ROPE_3_5' && this._playerHasRope(players[targetPlayer])) {
-					console.log(`[DamageSpreader] P${targetPlayer + 1} immune to rope damage (has rope)`);
+					// console.log(`[DamageSpreader] P${targetPlayer + 1} immune to rope damage (has rope)`);
 					// Track the applied effect
 					if (appliedEffects[targetPlayer]) {
 						appliedEffects[targetPlayer].push({ type: 'ROPE', damagePrevented: damage, sector: source.sector });
@@ -324,6 +324,5 @@ class DamageSpreader {
 }
 
 // Export for use in other modules
-if (typeof window !== 'undefined') {
-	window.DamageSpreader = DamageSpreader;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.DamageSpreader = DamageSpreader;

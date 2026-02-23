@@ -381,7 +381,7 @@
           delete data.rawHTML;
           window.__inactivityTriumphs[data.name] = data;
           window.__inactivityByCanonical[canonical] = data;
-          console.log('[InactivityDetector] Triumph total:', data.name, '=>', data.totalTriumph);
+          // console.log('[InactivityDetector] Triumph total:', data.name, '=>', data.totalTriumph);
         }
       }catch(e){
         console.warn('Harvest failed for', name, e);
@@ -495,7 +495,7 @@
       return normalizeDeathCause(rec && rec.deathCause);
     });
     const line = parts.join(',');
-    console.log('[InactivityDetector] DeathSummary:', line);
+    // console.log('[InactivityDetector] DeathSummary:', line);
     window.getDeathSummaryLine = () => line; // helper for copy
   }
 
@@ -506,7 +506,7 @@
       return (rec.inactivityClass === 'inactive' || rec.inactivityClass === 'grand-inactive') ? '1' : '0';
     });
     const line = parts.join(',');
-    console.log('[InactivityDetector] InactivitySummary:', line);
+    // console.log('[InactivityDetector] InactivitySummary:', line);
     window.getInactivitySummaryLine = ()=> line;
   }
 
@@ -545,7 +545,7 @@
 
   // Expose helper for manual inspection
   window.listTriumphTotals = function(){
-    Object.values(window.__inactivityTriumphs).forEach(d=>console.log(d.name, d.totalTriumph, d));
+    // Object.values(window.__inactivityTriumphs).forEach(d=>console.log(d.name, d.totalTriumph, d));
   };
   
   // Patch harvest logic: inject canonical mapping & avoid retaining rawHTML
