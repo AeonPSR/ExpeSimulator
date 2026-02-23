@@ -42,9 +42,9 @@ class ProbabilityDisplay extends Component {
 
 		let html = '';
 		html += this._renderResources(data.resources);
-		html += this._renderCombatRisks(data.combat);
+		// html += this._renderCombatRisks(data.combat);
 		html += this._renderCombatDamage(data.combat);
-		html += this._renderEventRisks(data.eventDamage);
+		// html += this._renderEventRisks(data.eventDamage);
 		html += this._renderEventDamage(data.eventDamage);
 		html += this._renderNegativeEvents(data.negativeEvents);
 
