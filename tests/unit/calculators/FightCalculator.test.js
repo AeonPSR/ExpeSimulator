@@ -194,16 +194,23 @@ describe('FightCalculator', () => {
 			expect(result.occurrence).toEqual({});
 		});
 
-		test('returns all expected fields', () => {
+		test('returns all expected fields with correct types', () => {
 			const sectors = ['COMBAT_ZONE'];
 			const result = FightCalculator.calculate(sectors);
 
-			expect(result).toHaveProperty('occurrence');
-			expect(result).toHaveProperty('damage');
-			expect(result).toHaveProperty('damageInstances');
-			expect(result).toHaveProperty('fightingPower');
-			expect(result).toHaveProperty('grenadeCount');
-			expect(result).toHaveProperty('playerCount');
+			// Occurrence should have entries for fight types in the sector
+			expect(Object.keys(result.occurrence).length).toBeGreaterThan(0);
+
+			// Damage values should be numbers
+			expect(typeof result.damage.pessimist).toBe('number');
+			expect(typeof result.damage.average).toBe('number');
+			expect(typeof result.damage.optimist).toBe('number');
+			expect(typeof result.damage.worstCase).toBe('number');
+
+			// Fighting power and grenade count should be numbers
+			expect(typeof result.fightingPower).toBe('number');
+			expect(typeof result.grenadeCount).toBe('number');
+			expect(typeof result.playerCount).toBe('number');
 		});
 
 		test('calculates fighting power from players', () => {

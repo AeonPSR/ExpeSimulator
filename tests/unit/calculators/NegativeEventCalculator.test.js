@@ -116,20 +116,28 @@ describe('NegativeEventCalculator', () => {
 
 	describe('EVENT_TYPES', () => {
 
-		test('defines all negative event types', () => {
-			expect(NegativeEventCalculator.EVENT_TYPES).toHaveProperty('disease');
-			expect(NegativeEventCalculator.EVENT_TYPES).toHaveProperty('playerLost');
-			expect(NegativeEventCalculator.EVENT_TYPES).toHaveProperty('again');
-			expect(NegativeEventCalculator.EVENT_TYPES).toHaveProperty('itemLost');
-			expect(NegativeEventCalculator.EVENT_TYPES).toHaveProperty('killAll');
-			expect(NegativeEventCalculator.EVENT_TYPES).toHaveProperty('killOne');
-			expect(NegativeEventCalculator.EVENT_TYPES).toHaveProperty('mushTrap');
+		test('defines all negative event types with valid categories', () => {
+			const types = NegativeEventCalculator.EVENT_TYPES;
+			// All 7 event types must be present
+			const expectedKeys = ['disease', 'playerLost', 'again', 'itemLost', 'killAll', 'killOne', 'mushTrap'];
+			for (const key of expectedKeys) {
+				expect(types).toHaveProperty(key);
+				// Each must have a non-empty categories array with string values
+				expect(types[key].categories.length).toBeGreaterThan(0);
+				for (const cat of types[key].categories) {
+					expect(typeof cat).toBe('string');
+				}
+			}
 		});
 
-		test('each event type has categories array', () => {
+		test('each event type has non-empty categories of strings', () => {
 			for (const [key, config] of Object.entries(NegativeEventCalculator.EVENT_TYPES)) {
-				expect(config).toHaveProperty('categories');
 				expect(Array.isArray(config.categories)).toBe(true);
+				expect(config.categories.length).toBeGreaterThan(0);
+				config.categories.forEach(cat => {
+					expect(typeof cat).toBe('string');
+					expect(cat.length).toBeGreaterThan(0);
+				});
 			}
 		});
 	});
@@ -153,17 +161,21 @@ describe('NegativeEventCalculator', () => {
 			expect(result.disease).toEqual({ pessimist: 0, average: 0, optimist: 0 });
 		});
 
-		test('returns all event types', () => {
+		test('returns all event types with numeric scenario values', () => {
 			const sectors = ['DANGEROUS'];
 			const result = NegativeEventCalculator.calculate(sectors);
 
-			expect(result).toHaveProperty('disease');
-			expect(result).toHaveProperty('playerLost');
-			expect(result).toHaveProperty('again');
-			expect(result).toHaveProperty('itemLost');
-			expect(result).toHaveProperty('killAll');
-			expect(result).toHaveProperty('killOne');
-			expect(result).toHaveProperty('mushTrap');
+			const expectedKeys = ['disease', 'playerLost', 'again', 'itemLost', 'killAll', 'killOne', 'mushTrap'];
+			for (const key of expectedKeys) {
+				expect(typeof result[key].pessimist).toBe('number');
+				expect(typeof result[key].average).toBe('number');
+				expect(typeof result[key].optimist).toBe('number');
+				// Pessimist >= average >= optimist (more events = worse)
+				expect(result[key].pessimist).toBeGreaterThanOrEqual(result[key].average);
+				expect(result[key].average).toBeGreaterThanOrEqual(result[key].optimist);
+			}
+			// DANGEROUS has DISEASE at 20%, so disease average should be > 0
+			expect(result.disease.average).toBeGreaterThan(0);
 		});
 
 		test('calculate queries sector probabilities', () => {
@@ -186,9 +198,14 @@ describe('NegativeEventCalculator', () => {
 				sectors, {}, ['disease'], null
 			);
 
-			expect(result).toHaveProperty('pessimist');
-			expect(result).toHaveProperty('average');
-			expect(result).toHaveProperty('optimist');
+			expect(typeof result.pessimist).toBe('number');
+			expect(typeof result.average).toBe('number');
+			expect(typeof result.optimist).toBe('number');
+			// DANGEROUS has DISEASE at 20%, so average = 0.2
+			expect(result.average).toBeCloseTo(0.2, 10);
+			// Pessimist >= average >= optimist
+			expect(result.pessimist).toBeGreaterThanOrEqual(result.average);
+			expect(result.average).toBeGreaterThanOrEqual(result.optimist);
 		});
 
 		test('convolves multiple sectors', () => {

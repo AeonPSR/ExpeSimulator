@@ -138,16 +138,21 @@ describe('ResourceCalculator', () => {
 			expect(result.fruits).toEqual({ pessimist: 0, average: 0, optimist: 0 });
 		});
 
-		test('calculate returns all resource types', () => {
+		test('calculate returns all resource types with numeric values', () => {
 			const sectors = ['FOREST'];
 			const result = ResourceCalculator.calculate(sectors);
 
-			expect(result).toHaveProperty('fruits');
-			expect(result).toHaveProperty('steaks');
-			expect(result).toHaveProperty('fuel');
-			expect(result).toHaveProperty('oxygen');
-			expect(result).toHaveProperty('artefacts');
-			expect(result).toHaveProperty('mapFragments');
+			// Each resource type should have numeric pessimist/average/optimist
+			for (const key of ['fruits', 'steaks', 'fuel', 'oxygen', 'artefacts', 'mapFragments']) {
+				expect(typeof result[key].pessimist).toBe('number');
+				expect(typeof result[key].average).toBe('number');
+				expect(typeof result[key].optimist).toBe('number');
+			}
+
+			// FOREST has HARVEST_1 (30%) and HARVEST_2 (20%), so fruits average > 0
+			expect(result.fruits.average).toBeGreaterThan(0);
+			// FOREST has no fuel events, so fuel should be 0
+			expect(result.fuel.average).toBe(0);
 		});
 
 		test('calculate queries sector probabilities for each sector', () => {
@@ -207,13 +212,16 @@ describe('ResourceCalculator', () => {
 			expect(distributions.length).toBe(2);
 		});
 
-		test('returns pessimist/average/optimist structure', () => {
+		test('returns pessimist/average/optimist with correct ordering', () => {
 			const sectors = ['FOREST'];
 			const result = ResourceCalculator._calculateWithConvolution(sectors, {}, 'HARVEST', 0, null);
 
-			expect(result).toHaveProperty('pessimist');
-			expect(result).toHaveProperty('average');
-			expect(result).toHaveProperty('optimist');
+			expect(typeof result.pessimist).toBe('number');
+			expect(typeof result.average).toBe('number');
+			expect(typeof result.optimist).toBe('number');
+			// For resources: optimist >= average >= pessimist (more = better)
+			expect(result.optimist).toBeGreaterThanOrEqual(result.average);
+			expect(result.average).toBeGreaterThanOrEqual(result.pessimist);
 		});
 
 		test('returns zeros for empty sectors', () => {
@@ -246,12 +254,16 @@ describe('ResourceCalculator', () => {
 
 		test('applies driller multiplier to fuel', () => {
 			const sectors = ['DESERT'];
-			// 1 driller = 2x multiplier
-			const result = ResourceCalculator._calculateFuelWithConvolution(sectors, {}, 1, null);
+			// Without driller
+			const resultNoDriller = ResourceCalculator._calculateFuelWithConvolution(sectors, {}, 0, null);
+			// With 1 driller = 2x multiplier
+			const resultWithDriller = ResourceCalculator._calculateFuelWithConvolution(sectors, {}, 1, null);
 
-			expect(result).toHaveProperty('pessimist');
-			expect(result).toHaveProperty('average');
-			expect(result).toHaveProperty('optimist');
+			// Average fuel with driller should be exactly double
+			expect(resultWithDriller.average).toBeCloseTo(resultNoDriller.average * 2, 10);
+			// Both should have non-zero fuel (DESERT has FUEL_1)
+			expect(resultNoDriller.average).toBeGreaterThan(0);
+			expect(resultWithDriller.average).toBeGreaterThan(0);
 		});
 
 		test('returns zeros for empty sectors', () => {
@@ -310,22 +322,24 @@ describe('ResourceCalculator', () => {
 
 		test('includes STARMAP events', () => {
 			const sectors = ['STARMAP_ZONE'];
-			// Should call getSectorProbabilities and include STARMAP
+			// STARMAP_ZONE has STARMAP at 30% + ARTEFACT at 20% (1/9 of that = map fragment)
 			const result = ResourceCalculator._calculateMapFragments(sectors, {}, null);
 
-			expect(result).toHaveProperty('pessimist');
-			expect(result).toHaveProperty('average');
-			expect(result).toHaveProperty('optimist');
+			// Average should reflect the combined probability of STARMAP + 1/9 ARTEFACT
+			expect(result.average).toBeGreaterThan(0);
+			expect(result.optimist).toBeGreaterThanOrEqual(result.average);
+			expect(result.average).toBeGreaterThanOrEqual(result.pessimist);
 		});
 
 		test('includes 1/9 of ARTEFACT as map fragment', () => {
 			// ARTEFACT_ZONE has 40% ARTEFACT
-			// 1/9 of that is map fragment
+			// 1/9 of that = 4.44% chance of map fragment per sector
 			const sectors = ['ARTEFACT_ZONE'];
 			const result = ResourceCalculator._calculateMapFragments(sectors, {}, null);
 
-			// Result should have non-zero values since there's artefact chance
-			expect(result).toHaveProperty('average');
+			// Average should be close to 0.4 * (1/9) ≈ 0.0444
+			expect(result.average).toBeCloseTo(0.4 * (1 / 9), 2);
+			expect(result.average).toBeGreaterThan(0);
 		});
 	});
 

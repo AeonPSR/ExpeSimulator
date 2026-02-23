@@ -180,16 +180,27 @@ describe('EventDamageCalculator', () => {
 			expect(result.occurrence).toEqual({});
 		});
 
-		test('returns all expected fields', () => {
+		test('returns all expected fields with correct values', () => {
 			const sectors = ['SECTOR_A'];
 			const players = [{}, {}];
 			const result = EventDamageCalculator.calculate(sectors, {}, players);
 
-			expect(result).toHaveProperty('occurrence');
-			expect(result).toHaveProperty('damage');
-			expect(result).toHaveProperty('damageInstances');
-			expect(result).toHaveProperty('damageDistribution');
-			expect(result).toHaveProperty('playerCount');
+			// Occurrence should have one entry per event type
+			const eventTypes = Object.keys(EventDamageCalculator.EVENT_DAMAGES);
+			expect(Object.keys(result.occurrence).length).toBe(eventTypes.length);
+
+			// Damage values should be numbers from the engine
+			expect(typeof result.damage.pessimist).toBe('number');
+			expect(typeof result.damage.average).toBe('number');
+			expect(typeof result.damage.optimist).toBe('number');
+			expect(typeof result.damage.worstCase).toBe('number');
+
+			// Player count should match input
+			expect(result.playerCount).toBe(2);
+
+			// Damage instances should have scenario keys
+			expect(Array.isArray(result.damageInstances.pessimist)).toBe(true);
+			expect(Array.isArray(result.damageInstances.optimist)).toBe(true);
 		});
 
 		test('calculates occurrence for each event type', () => {
@@ -208,13 +219,15 @@ describe('EventDamageCalculator', () => {
 			expect(DamageDistributionEngine.calculate).toHaveBeenCalledTimes(1);
 		});
 
-		test('includes legacy fields for backward compatibility', () => {
+		test('includes legacy fields with numeric values for backward compatibility', () => {
 			const sectors = ['SECTOR_A'];
 			const result = EventDamageCalculator.calculate(sectors);
 
-			expect(result).toHaveProperty('tired');
-			expect(result).toHaveProperty('accident');
-			expect(result).toHaveProperty('disaster');
+			// Legacy fields are plain numbers (average occurrence count), not objects
+			for (const key of ['tired', 'accident', 'disaster']) {
+				expect(typeof result[key]).toBe('number');
+				expect(result[key]).toBeGreaterThanOrEqual(0);
+			}
 		});
 
 		test('passes worstCaseExclusions to engine', () => {

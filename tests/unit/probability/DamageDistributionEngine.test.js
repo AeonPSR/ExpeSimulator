@@ -295,7 +295,7 @@ describe('DamageDistributionEngine', () => {
 			expect(result.damageDistribution.get(5)).toBe(1.0);
 		});
 
-		test('calculate returns standard damage result structure', () => {
+		test('calculate returns standard damage result with correct values', () => {
 			const getSectorDamageDist = () => ({
 				dist: [[10, 0.5]],
 				totalProb: 0.5
@@ -308,12 +308,18 @@ describe('DamageDistributionEngine', () => {
 				logLabel: 'Test'
 			});
 
-			expect(result.damage).toHaveProperty('optimist');
-			expect(result.damage).toHaveProperty('average');
-			expect(result.damage).toHaveProperty('pessimist');
-			expect(result.damage).toHaveProperty('worstCase');
-			expect(result.damage).toHaveProperty('distribution');
-			expect(result.damageInstances).toBeDefined();
+			// 50% chance of 10 damage, 50% chance of 0
+			// average = p50 (median), with 50% at 0 the median is 0
+			expect(result.damage.average).toBe(0);
+			// Optimist = p25: 50% mass at 0, so p25 falls in the 0 bin
+			expect(result.damage.optimist).toBe(0);
+			// Worst case = p100: max value is 10
+			expect(result.damage.worstCase).toBe(10);
+			// Pessimist = p75: cumulative 0.5 at 0 < 0.75, so p75 = 10
+			expect(result.damage.pessimist).toBe(10);
+			// damageInstances should have scenario arrays
+			expect(Array.isArray(result.damageInstances.pessimist)).toBe(true);
+			expect(Array.isArray(result.damageInstances.optimist)).toBe(true);
 		});
 
 		test('calculate handles empty sectors', () => {

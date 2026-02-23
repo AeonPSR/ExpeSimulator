@@ -42,19 +42,29 @@ describe('Integration: Expedition Pipeline', () => {
 			// Step 2: Calculate probabilities
 			const result = EventWeightCalculator.calculate(sectors, loadout);
 
-			// Verify result structure
+			// Verify result has correct structure AND meaningful values
 			expect(result).not.toBeNull();
-			expect(result.resources).toBeDefined();
-			expect(result.combat).toBeDefined();
-			expect(result.eventDamage).toBeDefined();
-			expect(result.sectorBreakdown).toBeDefined();
+
+			// Resources should have numeric scenario values
+			expect(typeof result.resources.fruits.average).toBe('number');
+			expect(typeof result.resources.fuel.average).toBe('number');
+			expect(result.resources.fruits.optimist).toBeGreaterThanOrEqual(result.resources.fruits.pessimist);
+
+			// Combat should have numeric damage values
+			expect(typeof result.combat.damage.worstCase).toBe('number');
+			expect(result.combat.damage.worstCase).toBeGreaterThanOrEqual(result.combat.damage.optimist);
+
+			// Event damage should have numeric values
+			expect(typeof result.eventDamage.damage.worstCase).toBe('number');
+
+			// Sector breakdown should contain all 3 sector names
+			expect(Object.keys(result.sectorBreakdown)).toEqual(expect.arrayContaining(['LANDING', 'FOREST', 'DESERT']));
 		});
 
 		test('calculateWithSampling works with sufficient sectors', () => {
-			// Need at least movementSpeed+1 sectors for sampling to trigger
-			// With 8 sectors and movementSpeed 4, sampling is triggered
-			const sectors = ['LANDING', 'FOREST', 'FOREST', 'DESERT', 'DESERT', 
-				'HYDROCARBON', 'HYDROCARBON', 'OXYGEN'];
+			// calculateWithSampling expects sectorCounts object, not sectors array
+			// LANDING is passed via alwaysInclude, not in sectorCounts
+			const sectorCounts = { FOREST: 2, DESERT: 2, HYDROCARBON: 2, OXYGEN: 1 };
 			const players = [
 				{
 					abilities: ['pilot.png', null, null, null],
@@ -64,15 +74,16 @@ describe('Integration: Expedition Pipeline', () => {
 			];
 			const loadout = LoadoutBuilder.build(players);
 
-			// Movement speed of 4 should trigger sampling for 8 non-landing sectors
-			// alwaysInclude=[0] means include LANDING at index 0
-			const result = EventWeightCalculator.calculateWithSampling(sectors, loadout, 4, [0], players);
+			// Movement speed 4 < total 7 sectors → sampling triggered
+			const sampledResult = EventWeightCalculator.calculateWithSampling(
+				sectorCounts, 4, loadout, players, { alwaysInclude: ['LANDING'] }
+			);
 
-			// Even if sampling conditions aren't met, should return valid result
-			expect(result).toBeDefined();
-			if (result) {
-				expect(result.resources).toBeDefined();
-			}
+			// Sampling should return a valid result with the same structure
+			expect(sampledResult).not.toBeNull();
+			expect(typeof sampledResult.resources.fruits.average).toBe('number');
+			expect(typeof sampledResult.combat.damage.worstCase).toBe('number');
+			expect(sampledResult.sectorBreakdown).toBeDefined();
 		});
 	});
 
@@ -82,7 +93,7 @@ describe('Integration: Expedition Pipeline', () => {
 
 	describe('Pilot ability prevents LANDING damage', () => {
 
-		test('with Pilot, LANDING sector has reduced danger', () => {
+		test('with Pilot, LANDING sector has no damage events', () => {
 			const sectors = ['LANDING', 'FOREST'];
 			const players = [
 				{
@@ -100,11 +111,16 @@ describe('Integration: Expedition Pipeline', () => {
 			const result = EventWeightCalculator.calculate(sectors, loadout);
 			expect(result).not.toBeNull();
 
-			// sectorBreakdown is a Map
-			expect(result.sectorBreakdown).toBeDefined();
+			// With Pilot, LANDING should have no damage events (TIRED_2, ACCIDENT_3_5, DISASTER_3_5 removed)
+			const landingEvents = result.sectorBreakdown['LANDING'].events;
+			expect(landingEvents['TIRED_2']).toBeUndefined();
+			expect(landingEvents['ACCIDENT_3_5']).toBeUndefined();
+			expect(landingEvents['DISASTER_3_5']).toBeUndefined();
+			// NOTHING_TO_REPORT should still be present (and be 100% since all others removed)
+			expect(landingEvents['NOTHING_TO_REPORT']).toBe(1);
 		});
 
-		test('without Pilot, LANDING sector can contribute damage', () => {
+		test('without Pilot, LANDING sector has damage events', () => {
 			const sectors = ['LANDING', 'FOREST'];
 			const players = [
 				{
@@ -117,7 +133,12 @@ describe('Integration: Expedition Pipeline', () => {
 
 			const result = EventWeightCalculator.calculate(sectors, loadout);
 			expect(result).not.toBeNull();
-			// Without pilot, LANDING damage is possible
+
+			// Without pilot, LANDING should contain damage events
+			const landingEvents = result.sectorBreakdown['LANDING'].events;
+			expect(landingEvents['TIRED_2']).toBeGreaterThan(0);
+			expect(landingEvents['ACCIDENT_3_5']).toBeGreaterThan(0);
+			expect(landingEvents['DISASTER_3_5']).toBeGreaterThan(0);
 		});
 	});
 
@@ -161,11 +182,10 @@ describe('Integration: Expedition Pipeline', () => {
 
 			const result = EventWeightCalculator.calculate(sectors, loadout);
 
-			// Multiple fight sectors should produce some worst-case damage
-			// Use >= 0 since pilot prevents landing and RNG might give 0
-			expect(result.combat.damage.worstCase).toBeGreaterThanOrEqual(0);
-			// At minimum, verify the result structure is correct
-			expect(result.combat.damage).toBeDefined();
+			// Without diplomacy, DESERT and MANKAROG have fight events → worst case must be > 0
+			expect(result.combat.damage.worstCase).toBeGreaterThan(0);
+			// Pessimist should also show some damage with multiple fight sectors
+			expect(result.combat.damage.pessimist).toBeGreaterThan(0);
 		});
 	});
 
@@ -211,13 +231,17 @@ describe('Integration: Expedition Pipeline', () => {
 			const fightingPower = FightingPowerService.calculateBaseFightingPower(players);
 			const grenadeCount = FightingPowerService.countGrenades(players);
 
+			expect(grenadeCount).toBe(1);
+
 			const evaluation = DamageComparator.evaluateExpedition(
 				sectors, loadout, players.length, fightingPower, grenadeCount
 			);
 
-			// With one grenade, grenadesUsed should be at most 1
+			// With one grenade, total used + remaining must equal initial count
+			expect(evaluation.grenadesUsed + evaluation.grenadesRemaining).toBe(grenadeCount);
+			// grenadesUsed must be 0 or 1
+			expect(evaluation.grenadesUsed).toBeGreaterThanOrEqual(0);
 			expect(evaluation.grenadesUsed).toBeLessThanOrEqual(1);
-			expect(evaluation.grenadesRemaining).toBeGreaterThanOrEqual(0);
 		});
 	});
 
@@ -318,7 +342,7 @@ describe('Integration: Expedition Pipeline', () => {
 			const sectors = ['LANDING', 'FOREST', 'FOREST'];
 			const playersWithBotanist = [
 				{
-					abilities: ['pilot.png', 'botanist.png', null, null],
+					abilities: ['pilot.png', 'botanic.png', null, null],
 					items: [null, null, null],
 					health: 14
 				}
@@ -334,12 +358,13 @@ describe('Integration: Expedition Pipeline', () => {
 			const loadoutWith = LoadoutBuilder.build(playersWithBotanist);
 			const loadoutWithout = LoadoutBuilder.build(playersWithoutBotanist);
 
-			const resultWith = EventWeightCalculator.calculate(sectors, loadoutWith);
-			const resultWithout = EventWeightCalculator.calculate(sectors, loadoutWithout);
+			const resultWith = EventWeightCalculator.calculate(sectors, loadoutWith, playersWithBotanist);
+			const resultWithout = EventWeightCalculator.calculate(sectors, loadoutWithout, playersWithoutBotanist);
 
-			// Botanist should give higher/equal fruit yield on average
-			expect(resultWith.resources).toBeDefined();
-			expect(resultWithout.resources).toBeDefined();
+			// Botanist adds +1 fruit per harvest event, so average fruit should be strictly higher
+			expect(resultWith.resources.fruits.average).toBeGreaterThan(
+				resultWithout.resources.fruits.average
+			);
 		});
 	});
 
@@ -373,8 +398,17 @@ describe('Integration: Expedition Pipeline', () => {
 			expect(loadout.items).toContain('SPACE_SUIT');
 			expect(loadout.items).toContain('KNIFE');
 
-			const result = EventWeightCalculator.calculate(sectors, loadout);
+			const result = EventWeightCalculator.calculate(sectors, loadout, players);
 			expect(result).not.toBeNull();
+
+			// Pilot should remove damage events from LANDING
+			const landingEvents = result.sectorBreakdown['LANDING'].events;
+			expect(landingEvents['TIRED_2']).toBeUndefined();
+			expect(landingEvents['ACCIDENT_3_5']).toBeUndefined();
+			expect(landingEvents['DISASTER_3_5']).toBeUndefined();
+
+			// Blaster and knife should contribute to fighting power
+			expect(result.combat.fightingPower).toBeGreaterThan(0);
 		});
 
 		test('grenade affects fighting power calculation', () => {
