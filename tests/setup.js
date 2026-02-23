@@ -49,6 +49,7 @@ const sourceFiles = [
   'js/components/ProbabilityDisplay.js',
   'js/components/ResultsDisplay.js',
   'js/components/ExampleWorlds.js',
+  'js/components/PlanetaryReview.js',
   'js/services/FightingPowerService.js',
   'js/services/LoadoutBuilder.js',
   'js/services/DamageSpreader.js',

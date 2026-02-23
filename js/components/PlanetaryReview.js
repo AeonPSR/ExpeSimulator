@@ -46,8 +46,11 @@ class PlanetaryReview extends Component {
 			table[i] = c;
 		}
 
-		// Encode as UTF-8 bytes (mirrors PHP string → CRC32 behaviour)
-		const bytes = new TextEncoder().encode(str);
+		// Encode as UTF-8 bytes (mirrors PHP string → CRC32 behaviour).
+		// Use Buffer in Node.js/Jest environments where TextEncoder is unavailable.
+		const bytes = (typeof TextEncoder !== 'undefined')
+			? new TextEncoder().encode(str)
+			: Buffer.from(str, 'utf8');
 
 		let crc = 0xFFFFFFFF;
 		for (const byte of bytes) {
