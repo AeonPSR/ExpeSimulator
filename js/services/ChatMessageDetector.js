@@ -78,6 +78,9 @@ class ChatMessageDetector {
 		// Process any messages already on the page
 		this._scanExistingMessages();
 
+		// Process any planet sections already on the page
+		this._scanExistingPlanetSections();
+
 		// Watch for new messages being added
 		this._observer = new MutationObserver((mutations) => {
 			for (const mutation of mutations) {
@@ -130,6 +133,105 @@ class ChatMessageDetector {
 		for (const message of messages) {
 			this._processMessage(message);
 		}
+
+		// Check for planet sections
+		if (node.classList && node.classList.contains('planet') && node.tagName === 'SECTION') {
+			this._processPlanetSection(node);
+		}
+		const planetSections = node.querySelectorAll ? node.querySelectorAll('section.planet') : [];
+		for (const section of planetSections) {
+			this._processPlanetSection(section);
+		}
+	}
+
+	/**
+	 * Scans planet sections already present in the DOM
+	 * @private
+	 */
+	_scanExistingPlanetSections() {
+		const sections = document.querySelectorAll('section.planet');
+		for (const section of sections) {
+			this._processPlanetSection(section);
+		}
+	}
+
+	/**
+	 * Checks if a planet section is valid and adds the import button
+	 * @private
+	 * @param {HTMLElement} section
+	 */
+	_processPlanetSection(section) {
+		if (this._processedMessages.has(section)) return;
+		this._processedMessages.add(section);
+
+		const actions = section.querySelector('.actions');
+		if (!actions) return;
+
+		this._addImportButtonToPlanet(section, actions);
+	}
+
+	/**
+	 * Adds an import button inside the .actions div of a planet section.
+	 * Classes are copied from the first existing button in .actions (minus
+	 * its unique role class) so the button always matches the game's style,
+	 * even if Vue scoped-CSS hashes or class names change.
+	 * @private
+	 * @param {HTMLElement} section
+	 * @param {HTMLElement} actionsDiv
+	 */
+	_addImportButtonToPlanet(section, actionsDiv) {
+		const button = document.createElement('button');
+
+		// Copy all attributes from an existing sibling button (data-v-*, data-v-tippy, etc.)
+		// so our button inherits Vue scoped styles and tooltip behaviour automatically.
+		// We then override class and title with our own values.
+		const sibling = actionsDiv.querySelector('button');
+		if (sibling) {
+			for (const attr of sibling.attributes) {
+				button.setAttribute(attr.name, attr.value);
+			}
+		}
+		button.className = 'icon expe-import-planet-btn';
+		button.title = 'Import to simulator';
+
+		const img = document.createElement('img');
+		img.src = getResourceURL('pictures/astro/astrophysicist.png');
+		img.alt = 'Import';
+		button.appendChild(img);
+
+		button.addEventListener('click', (e) => {
+			e.stopPropagation();
+			const sectors = this._parseSectorsFromPlanetSection(section);
+			if (sectors.length > 0 && this._onImport) {
+				this._onImport(sectors);
+			}
+		});
+
+		actionsDiv.appendChild(button);
+	}
+
+	/**
+	 * Parses sector IDs from a planet section by reading img[alt] attributes
+	 * inside the .analysis ul. Each <li> with a sector image counts as one
+	 * sector occurrence (duplicates are kept).
+	 *
+	 * @private
+	 * @param {HTMLElement} section
+	 * @returns {string[]} Array of sector IDs
+	 */
+	_parseSectorsFromPlanetSection(section) {
+		const sectors = [];
+		const images = section.querySelectorAll('.analysis ul li img[alt]');
+
+		for (const img of images) {
+			const name = img.alt.toLowerCase();
+			const sectorId = SECTOR_NAME_TO_ID.get(name);
+			if (sectorId) {
+				sectors.push(sectorId);
+			}
+		}
+
+		return sectors;
 	}
 
 	/**
