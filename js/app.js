@@ -17,6 +17,7 @@ class ExpeditionSimulatorApp {
 		this._exampleWorlds = null;
 		this._tabContainer = null;
 		this._planetaryReview = null;
+		this._currentPlanetName = null;
 		this._playerSection = null;
 		this._probabilityDisplay = null;
 		this._resultsDisplay = null;
@@ -207,7 +208,7 @@ class ExpeditionSimulatorApp {
 		const filtered = sectors.filter(s => s !== 'LANDING');
 		this._state.setSectors(['LANDING', ...filtered]);
 		this._selectedSectorsComponent.update(this._state.getSectors());
-		this._planetaryReview?.update(worldName);
+		this._currentPlanetName = worldName;
 	}
 
 	/**
@@ -358,6 +359,7 @@ class ExpeditionSimulatorApp {
 		this._sectorGrid?.updateSectorAvailability?.();
 		this._updateExploredSectors();
 		this._updateFightingPower();
+		this._updatePlanetaryReview();
 		this._requestCalculation();
 	}
 
@@ -388,6 +390,13 @@ class ExpeditionSimulatorApp {
 			this._state.isCentauriActive()
 		);
 		this._playerSection?.setFightingPower?.(power);
+	}
+
+	_updatePlanetaryReview() {
+		if (!this._planetaryReview) return;
+		const sectors = this._state.getSectors();
+		const reviewData = PlanetReviewScorer.score(sectors);
+		this._planetaryReview.update(this._currentPlanetName || null, reviewData);
 	}
 
 	/**

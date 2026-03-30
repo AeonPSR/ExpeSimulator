@@ -132,9 +132,10 @@ class StarRating extends Component {
 	_renderBooleans(booleans) {
 		this._booleansContainer.innerHTML = '';
 
-		if (booleans.length === 0) return;
+		const visible = booleans.filter(f => f.present);
+		if (visible.length === 0) return;
 
-		for (const flag of booleans) {
+		for (const flag of visible) {
 			const indicator = this.createElement('div', {
 				className: `star-rating-boolean ${flag.present ? 'star-rating-boolean--present' : 'star-rating-boolean--absent'}`
 			});

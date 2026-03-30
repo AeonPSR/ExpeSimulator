@@ -116,24 +116,6 @@ class PlanetaryReview extends Component {
 	 * @param {string|null} planetName
 	 * @param {Object|null} [reviewData] - Star rating data (see StarRating input contract)
 	 */
-	// TODO: Remove once backend scorer is implemented
-	static get _EXAMPLE_REVIEW_DATA() {
-		return {
-			overall: 3.5,
-			axes: [
-				{ key: 'fruits',    label: 'Fruits',    stars: 4.0 },
-				{ key: 'steaks',    label: 'Steaks',    stars: 2.5 },
-				{ key: 'fuel',      label: 'Fuel',      stars: 5.5 },
-				{ key: 'artifacts', label: 'Artifacts', stars: 3.0 },
-				{ key: 'lethality', label: 'Lethality', stars: 4.5 },
-				{ key: 'hazards',   label: 'Hazards',   stars: 2.0 },
-			],
-			booleans: [
-				{ key: 'oxygen', label: 'Oxygen', present: true }
-			]
-		};
-	}
-
 	update(planetName, reviewData = null) {
 		this._planetName = planetName || null;
 
@@ -145,8 +127,7 @@ class PlanetaryReview extends Component {
 		this._nameElement.textContent = this._planetName || 'Unknown planet';
 
 		if (this._starRating) {
-			// TODO: Replace with real reviewData once backend scorer exists
-			this._starRating.update(reviewData || PlanetaryReview._EXAMPLE_REVIEW_DATA);
+			this._starRating.update(reviewData);
 		}
 	}
 }
