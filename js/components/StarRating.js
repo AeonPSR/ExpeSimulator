@@ -154,31 +154,38 @@ class StarRating extends Component {
 	// ─── Static helpers ──────────────────────────────────────────────────────
 
 	/**
-	 * Creates a star bar element for a 0–5 score.
-	 * Supports full, half, and empty stars.
+	 * Creates a star bar element for a 0–6 score.
+	 * Always renders 6 stars. The 6th is hidden when score ≤ 5,
+	 * so it overflows to the right (not the left) when it appears.
 	 *
-	 * @param {number} score - Value from 0 to 5
+	 * @param {number} score - Value from 0 to 6
 	 * @returns {HTMLElement}
 	 */
 	static _createStarsElement(score) {
-		const clamped = Math.max(0, Math.min(5, score));
+		const clamped = Math.max(0, Math.min(6, score));
 
 		const container = document.createElement('span');
 		container.className = 'star-rating-stars';
 
-		for (let i = 1; i <= 5; i++) {
+		for (let i = 1; i <= 6; i++) {
 			const star = document.createElement('span');
+			const isSixth = (i === 6);
+			const hidden = isSixth && clamped <= 5;
+
+			let cls = 'star';
+			if (isSixth) cls += ' star--sixth';
+			if (hidden) cls += ' star--hidden';
+
 			if (clamped >= i) {
-				star.className = 'star star--full';
-				star.textContent = '★';
+				cls += ' star--full';
 			} else if (clamped >= i - 0.5) {
-				// Half star: overlay technique via CSS
-				star.className = 'star star--half';
-				star.textContent = '★';
+				cls += ' star--half';
 			} else {
-				star.className = 'star star--empty';
-				star.textContent = '★';
+				cls += ' star--empty';
 			}
+
+			star.className = cls;
+			star.textContent = '★';
 			container.appendChild(star);
 		}
 

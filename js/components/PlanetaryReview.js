@@ -123,7 +123,7 @@ class PlanetaryReview extends Component {
 			axes: [
 				{ key: 'fruits',    label: 'Fruits',    stars: 4.0 },
 				{ key: 'steaks',    label: 'Steaks',    stars: 2.5 },
-				{ key: 'fuel',      label: 'Fuel',      stars: 1.0 },
+				{ key: 'fuel',      label: 'Fuel',      stars: 5.5 },
 				{ key: 'artifacts', label: 'Artifacts', stars: 3.0 },
 				{ key: 'lethality', label: 'Lethality', stars: 4.5 },
 				{ key: 'hazards',   label: 'Hazards',   stars: 2.0 },

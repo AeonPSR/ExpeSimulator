@@ -342,6 +342,26 @@
 	color: #555;
 }
 
+#expedition-simulator .star-rating-stars .star--sixth.star--full {
+	color: #e74c3c;
+}
+
+#expedition-simulator .star-rating-stars .star--sixth.star--half {
+	color: #e74c3c;
+	-webkit-background-clip: text;
+	background-clip: text;
+	background-image: linear-gradient(90deg, #e74c3c 50%, #555 50%);
+	-webkit-text-fill-color: transparent;
+}
+
+#expedition-simulator .star-rating-stars .star--sixth.star--empty {
+	color: #555;
+}
+
+#expedition-simulator .star-rating-stars .star--hidden {
+	opacity: 0%;
+}
+
 /* ── Boolean indicators ────────────────────────────────────────────────── */
 
 #expedition-simulator .star-rating-booleans {

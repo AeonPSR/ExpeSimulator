@@ -82,7 +82,7 @@ class ExpeditionSimulatorApp {
 				{ id: 'planetary-review', label: 'Planetary Review' },
 				{ id: 'expedition-sim', label: 'Expedition Simulation' }
 			],
-			activeTab: 'expedition-sim'
+			activeTab: 'planetary-review'
 		});
 		this._tabContainer.mount(contentArea);
 
