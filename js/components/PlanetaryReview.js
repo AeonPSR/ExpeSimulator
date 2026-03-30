@@ -23,6 +23,7 @@ class PlanetaryReview extends Component {
 
 		this._imgElement  = null;
 		this._nameElement = null;
+		this._starRating  = null;
 	}
 
 	// ─── Static helpers ──────────────────────────────────────────────────────
@@ -101,16 +102,39 @@ class PlanetaryReview extends Component {
 			this._planetName || 'Unknown planet');
 		this.element.appendChild(this._nameElement);
 
+		// Star rating display
+		this._starRating = new StarRating();
+		this._starRating.mount(this.element);
+
 		return this.element;
 	}
 
 	/**
-	 * Updates the displayed planet image and name.
+	 * Updates the displayed planet image, name, and review scores.
 	 * Safe to call before or after mounting.
 	 *
 	 * @param {string|null} planetName
+	 * @param {Object|null} [reviewData] - Star rating data (see StarRating input contract)
 	 */
-	update(planetName) {
+	// TODO: Remove once backend scorer is implemented
+	static get _EXAMPLE_REVIEW_DATA() {
+		return {
+			overall: 3.5,
+			axes: [
+				{ key: 'fruits',    label: 'Fruits',    stars: 4.0 },
+				{ key: 'steaks',    label: 'Steaks',    stars: 2.5 },
+				{ key: 'fuel',      label: 'Fuel',      stars: 1.0 },
+				{ key: 'artifacts', label: 'Artifacts', stars: 3.0 },
+				{ key: 'lethality', label: 'Lethality', stars: 4.5 },
+				{ key: 'hazards',   label: 'Hazards',   stars: 2.0 },
+			],
+			booleans: [
+				{ key: 'oxygen', label: 'Oxygen', present: true }
+			]
+		};
+	}
+
+	update(planetName, reviewData = null) {
 		this._planetName = planetName || null;
 
 		if (!this._imgElement || !this._nameElement) return;
@@ -119,6 +143,11 @@ class PlanetaryReview extends Component {
 		this._imgElement.src = src;
 		this._imgElement.alt  = this._planetName || 'Unknown planet';
 		this._nameElement.textContent = this._planetName || 'Unknown planet';
+
+		if (this._starRating) {
+			// TODO: Replace with real reviewData once backend scorer exists
+			this._starRating.update(reviewData || PlanetaryReview._EXAMPLE_REVIEW_DATA);
+		}
 	}
 }
 

@@ -235,6 +235,146 @@
 	text-align: center;
 }
 
+/* ==========================================================================
+   Star Rating
+   ========================================================================== */
+
+#expedition-simulator .star-rating {
+	width: 100%;
+	max-width: 280px;
+	margin-top: 8px;
+}
+
+#expedition-simulator .star-rating-placeholder {
+	margin: 0;
+	font-size: 12px;
+	color: #7f8c8d;
+	text-align: center;
+	font-style: italic;
+}
+
+/* ── Overall ───────────────────────────────────────────────────────────── */
+
+#expedition-simulator .star-rating-overall {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 8px 0 10px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	margin-bottom: 8px;
+}
+
+#expedition-simulator .star-rating-overall-label {
+	font-size: 13px;
+	font-weight: 700;
+	font-variant: small-caps;
+	letter-spacing: 0.06em;
+	color: #ecf0f1;
+}
+
+#expedition-simulator .star-rating-overall-value {
+	font-size: 13px;
+	font-weight: 600;
+	color: #f1c40f;
+	min-width: 24px;
+	text-align: right;
+}
+
+#expedition-simulator .star-rating-overall .star-rating-stars .star {
+	font-size: 16px;
+}
+
+/* ── Per-axis rows ─────────────────────────────────────────────────────── */
+
+#expedition-simulator .star-rating-axes {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+#expedition-simulator .star-rating-axis {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+	padding: 2px 0;
+}
+
+#expedition-simulator .star-rating-axis-label {
+	font-size: 11px;
+	font-weight: 600;
+	color: #bdc3c7;
+	min-width: 70px;
+	font-variant: small-caps;
+	letter-spacing: 0.04em;
+}
+
+#expedition-simulator .star-rating-axis .star-rating-stars .star {
+	font-size: 13px;
+}
+
+/* ── Stars ─────────────────────────────────────────────────────────────── */
+
+#expedition-simulator .star-rating-stars {
+	display: inline-flex;
+	gap: 1px;
+}
+
+#expedition-simulator .star-rating-stars .star {
+	line-height: 1;
+	transition: color 0.2s ease;
+}
+
+#expedition-simulator .star-rating-stars .star--full {
+	color: #f1c40f;
+}
+
+#expedition-simulator .star-rating-stars .star--half {
+	color: #f1c40f;
+	-webkit-background-clip: text;
+	background-clip: text;
+	background-image: linear-gradient(90deg, #f1c40f 50%, #555 50%);
+	-webkit-text-fill-color: transparent;
+}
+
+#expedition-simulator .star-rating-stars .star--empty {
+	color: #555;
+}
+
+/* ── Boolean indicators ────────────────────────────────────────────────── */
+
+#expedition-simulator .star-rating-booleans {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 10px;
+	padding-top: 8px;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#expedition-simulator .star-rating-boolean {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+#expedition-simulator .star-rating-boolean--present .star-rating-boolean-icon {
+	color: #2ecc71;
+}
+
+#expedition-simulator .star-rating-boolean--absent .star-rating-boolean-icon {
+	color: #e74c3c;
+}
+
+#expedition-simulator .star-rating-boolean-label {
+	color: #bdc3c7;
+	font-variant: small-caps;
+	letter-spacing: 0.04em;
+}
+
 /* Panel Content Area */
 #expedition-simulator .panel-content {
 	height: calc(100vh - 70px);
