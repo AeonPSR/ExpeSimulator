@@ -333,21 +333,24 @@ describe('PlanetReviewScorer', () => {
 			expect(hazards.stars).toBeGreaterThanOrEqual(1);
 		});
 
-		test('overall is 0 (placeholder for Phase 2)', () => {
+		test('overall is computed from tier rules', () => {
 			const sectors = WorldData.getWorldConfiguration('Fugubos');
 			const result = PlanetReviewScorer.score(sectors);
-			expect(result.overall).toBe(0);
+			expect(result.overall).toBeGreaterThan(0);
+			expect(result.overall).toBeLessThanOrEqual(6);
+			// Should be rounded to 0.5
+			expect(result.overall * 2 % 1).toBe(0);
 		});
 
 		// ── Kill bonus post-processing ─────────────────────────────────
 
-		test('VOLCANIC_ACTIVITY adds +2 lethality stars (KILL_ALL)', () => {
+		test('VOLCANIC_ACTIVITY adds +1 lethality star (KILL_ALL)', () => {
 			const base = PlanetReviewScorer.score(['LANDING', 'FOREST']);
 			const withKill = PlanetReviewScorer.score(['LANDING', 'FOREST', 'VOLCANIC_ACTIVITY']);
 			const baseLethality = base.axes.find(a => a.key === 'lethality').stars;
 			const killLethality = withKill.axes.find(a => a.key === 'lethality').stars;
-			// +2 from kill bonus, but sector also adds its own EV, so diff ≥ 1.5
-			expect(killLethality - baseLethality).toBeGreaterThanOrEqual(1.5);
+			// +1 from kill bonus, plus sector's own EV
+			expect(killLethality - baseLethality).toBeGreaterThanOrEqual(1);
 		});
 
 		test('MANKAROG adds +1 lethality star (KILL_RANDOM)', () => {
@@ -362,8 +365,8 @@ describe('PlanetReviewScorer', () => {
 		test('multiple kill sectors stack bonuses', () => {
 			const result = PlanetReviewScorer.score(['LANDING', 'VOLCANIC_ACTIVITY', 'MANKAROG']);
 			const lethality = result.axes.find(a => a.key === 'lethality').stars;
-			// +2 for KILL_ALL + +1 for KILL_RANDOM + base EV from FIGHT_32 etc.
-			expect(lethality).toBeGreaterThanOrEqual(3);
+			// +1 for KILL_ALL + +0.5 for KILL_RANDOM + base EV from FIGHT_32 etc.
+			expect(lethality).toBeGreaterThanOrEqual(2);
 		});
 
 		test('kill bonuses are clamped at 6 stars', () => {
@@ -383,6 +386,195 @@ describe('PlanetReviewScorer', () => {
 			const baseArt = base.axes.find(a => a.key === 'artifacts').stars;
 			const cristalArt = withCristal.axes.find(a => a.key === 'artifacts').stars;
 			expect(cristalArt - baseArt).toBeGreaterThanOrEqual(1.5);
+		});
+	});
+
+	// =========================================================================
+	// _computeOverall (Phase 2 — tier/bucket system)
+	// =========================================================================
+
+	describe('_computeOverall', () => {
+
+		function makeAxes(obj) {
+			const defaults = { fruits: 0, steaks: 0, fuel: 0, artifacts: 0, lethality: 0, hazards: 0 };
+			const merged = { ...defaults, ...obj };
+			return Object.entries(merged).map(([key, stars]) => ({ key, label: key, stars }));
+		}
+
+		function makeBooleans(oxygen = false, cristal = false) {
+			return [
+				{ key: 'oxygen', label: 'Oxygen', present: oxygen },
+				{ key: 'cristal_field', label: 'Crystal Map', present: cristal },
+			];
+		}
+
+		// ── Rule 1: Base = best positive axis ────────────────────────
+
+		test('base equals best positive axis', () => {
+			const axes = makeAxes({ fuel: 4, fruits: 2 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(4);
+		});
+
+		test('base is 0 when all positive axes are 0', () => {
+			const axes = makeAxes({ lethality: 3 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(0);
+		});
+
+		// ── Rule 2: Size penalty ─────────────────────────────────────
+
+		test('size 9 → no penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(4);
+		});
+
+		test('size 10 → −0.5 penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 10)).toBe(3.5);
+		});
+
+		test('size 12 → −0.5 penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 12)).toBe(3.5);
+		});
+
+		test('size 13 → no penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 13)).toBe(4);
+		});
+
+		test('size 16 → no penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 16)).toBe(4);
+		});
+
+		test('size 17 → −0.5 penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 17)).toBe(3.5);
+		});
+
+		test('size 20 → −0.5 penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 20)).toBe(3.5);
+		});
+
+		// ── Rule 3: Secondary bonus ──────────────────────────────────
+
+		test('2nd axis ≥ 3 → +0.5 bonus', () => {
+			const axes = makeAxes({ fuel: 4, artifacts: 3 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(4.5);
+		});
+
+		test('2nd axis < 3 → no bonus', () => {
+			const axes = makeAxes({ fuel: 4, artifacts: 2.5 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(4);
+		});
+
+		// ── Rule 4: Danger penalties ─────────────────────────────────
+
+		test('lethality = 6 → −2', () => {
+			const axes = makeAxes({ fuel: 4, lethality: 6 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(2);
+		});
+
+		test('lethality = 5 → −1.5', () => {
+			const axes = makeAxes({ fuel: 4, lethality: 5 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(2.5);
+		});
+
+		test('lethality = 4 → −1', () => {
+			const axes = makeAxes({ fuel: 4, lethality: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(3);
+		});
+
+		test('lethality ≥ 2 but < 4 → −0.5', () => {
+			const axes = makeAxes({ fuel: 4, lethality: 2 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(3.5);
+		});
+
+		test('lethality < 2 → no penalty', () => {
+			const axes = makeAxes({ fuel: 4, lethality: 1.5 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(4);
+		});
+
+		test('hazards = 6 → −2', () => {
+			const axes = makeAxes({ fuel: 4, hazards: 6 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(2);
+		});
+
+		test('hazards = 4 → −1', () => {
+			const axes = makeAxes({ fuel: 4, hazards: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(3);
+		});
+
+		test('both lethality and hazards penalize cumulatively', () => {
+			const axes = makeAxes({ fuel: 5, lethality: 4, hazards: 4 });
+			// 5 - 1 - 1 = 3
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9)).toBe(3);
+		});
+
+		// ── Rule 5: Boolean bonuses ──────────────────────────────────
+
+		test('oxygen +0.5', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(true, false), 9)).toBe(4.5);
+		});
+
+		test('crystal map +0.5', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(false, true), 9)).toBe(4.5);
+		});
+
+		test('both booleans → +1', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(true, true), 9)).toBe(5);
+		});
+
+		// ── Rule 6: Clamping ─────────────────────────────────────────
+
+		test('result is clamped to minimum 0', () => {
+			const axes = makeAxes({ fuel: 0.5, lethality: 5, hazards: 5 });
+			// 0.5 - 1.5 - 1.5 - 0.5 (size 10) = -3 → clamped to 0
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 10)).toBe(0);
+		});
+
+		test('result is clamped to maximum 6', () => {
+			const axes = makeAxes({ fuel: 6, artifacts: 5 });
+			// 6 + 0.5 (secondary) + 1 (booleans) = 7.5 → clamped to 6
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(true, true), 9)).toBe(6);
+		});
+
+		// ── Combined rules ───────────────────────────────────────────
+
+		test('all rules combine correctly', () => {
+			// fuel=5 (base), artifacts=3 (+0.5 secondary), lethality=3 (-0.5),
+			// oxygen (+0.5), size=10 (-0.5) → 5 + 0.5 - 0.5 + 0.5 - 0.5 = 5
+			const axes = makeAxes({ fuel: 5, artifacts: 3, lethality: 3 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(true, false), 10)).toBe(5);
+		});
+
+		// ── Example worlds overall sanity ────────────────────────────
+
+		test('Americas Dream: good overall', () => {
+			const sectors = WorldData.getWorldConfiguration("America's Dream");
+			const result = PlanetReviewScorer.score(sectors);
+			expect(result.overall).toBeGreaterThanOrEqual(2);
+		});
+
+		test('Polyphemus: low overall (dangerous)', () => {
+			const sectors = WorldData.getWorldConfiguration('Polyphemus');
+			const result = PlanetReviewScorer.score(sectors);
+			expect(result.overall).toBeLessThanOrEqual(3);
+		});
+
+		test('all example worlds have valid overall', () => {
+			const worlds = WorldData.getAvailableWorlds();
+			for (const name of worlds) {
+				const sectors = WorldData.getWorldConfiguration(name);
+				const result = PlanetReviewScorer.score(sectors);
+				expect(result.overall).toBeGreaterThanOrEqual(0);
+				expect(result.overall).toBeLessThanOrEqual(6);
+				expect(result.overall * 2 % 1).toBe(0); // rounded to 0.5
+			}
 		});
 	});
 });

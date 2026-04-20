@@ -86,6 +86,25 @@ const PlanetReviewScorer = (() => {
 	/** Prefixes intentionally excluded from axis scoring */
 	const EXCLUDED_PREFIXES = ['OXYGEN_'];
 
+	/** Positive axes used for overall score (resource axes) */
+	const POSITIVE_AXES = new Set(['fruits', 'steaks', 'fuel', 'artifacts']);
+
+	/** Danger axes and their penalty thresholds: [threshold, penalty] pairs (descending) */
+	const DANGER_PENALTIES = {
+		lethality: [[6, -2], [5, -1.5], [4, -1], [2, -0.5]],
+		hazards:   [[6, -2], [5, -1.5], [4, -1], [2, -0.5]],
+	};
+
+	/** Planet sizes (scored sectors) that incur a -0.5 penalty */
+	const PENALIZED_SIZES = new Set([10, 11, 12, 17, 18, 19, 20]);
+
+	/** Threshold for 2nd-best positive axis to grant a bonus */
+	const SECONDARY_BONUS_THRESHOLD = 3;
+	const SECONDARY_BONUS = 0.5;
+
+	/** Boolean bonuses toward overall score */
+	const BOOLEAN_BONUSES = { oxygen: 0.5, cristal_field: 0.5 };
+
 	// ─── Event magnitude parser ─────────────────────────────────────────────
 
 	/**
@@ -327,10 +346,72 @@ const PlanetReviewScorer = (() => {
 		const hasCristalField = sectors.some(s => s === 'CRISTAL_FIELD');
 		booleans.push({ key: 'cristal_field', label: 'Crystal Map', present: hasCristalField });
 
-		// Overall: placeholder until Phase 2
-		const overall = 0;
+		const overall = computeOverall(axes, booleans, scoredSectors.length);
 
 		return { overall, axes, booleans };
+	}
+
+	// ─── Overall score (tier / bucket system) ───────────────────────────────
+
+	/**
+	 * Computes the overall planet score using a rule-based tier system.
+	 *
+	 * Rules applied in order:
+	 * 1. Base = best positive axis (fruits, steaks, fuel, artifacts)
+	 * 2. Size penalty: -0.5 if scored sectors in {10,11,12,17,18,19,20}
+	 * 3. Secondary bonus: +0.5 if 2nd best positive axis >= 3
+	 * 4. Danger penalties: lethality/hazards >= 4 → -1, elif >= 2 → -0.5
+	 * 5. Boolean bonuses: oxygen +0.5, crystal map +0.5
+	 * 6. Clamp to [0, 6], round to nearest 0.5
+	 *
+	 * @param {Array} axes - Scored axes from score()
+	 * @param {Array} booleans - Boolean indicators from score()
+	 * @param {number} scoredSectorCount - Number of scored sectors (excl. LANDING/UNKNOWN)
+	 * @returns {number}
+	 */
+	function computeOverall(axes, booleans, scoredSectorCount) {
+		// 1. Base = best positive axis
+		const positiveStars = axes
+			.filter(a => POSITIVE_AXES.has(a.key))
+			.map(a => a.stars)
+			.sort((a, b) => b - a);
+
+		let overall = positiveStars[0] || 0;
+
+		// 2. Size penalty
+		if (PENALIZED_SIZES.has(scoredSectorCount)) {
+			overall -= 0.5;
+		}
+
+		// 3. Secondary bonus
+		if (positiveStars.length >= 2 && positiveStars[1] >= SECONDARY_BONUS_THRESHOLD) {
+			overall += SECONDARY_BONUS;
+		}
+
+		// 4. Danger penalties
+		for (const [axisKey, thresholds] of Object.entries(DANGER_PENALTIES)) {
+			const axis = axes.find(a => a.key === axisKey);
+			if (!axis) continue;
+			for (const [threshold, penalty] of thresholds) {
+				if (axis.stars >= threshold) {
+					overall += penalty; // penalty is negative
+					break; // only apply the highest matching threshold
+				}
+			}
+		}
+
+		// 5. Boolean bonuses
+		for (const bool of booleans) {
+			if (bool.present && BOOLEAN_BONUSES[bool.key]) {
+				overall += BOOLEAN_BONUSES[bool.key];
+			}
+		}
+
+		// 6. Clamp and round
+		overall = Math.max(0, Math.min(6, overall));
+		overall = Math.round(overall * 2) / 2;
+
+		return overall;
 	}
 
 	// ─── Public API ─────────────────────────────────────────────────────────
@@ -342,6 +423,7 @@ const PlanetReviewScorer = (() => {
 		_getAxisForEvent: getAxisForEvent,
 		_computeSectorEVs: computeSectorEVs,
 		_computeCeilings: computeCeilings,
+		_computeOverall: computeOverall,
 		_FIVE_STAR_RATIO: FIVE_STAR_RATIO,
 		_EVENT_AXIS: EVENT_AXIS,
 		_PREFIX_AXIS: PREFIX_AXIS,
