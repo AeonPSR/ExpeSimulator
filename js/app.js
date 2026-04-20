@@ -17,6 +17,7 @@ class ExpeditionSimulatorApp {
 		this._exampleWorlds = null;
 		this._tabContainer = null;
 		this._planetaryReview = null;
+		this._currentPlanetName = null;
 		this._playerSection = null;
 		this._probabilityDisplay = null;
 		this._resultsDisplay = null;
@@ -82,7 +83,7 @@ class ExpeditionSimulatorApp {
 				{ id: 'planetary-review', label: 'Planetary Review' },
 				{ id: 'expedition-sim', label: 'Expedition Simulation' }
 			],
-			activeTab: 'expedition-sim'
+			activeTab: 'planetary-review'
 		});
 		this._tabContainer.mount(contentArea);
 
@@ -91,7 +92,8 @@ class ExpeditionSimulatorApp {
 
 		// Planetary Review tab
 		this._planetaryReview = new PlanetaryReview({
-			getResourceURL: getResourceURL
+			getResourceURL: getResourceURL,
+			onDiplomacyToggle: () => this._updatePlanetaryReview()
 		});
 		this._planetaryReview.mount(reviewPanel);
 
@@ -207,7 +209,7 @@ class ExpeditionSimulatorApp {
 		const filtered = sectors.filter(s => s !== 'LANDING');
 		this._state.setSectors(['LANDING', ...filtered]);
 		this._selectedSectorsComponent.update(this._state.getSectors());
-		this._planetaryReview?.update(worldName);
+		this._currentPlanetName = worldName;
 	}
 
 	/**
@@ -358,6 +360,7 @@ class ExpeditionSimulatorApp {
 		this._sectorGrid?.updateSectorAvailability?.();
 		this._updateExploredSectors();
 		this._updateFightingPower();
+		this._updatePlanetaryReview();
 		this._requestCalculation();
 	}
 
@@ -388,6 +391,14 @@ class ExpeditionSimulatorApp {
 			this._state.isCentauriActive()
 		);
 		this._playerSection?.setFightingPower?.(power);
+	}
+
+	_updatePlanetaryReview() {
+		if (!this._planetaryReview) return;
+		const sectors = this._state.getSectors();
+		const diplomacy = this._planetaryReview.isDiplomacyActive;
+		const reviewData = PlanetReviewScorer.score(sectors, { diplomacy });
+		this._planetaryReview.update(this._currentPlanetName || null, reviewData);
 	}
 
 	/**
