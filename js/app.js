@@ -92,7 +92,8 @@ class ExpeditionSimulatorApp {
 
 		// Planetary Review tab
 		this._planetaryReview = new PlanetaryReview({
-			getResourceURL: getResourceURL
+			getResourceURL: getResourceURL,
+			onDiplomacyToggle: () => this._updatePlanetaryReview()
 		});
 		this._planetaryReview.mount(reviewPanel);
 
@@ -395,7 +396,8 @@ class ExpeditionSimulatorApp {
 	_updatePlanetaryReview() {
 		if (!this._planetaryReview) return;
 		const sectors = this._state.getSectors();
-		const reviewData = PlanetReviewScorer.score(sectors);
+		const diplomacy = this._planetaryReview.isDiplomacyActive;
+		const reviewData = PlanetReviewScorer.score(sectors, { diplomacy });
 		this._planetaryReview.update(this._currentPlanetName || null, reviewData);
 	}
 

@@ -20,10 +20,12 @@ class PlanetaryReview extends Component {
 		super(options);
 		this.getResourceURL = options.getResourceURL;
 		this._planetName = options.planetName || null;
+		this.onDiplomacyToggle = options.onDiplomacyToggle || null;
 
 		this._imgElement  = null;
 		this._nameElement = null;
 		this._starRating  = null;
+		this._diplomacyToggle = null;
 	}
 
 	// ─── Static helpers ──────────────────────────────────────────────────────
@@ -89,6 +91,23 @@ class PlanetaryReview extends Component {
 	render() {
 		this.element = this.createElement('div', { className: 'planetary-review' });
 
+		// Diplomacy toggle (top-right)
+		if (!this._diplomacyToggle) {
+			this._diplomacyToggle = new ToggleButton({
+				id: 'review-diplomacy-toggle',
+				className: 'diplomacy-toggle-btn',
+				icon: this.getResourceURL('pictures/abilities/diplomacy.png'),
+				alt: 'Toggle Diplomacy',
+				activeColor: 'blue',
+				onToggle: (isActive) => {
+					this.onDiplomacyToggle?.(isActive);
+				}
+			});
+		}
+		const toggleWrapper = this.createElement('div', { className: 'planetary-review__toggle' });
+		toggleWrapper.appendChild(this._diplomacyToggle.render());
+		this.element.appendChild(toggleWrapper);
+
 		// Planet image
 		this._imgElement = this.createElement('img', {
 			className: 'planet-image',
@@ -129,6 +148,14 @@ class PlanetaryReview extends Component {
 		if (this._starRating) {
 			this._starRating.update(reviewData);
 		}
+	}
+
+	/**
+	 * Returns whether the diplomacy toggle is currently active.
+	 * @returns {boolean}
+	 */
+	get isDiplomacyActive() {
+		return this._diplomacyToggle ? this._diplomacyToggle.isActive : false;
 	}
 }
 

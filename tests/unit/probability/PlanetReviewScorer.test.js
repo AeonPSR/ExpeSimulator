@@ -577,4 +577,47 @@ describe('PlanetReviewScorer', () => {
 			}
 		});
 	});
+
+	// =========================================================================
+	// Diplomacy option
+	// =========================================================================
+
+	describe('diplomacy option', () => {
+
+		test('diplomacy reduces lethality on fight-heavy sectors', () => {
+			// Thousands Cuts is full of fight sectors (PREDATOR, RUMINANT, etc.)
+			const sectors = WorldData.getWorldConfiguration('Thousands Cuts');
+			const without = PlanetReviewScorer.score(sectors);
+			const withDip = PlanetReviewScorer.score(sectors, { diplomacy: true });
+			const letWithout = without.axes.find(a => a.key === 'lethality').stars;
+			const letWith = withDip.axes.find(a => a.key === 'lethality').stars;
+			expect(letWith).toBeLessThan(letWithout);
+		});
+
+		test('diplomacy does not affect non-fight axes', () => {
+			const sectors = WorldData.getWorldConfiguration("America's Dream");
+			const without = PlanetReviewScorer.score(sectors);
+			const withDip = PlanetReviewScorer.score(sectors, { diplomacy: true });
+			const fuelWithout = without.axes.find(a => a.key === 'fuel').stars;
+			const fuelWith = withDip.axes.find(a => a.key === 'fuel').stars;
+			// Fuel comes from FUEL_ events, not FIGHT_, so should stay same or increase
+			// (removing FIGHT_ redistributes weight, potentially increasing fuel's share)
+			expect(fuelWith).toBeGreaterThanOrEqual(fuelWithout);
+		});
+
+		test('diplomacy improves overall on dangerous planets', () => {
+			const sectors = WorldData.getWorldConfiguration('Thousands Cuts');
+			const without = PlanetReviewScorer.score(sectors);
+			const withDip = PlanetReviewScorer.score(sectors, { diplomacy: true });
+			expect(withDip.overall).toBeGreaterThanOrEqual(without.overall);
+		});
+
+		test('diplomacy=false is the default', () => {
+			const sectors = WorldData.getWorldConfiguration('Museum');
+			const defaultResult = PlanetReviewScorer.score(sectors);
+			const explicitFalse = PlanetReviewScorer.score(sectors, { diplomacy: false });
+			expect(defaultResult.overall).toBe(explicitFalse.overall);
+			expect(defaultResult.axes).toEqual(explicitFalse.axes);
+		});
+	});
 });

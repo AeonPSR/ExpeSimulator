@@ -282,11 +282,14 @@ const PlanetReviewScorer = (() => {
 	 * Scores a planet given its list of sectors.
 	 *
 	 * @param {string[]} sectors - Array of sector names (e.g. ['LANDING', 'FOREST', 'CAVE'])
+	 * @param {Object} [options]
+	 * @param {boolean} [options.diplomacy=false] - When true, removes FIGHT_* events before scoring
 	 * @returns {Object} Review data object for StarRating.update()
 	 */
-	function score(sectors) {
+	function score(sectors, options = {}) {
 		const ceilings = getCeilings();
 		const scoredSectors = sectors.filter(s => !IGNORED_SECTORS.has(s));
+		const useDiplomacy = options.diplomacy || false;
 
 		// Aggregate raw scores across all sectors
 		const rawScores = {};
@@ -295,8 +298,19 @@ const PlanetReviewScorer = (() => {
 		}
 
 		for (const sectorName of scoredSectors) {
-			const config = getSectorConfig(sectorName);
+			let config = getSectorConfig(sectorName);
 			if (!config) continue;
+
+			// Diplomacy: strip FIGHT_* events from the pool
+			if (useDiplomacy && config.explorationEvents) {
+				const filtered = {};
+				for (const [event, weight] of Object.entries(config.explorationEvents)) {
+					if (!event.startsWith('FIGHT_')) {
+						filtered[event] = weight;
+					}
+				}
+				config = { ...config, explorationEvents: filtered };
+			}
 
 			const evs = computeSectorEVs(config);
 			for (const [axisKey, value] of Object.entries(evs)) {
