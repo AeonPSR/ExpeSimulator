@@ -191,7 +191,7 @@ class SectorGrid extends Component {
 	 * @param {boolean} active
 	 */
 	setDiplomacyActive(active) {
-		this._diplomacyToggle?.setActive(active);
+		this._diplomacyToggle?.setActive(active, true);
 	}
 }
 

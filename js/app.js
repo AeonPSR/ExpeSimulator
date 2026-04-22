@@ -58,7 +58,7 @@ class ExpeditionSimulatorApp {
 			getResourceURL: getResourceURL,
 			sectorsWithFight: SectorData.sectorsWithFight,
 			onSectorClick: (name) => this._onSectorClick(name),
-			onDiplomacyToggle: (active) => this._updateDisplays(),
+			onDiplomacyToggle: (active) => this._onDiplomacyToggle(active),
 			getSectorAvailability: (name) => this._getSectorAvailability(name)
 		});
 		this._sectorGrid.mount(contentArea);
@@ -93,7 +93,7 @@ class ExpeditionSimulatorApp {
 		// Planetary Review tab
 		this._planetaryReview = new PlanetaryReview({
 			getResourceURL: getResourceURL,
-			onDiplomacyToggle: () => this._updatePlanetaryReview()
+			onDiplomacyToggle: (active) => this._onDiplomacyToggle(active)
 		});
 		this._planetaryReview.mount(reviewPanel);
 
@@ -119,6 +119,18 @@ class ExpeditionSimulatorApp {
 		// Render initial players from state
 		this._renderInitialPlayers();
 		
+		this._updateDisplays();
+	}
+
+	_onDiplomacyToggle(active) {
+		if (active) {
+			document.body.classList.add('diplomacy-active');
+		} else {
+			document.body.classList.remove('diplomacy-active');
+		}
+
+		this._sectorGrid?.setDiplomacyActive?.(active);
+		this._planetaryReview?.setDiplomacyActive?.(active);
 		this._updateDisplays();
 	}
 
@@ -396,7 +408,7 @@ class ExpeditionSimulatorApp {
 	_updatePlanetaryReview() {
 		if (!this._planetaryReview) return;
 		const sectors = this._state.getSectors();
-		const diplomacy = this._planetaryReview.isDiplomacyActive;
+		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
 		const reviewData = PlanetReviewScorer.score(sectors, { diplomacy });
 		this._planetaryReview.update(this._currentPlanetName || null, reviewData);
 	}

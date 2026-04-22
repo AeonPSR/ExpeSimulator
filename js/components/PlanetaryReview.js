@@ -157,6 +157,14 @@ class PlanetaryReview extends Component {
 	get isDiplomacyActive() {
 		return this._diplomacyToggle ? this._diplomacyToggle.isActive : false;
 	}
+
+	/**
+	 * Sets the diplomacy toggle state.
+	 * @param {boolean} active
+	 */
+	setDiplomacyActive(active) {
+		this._diplomacyToggle?.setActive(active, true);
+	}
 }
 
 if (typeof window !== 'undefined') {
