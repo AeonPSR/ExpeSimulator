@@ -69,6 +69,7 @@ class ChatMessageDetector {
 		this._observer = null;
 		this._processedMessages = new WeakSet();
 		this._onImport = options.onImport || null;
+		this._clickListener = null;
 	}
 
 	/**
@@ -78,7 +79,9 @@ class ChatMessageDetector {
 		// Process any messages already on the page
 		this._scanExistingMessages();
 
-		// Watch for new messages being added
+		const commsPanel = document.querySelector('.comms-panel') || document.body;
+
+		// Watch for new messages being added to the DOM
 		this._observer = new MutationObserver((mutations) => {
 			for (const mutation of mutations) {
 				for (const node of mutation.addedNodes) {
@@ -89,10 +92,20 @@ class ChatMessageDetector {
 			}
 		});
 
-		this._observer.observe(document.body, {
+		this._observer.observe(commsPanel, {
 			childList: true,
 			subtree: true
 		});
+
+		// Re-scan when the user switches tabs or expands a thread,
+		// since those actions reveal already-present messages without DOM insertions.
+		this._clickListener = (e) => {
+			const target = e.target.closest('.tab, .toggle-children');
+			if (!target) return;
+			setTimeout(() => this._scanExistingMessages(), 150);
+		};
+		commsPanel.addEventListener('click', this._clickListener);
+		this._commsPanel = commsPanel;
 	}
 
 	/**
@@ -103,6 +116,11 @@ class ChatMessageDetector {
 			this._observer.disconnect();
 			this._observer = null;
 		}
+		if (this._clickListener && this._commsPanel) {
+			this._commsPanel.removeEventListener('click', this._clickListener);
+			this._clickListener = null;
+			this._commsPanel = null;
+		}
 	}
 
 	/**
@@ -110,7 +128,7 @@ class ChatMessageDetector {
 	 * @private
 	 */
 	_scanExistingMessages() {
-		const messages = document.querySelectorAll('.main-message');
+		const messages = document.querySelectorAll('.message');
 		for (const message of messages) {
 			this._processMessage(message);
 		}
@@ -122,11 +140,11 @@ class ChatMessageDetector {
 	 * @param {HTMLElement} node
 	 */
 	_checkNode(node) {
-		if (node.classList && node.classList.contains('main-message')) {
+		if (node.classList && node.classList.contains('message')) {
 			this._processMessage(node);
 		}
 		// Also check descendants
-		const messages = node.querySelectorAll ? node.querySelectorAll('.main-message') : [];
+		const messages = node.querySelectorAll ? node.querySelectorAll('.message') : [];
 		for (const message of messages) {
 			this._processMessage(message);
 		}
@@ -176,8 +194,8 @@ class ChatMessageDetector {
 	 * @returns {boolean}
 	 */
 	_containsSectorName(message) {
-		const text = message.textContent;
-		return ALL_SECTOR_NAMES.some(name => name.length > 0 && text.includes(name));
+		const text = message.textContent.toLowerCase();
+		return ALL_SECTOR_NAMES.some(name => name.length > 0 && text.includes(name.toLowerCase()));
 	}
 
 	/**
