@@ -42,6 +42,13 @@
 	transform: translateX(0);
 }
 
+/* Force-close: overrides hover while the panel slides away after unpinning */
+#expedition-simulator.force-close,
+#expedition-simulator.force-close:hover {
+	transform: translateX(-400px);
+	transition-delay: 0s;
+}
+
 /* Import mode - temporarily force panel open */
 #expedition-simulator.import-open {
 	transform: translateX(0);

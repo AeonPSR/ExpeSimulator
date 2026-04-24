@@ -136,6 +136,13 @@ class Panel extends Component {
 			this.element.classList.remove('pinned');
 			pinBtn.classList.remove('active');
 			pinBtn.title = 'Pin panel open';
+			// Force the panel to slide away even if the mouse is still over it.
+			// The class is removed once the CSS transition ends so normal
+			// hover behaviour resumes immediately afterward.
+			this.element.classList.add('force-close');
+			this.element.addEventListener('transitionend', () => {
+				this.element.classList.remove('force-close');
+			}, { once: true });
 		}
 	}
 

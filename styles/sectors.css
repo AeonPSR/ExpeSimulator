@@ -127,11 +127,6 @@
 	filter: grayscale(100%);
 }
 
-/* Selected Sectors Section */
-#expedition-simulator .selected-sectors {
-	margin-bottom: 20px;
-}
-
 /* Import highlight animation */
 @keyframes import-highlight {
 	0%   { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
