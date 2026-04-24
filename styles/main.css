@@ -295,9 +295,9 @@
 /* ── Per-axis rows ─────────────────────────────────────────────────────── */
 
 #expedition-simulator .star-rating-axes {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 4px 12px;
 }
 
 #expedition-simulator .star-rating-axis {
@@ -371,33 +371,40 @@
 
 /* ── Boolean indicators ────────────────────────────────────────────────── */
 
-#expedition-simulator .star-rating-booleans {
+#expedition-simulator .star-rating-boolean-list {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
+	gap: 6px;
 	margin-top: 10px;
 	padding-top: 8px;
 	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	flex-direction: row;
+	gap: 3px;
 }
 
-#expedition-simulator .star-rating-boolean {
-	display: flex;
-	align-items: center;
-	gap: 4px;
+#expedition-simulator .star-rating-boolean-item {
+	gap: 5px;
+	padding: 2px 8px 2px 5px;
+	border-radius: 999px;
+	border: 2px solid var(--badge-color, #888);
 	font-size: 11px;
 	font-weight: 600;
+	width: fit-content;
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
 }
 
-#expedition-simulator .star-rating-boolean--present .star-rating-boolean-icon {
-	color: #2ecc71;
+#expedition-simulator .star-rating-boolean-item-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--badge-color, #888);
+	flex-shrink: 0;
 }
 
-#expedition-simulator .star-rating-boolean--absent .star-rating-boolean-icon {
-	color: #e74c3c;
-}
-
-#expedition-simulator .star-rating-boolean-label {
-	color: #bdc3c7;
+#expedition-simulator .star-rating-boolean-item-label {
+	color: #e0e0e0;
 	font-variant: small-caps;
 	letter-spacing: 0.04em;
 }

@@ -63,7 +63,7 @@ const SECTOR_NAME_TO_ID = buildSectorNameToIdMap();
 class ChatMessageDetector {
 	/**
 	 * @param {Object} options
-	 * @param {Function} [options.onImport] - Callback when sectors are imported: (sectorIds: string[]) => void
+	 * @param {Function} [options.onImport] - Callback when sectors are imported: (sectorIds: string[], planetName: string|null) => void
 	 */
 	constructor(options = {}) {
 		this._observer = null;
@@ -218,7 +218,8 @@ class ChatMessageDetector {
 			e.stopPropagation();
 			const sectors = this._parseSectorsFromMessage(message);
 			if (sectors.length > 0 && this._onImport) {
-				this._onImport(sectors);
+				const planetName = this._parsePlanetNameFromMessage(message);
+				this._onImport(sectors, planetName);
 			}
 		});
 
@@ -264,6 +265,30 @@ class ChatMessageDetector {
 		}
 
 		return sectors;
+	}
+
+	/**
+	 * Extracts the planet name from an expedition message.
+	 * The name appears in the <strong> element immediately following the :planet: image.
+	 *
+	 * @private
+	 * @param {HTMLElement} message
+	 * @returns {string|null}
+	 */
+	_parsePlanetNameFromMessage(message) {
+		const planetImg = message.querySelector('img[alt=":planet:"]');
+		if (!planetImg) return null;
+
+		// Walk forward through siblings to find the first <strong>
+		let node = planetImg.nextSibling;
+		while (node) {
+			if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'STRONG') {
+				const name = node.textContent.trim();
+				return name || null;
+			}
+			node = node.nextSibling;
+		}
+		return null;
 	}
 }
 

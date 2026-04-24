@@ -41,7 +41,7 @@ class StarRating extends Component {
 		this.element.appendChild(this._axesContainer);
 
 		// Boolean indicators
-		this._booleansContainer = this.createElement('div', { className: 'star-rating-booleans' });
+		this._booleansContainer = this.createElement('div', { className: 'star-rating-boolean-list' });
 		this.element.appendChild(this._booleansContainer);
 
 		// Render empty state
@@ -136,19 +136,20 @@ class StarRating extends Component {
 		if (visible.length === 0) return;
 
 		for (const flag of visible) {
-			const indicator = this.createElement('div', {
-				className: `star-rating-boolean ${flag.present ? 'star-rating-boolean--present' : 'star-rating-boolean--absent'}`
+			const color = flag.color || '#888';
+			const badge = this.createElement('div', {
+				className: 'star-rating-boolean-item'
 			});
+			badge.style.setProperty('--badge-color', color);
 
-			const icon = this.createElement('span', { className: 'star-rating-boolean-icon' },
-				flag.present ? '✓' : '✗');
-			indicator.appendChild(icon);
+			const dot = this.createElement('span', { className: 'star-rating-boolean-item-dot' });
+			badge.appendChild(dot);
 
-			const label = this.createElement('span', { className: 'star-rating-boolean-label' },
+			const label = this.createElement('span', { className: 'star-rating-boolean-item-label' },
 				flag.label);
-			indicator.appendChild(label);
+			badge.appendChild(label);
 
-			this._booleansContainer.appendChild(indicator);
+			this._booleansContainer.appendChild(badge);
 		}
 	}
 

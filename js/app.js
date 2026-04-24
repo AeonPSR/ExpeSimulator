@@ -42,7 +42,7 @@ class ExpeditionSimulatorApp {
 
 		// Start watching chat for expedition messages
 		this._chatDetector = new ChatMessageDetector({
-			onImport: (sectors) => this._onImportSectors(sectors)
+			onImport: (sectors, planetName) => this._onImportSectors(sectors, planetName)
 		});
 		this._chatDetector.start();
 
@@ -229,8 +229,9 @@ class ExpeditionSimulatorApp {
 	 * @param {string[]} sectorIds - Array of sector IDs (LANDING is always included automatically)
 	 * @private
 	 */
-	_onImportSectors(sectorIds) {
+	_onImportSectors(sectorIds, planetName = null) {
 		if (sectorIds.length === 0) return;
+		this._currentPlanetName = planetName || null;
 
 		// Open the panel temporarily
 		const panel = this._panel.element;
