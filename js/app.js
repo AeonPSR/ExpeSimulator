@@ -417,36 +417,8 @@ class ExpeditionSimulatorApp {
 
 	_onExportPlanetToClipboard() {
 		const name = this._currentPlanetName || 'Unknown planet';
-		const sectors = this._state.getSectors().filter(s => s !== 'LANDING');
-
-		const icons = sectors
-			.map(s => SectorData.SECTOR_ICONS[s] || s)
-			.join('');
-
-		const text = `:ic_planet_scanned: **${name}**\n${icons}`;
-
-		// Try the modern Clipboard API first; fall back to execCommand.
-		// Always return a Promise so the button can reflect success/failure.
-		if (navigator.clipboard?.writeText) {
-			return navigator.clipboard.writeText(text);
-		}
-
-		// execCommand fallback — treat any exception as failure
-		return new Promise((resolve, reject) => {
-			try {
-				const ta = document.createElement('textarea');
-				ta.value = text;
-				ta.style.position = 'fixed';
-				ta.style.opacity = '0';
-				document.body.appendChild(ta);
-				ta.select();
-				const ok = document.execCommand('copy');
-				document.body.removeChild(ta);
-				ok ? resolve() : reject();
-			} catch (e) {
-				reject(e);
-			}
-		});
+		const sectors = this._state.getSectors();
+		return PlanetExporter.copyToClipboard(name, sectors);
 	}
 
 	/**
