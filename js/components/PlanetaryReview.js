@@ -25,8 +25,12 @@ class PlanetaryReview extends Component {
 
 		this._imgElement  = null;
 		this._nameElement = null;
+		this._navElement  = null;
 		this._starRating  = null;
 		this._diplomacyToggle = null;
+
+		this._direction = 'North';
+		this._fuelCost  = 0;
 	}
 
 	// ─── Static helpers ──────────────────────────────────────────────────────
@@ -122,6 +126,11 @@ class PlanetaryReview extends Component {
 			this._planetName || 'Unknown planet');
 		this.element.appendChild(this._nameElement);
 
+		// Direction & fuel cost
+		this._navElement = this.createElement('p', { className: 'planet-nav' },
+			this._formatNav(this._direction, this._fuelCost));
+		this.element.appendChild(this._navElement);
+
 		// Star rating display
 		this._starRating = new StarRating();
 		this._starRating.mount(this.element);
@@ -165,6 +174,24 @@ class PlanetaryReview extends Component {
 		if (this._starRating) {
 			this._starRating.update(reviewData);
 		}
+	}
+
+	/**
+	 * Updates the direction and fuel cost display.
+	 * @param {string} direction
+	 * @param {number} fuelCost
+	 */
+	updateNav(direction, fuelCost) {
+		this._direction = direction;
+		this._fuelCost  = fuelCost;
+		if (this._navElement) {
+			this._navElement.textContent = this._formatNav(direction, fuelCost);
+		}
+	}
+
+	/** @private */
+	_formatNav(direction, fuelCost) {
+		return `${direction} — ${fuelCost} fuel`;
 	}
 
 	/**

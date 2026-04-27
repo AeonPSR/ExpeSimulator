@@ -31,9 +31,10 @@ class PlanetExporter {
 	 * @param {Array}       [axes]      - Scored axes from PlanetReviewScorer ({ key, label, stars }[])
 	 * @param {number|null} [overall]   - Overall star score
 	 * @param {boolean}     [diplomacy] - Whether diplomacy mode is active
+	 * @param {{ direction: string, fuel: number }|null} [nav] - Direction and fuel cost
 	 * @returns {string}
 	 */
-	static formatSummary(name, sectors, axes = [], overall = null, diplomacy = false) {
+	static formatSummary(name, sectors, axes = [], overall = null, diplomacy = false, nav = null) {
 		const filtered = sectors.filter(s => s !== 'LANDING');
 
 		const placed = new Set();
@@ -60,10 +61,11 @@ class PlanetExporter {
 
 		const starChar = '★';
 
-		// Title line: name + overall score + optional diplomacy flag
-		const overallStr = overall !== null ? ` — ${overall}${starChar}` : '';
+		// Title line: name + overall score + optional diplomacy flag + nav
+		const overallStr = overall !== null ? ` - ${overall}${starChar}` : '';
 		const diplomacyStr = diplomacy ? ' (diplomat)' : '';
-		const titleLine = `:ic_planet_scanned: **${name}**${overallStr}${diplomacyStr}`;
+		const navStr = nav ? ` | *${nav.direction} - ${nav.fuel} :fuel:*` : '';
+		const titleLine = `:ic_planet_scanned: **${name}**${overallStr}${diplomacyStr}${navStr}`;
 
 		// Axes: sort high → low, then split into rows of 3
 		const axesLines = [];
@@ -92,10 +94,11 @@ class PlanetExporter {
 	 * @param {Array}       [axes]      - Scored axes from PlanetReviewScorer
 	 * @param {number|null} [overall]   - Overall star score
 	 * @param {boolean}     [diplomacy] - Whether diplomacy mode is active
+	 * @param {{ direction: string, fuel: number }|null} [nav] - Direction and fuel cost
 	 * @returns {Promise<void>}
 	 */
-	static copyToClipboard(name, sectors, axes = [], overall = null, diplomacy = false) {
-		const text = PlanetExporter.formatSummary(name, sectors, axes, overall, diplomacy);
+	static copyToClipboard(name, sectors, axes = [], overall = null, diplomacy = false, nav = null) {
+		const text = PlanetExporter.formatSummary(name, sectors, axes, overall, diplomacy, nav);
 
 		if (navigator.clipboard?.writeText) {
 			return navigator.clipboard.writeText(text);
