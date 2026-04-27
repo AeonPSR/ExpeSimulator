@@ -218,12 +218,12 @@ const PlanetReviewScorer = (() => {
 			condition: (sectors) => sectors.filter(s => s !== 'LANDING').length > 16,
 		},
 		// ── Overall score tags ───────────────────────────────────────────────
-		// Terrible planet: overall score below 2
+		// Terrible planet: overall score below 2 (guard against empty planet)
 		{
 			key:   'score_terrible',
 			label: 'Poor',
 			color: '#6b7280',
-			condition: (_s, _a, overall) => overall > 0 && overall < 2,
+			condition: (sectors, _a, overall) => sectors.filter(s => s !== 'LANDING').length > 0 && overall < 2,
 		},
 		// Good planet: overall between 3.5 and 5 (inclusive)
 		{
