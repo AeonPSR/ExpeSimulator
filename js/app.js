@@ -18,6 +18,7 @@ class ExpeditionSimulatorApp {
 		this._tabContainer = null;
 		this._planetaryReview = null;
 		this._currentPlanetName = null;
+		this._lastReviewData = null;
 		this._playerSection = null;
 		this._probabilityDisplay = null;
 		this._resultsDisplay = null;
@@ -412,13 +413,17 @@ class ExpeditionSimulatorApp {
 		const sectors = this._state.getSectors();
 		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
 		const reviewData = PlanetReviewScorer.score(sectors, { diplomacy });
+		this._lastReviewData = reviewData;
 		this._planetaryReview.update(this._currentPlanetName || null, reviewData);
 	}
 
 	_onExportPlanetToClipboard() {
 		const name = this._currentPlanetName || 'Unknown planet';
 		const sectors = this._state.getSectors();
-		return PlanetExporter.copyToClipboard(name, sectors);
+		const axes = this._lastReviewData?.axes || [];
+		const overall = this._lastReviewData?.overall ?? null;
+		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
+		return PlanetExporter.copyToClipboard(name, sectors, axes, overall, diplomacy);
 	}
 
 	/**

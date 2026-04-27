@@ -18,7 +18,7 @@ class PlanetExporter {
 	static EXPORT_GROUPS = [
 		['CRISTAL_FIELD', 'OXYGEN', 'HYDROCARBON'],
 		['MANKAROG', 'VOLCANIC_ACTIVITY', 'SEISMIC_ACTIVITY'],
-		['FOREST', 'MOUNTAIN', 'SWAMP', 'DESERT', 'OCEAN', 'CAVE', 'RUINS', 'WRECK', 'FRUIT_TREES'],
+		['FRUIT_TREES', 'FOREST', 'MOUNTAIN', 'SWAMP', 'DESERT', 'OCEAN', 'CAVE', 'RUINS', 'WRECK'],
 		['INTELLIGENT', 'INSECT', 'RUMINANT', 'PREDATOR'],
 		['STRONG_WIND', 'COLD', 'HOT'],
 	];
@@ -26,11 +26,14 @@ class PlanetExporter {
 	/**
 	 * Builds the formatted planet summary string.
 	 *
-	 * @param {string}   name    - Planet display name
-	 * @param {string[]} sectors - Raw sector list (LANDING will be stripped)
+	 * @param {string}      name        - Planet display name
+	 * @param {string[]}    sectors     - Raw sector list (LANDING will be stripped)
+	 * @param {Array}       [axes]      - Scored axes from PlanetReviewScorer ({ key, label, stars }[])
+	 * @param {number|null} [overall]   - Overall star score
+	 * @param {boolean}     [diplomacy] - Whether diplomacy mode is active
 	 * @returns {string}
 	 */
-	static formatSummary(name, sectors) {
+	static formatSummary(name, sectors, axes = [], overall = null, diplomacy = false) {
 		const filtered = sectors.filter(s => s !== 'LANDING');
 
 		const placed = new Set();
@@ -55,7 +58,28 @@ class PlanetExporter {
 			.filter(l => l.length > 0)
 			.join('');
 
-		return `:ic_planet_scanned: **${name}**\n${iconBlock}`;
+		const starChar = '★';
+
+		// Title line: name + overall score + optional diplomacy flag
+		const overallStr = overall !== null ? ` — ${overall}${starChar}` : '';
+		const diplomacyStr = diplomacy ? ' (diplomat)' : '';
+		const titleLine = `:ic_planet_scanned: **${name}**${overallStr}${diplomacyStr}`;
+
+		// Axes: sort high → low, then split into rows of 3
+		const axesLines = [];
+		if (axes.length > 0) {
+			const sorted = [...axes].sort((a, b) => b.stars - a.stars);
+			for (let i = 0; i < sorted.length; i += 3) {
+				axesLines.push(
+					sorted.slice(i, i + 3)
+						.map(a => `${a.label}: ${a.stars > 0 ? `${a.stars}${starChar}` : '-'}`)
+						.join(' | ')
+				);
+			}
+		}
+
+		const parts = [titleLine, iconBlock, ...axesLines].filter(p => p.length > 0);
+		return parts.join('\n');
 	}
 
 	/**
@@ -63,12 +87,15 @@ class PlanetExporter {
 	 * Returns a Promise that resolves on success and rejects on failure,
 	 * so callers can show visual feedback.
 	 *
-	 * @param {string}   name    - Planet display name
-	 * @param {string[]} sectors - Raw sector list
+	 * @param {string}      name        - Planet display name
+	 * @param {string[]}    sectors     - Raw sector list
+	 * @param {Array}       [axes]      - Scored axes from PlanetReviewScorer
+	 * @param {number|null} [overall]   - Overall star score
+	 * @param {boolean}     [diplomacy] - Whether diplomacy mode is active
 	 * @returns {Promise<void>}
 	 */
-	static copyToClipboard(name, sectors) {
-		const text = PlanetExporter.formatSummary(name, sectors);
+	static copyToClipboard(name, sectors, axes = [], overall = null, diplomacy = false) {
+		const text = PlanetExporter.formatSummary(name, sectors, axes, overall, diplomacy);
 
 		if (navigator.clipboard?.writeText) {
 			return navigator.clipboard.writeText(text);
