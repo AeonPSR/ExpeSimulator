@@ -131,7 +131,15 @@ class PlanetaryReview extends Component {
 			className: 'planetary-review__export-btn',
 			title: 'Copy planet summary to clipboard'
 		}, '📋 Export');
-		this._exportBtn.addEventListener('click', () => this.onExportClick?.());
+		this._exportBtn.addEventListener('click', () => {
+			const result = this.onExportClick?.();
+			if (result instanceof Promise) {
+				result.then(
+					() => this.setExportState('success'),
+					() => this.setExportState('error')
+				);
+			}
+		});
 		this.element.appendChild(this._exportBtn);
 
 		return this.element;
@@ -157,6 +165,32 @@ class PlanetaryReview extends Component {
 		if (this._starRating) {
 			this._starRating.update(reviewData);
 		}
+	}
+
+	/**
+	 * Briefly shows a success or error state on the export button,
+	 * then resets it after 2 seconds.
+	 * @param {'success'|'error'} state
+	 */
+	setExportState(state) {
+		if (!this._exportBtn) return;
+		if (this._exportResetTimer) clearTimeout(this._exportResetTimer);
+
+		this._exportBtn.classList.remove(
+			'planetary-review__export-btn--success',
+			'planetary-review__export-btn--error'
+		);
+		this._exportBtn.classList.add(`planetary-review__export-btn--${state}`);
+		this._exportBtn.textContent = state === 'success' ? '✓ Copied!' : '✗ Failed';
+
+		this._exportResetTimer = setTimeout(() => {
+			this._exportBtn.classList.remove(
+				'planetary-review__export-btn--success',
+				'planetary-review__export-btn--error'
+			);
+			this._exportBtn.textContent = '📋 Export';
+			this._exportResetTimer = null;
+		}, 2000);
 	}
 
 	/**

@@ -425,16 +425,27 @@ class ExpeditionSimulatorApp {
 
 		const text = `:ic_planet_scanned: **${name}**\n${icons}`;
 
-		navigator.clipboard.writeText(text).catch(() => {
-			// Fallback for contexts where clipboard API is unavailable
-			const ta = document.createElement('textarea');
-			ta.value = text;
-			ta.style.position = 'fixed';
-			ta.style.opacity = '0';
-			document.body.appendChild(ta);
-			ta.select();
-			document.execCommand('copy');
-			document.body.removeChild(ta);
+		// Try the modern Clipboard API first; fall back to execCommand.
+		// Always return a Promise so the button can reflect success/failure.
+		if (navigator.clipboard?.writeText) {
+			return navigator.clipboard.writeText(text);
+		}
+
+		// execCommand fallback — treat any exception as failure
+		return new Promise((resolve, reject) => {
+			try {
+				const ta = document.createElement('textarea');
+				ta.value = text;
+				ta.style.position = 'fixed';
+				ta.style.opacity = '0';
+				document.body.appendChild(ta);
+				ta.select();
+				const ok = document.execCommand('copy');
+				document.body.removeChild(ta);
+				ok ? resolve() : reject();
+			} catch (e) {
+				reject(e);
+			}
 		});
 	}
 
