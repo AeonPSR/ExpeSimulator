@@ -93,7 +93,8 @@ class ExpeditionSimulatorApp {
 		// Planetary Review tab
 		this._planetaryReview = new PlanetaryReview({
 			getResourceURL: getResourceURL,
-			onDiplomacyToggle: (active) => this._onDiplomacyToggle(active)
+			onDiplomacyToggle: (active) => this._onDiplomacyToggle(active),
+			onExportClick: () => this._onExportPlanetToClipboard()
 		});
 		this._planetaryReview.mount(reviewPanel);
 
@@ -412,6 +413,29 @@ class ExpeditionSimulatorApp {
 		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
 		const reviewData = PlanetReviewScorer.score(sectors, { diplomacy });
 		this._planetaryReview.update(this._currentPlanetName || null, reviewData);
+	}
+
+	_onExportPlanetToClipboard() {
+		const name = this._currentPlanetName || 'Unknown planet';
+		const sectors = this._state.getSectors().filter(s => s !== 'LANDING');
+
+		const icons = sectors
+			.map(s => SectorData.SECTOR_ICONS[s] || s)
+			.join('');
+
+		const text = `:ic_planet_scanned: **${name}**\n${icons}`;
+
+		navigator.clipboard.writeText(text).catch(() => {
+			// Fallback for contexts where clipboard API is unavailable
+			const ta = document.createElement('textarea');
+			ta.value = text;
+			ta.style.position = 'fixed';
+			ta.style.opacity = '0';
+			document.body.appendChild(ta);
+			ta.select();
+			document.execCommand('copy');
+			document.body.removeChild(ta);
+		});
 	}
 
 	/**

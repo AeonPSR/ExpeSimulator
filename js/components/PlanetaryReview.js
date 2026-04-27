@@ -21,6 +21,7 @@ class PlanetaryReview extends Component {
 		this.getResourceURL = options.getResourceURL;
 		this._planetName = options.planetName || null;
 		this.onDiplomacyToggle = options.onDiplomacyToggle || null;
+		this.onExportClick = options.onExportClick || null;
 
 		this._imgElement  = null;
 		this._nameElement = null;
@@ -124,6 +125,14 @@ class PlanetaryReview extends Component {
 		// Star rating display
 		this._starRating = new StarRating();
 		this._starRating.mount(this.element);
+
+		// Export to clipboard button
+		this._exportBtn = this.createElement('button', {
+			className: 'planetary-review__export-btn',
+			title: 'Copy planet summary to clipboard'
+		}, '📋 Export');
+		this._exportBtn.addEventListener('click', () => this.onExportClick?.());
+		this.element.appendChild(this._exportBtn);
 
 		return this.element;
 	}
