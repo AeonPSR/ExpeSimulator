@@ -225,6 +225,15 @@
 	padding: 20px 10px;
 }
 
+#expedition-simulator .planetary-review__controls-left {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
 #expedition-simulator .planetary-review__toggle {
 	position: absolute;
 	top: 10px;

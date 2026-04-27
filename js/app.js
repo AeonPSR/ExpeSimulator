@@ -97,7 +97,15 @@ class ExpeditionSimulatorApp {
 		this._planetaryReview = new PlanetaryReview({
 			getResourceURL: getResourceURL,
 			onDiplomacyToggle: (active) => this._onDiplomacyToggle(active),
-			onExportClick: () => this._onExportPlanetToClipboard()
+			onExportClick: () => this._onExportPlanetToClipboard(),
+			onDirectionChange: (direction) => {
+				this._currentDirection = direction;
+				this._updatePlanetaryReview();
+			},
+			onFuelChange: (fuel) => {
+				this._currentFuelCost = fuel;
+				this._updatePlanetaryReview();
+			},
 		});
 		this._planetaryReview.mount(reviewPanel);
 

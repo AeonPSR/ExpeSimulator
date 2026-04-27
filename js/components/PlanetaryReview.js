@@ -22,12 +22,16 @@ class PlanetaryReview extends Component {
 		this._planetName = options.planetName || null;
 		this.onDiplomacyToggle = options.onDiplomacyToggle || null;
 		this.onExportClick = options.onExportClick || null;
+		this.onDirectionChange = options.onDirectionChange || null;
+		this.onFuelChange = options.onFuelChange || null;
 
 		this._imgElement  = null;
 		this._nameElement = null;
 		this._navElement  = null;
 		this._starRating  = null;
 		this._diplomacyToggle = null;
+		this._compassBtn  = null;
+		this._fuelBtn     = null;
 
 		this._direction = 'North';
 		this._fuelCost  = 0;
@@ -95,6 +99,65 @@ class PlanetaryReview extends Component {
 
 	render() {
 		this.element = this.createElement('div', { className: 'planetary-review' });
+
+		// Left controls: compass + fuel
+		const DIRECTIONS = ['North', 'East', 'South', 'West'];
+		this._compassBtn = this.createElement('button', {
+			className: 'compass-btn',
+			title: 'Change direction',
+			dataset: { active: 'true' }
+		});
+		const compassImg = this.createElement('img', {
+			src: this.getResourceURL('pictures/items_exploration/quad_compass.jpg'),
+			alt: 'Direction'
+		});
+		this._compassBtn.appendChild(compassImg);
+		this._compassBtn.addEventListener('click', () => {
+			const idx = DIRECTIONS.indexOf(this._direction);
+			this._direction = DIRECTIONS[(idx + 1) % DIRECTIONS.length];
+			if (this._navElement) this._navElement.textContent = this._formatNav(this._direction, this._fuelCost);
+			this.onDirectionChange?.(this._direction);
+		});
+
+		// Fuel cost picker: up arrow / image display / down arrow
+		const fuelControl = this.createElement('div', { className: 'fuel-control' });
+
+		const fuelUpBtn = this.createElement('button', {
+			className: 'fuel-arrow fuel-arrow--up',
+			title: 'Increase fuel cost'
+		});
+		fuelUpBtn.addEventListener('click', () => {
+			this._fuelCost = Math.min(9, this._fuelCost + 1);
+			if (this._navElement) this._navElement.textContent = this._formatNav(this._direction, this._fuelCost);
+			this.onFuelChange?.(this._fuelCost);
+		});
+
+		const fuelDisplay = this.createElement('button', { className: 'fuel-btn' });
+		const fuelImg = this.createElement('img', {
+			src: this.getResourceURL('pictures/others/fuel.jpg'),
+			alt: 'Fuel cost'
+		});
+		fuelDisplay.appendChild(fuelImg);
+
+		const fuelDownBtn = this.createElement('button', {
+			className: 'fuel-arrow fuel-arrow--down',
+			title: 'Decrease fuel cost'
+		});
+		fuelDownBtn.addEventListener('click', () => {
+			this._fuelCost = Math.max(0, this._fuelCost - 1);
+			if (this._navElement) this._navElement.textContent = this._formatNav(this._direction, this._fuelCost);
+			this.onFuelChange?.(this._fuelCost);
+		});
+
+		fuelControl.appendChild(fuelUpBtn);
+		fuelControl.appendChild(fuelDisplay);
+		fuelControl.appendChild(fuelDownBtn);
+		this._fuelBtn = fuelControl;
+
+		const leftWrapper = this.createElement('div', { className: 'planetary-review__controls-left' });
+		leftWrapper.appendChild(this._compassBtn);
+		leftWrapper.appendChild(fuelControl);
+		this.element.appendChild(leftWrapper);
 
 		// Diplomacy toggle (top-right)
 		if (!this._diplomacyToggle) {
