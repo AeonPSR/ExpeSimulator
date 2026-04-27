@@ -63,7 +63,7 @@ class PlanetExporter {
 
 		// Title line: name + overall score + optional diplomacy flag + nav
 		const overallStr = overall !== null ? ` - ${overall}${starChar}` : '';
-		const diplomacyStr = diplomacy ? ' (diplomat)' : '';
+		const diplomacyStr = diplomacy ? ' (:sk_diplomacy:)' : '';
 		const navStr = nav ? ` | *${nav.direction} - ${nav.fuel} :fuel:*` : '';
 		const titleLine = `:ic_planet_scanned: **${name}**${overallStr}${diplomacyStr}${navStr}`;
 

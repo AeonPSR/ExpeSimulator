@@ -529,7 +529,24 @@ describe('PlanetReviewScorer', () => {
 			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(true, true), 9)).toBe(5);
 		});
 
-		// ── Rule 6: Clamping ─────────────────────────────────────────
+		// ── Rule 6: Fuel cost penalty ───────────────────────────────
+
+		test('fuel cost < 6 → no penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9, 5)).toBe(4);
+		});
+
+		test('fuel cost = 6 → −0.5 penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9, 6)).toBe(3.5);
+		});
+
+		test('fuel cost > 6 → still only −0.5 penalty', () => {
+			const axes = makeAxes({ fuel: 4 });
+			expect(PlanetReviewScorer._computeOverall(axes, makeBooleans(), 9, 8)).toBe(3.5);
+		});
+
+		// ── Rule 7: Clamping ─────────────────────────────────────────
 
 		test('result is clamped to minimum 0', () => {
 			const axes = makeAxes({ fuel: 0.5, lethality: 5, hazards: 5 });

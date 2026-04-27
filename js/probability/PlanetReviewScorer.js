@@ -637,7 +637,7 @@ const PlanetReviewScorer = (() => {
 	 * 3. Secondary bonus: +0.5 if 2nd best positive axis >= 3
 	 * 4. Danger penalties: lethality/hazards >= 4 → -1, elif >= 2 → -0.5
 	 * 5. Boolean bonuses: oxygen +0.5, crystal map +0.5
-	 * 6. Fuel cost penalty: fuel 4-6 → -0.5, fuel > 6 → -1
+	 * 6. Fuel cost penalty: fuel >= 6 → -0.5
 	 * 7. Clamp to [0, 6], round to nearest 0.5
 	 *
 	 * @param {Array}  axes - Scored axes from score()
@@ -685,9 +685,7 @@ const PlanetReviewScorer = (() => {
 		}
 
 		// 6. Fuel cost penalty
-		if (fuelCost > 6) {
-			overall -= 1;
-		} else if (fuelCost >= 4) {
+		if (fuelCost >= 6) {
 			overall -= 0.5;
 		}
 
