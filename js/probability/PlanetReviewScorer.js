@@ -540,6 +540,7 @@ const PlanetReviewScorer = (() => {
 		const ceilings = getCeilings();
 		const scoredSectors = sectors.filter(s => !IGNORED_SECTORS.has(s));
 		const useDiplomacy = options.diplomacy || false;
+		const fuelCost = options.fuelCost ?? 0;
 
 		// Aggregate raw scores across all sectors
 		const rawScores = {};
@@ -613,7 +614,7 @@ const PlanetReviewScorer = (() => {
 			present: tag.condition(sectors, axes, 0),
 		}));
 
-		const overall = computeOverall(axes, booleansPass1, scoredSectors.length);
+		const overall = computeOverall(axes, booleansPass1, scoredSectors.length, fuelCost);
 
 		const booleans = BOOLEAN_TAGS.map(tag => ({
 			key:     tag.key,
@@ -636,14 +637,16 @@ const PlanetReviewScorer = (() => {
 	 * 3. Secondary bonus: +0.5 if 2nd best positive axis >= 3
 	 * 4. Danger penalties: lethality/hazards >= 4 → -1, elif >= 2 → -0.5
 	 * 5. Boolean bonuses: oxygen +0.5, crystal map +0.5
-	 * 6. Clamp to [0, 6], round to nearest 0.5
+	 * 6. Fuel cost penalty: fuel 4-6 → -0.5, fuel > 6 → -1
+	 * 7. Clamp to [0, 6], round to nearest 0.5
 	 *
-	 * @param {Array} axes - Scored axes from score()
-	 * @param {Array} booleans - Boolean indicators from score()
+	 * @param {Array}  axes - Scored axes from score()
+	 * @param {Array}  booleans - Boolean indicators from score()
 	 * @param {number} scoredSectorCount - Number of scored sectors (excl. LANDING/UNKNOWN)
+	 * @param {number} [fuelCost=0] - Fuel cost to reach the planet
 	 * @returns {number}
 	 */
-	function computeOverall(axes, booleans, scoredSectorCount) {
+	function computeOverall(axes, booleans, scoredSectorCount, fuelCost = 0) {
 		// 1. Base = best positive axis
 		const positiveStars = axes
 			.filter(a => POSITIVE_AXES.has(a.key))
@@ -681,7 +684,14 @@ const PlanetReviewScorer = (() => {
 			}
 		}
 
-		// 6. Clamp and round
+		// 6. Fuel cost penalty
+		if (fuelCost > 6) {
+			overall -= 1;
+		} else if (fuelCost >= 4) {
+			overall -= 0.5;
+		}
+
+		// 7. Clamp and round
 		overall = Math.max(0, Math.min(6, overall));
 		overall = Math.round(overall * 2) / 2;
 

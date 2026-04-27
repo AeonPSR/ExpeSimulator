@@ -759,3 +759,140 @@
 	cursor: pointer;
 	z-index: 10;
 }
+
+/* ==========================================================================
+   Compass Button (direction picker)
+   ========================================================================== */
+
+.compass-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.compass-btn img {
+	width: 30px;
+	height: 30px;
+	opacity: 0.5;
+	transition: opacity 0.3s ease;
+}
+
+.compass-btn::before,
+.compass-btn::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.compass-btn::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.compass-btn::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.compass-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+.compass-btn:hover::before,
+.compass-btn:hover::after {
+	background: #7f8c8d;
+}
+
+/* Active State - Blue */
+.compass-btn[data-active="true"] {
+	border-color: #2196f3;
+	background: rgba(33, 150, 243, 0.3);
+}
+
+.compass-btn[data-active="true"] img {
+	opacity: 1;
+}
+
+.compass-btn[data-active="true"]::before,
+.compass-btn[data-active="true"]::after {
+	opacity: 0;
+}
+
+.compass-btn[data-active="true"]:hover {
+	border-color: #1976d2;
+	background: rgba(33, 150, 243, 0.5);
+}
+
+/* ==========================================================================
+   Fuel Control (fuel cost picker with up/down arrows)
+   ========================================================================== */
+
+.fuel-control {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.fuel-arrow {
+	width: 0;
+	height: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	display: block;
+	transition: border-color 0.2s ease;
+}
+
+.fuel-arrow--up {
+	border-left: 9px solid transparent;
+	border-right: 9px solid transparent;
+	border-bottom: 7px solid #95a5a6;
+}
+
+.fuel-arrow--up:hover {
+	border-bottom-color: #2196f3;
+}
+
+.fuel-arrow--down {
+	border-left: 9px solid transparent;
+	border-right: 9px solid transparent;
+	border-top: 7px solid #95a5a6;
+}
+
+.fuel-arrow--down:hover {
+	border-top-color: #2196f3;
+}
+
+.fuel-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #2196f3;
+	border-radius: 4px;
+	background: rgba(33, 150, 243, 0.3);
+	cursor: default;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+}
+
+.fuel-btn img {
+	width: 30px;
+	height: 30px;
+}
+

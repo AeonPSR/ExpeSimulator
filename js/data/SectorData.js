@@ -87,6 +87,37 @@ const SectorData = {
 	},
 
 	/**
+	 * Maps each sector ID to its in-game chat icon code.
+	 * Used when exporting a planet summary to clipboard.
+	 */
+	SECTOR_ICONS: {
+		'CAVE':               ':as_cave:',
+		'COLD':               ':as_cold:',
+		'CRISTAL_FIELD':      ':as_cristalite:',
+		'DESERT':             ':as_desert:',
+		'FOREST':             ':as_forest:',
+		'HYDROCARBON':        ':as_fuel:',
+		'HOT':                ':as_hot:',
+		'INSECT':             ':as_insect:',
+		'INTELLIGENT':        ':as_intelligent:',
+		'LOST':               ':as_lost:',
+		'MANKAROG':           ':as_mankarog:',
+		'MOUNTAIN':           ':as_mountain:',
+		'OCEAN':              ':as_ocean:',
+		'FRUIT_TREES':        ':as_orchard:',
+		'OXYGEN':             ':as_oxygen:',
+		'PREDATOR':           ':as_predator:',
+		'RUINS':              ':as_ruins:',
+		'RUMINANT':           ':as_ruminant:',
+		'SEISMIC_ACTIVITY':   ':as_seismic:',
+		'SWAMP':              ':as_swamp:',
+		'UNKNOWN':            ':as_unknown:',
+		'VOLCANIC_ACTIVITY':  ':as_volcano:',
+		'STRONG_WIND':        ':as_wind:',
+		'WRECK':              ':as_wreck:',
+	},
+
+	/**
 	 * Checks if a sector is special (doesn't count towards the 20 sector limit)
 	 * @param {string} sectorName
 	 * @returns {boolean}

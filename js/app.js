@@ -18,6 +18,9 @@ class ExpeditionSimulatorApp {
 		this._tabContainer = null;
 		this._planetaryReview = null;
 		this._currentPlanetName = null;
+		this._currentDirection = 'North';
+		this._currentFuelCost = 0;
+		this._lastReviewData = null;
 		this._playerSection = null;
 		this._probabilityDisplay = null;
 		this._resultsDisplay = null;
@@ -42,7 +45,7 @@ class ExpeditionSimulatorApp {
 
 		// Start watching chat for expedition messages
 		this._chatDetector = new ChatMessageDetector({
-			onImport: (sectors, planetName) => this._onImportSectors(sectors, planetName)
+			onImport: (sectors, planetName, nav) => this._onImportSectors(sectors, planetName, nav)
 		});
 		this._chatDetector.start();
 
@@ -93,7 +96,16 @@ class ExpeditionSimulatorApp {
 		// Planetary Review tab
 		this._planetaryReview = new PlanetaryReview({
 			getResourceURL: getResourceURL,
-			onDiplomacyToggle: (active) => this._onDiplomacyToggle(active)
+			onDiplomacyToggle: (active) => this._onDiplomacyToggle(active),
+			onExportClick: () => this._onExportPlanetToClipboard(),
+			onDirectionChange: (direction) => {
+				this._currentDirection = direction;
+				this._updatePlanetaryReview();
+			},
+			onFuelChange: (fuel) => {
+				this._currentFuelCost = fuel;
+				this._updatePlanetaryReview();
+			},
 		});
 		this._planetaryReview.mount(reviewPanel);
 
@@ -227,11 +239,16 @@ class ExpeditionSimulatorApp {
 	/**
 	 * Imports sectors parsed from a chat message, replacing the current planet
 	 * @param {string[]} sectorIds - Array of sector IDs (LANDING is always included automatically)
+	 * @param {string|null} planetName
+	 * @param {{ direction: string, fuel: number }|null} nav
 	 * @private
 	 */
-	_onImportSectors(sectorIds, planetName = null) {
+	_onImportSectors(sectorIds, planetName = null, nav = null) {
 		if (sectorIds.length === 0) return;
 		this._currentPlanetName = planetName || null;
+		this._currentDirection = nav?.direction ?? 'North';
+		this._currentFuelCost = nav?.fuel ?? 0;
+		this._planetaryReview?.updateNav?.(this._currentDirection, this._currentFuelCost);
 
 		// Open the panel temporarily
 		const panel = this._panel.element;
@@ -410,8 +427,19 @@ class ExpeditionSimulatorApp {
 		if (!this._planetaryReview) return;
 		const sectors = this._state.getSectors();
 		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
-		const reviewData = PlanetReviewScorer.score(sectors, { diplomacy });
+		const reviewData = PlanetReviewScorer.score(sectors, { diplomacy, fuelCost: this._currentFuelCost });
+		this._lastReviewData = reviewData;
 		this._planetaryReview.update(this._currentPlanetName || null, reviewData);
+	}
+
+	_onExportPlanetToClipboard() {
+		const name = this._currentPlanetName || 'Unknown planet';
+		const sectors = this._state.getSectors();
+		const axes = this._lastReviewData?.axes || [];
+		const overall = this._lastReviewData?.overall ?? null;
+		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
+		const nav = { direction: this._currentDirection, fuel: this._currentFuelCost };
+		return PlanetExporter.copyToClipboard(name, sectors, axes, overall, diplomacy, nav);
 	}
 
 	/**

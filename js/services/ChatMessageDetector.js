@@ -219,7 +219,8 @@ class ChatMessageDetector {
 			const sectors = this._parseSectorsFromMessage(message);
 			if (sectors.length > 0 && this._onImport) {
 				const planetName = this._parsePlanetNameFromMessage(message);
-				this._onImport(sectors, planetName);
+				const nav = this._parseDirectionAndFuelFromMessage(message);
+				this._onImport(sectors, planetName, nav);
 			}
 		});
 
@@ -265,6 +266,35 @@ class ChatMessageDetector {
 		}
 
 		return sectors;
+	}
+
+	/**
+	 * Extracts the direction and fuel cost from an expedition message.
+	 * Looks for a text node immediately before the :fuel: image matching
+	 * the pattern "Direction - N" (e.g. "Ouest - 3").
+	 *
+	 * @private
+	 * @param {HTMLElement} message
+	 * @returns {{ direction: string, fuel: number }|null}
+	 */
+	_parseDirectionAndFuelFromMessage(message) {
+		const fuelImg = message.querySelector('img[alt=":fuel:"]');
+		if (!fuelImg) return null;
+
+		// Walk backwards through siblings looking for a text node like "Ouest - 3 "
+		let node = fuelImg.previousSibling;
+		while (node) {
+			if (node.nodeType === Node.TEXT_NODE) {
+				const match = node.textContent.match(/(\S+)\s*-\s*(\d+)\s*$/);
+				if (match) {
+					return { direction: match[1], fuel: parseInt(match[2], 10) };
+				}
+				// Non-empty text that didn't match — stop searching
+				if (node.textContent.trim()) break;
+			}
+			node = node.previousSibling;
+		}
+		return null;
 	}
 
 	/**
