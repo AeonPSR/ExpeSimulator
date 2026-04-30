@@ -68,76 +68,86 @@ const PlanetReviewScorer = (() => {
 		// ── Specific sector presence ─────────────────────────────────────
 		// Has at least one Oxygen sector
 		{
-			key:   'oxygen',
-			label: 'Oxygen',
-			color: '#3498db',
+			key:         'oxygen',
+			label:       'Oxygen',
+			color:       '#3498db',
+			description: 'Contains an Oxygen sector.',
 			condition: (sectors) => sectors.some(s => s === 'OXYGEN'),
 		},
 		// Has at least one Cristalite sector
 		{
-			key:   'cristal_field',
-			label: 'Crystal Field',
-			color: '#a855f7',
+			key:         'cristal_field',
+			label:       'Crystal Field',
+			color:       '#a855f7',
+			description: 'Contains a Cristal Field sector.',
 			condition: (sectors) => sectors.some(s => s === 'CRISTAL_FIELD'),
 		},
 		// Has at least one Mankarog sector
 		{
-			key:   'mankarog',
-			label: 'Mankarog',
-			color: '#dc2626',
+			key:         'mankarog',
+			label:       'Mankarog',
+			color:       '#dc2626',
+			description: 'Contains a Mankarog sector.',
 			condition: (sectors) => sectors.some(s => s === 'MANKAROG'),
 		},
 
 		// ── Axis tags: triggered when an axis exceeds 4 stars ────────────
 		// Lots of fruit harvests
 		{
-			key:   'fruits_high',
-			label: 'Cornucopia',
-			color: '#16a34a',
+			key:         'fruits_high',
+			label:       'Cornucopia',
+			color:       '#16a34a',
+			description: 'Exceptional fruit yield.',
 			condition: (_sectors, axes) => (axes.find(a => a.key === 'fruits')?.stars ?? 0) > 4,
 		},
 		// Lots of meat provisions
 		{
-			key:   'steaks_high',
-			label: 'Hunting Grounds',
-			color: '#b45309',
+			key:         'steaks_high',
+			label:       'Hunting Grounds',
+			color:       '#b45309',
+			description: 'Exceptional quantity of food.',
 			condition: (_sectors, axes) => (axes.find(a => a.key === 'steaks')?.stars ?? 0) > 4,
 		},
 		// Lots of fuel
 		{
-			key:   'fuel_high',
-			label: 'Black Pearl',
-			color: '#0f172a',
+			key:         'fuel_high',
+			label:       'Black Pearl',
+			color:       '#0f172a',
+			description: 'Exceptional quantity of fuel.',
 			condition: (_sectors, axes) => (axes.find(a => a.key === 'fuel')?.stars ?? 0) > 4,
 		},
 		// Lots of artifacts
 		{
-			key:   'artifacts_high',
-			label: 'Treasure Planet',
-			color: '#d97706',
+			key:         'artifacts_high',
+			label:       'Treasure Planet',
+			color:       '#d97706',
+			description: 'Exceptional quantity of relics.',
 			condition: (_sectors, axes) => (axes.find(a => a.key === 'artifacts')?.stars ?? 0) > 4,
 		},
 		// High lethality (combat-heavy planet)
 		{
-			key:   'lethality_high',
-			label: 'Death World',
-			color: '#7f1d1d',
+			key:         'lethality_high',
+			label:       'Death World',
+			color:       '#7f1d1d',
+			description: 'Extremely dangerous combat environment.',
 			condition: (_sectors, axes) => (axes.find(a => a.key === 'lethality')?.stars ?? 0) > 4,
 		},
 		// High hazards (disease, traps, lost crew, item loss…)
 		{
-			key:   'hazards_high',
-			label: "Murphy's Law",
-			color: '#78350f',
+			key:         'hazards_high',
+			label:       "Murphy's Law",
+			color:       '#78350f',
+			description: 'High risk of disease, traps, crew or item loss.',
 			condition: (_sectors, axes) => (axes.find(a => a.key === 'hazards')?.stars ?? 0) > 4,
 		},
 
 		// ── Composition tags ─────────────────────────────────────────────
 		// Mineral-heavy: HC + Mountain + Cristal + Cave + Seismic + Volcano > 7
 		{
-			key:   'mineral_rich',
-			label: 'Rock and Stone !',
-			color: '#64748b',
+			key:         'mineral_rich',
+			label:       'Rock and Stone !',
+			color:       '#64748b',
+			description: 'Dominated by mineral sectors.',
 			condition: (sectors) => countIn(sectors, [
 				'HYDROCARBON', 'MOUNTAIN', 'CRISTAL_FIELD', 'CAVE',
 				'SEISMIC_ACTIVITY', 'VOLCANIC_ACTIVITY',
@@ -146,9 +156,10 @@ const PlanetReviewScorer = (() => {
 		// Plant-heavy: Forest + Swamp + Fruit Trees + Hot > 7
 		// (Note: Swamp listed once — duplicate in the request was likely a typo)
 		{
-			key:   'jungle',
-			label: 'Greenpath',
-			color: '#15803d',
+			key:         'jungle',
+			label:       'Greenpath',
+			color:       '#15803d',
+			description: 'Dominated by lush vegetation.',
 			condition: (sectors) => countIn(sectors, [
 				'FOREST', 'SWAMP', 'FRUIT_TREES', 'HOT',
 			]) > 7,
@@ -156,9 +167,10 @@ const PlanetReviewScorer = (() => {
 		// Diverse terrain: Forest + Mountain + Swamp + Desert + Ocean + Cave
 		// + Ruins + Wreck + Fruit Trees + Cristalite > 11
 		{
-			key:   'varied_landscape',
-			label: 'Pretty Landscapes',
-			color: '#0d9488',
+			key:         'varied_landscape',
+			label:       'Pretty Landscapes',
+			color:       '#0d9488',
+			description: 'Highly diverse terrain.',
 			condition: (sectors) => countIn(sectors, [
 				'FOREST', 'MOUNTAIN', 'SWAMP', 'DESERT', 'OCEAN', 'CAVE',
 				'RUINS', 'WRECK', 'FRUIT_TREES', 'CRISTAL_FIELD',
@@ -166,18 +178,20 @@ const PlanetReviewScorer = (() => {
 		},
 		// Fauna-heavy: Ruminant + Intelligent + Predator + Insect + Mankarog > 7
 		{
-			key:   'fauna_rich',
-			label: 'Overcrowded',
-			color: '#ca8a04',
+			key:         'fauna_rich',
+			label:       'Overcrowded',
+			color:       '#ca8a04',
+			description: 'Teeming with wildlife.',
 			condition: (sectors) => countIn(sectors, [
 				'RUMINANT', 'INTELLIGENT', 'PREDATOR', 'INSECT', 'MANKAROG',
 			]) > 7,
 		},
 		// Climate hazards: Hot + Cold + Wind + Volcano + Seismic > 7
 		{
-			key:   'climate_change',
-			label: 'Climate Change',
-			color: '#7c3aed',
+			key:         'climate_change',
+			label:       'Climate Change',
+			color:       '#7c3aed',
+			description: 'Dominated by hostile climate sectors.',
 			condition: (sectors) => countIn(sectors, [
 				'HOT', 'COLD', 'STRONG_WIND', 'VOLCANIC_ACTIVITY', 'SEISMIC_ACTIVITY',
 			]) > 7,
@@ -186,9 +200,10 @@ const PlanetReviewScorer = (() => {
 		// ── Unknown tags ─────────────────────────────────────────────────
 		// Some unknowns: 5–8 (mysterious)
 		{
-			key:   'terra_incognita',
-			label: 'Terra Incognita',
-			color: '#6366f1',
+			key:         'terra_incognita',
+			label:       'Terra Incognita',
+			color:       '#6366f1',
+			description: 'Several unknown sectors.',
 			condition: (sectors) => {
 				const n = sectors.filter(s => s === 'UNKNOWN').length;
 				return n > 4 && n < 9;
@@ -196,86 +211,92 @@ const PlanetReviewScorer = (() => {
 		},
 		// Lots of unknowns: > 8 (uncharted)
 		{
-			key:   'no_astro',
-			label: 'Maybe scan it some more',
-			color: '#4338ca',
+			key:         'no_astro',
+			label:       'Maybe scan it some more',
+			color:       '#4338ca',
+			description: 'Mostly unscanned.',
 			condition: (sectors) => sectors.filter(s => s === 'UNKNOWN').length > 8,
 		},
 
 		// ── Size tags (LANDING excluded from the count) ──────────────────
 		// Tiny planet: fewer than 6 sectors
 		{
-			key:   'tiny',
-			label: 'Pocket World',
-			color: '#94a3b8',
+			key:         'tiny',
+			label:       'Pocket World',
+			color:       '#94a3b8',
+			description: 'Fewer than 6 sectors.',
 			condition: (sectors) => sectors.filter(s => s !== 'LANDING').length < 6,
 		},
 		// Huge planet: more than 16 sectors
 		{
-			key:   'huge',
-			label: 'Behemoth',
-			color: '#1e40af',
+			key:         'huge',
+			label:       'Behemoth',
+			color:       '#1e40af',
+			description: 'More than 16 sectors.',
 			condition: (sectors) => sectors.filter(s => s !== 'LANDING').length > 16,
 		},
 		// ── Overall score tags ───────────────────────────────────────────────
 		// Terrible planet: overall score below 2 (guard against empty planet)
 		{
-			key:   'score_terrible',
-			label: 'Poor',
-			color: '#6b7280',
+			key:         'score_terrible',
+			label:       'Poor',
+			color:       '#6b7280',
+			description: 'Overall score below 2.',
 			condition: (sectors, _a, overall) => sectors.filter(s => s !== 'LANDING').length > 0 && overall < 2,
 		},
 		// Good planet: overall between 3.5 and 5 (inclusive)
 		{
-			key:   'score_good',
-			label: 'Promising',
-			color: '#22c55e',
+			key:         'score_good',
+			label:       'Promising',
+			color:       '#22c55e',
+			description: 'Overall score between 3.5 and 5.',
 			condition: (_s, _a, overall) => overall >= 3.5 && overall <= 5,
 		},
 		// Exceptional planet: overall above 5
 		{
-			key:   'score_exceptional',
-			label: 'Exceptionnal',
-			color: '#f59e0b',
+			key:         'score_exceptional',
+			label:       'Exceptionnal',
+			color:       '#f59e0b',
+			description: 'Overall score above 5.',
 			condition: (_s, _a, overall) => overall > 5,
 		},
 		// ── Per-sector "x4" tags: triggered when 4 of that sector are present ──
 		// Forest x4 — endless canopy of trees
-		{ key: 'quad_forest',             label: 'Brocéliande',     color: '#15803d', condition: (s) => quad(s, 'FOREST') },
+		{ key: 'quad_forest',             label: 'Brocéliande',            color: '#15803d', description: '4 Forest sectors.',             condition: (s) => quad(s, 'FOREST') },
 		// Mountain x4 — towering ranges
-		{ key: 'quad_mountain',           label: 'Mountain Ranges',         color: '#78716c', condition: (s) => quad(s, 'MOUNTAIN') },
+		{ key: 'quad_mountain',           label: 'Mountain Ranges',        color: '#78716c', description: '4 Mountain sectors.',           condition: (s) => quad(s, 'MOUNTAIN') },
 		// Swamp x4 — endless wetlands
-		{ key: 'quad_swamp',              label: 'Bayou',             color: '#365314', condition: (s) => quad(s, 'SWAMP') },
+		{ key: 'quad_swamp',              label: 'Bayou',                  color: '#365314', description: '4 Swamp sectors.',              condition: (s) => quad(s, 'SWAMP') },
 		// Desert x4 — vast dunes
-		{ key: 'quad_desert',             label: 'Arrakis\' Wastes',        color: '#eab308', condition: (s) => quad(s, 'DESERT') },
+		{ key: 'quad_desert',             label: 'Arrakis\' Wastes',       color: '#eab308', description: '4 Desert sectors.',             condition: (s) => quad(s, 'DESERT') },
 		// Ocean x4 — water world
-		{ key: 'quad_ocean',              label: 'Waterworld',        color: '#0ea5e9', condition: (s) => quad(s, 'OCEAN') },
+		{ key: 'quad_ocean',              label: 'Waterworld',             color: '#0ea5e9', description: '4 Ocean sectors.',              condition: (s) => quad(s, 'OCEAN') },
 		// Cave x4 — vast cave network
-		{ key: 'quad_cave',               label: 'Hollow World',      color: '#000000', condition: (s) => quad(s, 'CAVE') },
+		{ key: 'quad_cave',               label: 'Hollow World',           color: '#000000', description: '4 Cave sectors.',               condition: (s) => quad(s, 'CAVE') },
 		// Ruins x4 — ancient civilization remnants
-		{ key: 'quad_ruins',              label: 'Type 1 Extinction', color: '#a16207', condition: (s) => quad(s, 'RUINS') },
+		{ key: 'quad_ruins',              label: 'Type 1 Extinction',      color: '#a16207', description: '4 Ruins sectors.',              condition: (s) => quad(s, 'RUINS') },
 		// Wreck x4 — ship graveyard
-		{ key: 'quad_wreck',              label: 'The Big Thrash Heap',    color: '#52525b', condition: (s) => quad(s, 'WRECK') },
+		{ key: 'quad_wreck',              label: 'The Big Thrash Heap',    color: '#52525b', description: '4 Wreck sectors.',              condition: (s) => quad(s, 'WRECK') },
 		// Fruit trees x4 — orchard planet
-		{ key: 'quad_fruit_trees',        label: 'Hanging Gardens',           color: '#84cc16', condition: (s) => quad(s, 'FRUIT_TREES') },
+		{ key: 'quad_fruit_trees',        label: 'Hanging Gardens',        color: '#84cc16', description: '4 Fruit Tree sectors.',         condition: (s) => quad(s, 'FRUIT_TREES') },
 		// Ruminant x4 — herds everywhere
-		{ key: 'quad_ruminant',           label: 'Augean Stables',          color: '#a3a3a3', condition: (s) => quad(s, 'RUMINANT') },
+		{ key: 'quad_ruminant',           label: 'Augean Stables',         color: '#a3a3a3', description: '4 Ruminant sectors.',           condition: (s) => quad(s, 'RUMINANT') },
 		// Predator x4 — apex predators
-		{ key: 'quad_predator',           label: 'Apex Hunters',      color: '#991b1b', condition: (s) => quad(s, 'PREDATOR') },
+		{ key: 'quad_predator',           label: 'Apex Hunters',           color: '#991b1b', description: '4 Predator sectors.',           condition: (s) => quad(s, 'PREDATOR') },
 		// Intelligent x4 — civilized natives
-		{ key: 'quad_intelligent',        label: 'Homeworld',     color: '#7c3aed', condition: (s) => quad(s, 'INTELLIGENT') },
+		{ key: 'quad_intelligent',        label: 'Homeworld',              color: '#7c3aed', description: '4 Intelligent sectors.',        condition: (s) => quad(s, 'INTELLIGENT') },
 		// Insect x4 — swarms
-		{ key: 'quad_insect',             label: 'The Great Swarm',        color: '#65a30d', condition: (s) => quad(s, 'INSECT') },
+		{ key: 'quad_insect',             label: 'The Great Swarm',        color: '#65a30d', description: '4 Insect sectors.',             condition: (s) => quad(s, 'INSECT') },
 		// Cold x4 — frozen wasteland
-		{ key: 'quad_cold',               label: 'Giant Snowball',              color: '#ffffff', condition: (s) => quad(s, 'COLD') },
+		{ key: 'quad_cold',               label: 'Giant Snowball',         color: '#ffffff', description: '4 Cold sectors.',               condition: (s) => quad(s, 'COLD') },
 		// Hot x4 — scorching wasteland
-		{ key: 'quad_hot',                label: '4th degree burn',           color: '#f97316', condition: (s) => quad(s, 'HOT') },
+		{ key: 'quad_hot',                label: '4th degree burn',        color: '#f97316', description: '4 Hot sectors.',                condition: (s) => quad(s, 'HOT') },
 		// Strong wind x4 — perpetual storms
-		{ key: 'quad_strong_wind',        label: 'Jovian Winds',       color: '#0891b2', condition: (s) => quad(s, 'STRONG_WIND') },
+		{ key: 'quad_strong_wind',        label: 'Jovian Winds',           color: '#0891b2', description: '4 Strong Wind sectors.',        condition: (s) => quad(s, 'STRONG_WIND') },
 		// Seismic x4 — never-ending tremors
-		{ key: 'quad_seismic_activity',   label: 'Faultline',         color: '#a8a29e', condition: (s) => quad(s, 'SEISMIC_ACTIVITY') },
+		{ key: 'quad_seismic_activity',   label: 'Faultline',              color: '#a8a29e', description: '4 Seismic Activity sectors.',    condition: (s) => quad(s, 'SEISMIC_ACTIVITY') },
 		// Volcanic x4 — molten hellscape
-		{ key: 'quad_volcanic_activity',  label: 'A nice chill expedition',          color: '#dc2626', condition: (s) => quad(s, 'VOLCANIC_ACTIVITY') },
+		{ key: 'quad_volcanic_activity',  label: 'A nice chill expedition', color: '#dc2626', description: '4 Volcanic Activity sectors.',   condition: (s) => quad(s, 'VOLCANIC_ACTIVITY') },
 	];
 
 	/** Count how many sectors in `list` are present in `sectors` (with multiplicity). */
@@ -608,19 +629,21 @@ const PlanetReviewScorer = (() => {
 		// Two-pass: first pass (overall=0) feeds computeOverall for BOOLEAN_BONUSES;
 		// second pass re-evaluates with the real overall so score-based tags work.
 		const booleansPass1 = BOOLEAN_TAGS.map(tag => ({
-			key:     tag.key,
-			label:   tag.label,
-			color:   tag.color,
-			present: tag.condition(sectors, axes, 0),
+			key:         tag.key,
+			label:       tag.label,
+			color:       tag.color,
+			description: tag.description,
+			present:     tag.condition(sectors, axes, 0),
 		}));
 
 		const overall = computeOverall(axes, booleansPass1, scoredSectors.length, fuelCost);
 
 		const booleans = BOOLEAN_TAGS.map(tag => ({
-			key:     tag.key,
-			label:   tag.label,
-			color:   tag.color,
-			present: tag.condition(sectors, axes, overall),
+			key:         tag.key,
+			label:       tag.label,
+			color:       tag.color,
+			description: tag.description,
+			present:     tag.condition(sectors, axes, overall),
 		}));
 
 		return { overall, axes, booleans };

@@ -447,6 +447,46 @@
 	display: flex;
 	flex-direction: row;
 	align-items: baseline;
+	background-color: transparent;
+	transition: background-color 0.15s ease-in-out;
+	cursor: default;
+}
+
+#expedition-simulator .star-rating-boolean-item:hover {
+	background-color: color-mix(in srgb, var(--badge-color, #888) 25%, transparent);
+}
+
+#expedition-simulator .star-rating-boolean-item[data-tooltip] {
+	position: relative;
+}
+
+#expedition-simulator .star-rating-boolean-item[data-tooltip]::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	bottom: calc(100% + 6px);
+	left: 50%;
+	transform: translateX(-50%);
+	background: #1e1e2e;
+	color: #e0e0e0;
+	font-size: 11px;
+	font-weight: 400;
+	font-variant: normal;
+	letter-spacing: normal;
+	white-space: normal;
+	width: max-content;
+	max-width: 200px;
+	padding: 5px 8px;
+	border-radius: 5px;
+	border: 1px solid var(--badge-color, #555);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.15s ease-in-out;
+	z-index: 100;
+}
+
+#expedition-simulator .star-rating-boolean-item[data-tooltip]:hover::after {
+	opacity: 1;
 }
 
 #expedition-simulator .star-rating-boolean-item-dot {

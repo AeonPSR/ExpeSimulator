@@ -127,7 +127,7 @@ class StarRating extends Component {
 	}
 
 	/**
-	 * @param {Array<{key: string, label: string, present: boolean}>} booleans
+	 * @param {Array<{key: string, label: string, present: boolean, color?: string, description?: string}>} booleans
 	 */
 	_renderBooleans(booleans) {
 		this._booleansContainer.innerHTML = '';
@@ -141,6 +141,9 @@ class StarRating extends Component {
 				className: 'star-rating-boolean-item'
 			});
 			badge.style.setProperty('--badge-color', color);
+			if (flag.description) {
+				badge.dataset.tooltip = flag.description;
+			}
 
 			const dot = this.createElement('span', { className: 'star-rating-boolean-item-dot' });
 			badge.appendChild(dot);
