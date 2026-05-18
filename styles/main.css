@@ -118,6 +118,7 @@
 }
 
 #expedition-simulator .panel-header h3 {
+	flex: 1;
 	margin: 0;
 	font-size: 18px;
 	font-weight: 600;
@@ -126,9 +127,9 @@
 
 /* Language Button */
 #expedition-simulator .panel-lang-btn {
+	width: 40px;
 	height: 40px;
-	min-width: 40px;
-	padding: 0 6px;
+	padding: 0;
 	border: 2px solid #95a5a6;
 	border-radius: 4px;
 	background: rgba(149, 165, 166, 0.3);
@@ -138,10 +139,14 @@
 	justify-content: center;
 	transition: all 0.3s ease;
 	flex-shrink: 0;
-	color: white;
-	font-size: 13px;
-	font-weight: 700;
-	letter-spacing: 0.5px;
+	margin-right: 6px;
+}
+
+#expedition-simulator .panel-lang-btn img {
+	width: 28px;
+	height: 28px;
+	object-fit: contain;
+	border-radius: 2px;
 }
 
 #expedition-simulator .panel-lang-btn:hover {

@@ -110,10 +110,15 @@ class Panel extends Component {
 			className: 'panel-lang-btn',
 			title: I18n.t('panel.lang.label')
 		});
-		langBtn.textContent = I18n.locale.toUpperCase();
+		const langImg = this.createElement('img', {
+			src: this.getResourceURL(`pictures/others/${I18n.locale}.png`),
+			alt: I18n.locale.toUpperCase()
+		});
+		langBtn.appendChild(langImg);
 		this.addEventListener(langBtn, 'click', () => {
 			I18n.cycleLocale();
-			langBtn.textContent = I18n.locale.toUpperCase();
+			langImg.src = this.getResourceURL(`pictures/others/${I18n.locale}.png`);
+			langImg.alt = I18n.locale.toUpperCase();
 		});
 		header.appendChild(langBtn);
 
