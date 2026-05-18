@@ -54,7 +54,7 @@ class ExpeditionSimulatorApp {
 
 		// Re-render dynamic content when the user switches language
 		document.addEventListener('i18n:change', () => {
-			this._selectedSectorsComponent?.update(this._state.sectors);
+			this._selectedSectorsComponent?.update(this._state.getSectors());
 			this._scheduleUpdate();
 		});
 	}
