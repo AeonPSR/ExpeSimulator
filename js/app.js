@@ -311,7 +311,6 @@ class ExpeditionSimulatorApp {
 		if (!player) return;
 
 		new SelectionModal({
-			title: 'Select Character',
 			items: CharacterData.getSelectionItems(getResourceURL),
 			selectedId: player.avatar,
 			columns: 6,
@@ -330,7 +329,6 @@ class ExpeditionSimulatorApp {
 		items.unshift({ id: null, image: '', label: 'Clear' });
 
 		new SelectionModal({
-			title: 'Select Ability',
 			items: items,
 			selectedId: player.abilities[slotIndex],
 			columns: 4,
@@ -351,7 +349,6 @@ class ExpeditionSimulatorApp {
 		items.unshift({ id: null, image: '', label: 'Clear' });
 
 		new SelectionModal({
-			title: 'Select Item',
 			items: items,
 			selectedId: player.items[slotIndex],
 			columns: 5,

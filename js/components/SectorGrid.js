@@ -60,7 +60,7 @@ class SectorGrid extends Component {
 		const header = this.createElement('div', { className: 'sectors-header' });
 
 		// Title
-		const title = this.createElement('h4', {}, 'Available Sectors');
+		const title = this.createElement('h4', { 'data-i18n': 'sectors.available' }, I18n.t('sectors.available'));
 		header.appendChild(title);
 
 		// Buttons container

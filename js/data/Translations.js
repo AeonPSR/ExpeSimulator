@@ -26,6 +26,9 @@ const Translations = {
 		'sectors.clear_all':        'Clear All',
 		'sectors.remove_hint':      '{name} — Click to remove',
 
+		// Sector grid
+		'sectors.available':        'Available Sectors',
+
 		// Example worlds
 		'worlds.header':            'Example Worlds',
 
@@ -99,6 +102,13 @@ const Translations = {
 		'planet.nav':               '{direction} — {fuel} fuel',
 
 		// Star rating
+		// Results legend
+		'legend.scenarios':         'Scenarios',
+		'legend.optimist':          'Optimist',
+		'legend.median':            'Median',
+		'legend.pessimist':         'Pessimist',
+		'legend.worst':             'Worst',
+
 		'stars.overall':            'Overall',
 		'stars.axis.fruits':        'Fruits',
 		'stars.axis.steaks':        'Steaks',
@@ -127,6 +137,9 @@ const Translations = {
 		'sectors.special_suffix':   '+ {count} spécial',
 		'sectors.clear_all':        'Tout effacer',
 		'sectors.remove_hint':      '{name} — Cliquer pour retirer',
+
+		// Sector grid
+		'sectors.available':        'Secteurs disponibles',
 
 		// Example worlds
 		'worlds.header':            'Mondes exemples',
@@ -201,6 +214,13 @@ const Translations = {
 		'planet.nav':               '{direction} — {fuel} de carburant',
 
 		// Star rating
+		// Results legend
+		'legend.scenarios':         'Scénarios',
+		'legend.optimist':          'Optimiste',
+		'legend.median':            'Médian',
+		'legend.pessimist':         'Pessimiste',
+		'legend.worst':             'Pire',
+
 		'stars.overall':            'Général',
 		'stars.axis.fruits':        'Fruits',
 		'stars.axis.steaks':        'Steaks',
@@ -229,6 +249,9 @@ const Translations = {
 		'sectors.special_suffix':   '+ {count} especial',
 		'sectors.clear_all':        'Borrar todo',
 		'sectors.remove_hint':      '{name} — Clic para eliminar',
+
+		// Sector grid
+		'sectors.available':        'Sectores disponibles',
 
 		// Example worlds
 		'worlds.header':            'Mundos de ejemplo',
@@ -303,6 +326,13 @@ const Translations = {
 		'planet.nav':               '{direction} — {fuel} de combustible',
 
 		// Star rating
+		// Results legend
+		'legend.scenarios':         'Escenarios',
+		'legend.optimist':          'Optimista',
+		'legend.median':            'Mediana',
+		'legend.pessimist':         'Pesimista',
+		'legend.worst':             'Peor',
+
 		'stars.overall':            'General',
 		'stars.axis.fruits':        'Frutas',
 		'stars.axis.steaks':        'Bistecs',

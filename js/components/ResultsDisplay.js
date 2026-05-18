@@ -88,23 +88,23 @@ class ResultsDisplay extends Component {
 	showDefaultLegend() {
 		const legendHTML = `
 			<div class="expedition-legend">
-				<h5>Scenarios</h5>
+				<h5>${I18n.t('legend.scenarios')}</h5>
 				<div class="legend-items">
 					<div class="legend-item">
 						<div class="legend-color optimist"></div>
-						<span class="legend-text">Optimist</span>
+						<span class="legend-text">${I18n.t('legend.optimist')}</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color median"></div>
-						<span class="legend-text">Median</span>
+						<span class="legend-text">${I18n.t('legend.median')}</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color pessimist"></div>
-						<span class="legend-text">Pessimist</span>
+						<span class="legend-text">${I18n.t('legend.pessimist')}</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color worst"></div>
-						<span class="legend-text">Worst</span>
+						<span class="legend-text">${I18n.t('legend.worst')}</span>
 					</div>
 				</div>
 			</div>
