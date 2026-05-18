@@ -254,7 +254,8 @@ this._imgElement.alt  = this._planetName || I18n.t('planet.unknown');
 
 	/** @private */
 	_formatNav(direction, fuelCost) {
-		return I18n.t('planet.nav', { direction, fuel: fuelCost });
+		const translatedDir = I18n.t('planet.dir.' + direction.toLowerCase());
+		return I18n.t('planet.nav', { direction: translatedDir, fuel: fuelCost });
 	}
 
 	/**
