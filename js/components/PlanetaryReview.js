@@ -104,7 +104,7 @@ class PlanetaryReview extends Component {
 		const DIRECTIONS = ['North', 'East', 'South', 'West'];
 		this._compassBtn = this.createElement('button', {
 			className: 'compass-btn',
-			title: 'Change direction',
+			title: I18n.t('planet.direction_title'),
 			dataset: { active: 'true' }
 		});
 		const compassImg = this.createElement('img', {
@@ -124,7 +124,7 @@ class PlanetaryReview extends Component {
 
 		const fuelUpBtn = this.createElement('button', {
 			className: 'fuel-arrow fuel-arrow--up',
-			title: 'Increase fuel cost'
+			title: I18n.t('planet.fuel_up')
 		});
 		fuelUpBtn.addEventListener('click', () => {
 			this._fuelCost = Math.min(9, this._fuelCost + 1);
@@ -141,7 +141,7 @@ class PlanetaryReview extends Component {
 
 		const fuelDownBtn = this.createElement('button', {
 			className: 'fuel-arrow fuel-arrow--down',
-			title: 'Decrease fuel cost'
+			title: I18n.t('planet.fuel_down')
 		});
 		fuelDownBtn.addEventListener('click', () => {
 			this._fuelCost = Math.max(0, this._fuelCost - 1);
@@ -186,7 +186,7 @@ class PlanetaryReview extends Component {
 
 		// Planet name label
 		this._nameElement = this.createElement('p', { className: 'planet-name' },
-			this._planetName || 'Unknown planet');
+			this._planetName || I18n.t('planet.unknown'));
 		this.element.appendChild(this._nameElement);
 
 		// Direction & fuel cost
@@ -201,8 +201,8 @@ class PlanetaryReview extends Component {
 		// Export to clipboard button
 		this._exportBtn = this.createElement('button', {
 			className: 'planetary-review__export-btn',
-			title: 'Copy planet summary to clipboard'
-		}, '📋 Export');
+			title: I18n.t('planet.export_title')
+		}, I18n.t('planet.export_btn'));
 		this._exportBtn.addEventListener('click', () => {
 			const result = this.onExportClick?.();
 			if (result instanceof Promise) {
@@ -231,8 +231,8 @@ class PlanetaryReview extends Component {
 
 		const src = PlanetaryReview.getPlanetImage(this._planetName, this.getResourceURL);
 		this._imgElement.src = src;
-		this._imgElement.alt  = this._planetName || 'Unknown planet';
-		this._nameElement.textContent = this._planetName || 'Unknown planet';
+this._imgElement.alt  = this._planetName || I18n.t('planet.unknown');
+				this._nameElement.textContent = this._planetName || I18n.t('planet.unknown');
 
 		if (this._starRating) {
 			this._starRating.update(reviewData);
@@ -254,7 +254,7 @@ class PlanetaryReview extends Component {
 
 	/** @private */
 	_formatNav(direction, fuelCost) {
-		return `${direction} — ${fuelCost} fuel`;
+		return I18n.t('planet.nav', { direction, fuel: fuelCost });
 	}
 
 	/**
@@ -271,14 +271,14 @@ class PlanetaryReview extends Component {
 			'planetary-review__export-btn--error'
 		);
 		this._exportBtn.classList.add(`planetary-review__export-btn--${state}`);
-		this._exportBtn.textContent = state === 'success' ? '✓ Copied!' : '✗ Failed';
+		this._exportBtn.textContent = state === 'success' ? I18n.t('planet.export_success') : I18n.t('planet.export_error');
 
 		this._exportResetTimer = setTimeout(() => {
 			this._exportBtn.classList.remove(
 				'planetary-review__export-btn--success',
 				'planetary-review__export-btn--error'
 			);
-			this._exportBtn.textContent = '📋 Export';
+			this._exportBtn.textContent = I18n.t('planet.export_btn');
 			this._exportResetTimer = null;
 		}, 2000);
 	}

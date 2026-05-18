@@ -22,14 +22,14 @@ class ResultsDisplay extends Component {
 		this.element = this.createElement('div', { className: 'expedition-results' });
 
 		// Header
-		const header = this.createElement('h4', {}, 'Expedition Results');
+		const header = this.createElement('h4', { 'data-i18n': 'results.header' }, I18n.t('results.header'));
 		this.element.appendChild(header);
 
 		// Content area
 		this._contentElement = this.createElement('div', {
 			className: 'results-content',
 			id: 'results-content'
-		}, 'Add players to see expedition results');
+		}, I18n.t('results.placeholder'));
 
 		this.element.appendChild(this._contentElement);
 
@@ -68,7 +68,7 @@ class ResultsDisplay extends Component {
 	 */
 	setPlaceholder(message) {
 		if (this._contentElement) {
-			this._contentElement.textContent = message;
+			this._contentElement.textContent = I18n.t('results.placeholder');
 		}
 		if (this._legendContainer) {
 			this._legendContainer.innerHTML = '';
@@ -79,7 +79,7 @@ class ResultsDisplay extends Component {
 	 * Clears the content
 	 */
 	clear() {
-		this.setPlaceholder('Add players to see expedition results');
+		this.setPlaceholder(I18n.t('results.placeholder'));
 	}
 
 	/**

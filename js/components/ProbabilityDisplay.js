@@ -18,13 +18,13 @@ class ProbabilityDisplay extends Component {
 	render() {
 		this.element = this.createElement('div', { className: 'probability-display' });
 
-		const header = this.createElement('h4', {}, 'Event Probabilities');
+		const header = this.createElement('h4', { 'data-i18n': 'prob.header' }, I18n.t('prob.header'));
 		this.element.appendChild(header);
 
 		this._contentElement = this.createElement('div', {
 			className: 'prob-content',
 			id: 'prob-content'
-		}, 'Select sectors to see probabilities');
+		}, I18n.t('prob.placeholder'));
 
 		this.element.appendChild(this._contentElement);
 		return this.element;
@@ -56,7 +56,7 @@ class ProbabilityDisplay extends Component {
 	 */
 	clear() {
 		if (this._contentElement) {
-			this._contentElement.textContent = 'Select sectors to see probabilities';
+			this._contentElement.textContent = I18n.t('prob.placeholder');
 		}
 	}
 
@@ -65,7 +65,7 @@ class ProbabilityDisplay extends Component {
 	 */
 	showLoading() {
 		if (this._contentElement) {
-			this._contentElement.innerHTML = '<div class="loading-spinner">Calculating...</div>';
+			this._contentElement.innerHTML = `<div class="loading-spinner">${I18n.t('prob.loading')}</div>`;
 		}
 	}
 
@@ -74,7 +74,7 @@ class ProbabilityDisplay extends Component {
 	 */
 	showError() {
 		if (this._contentElement) {
-			this._contentElement.innerHTML = '<div class="calculation-error">Calculation error</div>';
+			this._contentElement.innerHTML = `<div class="calculation-error">${I18n.t('prob.error')}</div>`;
 		}
 	}
 
@@ -84,12 +84,12 @@ class ProbabilityDisplay extends Component {
 
 	_renderResources(resources) {
 		const items = [
-			{ name: 'Fruits', icon: 'pictures/items/fruit10.jpg', data: resources.fruits },
-			{ name: 'Steaks', icon: 'pictures/items/alien_steak.jpg', data: resources.steaks },
-			{ name: 'Fuel', icon: 'pictures/items/fuel_capsule.jpg', data: resources.fuel },
-			{ name: 'Oxygen', icon: 'pictures/items/oxy_capsule.jpg', data: resources.oxygen },
-			{ name: 'Artefacts', icon: 'pictures/items/artefact.png', data: resources.artefacts },
-			{ name: 'Map Fragments', icon: 'pictures/items/super_map.jpg', data: resources.mapFragments }
+			{ name: I18n.t('resource.fruits'),       icon: 'pictures/items/fruit10.jpg',    data: resources.fruits },
+			{ name: I18n.t('resource.steaks'),       icon: 'pictures/items/alien_steak.jpg', data: resources.steaks },
+			{ name: I18n.t('resource.fuel'),         icon: 'pictures/items/fuel_capsule.jpg', data: resources.fuel },
+			{ name: I18n.t('resource.oxygen'),       icon: 'pictures/items/oxy_capsule.jpg', data: resources.oxygen },
+			{ name: I18n.t('resource.artefacts'),    icon: 'pictures/items/artefact.png',   data: resources.artefacts },
+			{ name: I18n.t('resource.map_fragments'), icon: 'pictures/items/super_map.jpg',  data: resources.mapFragments }
 		];
 
 		// Sort: items with values first (check both average and optimist)
@@ -103,7 +103,7 @@ class ProbabilityDisplay extends Component {
 			const icon = this._icon(r.icon);
 			// Show "none" only if both average AND optimist are 0
 			if (r.data.average === 0 && r.data.optimist === 0) {
-				return `<tr><td class="icon-cell">${icon}</td><td colspan="3" class="neutral none-row">none</td></tr>`;
+				return `<tr><td class="icon-cell">${icon}</td><td colspan="3" class="neutral none-row">${I18n.t('prob.none')}</td></tr>`;
 			}
 			return `<tr>
 				<td class="icon-cell">${icon}</td>
@@ -115,14 +115,14 @@ class ProbabilityDisplay extends Component {
 
 		return `
 			<div class="outcome-category">
-				<h5>Resources</h5>
+				<h5>${I18n.t('prob.resources.header')}</h5>
 				<table class="resource-table">
 					<thead>
 						<tr>
-							<th>Resource</th>
-						<th class="pessimist-col">Pessimist</th>
-						<th class="average-col">Average</th>
-						<th class="optimist-col">Optimist</th>
+							<th>${I18n.t('prob.resources.col')}</th>
+						<th class="pessimist-col">${I18n.t('prob.col.pessimist')}</th>
+						<th class="average-col">${I18n.t('prob.col.average')}</th>
+						<th class="optimist-col">${I18n.t('prob.col.optimist')}</th>
 						</tr>
 					</thead>
 					<tbody>${rows}</tbody>
@@ -183,7 +183,7 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (data.optimistProb || 0) + (data.averageProb || 0) + (data.pessimistProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist, Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.optimist_average_pessimist')}: ${this._formatProb(combinedProb)}</span>
 					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
@@ -191,46 +191,46 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (data.optimistProb || 0) + (data.averageProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist and Average Scenario: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.optimist_average')}: ${this._formatProb(combinedProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>Pessimist Scenario: ${this._formatProb(data.pessimistProb)}</span>
+					<span>${I18n.t('scenario.pessimist')}: ${this._formatProb(data.pessimistProb)}</span>
 					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 			`);
 		} else if (averageEqualsPessimist) {
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist Scenario: ${this._formatProb(data.optimistProb)}</span>
+					<span>${I18n.t('scenario.optimist')}: ${this._formatProb(data.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			const combinedProb = (data.averageProb || 0) + (data.pessimistProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>Average and Pessimist Scenario: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.average_pessimist')}: ${this._formatProb(combinedProb)}</span>
 					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 			`);
 		} else {
 			rows.push(`
 				<div class="damage-item">
-					<span>Optimist Scenario: ${this._formatProb(data.optimistProb)}</span>
+					<span>${I18n.t('scenario.optimist')}: ${this._formatProb(data.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>Average Scenario: ${this._formatProb(data.averageProb)}</span>
+					<span>${I18n.t('scenario.average')}: ${this._formatProb(data.averageProb)}</span>
 					<span class="danger">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>Pessimist Scenario: ${this._formatProb(data.pessimistProb)}</span>
+					<span>${I18n.t('scenario.pessimist')}: ${this._formatProb(data.pessimistProb)}</span>
 					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 			`);
@@ -244,7 +244,7 @@ class ProbabilityDisplay extends Component {
 				rows.length = 0;
 				rows.push(`
 				<div class="damage-item">
-					<span>All Scenarios: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.all')}: ${this._formatProb(combinedProb)}</span>
 					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 				`);
@@ -252,7 +252,7 @@ class ProbabilityDisplay extends Component {
 				const combinedProb = (data.averageProb || 0) + (data.pessimistProb || 0) + (data.worstCaseProb || 0);
 				rows[rows.length - 1] = `
 				<div class="damage-item">
-					<span>Average, Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.average_pessimist_worst')}: ${this._formatProb(combinedProb)}</span>
 					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 				`;
@@ -260,7 +260,7 @@ class ProbabilityDisplay extends Component {
 				const combinedProb = (data.pessimistProb || 0) + (data.worstCaseProb || 0);
 				rows[rows.length - 1] = `
 				<div class="damage-item">
-					<span>Pessimist and Worst Case Scenario: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.pessimist_worst')}: ${this._formatProb(combinedProb)}</span>
 					<span class="critical bold-damage">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 				`;
@@ -268,7 +268,7 @@ class ProbabilityDisplay extends Component {
 		} else {
 			rows.push(`
 				<div class="damage-item">
-					<span>Worst Case Scenario: ${this._formatProb(data.worstCaseProb)}</span>
+					<span>${I18n.t('scenario.worst')}: ${this._formatProb(data.worstCaseProb)}</span>
 					<span class="critical bold-damage">${hpIcon}<strong>${worstDmg}</strong></span>
 				</div>
 			`);
@@ -339,8 +339,8 @@ class ProbabilityDisplay extends Component {
 		if (!damage || (damage.pessimist === 0 && damage.average === 0 && damage.optimist === 0 && damage.worstCase === 0)) {
 			return `
 				<div class="outcome-category">
-					<h5>Combat Damage</h5>
-					<div class="outcome-item"><span>No combat damage expected</span></div>
+					<h5>${I18n.t('prob.combat.header')}</h5>
+					<div class="outcome-item"><span>${I18n.t('prob.combat.none')}</span></div>
 				</div>
 			`;
 		}
@@ -349,7 +349,7 @@ class ProbabilityDisplay extends Component {
 
 		return `
 			<div class="outcome-category">
-				<h5>Combat Damage</h5>
+				<h5>${I18n.t('prob.combat.header')}</h5>
 				${rows.join('')}
 			</div>
 		`;
@@ -447,8 +447,8 @@ class ProbabilityDisplay extends Component {
 		if (!hasEventDamage || !scenarios) {
 			return `
 				<div class="outcome-category">
-					<h5>Event Damage</h5>
-					<div class="outcome-item"><span>No event damage expected</span></div>
+					<h5>${I18n.t('prob.event.header')}</h5>
+					<div class="outcome-item"><span>${I18n.t('prob.event.none')}</span></div>
 				</div>
 			`;
 		}
@@ -457,7 +457,7 @@ class ProbabilityDisplay extends Component {
 
 		return `
 			<div class="outcome-category">
-				<h5>Event Damage</h5>
+				<h5>${I18n.t('prob.event.header')}</h5>
 				${rows.join('')}
 			</div>
 		`;
@@ -465,13 +465,13 @@ class ProbabilityDisplay extends Component {
 
 	_renderNegativeEvents(events) {
 		const eventList = [
-			{ name: 'Player Lost', data: events.playerLost },
-			{ name: 'Sector Unexplored', data: events.again },
-			{ name: 'Disease', data: events.disease },
-			{ name: 'Item Loss', data: events.itemLost },
-			{ name: 'Kill All', data: events.killAll },
-			{ name: 'Kill One', data: events.killOne },
-			{ name: 'Mush Trap', data: events.mushTrap }
+			{ name: I18n.t('event.player_lost'), data: events.playerLost },
+			{ name: I18n.t('event.unexplored'),  data: events.again },
+			{ name: I18n.t('event.disease'),     data: events.disease },
+			{ name: I18n.t('event.item_lost'),   data: events.itemLost },
+			{ name: I18n.t('event.kill_all'),    data: events.killAll },
+			{ name: I18n.t('event.kill_one'),    data: events.killOne },
+			{ name: I18n.t('event.mush_trap'),   data: events.mushTrap }
 		];
 
 		// Sort: items with values first (check both average and pessimist)
@@ -484,7 +484,7 @@ class ProbabilityDisplay extends Component {
 		const rows = eventList.map(e => {
 			// Show "none" only if both average AND pessimist are 0
 			if (e.data.average === 0 && e.data.pessimist === 0) {
-				return `<tr><td>${e.name}</td><td colspan="3" class="neutral none-row">none</td></tr>`;
+				return `<tr><td>${e.name}</td><td colspan="3" class="neutral none-row">${I18n.t('prob.none')}</td></tr>`;
 			}
 			return `<tr>
 				<td>${e.name}</td>
@@ -496,14 +496,14 @@ class ProbabilityDisplay extends Component {
 
 		return `
 			<div class="outcome-category">
-				<h5>Negative Events</h5>
+				<h5>${I18n.t('prob.negative.header')}</h5>
 				<table class="events-table">
 					<thead>
 						<tr>
-							<th>Event Type</th>
-							<th class="pessimist-col">Pessimist</th>
-							<th class="average-col">Average</th>
-							<th class="optimist-col">Optimist</th>
+						<th>${I18n.t('prob.negative.col')}</th>
+						<th class="pessimist-col">${I18n.t('prob.col.pessimist')}</th>
+						<th class="average-col">${I18n.t('prob.col.average')}</th>
+						<th class="optimist-col">${I18n.t('prob.col.optimist')}</th>
 						</tr>
 					</thead>
 					<tbody>${rows}</tbody>

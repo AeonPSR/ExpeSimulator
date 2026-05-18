@@ -17,12 +17,12 @@ const PlanetReviewScorer = (() => {
 
 	/** Axes definition: key, label, and which events belong to each */
 	const AXES = [
-		{ key: 'fruits',    label: 'Fruits' },
-		{ key: 'steaks',    label: 'Steaks' },
-		{ key: 'fuel',      label: 'Fuel' },
-		{ key: 'artifacts', label: 'Artifacts' },
-		{ key: 'lethality', label: 'Lethality' },
-		{ key: 'hazards',   label: 'Hazards' },
+		{ key: 'fruits',    label: () => I18n.t('stars.axis.fruits') },
+		{ key: 'steaks',    label: () => I18n.t('stars.axis.steaks') },
+		{ key: 'fuel',      label: () => I18n.t('stars.axis.fuel') },
+		{ key: 'artifacts', label: () => I18n.t('stars.axis.artifacts') },
+		{ key: 'lethality', label: () => I18n.t('stars.axis.lethality') },
+		{ key: 'hazards',   label: () => I18n.t('stars.axis.hazards') },
 	];
 
 	/** Fixed magnitudes for events that don't encode a number in their name */
@@ -620,7 +620,7 @@ const PlanetReviewScorer = (() => {
 			if ((raw > 0 || axisBonus > 0) && stars < 0.5) stars = 0.5;
 			return {
 				key: axisDef.key,
-				label: axisDef.label,
+				label: typeof axisDef.label === 'function' ? axisDef.label() : axisDef.label,
 				stars,
 			};
 		});

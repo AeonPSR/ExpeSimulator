@@ -51,6 +51,12 @@ class ExpeditionSimulatorApp {
 
 		// Initialize worker after all scripts are loaded
 		this._initWorker();
+
+		// Re-render dynamic content when the user switches language
+		document.addEventListener('i18n:change', () => {
+			this._selectedSectorsComponent?.update(this._state.sectors);
+			this._scheduleUpdate();
+		});
 	}
 
 	_createSections() {
@@ -83,8 +89,8 @@ class ExpeditionSimulatorApp {
 		// Tabs: Planetary Review (future) and Expedition Simulation
 		this._tabContainer = new TabContainer({
 			tabs: [
-				{ id: 'planetary-review', label: 'Planetary Review' },
-				{ id: 'expedition-sim', label: 'Expedition Simulation' }
+				{ id: 'planetary-review', label: I18n.t('tab.planetary_review'), i18nKey: 'tab.planetary_review' },
+				{ id: 'expedition-sim', label: I18n.t('tab.expedition_sim'), i18nKey: 'tab.expedition_sim' }
 			],
 			activeTab: 'planetary-review'
 		});
