@@ -60,6 +60,14 @@ function buildSectorNameToIdMap() {
 
 const SECTOR_NAME_TO_ID = buildSectorNameToIdMap();
 
+// Maps every localised direction word (EN/FR/ES) to its canonical English form.
+const DIRECTION_NORMALIZE = {
+	'north': 'North', 'nord':  'North', 'norte': 'North',
+	'east':  'East',  'est':   'East',  'este':  'East',
+	'south': 'South', 'sud':   'South', 'sur':   'South',
+	'west':  'West',  'ouest': 'West',  'oeste': 'West',
+};
+
 class ChatMessageDetector {
 	/**
 	 * @param {Object} options
@@ -327,7 +335,8 @@ class ChatMessageDetector {
 			if (node.nodeType === Node.TEXT_NODE) {
 				const match = node.textContent.match(/(\S+)\s*-\s*(\d+)\s*$/);
 				if (match) {
-					return { direction: match[1], fuel: parseInt(match[2], 10) };
+					const direction = DIRECTION_NORMALIZE[match[1].toLowerCase()] || match[1];
+					return { direction, fuel: parseInt(match[2], 10) };
 				}
 				// Non-empty text that didn't match — stop searching
 				if (node.textContent.trim()) break;
