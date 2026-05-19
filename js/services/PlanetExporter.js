@@ -64,8 +64,8 @@ class PlanetExporter {
 		// Title line: name + overall score + optional diplomacy flag + nav
 		const overallStr = overall !== null ? ` - ${overall}${starChar}` : '';
 		const diplomacyStr = diplomacy ? ' (:sk_diplomacy:)' : '';
-		const navStr = nav ? ` | *${nav.direction} - ${nav.fuel} :fuel:*` : '';
-		const titleLine = `:ic_planet_scanned: **${name}**${overallStr}${diplomacyStr}${navStr}`;
+		const navStr = nav ? `*${nav.direction} - ${nav.fuel} :fuel:*` : '';
+		const titleLine = `:ic_planet_scanned: **${name}**${overallStr}${diplomacyStr}`;
 
 		// Axes: sort high → low, then split into rows of 3
 		const axesLines = [];
@@ -80,8 +80,8 @@ class PlanetExporter {
 			}
 		}
 
-		const parts = [titleLine, iconBlock, ...axesLines].filter(p => p.length > 0);
-		return parts.join('\n');
+		const parts = [titleLine, navStr, iconBlock, ...axesLines].filter(p => p.length > 0);
+		return '\n' + parts.join('\n');
 	}
 
 	/**
