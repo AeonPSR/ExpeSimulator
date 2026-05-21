@@ -28,7 +28,7 @@ class ExampleWorlds extends Component {
 		this.element = this.createElement('div', { className: 'example-worlds' });
 
 		// Header
-		const header = this.createElement('h4', {}, 'Example Worlds');
+		const header = this.createElement('h4', { 'data-i18n': 'worlds.header' }, I18n.t('worlds.header'));
 		this.element.appendChild(header);
 
 		// World button rows

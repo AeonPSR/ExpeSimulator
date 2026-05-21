@@ -60,6 +60,14 @@ function buildSectorNameToIdMap() {
 
 const SECTOR_NAME_TO_ID = buildSectorNameToIdMap();
 
+// Maps every localised direction word (EN/FR/ES) to its canonical English form.
+const DIRECTION_NORMALIZE = {
+	'north': 'North', 'nord':  'North', 'norte': 'North',
+	'east':  'East',  'est':   'East',  'este':  'East',
+	'south': 'South', 'sud':   'South', 'sur':   'South',
+	'west':  'West',  'ouest': 'West',  'oeste': 'West',
+};
+
 class ChatMessageDetector {
 	/**
 	 * @param {Object} options
@@ -177,9 +185,16 @@ class ChatMessageDetector {
 		let hasFuel = false;
 
 		for (const img of images) {
-			if (img.alt === ':planet:') hasPlanet = true;
+			if (img.alt === ':planet:' || img.alt === ':ic_planet_scanned:') hasPlanet = true;
 			if (img.alt === ':fuel:') hasFuel = true;
 			if (hasPlanet && hasFuel) break;
+		}
+
+		// Also accept text-based codes (copy-pasted or self-exported messages)
+		if (!hasPlanet || !hasFuel) {
+			const text = message.textContent;
+			if (!hasPlanet) hasPlanet = text.includes(':ic_planet_scanned:') || text.includes(':planet:');
+			if (!hasFuel)   hasFuel   = text.includes(':fuel:');
 		}
 
 		if (!hasPlanet || !hasFuel) return false;
@@ -188,14 +203,23 @@ class ChatMessageDetector {
 	}
 
 	/**
-	 * Checks if the message text contains any known sector name
+	 * Checks if the message text or icons contain any known sector reference
 	 * @private
 	 * @param {HTMLElement} message
 	 * @returns {boolean}
 	 */
 	_containsSectorName(message) {
+		// Text-based: original game messages list sector names in prose
 		const text = message.textContent.toLowerCase();
-		return ALL_SECTOR_NAMES.some(name => name.length > 0 && text.includes(name.toLowerCase()));
+		if (ALL_SECTOR_NAMES.some(name => name.length > 0 && text.includes(name.toLowerCase()))) {
+			return true;
+		}
+		// Icon-based: our own export uses :as_xxx: sector images
+		const images = message.querySelectorAll('img');
+		for (const img of images) {
+			if (img.alt.startsWith(':as_')) return true;
+		}
+		return false;
 	}
 
 	/**
@@ -265,7 +289,31 @@ class ChatMessageDetector {
 			}
 		}
 
+		// Fallback: icon-based parsing for our own export format (:as_xxx: images)
+		if (sectors.length === 0) {
+			const iconToId = ChatMessageDetector._getIconToIdMap();
+			const images = message.querySelectorAll('img');
+			for (const img of images) {
+				const id = iconToId.get(img.alt);
+				if (id && id !== 'LANDING') sectors.push(id);
+			}
+		}
+
 		return sectors;
+	}
+
+	/**
+	 * Builds (and caches) a reverse map from icon code to sector ID.
+	 * e.g. ':as_oxygen:' → 'OXYGEN'
+	 * @returns {Map<string, string>}
+	 */
+	static _getIconToIdMap() {
+		if (!ChatMessageDetector._iconToIdMap) {
+			ChatMessageDetector._iconToIdMap = new Map(
+				Object.entries(SectorData.SECTOR_ICONS).map(([id, icon]) => [icon, id])
+			);
+		}
+		return ChatMessageDetector._iconToIdMap;
 	}
 
 	/**
@@ -287,7 +335,8 @@ class ChatMessageDetector {
 			if (node.nodeType === Node.TEXT_NODE) {
 				const match = node.textContent.match(/(\S+)\s*-\s*(\d+)\s*$/);
 				if (match) {
-					return { direction: match[1], fuel: parseInt(match[2], 10) };
+					const direction = DIRECTION_NORMALIZE[match[1].toLowerCase()] || match[1];
+					return { direction, fuel: parseInt(match[2], 10) };
 				}
 				// Non-empty text that didn't match — stop searching
 				if (node.textContent.trim()) break;
@@ -306,7 +355,7 @@ class ChatMessageDetector {
 	 * @returns {string|null}
 	 */
 	_parsePlanetNameFromMessage(message) {
-		const planetImg = message.querySelector('img[alt=":planet:"]');
+		const planetImg = message.querySelector('img[alt=":planet:"], img[alt=":ic_planet_scanned:"]');
 		if (!planetImg) return null;
 
 		// Walk forward through siblings to find the first <strong>

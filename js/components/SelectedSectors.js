@@ -57,8 +57,9 @@ class SelectedSectors extends Component {
 		const clearBtn = this.createElement('button', {
 			id: 'clear-all',
 			className: 'clear-btn',
+			'data-i18n': 'sectors.clear_all',
 			onClick: () => this.onClearAll?.()
-		}, 'Clear All');
+		}, I18n.t('sectors.clear_all'));
 		this.element.appendChild(clearBtn);
 
 		return this.element;
@@ -77,10 +78,12 @@ class SelectedSectors extends Component {
 		const totalCount = this._selectedSectors.length;
 		
 		// Show format like original: "Selected Expedition (5/20)" or "Selected Expedition (5/20 + 2 special)"
-		const baseText = `Selected Expedition (${regularCount}/${this.maxSectors})`;
+		const baseText = I18n.t('sectors.header', { regular: regularCount, max: this.maxSectors });
 		const specialCount = totalCount - regularCount;
 		
-		return specialCount > 0 ? `${baseText} + ${specialCount} special` : baseText;
+		return specialCount > 0
+			? `${baseText} ${I18n.t('sectors.special_suffix', { count: specialCount })}`
+			: baseText;
 	}
 
 	/**
@@ -117,7 +120,7 @@ class SelectedSectors extends Component {
 		const sectorDiv = this.createElement('div', {
 			className: 'selected-sector-item',
 			dataset: { index: index.toString() },
-			title: `${formatSectorName(sectorName)} - Click to remove`
+			title: I18n.t('sectors.remove_hint', { name: formatSectorName(sectorName) })
 		});
 
 		// Main image

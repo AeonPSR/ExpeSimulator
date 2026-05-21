@@ -22,14 +22,14 @@ class ResultsDisplay extends Component {
 		this.element = this.createElement('div', { className: 'expedition-results' });
 
 		// Header
-		const header = this.createElement('h4', {}, 'Expedition Results');
+		const header = this.createElement('h4', { 'data-i18n': 'results.header' }, I18n.t('results.header'));
 		this.element.appendChild(header);
 
 		// Content area
 		this._contentElement = this.createElement('div', {
 			className: 'results-content',
 			id: 'results-content'
-		}, 'Add players to see expedition results');
+		}, I18n.t('results.placeholder'));
 
 		this.element.appendChild(this._contentElement);
 
@@ -68,7 +68,7 @@ class ResultsDisplay extends Component {
 	 */
 	setPlaceholder(message) {
 		if (this._contentElement) {
-			this._contentElement.textContent = message;
+			this._contentElement.textContent = I18n.t('results.placeholder');
 		}
 		if (this._legendContainer) {
 			this._legendContainer.innerHTML = '';
@@ -79,7 +79,7 @@ class ResultsDisplay extends Component {
 	 * Clears the content
 	 */
 	clear() {
-		this.setPlaceholder('Add players to see expedition results');
+		this.setPlaceholder(I18n.t('results.placeholder'));
 	}
 
 	/**
@@ -88,23 +88,23 @@ class ResultsDisplay extends Component {
 	showDefaultLegend() {
 		const legendHTML = `
 			<div class="expedition-legend">
-				<h5>Scenarios</h5>
+				<h5>${I18n.t('legend.scenarios')}</h5>
 				<div class="legend-items">
 					<div class="legend-item">
 						<div class="legend-color optimist"></div>
-						<span class="legend-text">Optimist</span>
+						<span class="legend-text">${I18n.t('legend.optimist')}</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color median"></div>
-						<span class="legend-text">Median</span>
+						<span class="legend-text">${I18n.t('legend.median')}</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color pessimist"></div>
-						<span class="legend-text">Pessimist</span>
+						<span class="legend-text">${I18n.t('legend.pessimist')}</span>
 					</div>
 					<div class="legend-item">
 						<div class="legend-color worst"></div>
-						<span class="legend-text">Worst</span>
+						<span class="legend-text">${I18n.t('legend.worst')}</span>
 					</div>
 				</div>
 			</div>

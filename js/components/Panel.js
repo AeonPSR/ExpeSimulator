@@ -19,7 +19,7 @@ class Panel extends Component {
 	 */
 	constructor(options = {}) {
 		super(options);
-		this.title = options.title || 'Expedition Simulator';
+		this.title = options.title || I18n.t('panel.title');
 		this.tongueIcon = options.tongueIcon || null;
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 		
@@ -102,13 +102,30 @@ class Panel extends Component {
 	_createHeader() {
 		const header = this.createElement('div', { className: 'panel-header' });
 		
-		const title = this.createElement('h3', {}, this.title);
+		const title = this.createElement('h3', { 'data-i18n': 'panel.title' }, I18n.t('panel.title'));
 		header.appendChild(title);
+
+		// Language cycle button
+		const langBtn = this.createElement('button', {
+			className: 'panel-lang-btn',
+			title: I18n.t('panel.lang.label')
+		});
+		const langImg = this.createElement('img', {
+			src: this.getResourceURL(`pictures/others/${I18n.locale}.png`),
+			alt: I18n.locale.toUpperCase()
+		});
+		langBtn.appendChild(langImg);
+		this.addEventListener(langBtn, 'click', () => {
+			I18n.cycleLocale();
+			langImg.src = this.getResourceURL(`pictures/others/${I18n.locale}.png`);
+			langImg.alt = I18n.locale.toUpperCase();
+		});
+		header.appendChild(langBtn);
 
 		// Pin button to lock the panel open
 		const pinBtn = this.createElement('button', {
 			className: 'panel-pin-btn',
-			title: 'Pin panel open'
+			title: I18n.t('panel.pin')
 		});
 		const pinImg = this.createElement('img', {
 			src: this.getResourceURL('pictures/others/pin.png'),
@@ -131,11 +148,11 @@ class Panel extends Component {
 		if (this._pinned) {
 			this.element.classList.add('pinned');
 			pinBtn.classList.add('active');
-			pinBtn.title = 'Unpin panel';
+			pinBtn.title = I18n.t('panel.unpin');
 		} else {
 			this.element.classList.remove('pinned');
 			pinBtn.classList.remove('active');
-			pinBtn.title = 'Pin panel open';
+			pinBtn.title = I18n.t('panel.pin');
 			// Force the panel to slide away even if the mouse is still over it.
 			// The class is removed once the CSS transition ends so normal
 			// hover behaviour resumes immediately afterward.

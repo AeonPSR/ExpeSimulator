@@ -83,7 +83,7 @@ class PlayerSection extends Component {
 		const header = this.createElement('div', { className: 'players-header' });
 
 		// Title
-		const title = this.createElement('h4', {}, 'Players');
+		const title = this.createElement('h4', { 'data-i18n': 'players.header' }, I18n.t('players.header'));
 		header.appendChild(title);
 
 		// Controls container

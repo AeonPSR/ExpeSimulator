@@ -78,12 +78,12 @@ class StarRating extends Component {
 	// Default axes shown when no data is provided (all at 0 stars)
 	static get EMPTY_AXES() {
 		return [
-			{ key: 'fruits',    label: 'Fruits',    stars: 0 },
-			{ key: 'steaks',    label: 'Steaks',    stars: 0 },
-			{ key: 'fuel',      label: 'Fuel',      stars: 0 },
-			{ key: 'artifacts', label: 'Artifacts', stars: 0 },
-			{ key: 'lethality', label: 'Lethality', stars: 0 },
-			{ key: 'hazards',   label: 'Hazards',   stars: 0 },
+			{ key: 'fruits',    label: I18n.t('stars.axis.fruits'),    stars: 0 },
+			{ key: 'steaks',    label: I18n.t('stars.axis.steaks'),    stars: 0 },
+			{ key: 'fuel',      label: I18n.t('stars.axis.fuel'),      stars: 0 },
+			{ key: 'artifacts', label: I18n.t('stars.axis.artifacts'), stars: 0 },
+			{ key: 'lethality', label: I18n.t('stars.axis.lethality'), stars: 0 },
+			{ key: 'hazards',   label: I18n.t('stars.axis.hazards'),   stars: 0 },
 		];
 	}
 
@@ -93,7 +93,7 @@ class StarRating extends Component {
 	_renderOverall(score) {
 		this._overallContainer.innerHTML = '';
 
-		const label = this.createElement('span', { className: 'star-rating-overall-label' }, 'Overall');
+		const label = this.createElement('span', { className: 'star-rating-overall-label', 'data-i18n': 'stars.overall' }, I18n.t('stars.overall'));
 		this._overallContainer.appendChild(label);
 
 		const starsEl = StarRating._createStarsElement(score);

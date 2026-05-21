@@ -35,10 +35,12 @@ class TabContainer extends Component {
 		// Tab bar
 		const tabBar = this.createElement('div', { className: 'tab-bar' });
 		for (const tab of this.tabs) {
-			const btn = this.createElement('button', {
+			const attrs = {
 				className: 'tab-btn' + (tab.id === this.activeTab ? ' active' : ''),
 				dataset: { tab: tab.id }
-			}, tab.label);
+			};
+			if (tab.i18nKey) attrs['data-i18n'] = tab.i18nKey;
+			const btn = this.createElement('button', attrs, tab.label);
 
 			this.addEventListener(btn, 'click', () => this._switchTab(tab.id));
 			tabBar.appendChild(btn);
