@@ -191,6 +191,34 @@
 	opacity: 1;
 }
 
+#expedition-simulator .panel-theme-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	padding: 0;
+	flex-shrink: 0;
+	font-size: 18px;
+	color: #95a5a6;
+}
+
+#expedition-simulator .panel-theme-btn:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.5);
+}
+
+#expedition-simulator .panel-theme-btn--active {
+	border-color: #db3498;
+	background: rgba(219, 52, 152, 0.3);
+	color: #db3498;
+}
+
 /* ==========================================================================
    Tab Container
    ========================================================================== */

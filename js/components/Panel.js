@@ -135,6 +135,17 @@ class Panel extends Component {
 		this.addEventListener(pinBtn, 'click', () => this._togglePin(pinBtn));
 		header.appendChild(pinBtn);
 
+		// Theme toggle button
+		const themeBtn = this.createElement('button', {
+			className: 'panel-theme-btn',
+			title: 'Toggle retro theme'
+		}, '★');
+		this.addEventListener(themeBtn, 'click', () => {
+			const isRetro = document.body.classList.toggle('retro-theme');
+			themeBtn.classList.toggle('panel-theme-btn--active', isRetro);
+		});
+		header.appendChild(themeBtn);
+
 		return header;
 	}
 

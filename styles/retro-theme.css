@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Retro Theme — active when <body class="retro-theme">
+   All selectors include #expedition-simulator to beat the default specificity.
+   ========================================================================== */
+
+/* ── Panel structure ─────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .panel-header,
+body.retro-theme #expedition-simulator .panel-tongue {
+	background: linear-gradient(135deg, #db3498 0%, #b92980 100%);
+}
+
+body.retro-theme #expedition-simulator .panel-main {
+	border-right-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .panel-main:hover,
+body.retro-theme #expedition-simulator .panel-main:focus-within {
+	border-color: #db3498;
+}
+
+/* ── Tabs / active indicators ────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .tab-btn.active,
+body.retro-theme #expedition-simulator .tab-btn:hover {
+	color: #db3498;
+	border-bottom-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .tab-content.active {
+	border-color: #db3498;
+}
+
+/* ── Sectors ─────────────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .sector-grid-title {
+	color: #db3498;
+	border-bottom-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .sector-category-title {
+	border-bottom-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .sector-btn.selected,
+body.retro-theme #expedition-simulator .sector-btn:focus {
+	border-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .diplomacy-toggle-btn.active {
+	border-color: #db3498;
+}
+
+/* ── Import buttons ──────────────────────────────────────────────────── */
+body.retro-theme .expe-import-btn {
+	background: #df0074;
+	background: linear-gradient(0deg, #c3003b 2%, #df0074 6% 46%, #e5008e 54% 94%, #e5499a 96%);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .results-table thead th {
+	background: #db3498;
+}
+
+body.retro-theme #expedition-simulator .highlighted-row td:first-child {
+	color: #db3498;
+}
+
+/* ── Modals ──────────────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .modal-container {
+	border-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .modal-search-input:focus {
+	border-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .modal-title {
+	color: #db3498;
+}
+
+/* ── Results / progress ──────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .probability-bar-fill {
+	background: #db3498;
+}
+
+/* ── Planet review ───────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .planetary-review .planet-nav {
+	color: #db3498;
+}
