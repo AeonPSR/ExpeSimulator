@@ -32,9 +32,10 @@ class PlanetExporter {
 	 * @param {number|null} [overall]   - Overall star score
 	 * @param {boolean}     [diplomacy] - Whether diplomacy mode is active
 	 * @param {{ direction: string, fuel: number }|null} [nav] - Direction and fuel cost
+	 * @param {Object|null} [planetResources] - Planet-level resource quartiles from ResourceCalculator
 	 * @returns {string}
 	 */
-	static formatSummary(name, sectors, axes = [], overall = null, diplomacy = false, nav = null) {
+	static formatSummary(name, sectors, axes = [], overall = null, diplomacy = false, nav = null, planetResources = null) {
 		const filtered = sectors.filter(s => s !== 'LANDING');
 
 		const placed = new Set();
@@ -64,19 +65,50 @@ class PlanetExporter {
 		// Title line: name + overall score + optional diplomacy flag + nav
 		const overallStr = overall !== null ? ` - ${overall}${starChar}` : '';
 		const diplomacyStr = diplomacy ? ' (:sk_diplomacy:)' : '';
-		const navStr = nav ? `*${nav.direction} - ${nav.fuel} :fuel:*` : '';
+		const navDir = nav ? (I18n?.t?.('planet.dir.' + nav.direction.toLowerCase()) || nav.direction) : '';
+		const navStr = nav ? `*${navDir} - ${nav.fuel} :fuel:*` : '';
 		const titleLine = `:ic_planet_scanned: **${name}**${overallStr}${diplomacyStr}`;
 
-		// Axes: sort high → low, then split into rows of 3
+		// Axes: fixed pairs on three lines
+		// Line 1: Fruits | Steaks
+		// Line 2: Fuel   | Artifacts
+		// Line 3: Lethality | Hazards
 		const axesLines = [];
 		if (axes.length > 0) {
-			const sorted = [...axes].sort((a, b) => b.stars - a.stars);
-			for (let i = 0; i < sorted.length; i += 3) {
-				axesLines.push(
-					sorted.slice(i, i + 3)
-						.map(a => `${a.label}: ${a.stars > 0 ? `${a.stars}${starChar}` : '-'}`)
-						.join(' | ')
-				);
+			const RESOURCE_KEY_MAP = {
+				fruits:    ['fruits'],
+				steaks:    ['steaks'],
+				fuel:      ['fuel'],
+				artifacts: ['artefacts', 'mapFragments'],
+			};
+			const fmtQ = (v, round) => (v === 0 || v == null) ? '0' : round ? String(Math.round(v)) : v < 0.1 ? '<0.1' : v.toFixed(1);
+			const quartileStr = (axisKey) => {
+				if (!planetResources) return '';
+				const keys = RESOURCE_KEY_MAP[axisKey];
+				if (!keys) return '';
+				let q1 = 0, q3 = 0;
+				for (const k of keys) {
+					const d = planetResources[k];
+					if (d) { q1 += d.pessimist ?? 0; q3 += d.optimist ?? 0; }
+				}
+				const round = axisKey !== 'artifacts';
+				if (q1 === 0 && q3 === 0) return ' *(0)*';
+				return ` *(${fmtQ(q1, round)}~${fmtQ(q3, round)})*`;
+			};
+			const byKey = Object.fromEntries(axes.map(a => [a.key, a]));
+			const fmtAxis = (key) => {
+				const a = byKey[key];
+				if (!a) return null;
+				return `${a.label}: ${a.stars > 0 ? `${a.stars}${starChar}` : '-'}${quartileStr(a.key)}`;
+			};
+			const PAIRS = [
+				['fruits', 'steaks'],
+				['fuel', 'artifacts'],
+				['lethality', 'hazards'],
+			];
+			for (const pair of PAIRS) {
+				const cells = pair.map(fmtAxis).filter(Boolean);
+				if (cells.length > 0) axesLines.push(cells.join(' | '));
 			}
 		}
 
@@ -95,10 +127,11 @@ class PlanetExporter {
 	 * @param {number|null} [overall]   - Overall star score
 	 * @param {boolean}     [diplomacy] - Whether diplomacy mode is active
 	 * @param {{ direction: string, fuel: number }|null} [nav] - Direction and fuel cost
+	 * @param {Object|null} [planetResources] - Planet-level resource quartiles
 	 * @returns {Promise<void>}
 	 */
-	static copyToClipboard(name, sectors, axes = [], overall = null, diplomacy = false, nav = null) {
-		const text = PlanetExporter.formatSummary(name, sectors, axes, overall, diplomacy, nav);
+	static copyToClipboard(name, sectors, axes = [], overall = null, diplomacy = false, nav = null, planetResources = null) {
+		const text = PlanetExporter.formatSummary(name, sectors, axes, overall, diplomacy, nav, planetResources);
 
 		if (navigator.clipboard?.writeText) {
 			return navigator.clipboard.writeText(text);

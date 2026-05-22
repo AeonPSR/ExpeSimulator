@@ -443,7 +443,7 @@ class ExpeditionSimulatorApp {
 		const overall = this._lastReviewData?.overall ?? null;
 		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
 		const nav = { direction: this._currentDirection, fuel: this._currentFuelCost };
-		return PlanetExporter.copyToClipboard(name, sectors, axes, overall, diplomacy, nav);
+		return PlanetExporter.copyToClipboard(name, sectors, axes, overall, diplomacy, nav, this._lastPlanetResources || null);
 	}
 
 	/**
@@ -574,15 +574,39 @@ class ExpeditionSimulatorApp {
 		// Store participation info for rendering
 		results.participationStatus = OxygenService.getParticipationStatus(allPlayers, sectors);
 
+		// Planet-level resources: always computed over all sectors regardless of exploredCount,
+		// so the star-rating quartile indicator is independent of team movement speed.
+		// Diplomacy toggle is honoured here (removes FIGHT events → boosts resource probabilities)
+		// but is NOT applied to the main expedition results above.
+		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
+		const planetLoadout = (diplomacy && !loadout.abilities.includes('DIPLOMACY'))
+			? { ...loadout, abilities: [...loadout.abilities, 'DIPLOMACY'] }
+			: loadout;
+		if (exploredCount < totalExplorableSectors) {
+			const fullSectors = [];
+			for (const [type, count] of Object.entries(sectorCounts)) {
+				for (let i = 0; i < count; i++) fullSectors.push(type);
+			}
+			for (const s of alwaysInclude) fullSectors.push(s);
+			results.planetResources = ResourceCalculator.calculate(fullSectors, planetLoadout, participatingPlayers);
+		} else {
+			results.planetResources = ResourceCalculator.calculate(sectors, planetLoadout, participatingPlayers);
+		}
+
 		return results;
 	}
 
 	_updateProbabilityDisplay(results) {
 		if (!results) {
 			this._probabilityDisplay.clear();
+			this._lastPlanetResources = null;
+			this._planetaryReview?.updateResources?.(null);
 			return;
 		}
 		this._probabilityDisplay.update(results);
+		const planetResources = results.planetResources || results.resources || null;
+		this._lastPlanetResources = planetResources;
+		this._planetaryReview?.updateResources?.(planetResources);
 	}
 
 	_updateResultsDisplay(results) {
@@ -831,7 +855,8 @@ class ExpeditionSimulatorApp {
 			sectors,
 			allPlayers: this._state.getPlayers(),
 			antigravActive: this._state.isAntigravActive(),
-			exploredCount: this._playerSection?.getExploredSectors?.() || 9
+			exploredCount: this._playerSection?.getExploredSectors?.() || 9,
+			diplomacy: this._sectorGrid?.isDiplomacyActive?.() || false
 		});
 	}
 

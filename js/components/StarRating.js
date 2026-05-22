@@ -25,6 +25,8 @@ class StarRating extends Component {
 		this._overallContainer = null;
 		this._axesContainer = null;
 		this._booleansContainer = null;
+		this._lastAxes = null;
+		this._lastResources = null;
 	}
 
 	// ─── Rendering ───────────────────────────────────────────────────────────
@@ -63,15 +65,30 @@ class StarRating extends Component {
 		}
 
 		this._renderOverall(data.overall);
-		this._renderAxes(data.axes || []);
+		this._lastAxes = data.axes || [];
+		this._renderAxes(this._lastAxes);
 		this._renderBooleans(data.booleans || []);
+	}
+
+	/**
+	 * Updates the resource quartile data shown next to axis labels.
+	 * Expects ResourceCalculator output (with .fruits/.steaks/.fuel/.artefacts,
+	 * each having .pessimist and .optimist). Pass null to clear.
+	 * @param {Object|null} resources
+	 */
+	updateResources(resources) {
+		this._lastResources = resources || null;
+		if (this._axesContainer && this._lastAxes) {
+			this._renderAxes(this._lastAxes);
+		}
 	}
 
 	// ─── Private renderers ───────────────────────────────────────────────────
 
 	_renderEmpty() {
 		this._renderOverall(0);
-		this._renderAxes(StarRating.EMPTY_AXES);
+		this._lastAxes = StarRating.EMPTY_AXES;
+		this._renderAxes(this._lastAxes);
 		this._renderBooleans([]);
 	}
 
@@ -115,8 +132,9 @@ class StarRating extends Component {
 				className: `star-rating-axis star-rating-axis--${axis.key}`
 			});
 
+			const labelText = axis.label + this._formatAxisQuartiles(axis.key);
 			const label = this.createElement('span', { className: 'star-rating-axis-label' },
-				axis.label);
+				labelText);
 			row.appendChild(label);
 
 			const starsEl = StarRating._createStarsElement(axis.stars);
@@ -124,6 +142,43 @@ class StarRating extends Component {
 
 			this._axesContainer.appendChild(row);
 		}
+	}
+
+	/**
+	 * Returns " (Q1~Q3)" for resource axes (fruits/steaks/fuel/artifacts),
+	 * or an empty string for non-resource axes or when no data is loaded.
+	 * @private
+	 */
+	_formatAxisQuartiles(axisKey) {
+		if (!this._lastResources) return '';
+		// Map axis key → one or more resources field names to sum together
+		const RESOURCE_KEY_MAP = {
+			fruits:    ['fruits'],
+			steaks:    ['steaks'],
+			fuel:      ['fuel'],
+			artifacts: ['artefacts', 'mapFragments'],  // crystal map counts as an artifact
+		};
+		const resKeys = RESOURCE_KEY_MAP[axisKey];
+		if (!resKeys) return '';
+		let pessimist = 0;
+		let optimist  = 0;
+		for (const key of resKeys) {
+			const data = this._lastResources[key];
+			if (data) {
+				pessimist += data.pessimist ?? 0;
+				optimist  += data.optimist  ?? 0;
+			}
+		}
+		const round = axisKey !== 'artifacts';
+		if (pessimist === 0 && optimist === 0) return ' (0)';
+		return ` (${StarRating._formatQuartile(pessimist, round)}~${StarRating._formatQuartile(optimist, round)})`;
+	}
+
+	static _formatQuartile(value, round = false) {
+		if (value === 0 || value == null) return '0';
+		if (round) return String(Math.round(value));
+		if (value < 0.1) return '<0.1';
+		return value.toFixed(1);
 	}
 
 	/**

@@ -80,7 +80,7 @@ self.onmessage = function(event) {
  * 7. Attach participationStatus (OxygenService.getParticipationStatus)
  * 8. Return the complete results object
  */
-function runCalculation({ sectors, allPlayers, antigravActive, exploredCount }) {
+function runCalculation({ sectors, allPlayers, antigravActive, exploredCount, diplomacy = false }) {
 	if (sectors.length === 0) return null;
 
 	const participatingPlayers = OxygenService.getParticipatingPlayers(allPlayers, sectors);
@@ -168,5 +168,23 @@ function runCalculation({ sectors, allPlayers, antigravActive, exploredCount }) 
 	}
 
 	results.participationStatus = OxygenService.getParticipationStatus(allPlayers, sectors);
+
+	// Planet-level resources: always computed over all sectors regardless of exploredCount,
+	// so the star-rating quartile indicator is independent of team movement speed.
+	// Diplomacy toggle is honoured here but is NOT applied to the main expedition results above.
+	const planetLoadout = (diplomacy && !loadout.abilities.includes('DIPLOMACY'))
+		? { ...loadout, abilities: [...loadout.abilities, 'DIPLOMACY'] }
+		: loadout;
+	if (exploredCount < totalExplorableSectors) {
+		const fullSectors = [];
+		for (const [type, count] of Object.entries(sectorCounts)) {
+			for (let i = 0; i < count; i++) fullSectors.push(type);
+		}
+		for (const s of alwaysInclude) fullSectors.push(s);
+		results.planetResources = ResourceCalculator.calculate(fullSectors, planetLoadout, participatingPlayers);
+	} else {
+		results.planetResources = ResourceCalculator.calculate(sectors, planetLoadout, participatingPlayers);
+	}
+
 	return results;
 }

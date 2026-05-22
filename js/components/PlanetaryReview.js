@@ -115,7 +115,7 @@ class PlanetaryReview extends Component {
 		this._compassBtn.addEventListener('click', () => {
 			const idx = DIRECTIONS.indexOf(this._direction);
 			this._direction = DIRECTIONS[(idx + 1) % DIRECTIONS.length];
-			if (this._navElement) this._navElement.textContent = this._formatNav(this._direction, this._fuelCost);
+			if (this._navElement) this._updateNavElement(this._direction, this._fuelCost);
 			this.onDirectionChange?.(this._direction);
 		});
 
@@ -128,7 +128,7 @@ class PlanetaryReview extends Component {
 		});
 		fuelUpBtn.addEventListener('click', () => {
 			this._fuelCost = Math.min(9, this._fuelCost + 1);
-			if (this._navElement) this._navElement.textContent = this._formatNav(this._direction, this._fuelCost);
+			if (this._navElement) this._updateNavElement(this._direction, this._fuelCost);
 			this.onFuelChange?.(this._fuelCost);
 		});
 
@@ -145,7 +145,7 @@ class PlanetaryReview extends Component {
 		});
 		fuelDownBtn.addEventListener('click', () => {
 			this._fuelCost = Math.max(0, this._fuelCost - 1);
-			if (this._navElement) this._navElement.textContent = this._formatNav(this._direction, this._fuelCost);
+			if (this._navElement) this._updateNavElement(this._direction, this._fuelCost);
 			this.onFuelChange?.(this._fuelCost);
 		});
 
@@ -190,8 +190,8 @@ class PlanetaryReview extends Component {
 		this.element.appendChild(this._nameElement);
 
 		// Direction & fuel cost
-		this._navElement = this.createElement('p', { className: 'planet-nav' },
-			this._formatNav(this._direction, this._fuelCost));
+		this._navElement = this.createElement('p', { className: 'planet-nav' });
+		this._updateNavElement(this._direction, this._fuelCost);
 		this.element.appendChild(this._navElement);
 
 		// Star rating display
@@ -248,8 +248,31 @@ this._imgElement.alt  = this._planetName || I18n.t('planet.unknown');
 		this._direction = direction;
 		this._fuelCost  = fuelCost;
 		if (this._navElement) {
-			this._navElement.textContent = this._formatNav(direction, fuelCost);
+			this._updateNavElement(direction, fuelCost);
 		}
+	}
+
+	/**
+	 * Forwards resource quartile data to the StarRating so it can show
+	 * "(Q1~Q3)" next to resource axis labels.
+	 * @param {Object|null} resources
+	 */
+	updateResources(resources) {
+		this._starRating?.updateResources?.(resources);
+	}
+
+	/** @private */
+	_updateNavElement(direction, fuelCost) {
+		if (!this._navElement) return;
+		this._navElement.innerHTML = '';
+		const textNode = this.createElement('span', {}, this._formatNav(direction, fuelCost) + '\u00a0');
+		const icon = this.createElement('img', {
+			src: this.getResourceURL('pictures/others/fuel_icon.png'),
+			className: 'fuel-icon',
+			alt: 'fuel'
+		});
+		this._navElement.appendChild(textNode);
+		this._navElement.appendChild(icon);
 	}
 
 	/** @private */

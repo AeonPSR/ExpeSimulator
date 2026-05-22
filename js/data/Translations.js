@@ -99,7 +99,7 @@ const Translations = {
 		'planet.export_btn':        '📋 Export',
 		'planet.export_success':    '✓ Copied!',
 		'planet.export_error':      '✗ Failed',
-		'planet.nav':               '{direction} — {fuel} fuel',
+		'planet.nav':               '{direction} — {fuel}',
 
 		// Star rating
 		// Results legend
@@ -299,7 +299,7 @@ const Translations = {
 		'planet.export_btn':        '📋 Exporter',
 		'planet.export_success':    '✓ Copié !',
 		'planet.export_error':      '✗ Échec',
-		'planet.nav':               '{direction} — {fuel} de carburant',
+		'planet.nav':               '{direction} — {fuel}',
 
 		// Star rating
 		// Results legend
@@ -499,7 +499,7 @@ const Translations = {
 		'planet.export_btn':        '📋 Exportar',
 		'planet.export_success':    '✓ ¡Copiado!',
 		'planet.export_error':      '✗ Error',
-		'planet.nav':               '{direction} — {fuel} de combustible',
+		'planet.nav':               '{direction} — {fuel}',
 
 		// Star rating
 		// Results legend
