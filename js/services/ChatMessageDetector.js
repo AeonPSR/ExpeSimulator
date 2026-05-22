@@ -235,7 +235,7 @@ class ChatMessageDetector {
 		}
 
 		const button = document.createElement('button');
-		button.className = 'expe-import-btn';
+		button.className = 'expe-import-btn expe-import-btn--overlay';
 		button.textContent = 'Import';
 
 		button.addEventListener('click', (e) => {
@@ -370,6 +370,10 @@ class ChatMessageDetector {
 		return null;
 	}
 }
+
+// Expose shared lookup tables so PlanetCardInjector can reuse them
+ChatMessageDetector.SECTOR_NAME_TO_ID = SECTOR_NAME_TO_ID;
+ChatMessageDetector.DIRECTION_NORMALIZE = DIRECTION_NORMALIZE;
 
 // Export for use in other modules
 if (typeof window !== 'undefined') {

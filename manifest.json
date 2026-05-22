@@ -61,6 +61,7 @@
         "js/probability/FightCalculator.js",
         "js/probability/EventDamageCalculator.js",
         "js/services/ChatMessageDetector.js",
+        "js/services/PlanetCardInjector.js",
         "js/app.js",
         "js/content.js"
       ],

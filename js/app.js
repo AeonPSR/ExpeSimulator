@@ -49,6 +49,11 @@ class ExpeditionSimulatorApp {
 		});
 		this._chatDetector.start();
 
+		this._planetCardInjector = new PlanetCardInjector({
+			onImport: (sectors, planetName, nav) => this._onImportSectors(sectors, planetName, nav)
+		});
+		this._planetCardInjector.start();
+
 		// Initialize worker after all scripts are loaded
 		this._initWorker();
 

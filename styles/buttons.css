@@ -733,9 +733,6 @@
    ========================================================================== */
 
 .expe-import-btn {
-	position: absolute;
-	top: 4px;
-	right: 4px;
 	margin: .2rem;
 	flex-flow: row wrap;
 	display: flex;
@@ -757,6 +754,12 @@
 	background: #0074df;
 	background: linear-gradient(0deg, #003bc3 2%, #0074df 6% 46%, #008ee5 54% 94%, #499ae5 96%);
 	cursor: pointer;
+}
+
+.expe-import-btn--overlay {
+	position: absolute;
+	top: 4px;
+	right: 4px;
 	z-index: 10;
 }
 
