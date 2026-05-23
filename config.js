@@ -559,9 +559,9 @@ const ProjectEffects = {
 	'antigrav_propeller': {
 		name: 'Antigrav Propeller',
 		effects: {
-			sectorEventModifier: {
+			sectorModifications: {
 				'LANDING': {
-					'NOTHING_TO_REPORT': 2 // Doubles the weight of the "Nothing" event in the Landing sector
+					removeEvents: ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5']
 				}
 			}
 		}
