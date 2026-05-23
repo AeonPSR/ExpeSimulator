@@ -383,7 +383,7 @@ const AbilityEffects = {
 		effects: {
 			combatPowerBonus: 1,
 			requiresGun: true,
-			gunTypes: ['blaster', 'machine_gun', 'missile_launcher', 'natamy_riffle', 'sniper_riffle']
+			gunTypes: ['blaster', 'blaster_custom', 'machine_gun', 'missile_launcher', 'natamy_riffle', 'sniper_riffle']
 		}
 	},
 	'diplomacy': {
@@ -436,6 +436,12 @@ const ItemEffects = {
 		name: 'Blaster',
 		effects: {
 			combatPowerBonus: 1
+		}
+	},
+	'blaster_custom': {
+		name: 'Customized Blaster',
+		effects: {
+			combatPowerBonus: 2
 		}
 	},
 	'driller': {

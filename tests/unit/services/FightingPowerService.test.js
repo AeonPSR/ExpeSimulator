@@ -23,6 +23,7 @@ describe('FightingPowerService', () => {
 		global.ItemEffects = {
 			grenade: { effects: { combatPowerBonus: 3 } },
 			blaster: { effects: { combatPowerBonus: 6 } },
+			blaster_custom: { effects: { combatPowerBonus: 4 } },
 			old_faithful: { effects: { combatPowerBonus: 6 } },
 			knife: { effects: { combatPowerBonus: 2 } },
 			natamy: { effects: { combatPowerBonus: 3 } },
@@ -36,7 +37,7 @@ describe('FightingPowerService', () => {
 				effects: { 
 					combatPowerBonus: 2, 
 					requiresGun: true,
-					gunTypes: ['blaster', 'old_faithful', 'natamy']
+					gunTypes: ['blaster', 'blaster_custom', 'old_faithful', 'natamy']
 				} 
 			},
 			wrestler: { effects: { combatPowerBonus: 1 } }
@@ -234,6 +235,16 @@ describe('FightingPowerService', () => {
 			expect(power).toBe(8);
 		});
 
+		test('applies Centauri bonus to blaster_custom', () => {
+			const players = [
+				{ items: ['blaster_custom.jpg'] }
+			];
+			const power = FightingPowerService.calculateItemPower(players, true);
+
+			// 4 blaster_custom + 2 centauri = 6
+			expect(power).toBe(6);
+		});
+
 		test('handles null items', () => {
 			const players = [
 				{ items: [null, 'blaster.jpg', null] }
@@ -281,6 +292,11 @@ describe('FightingPowerService', () => {
 			expect(power).toBe(6);
 		});
 
+		test('blaster_custom returns its own power', () => {
+			const power = FightingPowerService.getItemPower('blaster_custom.jpg');
+			expect(power).toBe(4);
+		});
+
 		test('returns 0 for unknown item', () => {
 			const power = FightingPowerService.getItemPower('unknown.jpg');
 			expect(power).toBe(0);
@@ -289,6 +305,11 @@ describe('FightingPowerService', () => {
 		test('applies Centauri bonus to blaster', () => {
 			const power = FightingPowerService.getItemPower('blaster.jpg', true);
 			expect(power).toBe(8);
+		});
+
+		test('applies Centauri bonus to blaster_custom', () => {
+			const power = FightingPowerService.getItemPower('blaster_custom.jpg', true);
+			expect(power).toBe(6);  // 4 + 2 centauri
 		});
 
 		test('Centauri bonus only applies to blaster', () => {
@@ -341,6 +362,14 @@ describe('FightingPowerService', () => {
 		test('works with old_faithful gun', () => {
 			const abilityConfig = AbilityEffects.gunman;
 			const player = { items: ['old_faithful.jpg'] };
+			
+			const power = FightingPowerService.validateGunmanBonus(abilityConfig, player);
+			expect(power).toBe(2);
+		});
+
+		test('works with blaster_custom gun', () => {
+			const abilityConfig = AbilityEffects.gunman;
+			const player = { items: ['blaster_custom.jpg'] };
 			
 			const power = FightingPowerService.validateGunmanBonus(abilityConfig, player);
 			expect(power).toBe(2);
