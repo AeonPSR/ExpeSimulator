@@ -3,6 +3,44 @@
    All selectors include #expedition-simulator to beat the default specificity.
    ========================================================================== */
 
+/* ── Chamfer definition ──────────────────────────────────────────────── */
+body.retro-theme {
+	--chamfer-size: 5px;
+}
+
+/* ── Freeze ALL transitions for the single frame of the theme toggle ─── */
+/* Must live outside retro-theme selectors so it works in both directions. */
+.retro-theme-switching * {
+	transition: none !important;
+}
+
+/* ── Chamfer: all chamfered elements ─────────────────────────────────── */
+body.retro-theme #expedition-simulator button,
+body.retro-theme #expedition-simulator input,
+body.retro-theme #expedition-simulator .player-profile,
+body.retro-theme #expedition-simulator .player-avatar,
+body.retro-theme #expedition-simulator .ability-slot,
+body.retro-theme #expedition-simulator .item-slot,
+body.retro-theme #expedition-simulator .health-slot,
+body.retro-theme #expedition-simulator .morale-slot,
+body.retro-theme #expedition-simulator .sector-item,
+body.retro-theme #expedition-simulator .selected-sector-item,
+body.retro-theme #expedition-simulator .expedition-result-card,
+body.retro-theme #expedition-simulator .expedition-result-avatar,
+body.retro-theme #expedition-simulator .modal-container {
+	border-radius: var(--chamfer-size) !important;
+	corner-shape: bevel;
+}
+
+/* ── Per-element chamfer size overrides ──────────────────────────────── */
+body.retro-theme #expedition-simulator .sector-item {
+	--chamfer-size: 10px;
+}
+
+body.retro-theme #expedition-simulator .tab-bar button {
+	--chamfer-size: 0px;
+}
+
 /* ── Panel structure ─────────────────────────────────────────────────── */
 body.retro-theme #expedition-simulator .panel-header,
 body.retro-theme #expedition-simulator .panel-tongue {

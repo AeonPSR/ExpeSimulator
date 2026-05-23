@@ -412,8 +412,8 @@ const Translations = {
 	es: {
 		// Panel
 		'panel.title':              'Simulador de Expedición',
-		'panel.pin':                'Fijar panel',
-		'panel.unpin':              'Desfijar panel',
+		'panel.pin':                'Anclar panel',
+		'panel.unpin':              'Desanclar panel',
 		'panel.lang.label':         'Idioma',
 
 		// Tabs

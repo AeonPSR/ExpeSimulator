@@ -141,7 +141,10 @@ class Panel extends Component {
 			title: 'Toggle retro theme'
 		}, '★');
 		this.addEventListener(themeBtn, 'click', () => {
+			document.body.classList.add('retro-theme-switching');
 			const isRetro = document.body.classList.toggle('retro-theme');
+			document.body.getBoundingClientRect(); // force reflow so the freeze applies
+			document.body.classList.remove('retro-theme-switching');
 			themeBtn.classList.toggle('panel-theme-btn--active', isRetro);
 		});
 		header.appendChild(themeBtn);
