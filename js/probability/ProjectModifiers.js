@@ -9,7 +9,7 @@
 const ProjectModifiers = {
 
 	/**
-	 * Applies Antigrav Propeller: Doubles NOTHING_TO_REPORT weight in LANDING sector.
+	 * Applies Antigrav Propeller: Removes damage events from LANDING sector.
 	 * 
 	 * @param {Object} events - The explorationEvents object (will be mutated)
 	 * @param {string} sectorName - Current sector name
@@ -19,7 +19,7 @@ const ProjectModifiers = {
 		if (sectorName !== 'LANDING') {
 			return events;
 		}
-		return EventModifier.multiplyEventWeight(events, 'NOTHING_TO_REPORT', 2);
+		return EventModifier.removeEvents(events, ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5']);
 	}
 };
 
