@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Pre-push hook: run the full Jest suite before allowing a push.
+# Bypass (rarely needed) with:  git push --no-verify
+#
+
+echo "[pre-push] Running Jest test suite..."
+npx jest --ci --colors
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo ""
+  echo "[pre-push] Tests failed. Push aborted."
+  echo "[pre-push] Fix the failures, or bypass with: git push --no-verify"
+  exit $status
+fi
+
+echo "[pre-push] Tests passed."
+exit 0
