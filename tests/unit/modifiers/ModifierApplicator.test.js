@@ -155,7 +155,11 @@ describe('ModifierApplicator', () => {
 			
 			const result = ModifierApplicator.apply(config, 'LANDING', loadout);
 			
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(20); // 10 * 2
+			// Antigrav (buffed) removes damage events on LANDING, same as Pilot
+			expect(result.explorationEvents.TIRED_2).toBeUndefined();
+			expect(result.explorationEvents.ACCIDENT_3_5).toBeUndefined();
+			expect(result.explorationEvents.DISASTER_3_5).toBeUndefined();
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
 		});
 		
 		test('Tracker removes KILL_LOST from LOST', () => {
@@ -262,8 +266,8 @@ describe('ModifierApplicator', () => {
 			// Quad Compass removes AGAIN
 			expect(result.explorationEvents.AGAIN).toBeUndefined();
 			
-			// Antigrav doubles NOTHING_TO_REPORT
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(20);
+			// Antigrav (buffed) also removes damage events on LANDING (redundant with Pilot here)
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
 		});
 	});
 	

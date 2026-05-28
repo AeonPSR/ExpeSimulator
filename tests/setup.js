@@ -30,6 +30,8 @@ const sourceFiles = [
   'js/utils/helpers.js',
   'js/utils/EventClassifier.js',
   'js/utils/ValidationUtils.js',
+  'js/data/Translations.js',
+  'js/utils/I18n.js',
   'js/data/SectorData.js',
   'js/data/CharacterData.js',
   'js/data/AbilityData.js',

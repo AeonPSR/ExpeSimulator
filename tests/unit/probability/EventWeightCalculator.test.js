@@ -108,12 +108,16 @@ describe('EventWeightCalculator', () => {
 			}))
 		};
 
-		// Mock NegativeEventCalculator
+		// Mock NegativeEventCalculator (real keys per EventClassifier categories)
 		global.NegativeEventCalculator = {
 			calculate: jest.fn(() => ({
-				tired: { pessimist: 0, average: 0.5, optimist: 1 },
-				hurt: { pessimist: 0, average: 0, optimist: 0 },
-				sick: { pessimist: 0, average: 0, optimist: 0 }
+				disease:    { pessimist: 0, average: 0, optimist: 0 },
+				playerLost: { pessimist: 0, average: 0, optimist: 0 },
+				again:      { pessimist: 0, average: 0, optimist: 0 },
+				itemLost:   { pessimist: 0, average: 0, optimist: 0 },
+				killAll:    { pessimist: 0, average: 0, optimist: 0 },
+				killOne:    { pessimist: 0, average: 0, optimist: 0 },
+				mushTrap:   { pessimist: 0, average: 0, optimist: 0 }
 			}))
 		};
 
@@ -145,11 +149,12 @@ describe('EventWeightCalculator', () => {
 			countGrenades: jest.fn(() => 0)
 		};
 
-		// Mock FightCalculator
+		// Mock FightCalculator (must include diseaseFromFights for the EWC fold)
 		global.FightCalculator = {
 			calculate: jest.fn(() => ({
 				totalFights: { pessimist: 0, average: 0.5, optimist: 1 },
-				totalDamage: { pessimist: 0, average: 4, optimist: 12 }
+				totalDamage: { pessimist: 0, average: 4, optimist: 12 },
+				diseaseFromFights: { pessimist: 0, average: 0, optimist: 0 }
 			}))
 		};
 
