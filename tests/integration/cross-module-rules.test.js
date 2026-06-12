@@ -329,7 +329,6 @@ describe('Cross-module integration', () => {
 
 	describe('Sampling path', () => {
 
-		// ── 5.6 Parity ────────────────────────────────────────────────────────
 		// When only one composition is possible (single sector type, movementSpeed
 		// < totalSectors), calculateWithSampling must return an identical result
 		// to calling calculate directly with that composition's sector list.
@@ -351,7 +350,6 @@ describe('Cross-module integration', () => {
 				.toBeCloseTo(directResult.negativeEvents.again.average, 8);
 		});
 
-		// ── 5.7 Mix weighting ─────────────────────────────────────────────────
 		// The mixed result must equal the probability-weighted sum of each
 		// composition's individual calculate() result.
 
