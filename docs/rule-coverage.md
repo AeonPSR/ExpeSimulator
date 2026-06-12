@@ -24,8 +24,8 @@
 | 1.5 | **Quad Compass** removes the `AGAIN` event from every sector | [ItemModifiers.js#L25](../js/probability/ItemModifiers.js#L25) | [ItemModifiers.test.js](../tests/unit/modifiers/ItemModifiers.test.js) | ✅ |
 | 1.6 | **Trad Module** doubles `ARTEFACT` weight in INTELLIGENT only | [ItemModifiers.js#L37](../js/probability/ItemModifiers.js#L37) | [ItemModifiers.test.js](../tests/unit/modifiers/ItemModifiers.test.js) | ✅ |
 | 1.7 | **Antigrav Propeller** removes `TIRED_2`, `ACCIDENT_3_5`, `DISASTER_3_5` from LANDING (same effect as Pilot — buffed; previously doubled `NOTHING_TO_REPORT`) | [ProjectModifiers.js#L19](../js/probability/ProjectModifiers.js#L19) | [ProjectModifiers.test.js](../tests/unit/modifiers/ProjectModifiers.test.js) (rewritten in this pass — stale tests asserted the old doubling behaviour) | ✅ |
-| 1.8 | **Pilot + Antigrav on LANDING** — second is a no-op (both remove the same damage events); regression guard needed since the two paths share a target | rule 1.1 + 1.7 composition | — | ❌ |
-| 1.9 | **Diplomacy + White Flag on INTELLIGENT** — second is a no-op (Diplomacy already removed every `FIGHT_*`) | rule 1.2 + 1.4 composition | — | ❌ (silently OK today, but no regression guard) |
+| 1.8 | **Pilot + Antigrav on LANDING** — second is a no-op (both remove the same damage events); regression guard needed since the two paths share a target | rule 1.1 + 1.7 composition | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `Pilot + Antigrav (rule 1.8)` | ✅ |
+| 1.9 | **Diplomacy + White Flag on INTELLIGENT** — second is a no-op (Diplomacy already removed every `FIGHT_*`) | rule 1.2 + 1.4 composition | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `Diplomacy + White Flag (rule 1.9)` | ✅ |
 | 1.10 | **Skillful** ability expands to `DIPLOMACY` + `BOTANIC` via `Constants.ABILITY_ALIASES` (loadout assembly) | [LoadoutBuilder.js#L52](../js/services/LoadoutBuilder.js#L52) | [LoadoutBuilder.test.js](../tests/unit/services/LoadoutBuilder.test.js) | 🟡 (expansion is unit-tested but its propagation to `FIGHT_*` removal is not asserted end-to-end) |
 | 1.11 | `ModifierApplicator` clones config before mutating (original sector data never modified) | [ModifierApplicator.js#L21](../js/probability/ModifierApplicator.js#L21) | [ModifierApplicator.test.js](../tests/unit/modifiers/ModifierApplicator.test.js) | ✅ |
 
@@ -46,10 +46,10 @@
 | 2.9 | Combat damage spread randomly: 1 hit point at a time per random player | [DamageSpreader.js#L121](../js/services/DamageSpreader.js#L121) | [DamageSpreader.test.js](../tests/unit/services/DamageSpreader.test.js) `_distributeFightDamage distributes each damage point randomly` | ✅ |
 | 2.10 | `affectsAll: true` event damage is divided back to per-player when distributed | [DamageSpreader.js#L164](../js/services/DamageSpreader.js#L164) | [DamageSpreader.test.js](../tests/unit/services/DamageSpreader.test.js) `_distributeEventDamage distributes affectsAll events to all players` | ✅ |
 | 2.11 | **DamageComparator** picks the higher-scoring event when FIGHT vs ACCIDENT/DISASTER co-exist on a sector (INSECT, PREDATOR, LANDING, MOUNTAIN, COLD, HOT) | [DamageComparator.js#L51](../js/probability/DamageComparator.js#L51) | [DamageComparator.test.js](../tests/unit/probability/DamageComparator.test.js), [expedition-pipeline.test.js#L198](../tests/integration/expedition-pipeline.test.js#L198) | ✅ |
-| 2.12 | Mutual-exclusivity excludes the "losing" event from the worst-case path in the *other* calculator (`fightExclusions` / `eventExclusions`) | [EventWeightCalculator.js#L490](../js/probability/EventWeightCalculator.js#L490) | — | ❌ (both calculators are tested with `worstCaseExclusions` *passed in*, but the wiring that builds those sets in `EventWeightCalculator.calculate` is not asserted) |
+| 2.12 | Mutual-exclusivity excludes the "losing" event from the worst-case path in the *other* calculator (`fightExclusions` / `eventExclusions`) | [EventWeightCalculator.js#L490](../js/probability/EventWeightCalculator.js#L490) | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `evaluateExpedition produces fightExclusions/eventExclusions (rule 2.12)` | ✅ |
 | 2.13 | Concentrated damage > spread damage in score formula: `maxDmgToOne × 1000 + total` | [DamageComparator.js](../js/probability/DamageComparator.js) (header comment + `_scoreFightEvent` / `_scoreDamageEvent`) | [DamageComparator.test.js](../tests/unit/probability/DamageComparator.test.js) | ✅ |
 | 2.14 | Grenades are allocated to highest-fight-damage sectors first (sort by `maxFightDamage` desc) | [DamageComparator.js#L172](../js/probability/DamageComparator.js#L172) | [expedition-pipeline.test.js#L221](../tests/integration/expedition-pipeline.test.js#L221) | ✅ |
-| 2.15 | **Cross-module: fight damage induces disease at 5% per player hit** (`playersHit = min(netDamage, playerCount)`, Binomial mixture) | [FightCalculator.js#L282](../js/probability/FightCalculator.js#L282) → [EventWeightCalculator.js#L533](../js/probability/EventWeightCalculator.js#L533) | — | ❌ **CRITICAL** (the exact gap that started this audit) |
+| 2.15 | **Cross-module: fight damage induces disease at 5% per player hit** (`playersHit = min(netDamage, playerCount)`, Binomial mixture) | [FightCalculator.js#L282](../js/probability/FightCalculator.js#L282) → [EventWeightCalculator.js#L533](../js/probability/EventWeightCalculator.js#L533) | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `Fight damage folds into disease (rule 2.15)` | ✅ |
 | 2.16 | `_diseaseTailScenarios` produces fractional pessimist/average/optimist from the binomial mixture (consistent with `NegativeEventCalculator`) | [FightCalculator.js#L320](../js/probability/FightCalculator.js#L320) | — | ❌ |
 
 ---
@@ -65,7 +65,7 @@
 | 3.5 | Artefacts = 8/9 of `ARTEFACT` events | [ResourceCalculator.js#L165](../js/probability/ResourceCalculator.js#L165) | [ResourceCalculator.test.js#L304](../tests/unit/calculators/ResourceCalculator.test.js#L304) | ✅ |
 | 3.6 | Map fragments = `STARMAP` + 1/9 of `ARTEFACT` | [ResourceCalculator.js#L196](../js/probability/ResourceCalculator.js#L196) | [ResourceCalculator.test.js#L323](../tests/unit/calculators/ResourceCalculator.test.js#L323) | ✅ |
 | 3.7 | **Cross-module**: multiple botanists / drillers / survivals on different players stack correctly via `_countModifiers` | [ResourceCalculator.js](../js/probability/ResourceCalculator.js) | [ResourceCalculator.test.js#L352](../tests/unit/calculators/ResourceCalculator.test.js#L352) (counting tested) | 🟡 (counting tested; stacking-effect on yield not directly asserted) |
-| 3.8 | Trad Module's `ARTEFACT` doubling (rule 1.6) actually increases the artefact-yield numbers in the result | rule 1.6 + 3.5 composition | — | ❌ |
+| 3.8 | Trad Module's `ARTEFACT` doubling (rule 1.6) actually increases the artefact-yield numbers in the result | rule 1.6 + 3.5 composition | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `Trad Module artefact doubling (rule 3.8)` | ✅ |
 
 ---
 
@@ -77,7 +77,7 @@
 | 4.2 | Per-sector binary distribution: event fires (1) or not (0), then convolved across sectors | [NegativeEventCalculator.js#L139](../js/probability/NegativeEventCalculator.js#L139) | [NegativeEventCalculator.test.js#L195](../tests/unit/calculators/NegativeEventCalculator.test.js#L195) | ✅ |
 | 4.3 | Scenarios use **conditional tail expectations** (E[X \| top 25%], not P75), so sparse distributions yield fractional values | [NegativeEventCalculator.js#L106](../js/probability/NegativeEventCalculator.js#L106) | [NegativeEventCalculator.test.js#L308](../tests/unit/calculators/NegativeEventCalculator.test.js#L308) | ✅ |
 | 4.4 | Event categorisation goes through `EventClassifier.classify` (single source of truth for what counts as "disease", "playerLost", etc.) | [NegativeEventCalculator.js#L155](../js/probability/NegativeEventCalculator.js#L155) | [NegativeEventCalculator.test.js#L262](../tests/unit/calculators/NegativeEventCalculator.test.js#L262) | ✅ |
-| 4.5 | **Cross-module: `negativeEvents.disease` = base disease + fight-induced disease** (see also rule 2.15) | [EventWeightCalculator.js#L537](../js/probability/EventWeightCalculator.js#L537) | — | ❌ **CRITICAL** |
+| 4.5 | **Cross-module: `negativeEvents.disease` = base disease + fight-induced disease** (see also rule 2.15) | [EventWeightCalculator.js#L537](../js/probability/EventWeightCalculator.js#L537) | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `negativeEvents.disease includes fight-induced disease (rule 4.5)` | ✅ |
 
 ---
 
@@ -116,7 +116,7 @@
 |---|---|---|---|---|
 | 7.1 | Players without `space_suit` are excluded when the planet has no OXYGEN sector | [OxygenService.js#L42](../js/services/OxygenService.js#L42) | [OxygenService.test.js](../tests/unit/services/OxygenService.test.js), [expedition-pipeline.test.js#L254](../tests/integration/expedition-pipeline.test.js#L254) | ✅ |
 | 7.2 | All players participate when OXYGEN sector is selected | [OxygenService.js#L41](../js/services/OxygenService.js#L41) | [expedition-pipeline.test.js#L267](../tests/integration/expedition-pipeline.test.js#L267) | ✅ |
-| 7.3 | Filtered (non-participating) players do not contribute to fighting power, grenade count, or damage spreading | rules 7.1 + 6.x + 2.9 composition | — | ❌ (no explicit assertion that an excluded player's blaster doesn't add FP) |
+| 7.3 | Filtered (non-participating) players do not contribute to fighting power, grenade count, or damage spreading | rules 7.1 + 6.x + 2.9 composition | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `Excluded player does not contribute to fighting power (rule 7.3)` | ✅ |
 
 ---
 
@@ -137,10 +137,10 @@
 
 | # | Rule | Implementation | Test | Status |
 |---|---|---|---|---|
-| 9.1 | `sectorProbabilities` is computed ONCE and passed to all sub-calculators (no per-calculator recomputation) | [EventWeightCalculator.js#L463](../js/probability/EventWeightCalculator.js#L463) | — | ❌ (not asserted; refactor could break this silently) |
+| 9.1 | `sectorProbabilities` is computed ONCE and passed to all sub-calculators (no per-calculator recomputation) | [EventWeightCalculator.js#L463](../js/probability/EventWeightCalculator.js#L463) | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `sectorProbabilities computed once (rule 9.1)` | ✅ |
 | 9.2 | Result shape contains `resources`, `combat`, `eventDamage`, `negativeEvents`, `sectorBreakdown` | [EventWeightCalculator.js#L540](../js/probability/EventWeightCalculator.js#L540) | [expedition-pipeline.test.js#L25](../tests/integration/expedition-pipeline.test.js#L25) | ✅ |
-| 9.3 | `DamageComparator.evaluateExpedition` runs only when `playerCount > 0` and produces both exclusion sets | [EventWeightCalculator.js#L482](../js/probability/EventWeightCalculator.js#L482) | — | ❌ |
-| 9.4 | Pipeline applies rule 2.15 disease folding (see also rule 4.5) | [EventWeightCalculator.js#L533](../js/probability/EventWeightCalculator.js#L533) | — | ❌ |
+| 9.3 | `DamageComparator.evaluateExpedition` is called whenever `DamageComparator` is defined (regardless of `playerCount`); with 0 players it runs with power=0 (no exclusions generated, which is correct) | [EventWeightCalculator.js#L482](../js/probability/EventWeightCalculator.js#L482) | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `evaluateExpedition is called regardless of playerCount (rule 9.3)` | ✅ |
+| 9.4 | Pipeline applies rule 2.15 disease folding (see also rule 4.5) | [EventWeightCalculator.js#L533](../js/probability/EventWeightCalculator.js#L533) | [cross-module-rules.test.js](../tests/integration/cross-module-rules.test.js) `Fight damage folds into disease (rule 2.15)` (same assertion covers 9.4) | ✅ |
 
 ---
 
@@ -159,8 +159,8 @@
 
 | # | Rule | Implementation | Test | Status |
 |---|---|---|---|---|
-| 11.1 | [calculation-worker.js](../js/workers/calculation-worker.js) accepts a message and returns a result of the same shape as in-process `calculate()` | [calculation-worker.js](../js/workers/calculation-worker.js) | — | ❌ (no test loads the worker) |
-| 11.2 | Worker computation matches main-thread computation for an identical input | — | — | ❌ |
+| 11.1 | [calculation-worker.js](../js/workers/calculation-worker.js) / `ExpeditionRunner.run()` returns a result of the same shape as in-process `calculate()` | [ExpeditionRunner.js](../js/services/ExpeditionRunner.js) | [calculation-worker.test.js](../tests/unit/workers/calculation-worker.test.js) `contains worker-specific fields (rule 11.1)` | ✅ |
+| 11.2 | Worker computation matches main-thread computation for an identical input | [ExpeditionRunner.js](../js/services/ExpeditionRunner.js) | [calculation-worker.test.js](../tests/unit/workers/calculation-worker.test.js) `ExpeditionRunner.run matches EWC.calculate (rule 11.2)` | ✅ |
 
 ---
 
@@ -170,20 +170,22 @@
 
 | Category | ✅ | 🟡 | ❌ | Total |
 |---|---|---|---|---|
-| Modifiers (§1) | 8 | 1 | 2 | 11 |
-| Damage (§2) | 14 | 0 | 2 | 16 |
-| Resources (§3) | 5 | 2 | 1 | 8 |
-| Negative events (§4) | 4 | 0 | 1 | 5 |
+| Modifiers (§1) | 10 | 1 | 0 | 11 |
+| Damage (§2) | 15 | 0 | 1 | 16 |
+| Resources (§3) | 6 | 2 | 0 | 8 |
+| Negative events (§4) | 5 | 0 | 0 | 5 |
 | Sampling (§5) | 2 | 1 | 4 | 7 |
 | FP / loadout (§6) | 8 | 0 | 0 | 8 |
-| Oxygen (§7) | 2 | 0 | 1 | 3 |
+| Oxygen (§7) | 3 | 0 | 0 | 3 |
 | Distribution math (§8) | 6 | 0 | 0 | 6 |
-| Pipeline (§9) | 1 | 0 | 3 | 4 |
+| Pipeline (§9) | 4 | 0 | 0 | 4 |
 | Planet review (§10) | 4 | 0 | 0 | 4 |
-| Worker (§11) | 0 | 0 | 2 | 2 |
-| **Total** | **54** | **4** | **16** | **74** |
+| Worker (§11) | 2 | 0 | 0 | 2 |
+| **Total** | **65** | **4** | **5** | **74** |
 
-**Coverage at the rule level: 54 / 74 fully tested (~73%), 16 missing outright (~22%), 4 partial (~5%).**
+**Coverage at the rule level: 65 / 74 fully tested (~88%), 5 missing outright (~7%), 4 partial (~5%).**
+
+*The remaining 5 ❌ rules (2.16, 5.3, 5.5, 5.6, 5.7) are all in the sampling tier — deferred to the batch-4 PR.*
 
 The 16 missing rules cluster tightly around cross-module wiring — see the priority list below.
 
@@ -196,7 +198,18 @@ The 16 missing rules cluster tightly around cross-module wiring — see the prio
 | 1.5 Quad Compass | 🟡 | ✅ | `ItemModifiers.test.js` asserts AGAIN removal across sectors. *Rule clarified: only the exact `AGAIN` event is removed.* |
 | 1.6 Trad Module | 🟡 | ✅ | `ItemModifiers.test.js` asserts doubling on INTELLIGENT and no-op elsewhere. |
 | **1.7 Antigrav** | 🟡 | ✅ | **Test file was stale** — asserted the old doubling behaviour (3 failing tests confirmed). Rewrote `ProjectModifiers.test.js` (6 passing tests) to match the buffed Pilot-equivalent behaviour. |
-| 1.8 Pilot + Antigrav stacking | ❌ | ❌ *(reworded)* | After the buff, second is now a no-op (was previously redundant for a different reason). |
+| 1.8 Pilot + Antigrav stacking | ❌ | ✅ | `cross-module-rules.test.js` asserts idempotency: LANDING events with pilot+antigrav = LANDING events with pilot alone. |
+| 1.9 Diplomacy + White Flag | ❌ | ✅ | `cross-module-rules.test.js` asserts idempotency: INTELLIGENT events with diplo+wf = diplo alone. |
+| 2.12 mutual-exclusivity wiring | ❌ | ✅ | `cross-module-rules.test.js` asserts `fightExclusions`/`eventExclusions` are non-empty for PREDATOR. |
+| 2.15 fight → disease | ❌ | ✅ | `cross-module-rules.test.js` asserts disease increases with PREDATOR vs control. |
+| 3.8 TradModule artefact yield | ❌ | ✅ | `cross-module-rules.test.js` asserts artefact mean higher with Trad Module item. |
+| 4.5 disease accumulation | ❌ | ✅ | Same test as 2.15 (both share the fight+disease wiring check). |
+| 7.3 excluded player FP | ❌ | ✅ | `cross-module-rules.test.js` asserts FP with 2 players > FP with 1 (non-spacesuit excluded). |
+| 9.1 sectorProbabilities once | ❌ | ✅ | `cross-module-rules.test.js` spies on `OccurrenceCalculator.getSectorProbabilities` and confirms it is called exactly once per `calculate()`. |
+| 9.3 evaluateExpedition guard | ❌ | ✅ | Rule description corrected: guard is `typeof DamageComparator !== 'undefined'`, not `playerCount > 0`. Test confirms it is called with 0 players. |
+| 9.4 disease folding in pipeline | ❌ | ✅ | Same test as 2.15. |
+| 11.1 worker result shape | ❌ | ✅ | `calculation-worker.test.js` asserts `healthByScenario`, `effectsByScenario`, `participationStatus`, `planetResources` present. |
+| 11.2 worker↔main parity | ❌ | ✅ | `calculation-worker.test.js` asserts `ExpeditionRunner.run()` combat scenarios match `EWC.calculate()` for identical input. |
 | 2.9 fight spread | 🟡 | ✅ | `_distributeFightDamage distributes each damage point randomly`. |
 | 2.10 affectsAll split | 🟡 | ✅ | `_distributeEventDamage distributes affectsAll events to all players`. |
 | 5.4 Echo Sounder | 🟡 | ✅ | `getEffectiveWeights applies item multipliers` asserts the observable result (HYDROCARBON 8×5 = 40). |
@@ -213,16 +226,18 @@ Compare this to the **17 / 17 file-level coverage** previously reported — the 
 
 ## Highest-priority gaps to close before refactoring
 
-These are the rules whose absence would let a refactor introduce a silent regression undetected:
+These are the rules whose absence could let a refactor introduce a silent regression undetected.
 
-1. **2.15 / 4.5 / 9.4** — fight → disease coupling (the original motivator).
-2. **2.12 / 9.3** — mutual-exclusivity wiring between `DamageComparator` and the two damage calculators.
-3. **9.1** — single-computation of `sectorProbabilities` (an obvious target for the proposed `ExpeditionPipeline` rename + extraction).
-4. **5.6 / 5.7** — sampling vs full-enumeration parity, and weighted mixing of composition results.
-5. **11.1 / 11.2** — worker parity (blocks the proposed bundler step).
-6. **3.8 / 1.8 / 1.9 / 6.4 / 7.3** — multi-modifier interaction rules. Each is a single targeted scenario fixture.
+**Addressed in batch 1–3/5/6 (cross-module-rules.test.js + calculation-worker.test.js):**
+- ✅ **2.15 / 4.5 / 9.4** — fight → disease coupling.
+- ✅ **2.12 / 9.3** — mutual-exclusivity wiring between `DamageComparator` and the two damage calculators.
+- ✅ **9.1** — single-computation of `sectorProbabilities`.
+- ✅ **11.1 / 11.2** — worker parity (via `ExpeditionRunner`).
+- ✅ **3.8 / 1.8 / 1.9 / 7.3** — multi-modifier interaction rules.
 
-A reasonable batch: write **6 integration-style tests** (one per group above) and the rule-coverage table flips from ~73% to ~95% green. That's the safety net §8 of the proposal calls for.
+**Deferred to batch-4 PR (sampling tier):**
+1. **5.3 / 5.5 / 5.6 / 5.7** — `alwaysInclude` appending, `pruneCompositions`, sampling parity, and weighted mixing.
+2. **2.16** — `_diseaseTailScenarios` fractional pessimist/average/optimist.
 
 ---
 
