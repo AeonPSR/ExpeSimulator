@@ -323,4 +323,74 @@ describe('Cross-module integration', () => {
 
 	});
 
+	// =========================================================================
+	// Sampling path
+	// =========================================================================
+
+	describe('Sampling path', () => {
+
+		// ── 5.6 Parity ────────────────────────────────────────────────────────
+		// When only one composition is possible (single sector type, movementSpeed
+		// < totalSectors), calculateWithSampling must return an identical result
+		// to calling calculate directly with that composition's sector list.
+
+		test('single-composition sampling returns the same result as direct calculate', () => {
+			// {FOREST: 3}, movementSpeed=2 → only possible composition is {FOREST: 2}
+			// with probability 1.0 → no mixing, result is returned unchanged.
+			const directResult   = EventWeightCalculator.calculate(['FOREST', 'FOREST'], {}, []);
+			const samplingResult = EventWeightCalculator.calculateWithSampling({ FOREST: 3 }, 2, {}, []);
+
+			// Resources
+			expect(samplingResult.resources.fruits.average)
+				.toBeCloseTo(directResult.resources.fruits.average, 8);
+			expect(samplingResult.resources.fruits.pessimist)
+				.toBeCloseTo(directResult.resources.fruits.pessimist, 8);
+
+			// Negative events
+			expect(samplingResult.negativeEvents.again.average)
+				.toBeCloseTo(directResult.negativeEvents.again.average, 8);
+		});
+
+		// ── 5.7 Mix weighting ─────────────────────────────────────────────────
+		// The mixed result must equal the probability-weighted sum of each
+		// composition's individual calculate() result.
+
+		test('mixed result is the probability-weighted average of each composition result', () => {
+			const sectorCounts   = { FOREST: 2, DESERT: 2 };
+			const movementSpeed  = 2;
+
+			// Get the compositions exactly as the sampler computes them
+			const compositions = SectorSampler.generateWeightedCompositions(sectorCounts, movementSpeed, {});
+
+			// Compute each composition's result independently
+			const perComposition = compositions.map(({ composition, probability }) => ({
+				probability,
+				result: EventWeightCalculator.calculate(
+					SectorSampler.expandComposition(composition), {}, []
+				)
+			}));
+
+			// Manual weighted average for fruits (varies across compositions: FOREST has
+			// HARVEST events, DESERT does not, so the values are meaningfully different)
+			const expectedFruitsAvg = perComposition.reduce(
+				(sum, { probability, result }) => sum + probability * (result.resources.fruits?.average || 0),
+				0
+			);
+
+			const samplingResult = EventWeightCalculator.calculateWithSampling(
+				sectorCounts, movementSpeed, {}, []
+			);
+
+			expect(samplingResult.resources.fruits.average).toBeCloseTo(expectedFruitsAvg, 8);
+
+			// Same check for negativeEvents to verify the negative-event mixer too
+			const expectedAgainAvg = perComposition.reduce(
+				(sum, { probability, result }) => sum + probability * (result.negativeEvents.again?.average || 0),
+				0
+			);
+			expect(samplingResult.negativeEvents.again.average).toBeCloseTo(expectedAgainAvg, 8);
+		});
+
+	});
+
 });

@@ -315,6 +315,90 @@ describe('SectorSampler', () => {
 	});
 
 	// ========================================
+	// pruneCompositions()
+	// ========================================
+
+	describe('pruneCompositions', () => {
+
+		test('drops tail compositions below the 99.9% coverage threshold', () => {
+			// Sorted desc: 0.5, 0.4, 0.09, 0.009, 0.001
+			// Cumulative:  0.5, 0.9, 0.99, 0.999 → threshold met after 4th item; 5th dropped.
+			const weighted = [
+				{ composition: { A: 1 }, probability: 0.5   },
+				{ composition: { B: 1 }, probability: 0.4   },
+				{ composition: { C: 1 }, probability: 0.09  },
+				{ composition: { D: 1 }, probability: 0.009 },
+				{ composition: { E: 1 }, probability: 0.001 }, // should be pruned
+			];
+
+			const result = SectorSampler.pruneCompositions(weighted);
+
+			expect(result.length).toBe(4);
+			expect(result.some(r => r.composition.E === 1)).toBe(false);
+		});
+
+		test('renormalizes kept probabilities to sum to 1', () => {
+			// After dropping the 5th item (prob 0.001), kept sum = 0.999 → each / 0.999
+			const weighted = [
+				{ composition: { A: 1 }, probability: 0.5   },
+				{ composition: { B: 1 }, probability: 0.4   },
+				{ composition: { C: 1 }, probability: 0.09  },
+				{ composition: { D: 1 }, probability: 0.009 },
+				{ composition: { E: 1 }, probability: 0.001 },
+			];
+
+			const result = SectorSampler.pruneCompositions(weighted);
+			const sum = result.reduce((s, r) => s + r.probability, 0);
+
+			expect(sum).toBeCloseTo(1.0, 10);
+		});
+
+		test('sorts unsorted input by probability before pruning', () => {
+			// Same data as above, deliberately shuffled
+			const weighted = [
+				{ composition: { C: 1 }, probability: 0.09  },
+				{ composition: { E: 1 }, probability: 0.001 },
+				{ composition: { A: 1 }, probability: 0.5   },
+				{ composition: { D: 1 }, probability: 0.009 },
+				{ composition: { B: 1 }, probability: 0.4   },
+			];
+
+			const result = SectorSampler.pruneCompositions(weighted);
+
+			// Regardless of input order, E (lowest prob) is still pruned
+			expect(result.length).toBe(4);
+			expect(result.some(r => r.composition.E === 1)).toBe(false);
+		});
+
+		test('keeps all compositions when they all fit within threshold', () => {
+			const weighted = [
+				{ composition: { A: 1 }, probability: 0.6 },
+				{ composition: { B: 1 }, probability: 0.4 },
+			];
+
+			const result = SectorSampler.pruneCompositions(weighted);
+
+			expect(result.length).toBe(2);
+		});
+
+		test('respects a custom threshold', () => {
+			// With threshold=0.9, the first composition alone (0.5) is not enough,
+			// but the first two (0.5 + 0.4 = 0.9) exactly hit it.
+			const weighted = [
+				{ composition: { A: 1 }, probability: 0.5  },
+				{ composition: { B: 1 }, probability: 0.4  },
+				{ composition: { C: 1 }, probability: 0.09 },
+				{ composition: { D: 1 }, probability: 0.01 },
+			];
+
+			const result = SectorSampler.pruneCompositions(weighted, 0.9);
+
+			expect(result.length).toBe(2);
+		});
+
+	});
+
+	// ========================================
 	// validateProbabilities()
 	// ========================================
 
