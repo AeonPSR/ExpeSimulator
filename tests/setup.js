@@ -32,6 +32,8 @@ const sourceFiles = [
   'js/utils/ValidationUtils.js',
   'js/data/Translations.js',
   'js/utils/I18n.js',
+  'js/utils/Hash.js',
+  'js/utils/Format.js',
   'js/data/SectorData.js',
   'js/data/CharacterData.js',
   'js/data/AbilityData.js',

@@ -1,10 +1,9 @@
 /**
  * PlanetaryReview Tests
  *
- * Covers the two static helpers that implement the server-side planet image
- * selection algorithm:
- *
- *   imageId = intval(hash('crc32', $planet->getName()->toString()), 16) % 5
+ * Covers getPlanetImage — the static helper that maps a planet name to
+ * one of the five planet images using Hash.crc32.
+ * The crc32 algorithm itself is tested in tests/unit/utils/Hash.test.js.
  */
 
 describe('PlanetaryReview', () => {
@@ -12,44 +11,6 @@ describe('PlanetaryReview', () => {
 	// Convenience: mirrors what getResourceURL() does in the jsdom test env
 	// (chrome.runtime.getURL returns the path as-is)
 	const url = (path) => path;
-
-	// =========================================================================
-	// _crc32
-	// =========================================================================
-
-	describe('_crc32', () => {
-
-		test('returns an unsigned 32-bit integer (>= 0)', () => {
-			const result = PlanetaryReview._crc32('anything');
-			expect(result).toBeGreaterThanOrEqual(0);
-			expect(result).toBeLessThanOrEqual(0xFFFFFFFF);
-		});
-
-		test('is deterministic — same input always yields the same output', () => {
-			expect(PlanetaryReview._crc32('Vie Heureuse')).toBe(PlanetaryReview._crc32('Vie Heureuse'));
-		});
-
-		test('is sensitive to case', () => {
-			expect(PlanetaryReview._crc32('fugubos')).not.toBe(PlanetaryReview._crc32('Fugubos'));
-		});
-
-		// Ground-truth values verified against PHP hash('crc32', ...) via the
-		// same CRC32b algorithm used by the game server.
-		test.each([
-			['Rocky World',    3223245548],
-			['Fugubos',        4136742940],
-			['Vie Heureuse',   2855688966],
-			['Polyphemus',     1378042749],
-			['Museum',         1709916481],
-			['Thousands Cuts', 2534595022],
-		])('matches PHP crc32 for "%s"', (name, expected) => {
-			expect(PlanetaryReview._crc32(name)).toBe(expected);
-		});
-	});
-
-	// =========================================================================
-	// getPlanetImage
-	// =========================================================================
 
 	describe('getPlanetImage', () => {
 
