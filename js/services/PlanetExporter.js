@@ -155,3 +155,7 @@ class PlanetExporter {
 		});
 	}
 }
+
+if (typeof window !== 'undefined') {
+	window.PlanetExporter = PlanetExporter;
+}

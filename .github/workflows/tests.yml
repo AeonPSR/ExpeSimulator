@@ -28,3 +28,10 @@ jobs:
 
       - name: Run Jest
         run: npm test -- --ci --colors
+
+      - name: Check no DOM access in probability module
+        run: |
+          if grep -rn "document\." js/probability/; then
+            echo "DOM access (document.) found in js/probability/ — this module must stay pure"
+            exit 1
+          fi

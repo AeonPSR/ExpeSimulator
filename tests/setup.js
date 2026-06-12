@@ -58,6 +58,7 @@ const sourceFiles = [
   'js/services/DamageSpreader.js',
   'js/services/OxygenService.js',
   'js/services/ExpeditionRunner.js',
+  'js/services/PlanetExporter.js',
   'js/probability/DistributionCalculator.js',
   'js/probability/EventModifier.js',
   'js/probability/AbilityModifiers.js',
