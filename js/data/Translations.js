@@ -314,7 +314,7 @@ const Translations = {
 		'stars.axis.steaks':        'Steaks',
 		'stars.axis.fuel':          'Carburant',
 		'stars.axis.artifacts':     'Artefacts',
-		'stars.axis.lethality':     'Léthalité',
+		'stars.axis.lethality':     'Létalité',
 		'stars.axis.hazards':       'Dangers',
 
 		// Directions
