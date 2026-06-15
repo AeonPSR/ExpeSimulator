@@ -124,6 +124,9 @@ const FightCalculator = {
 		// Add breakdown for backward compatibility
 		damageResult.breakdown = { pessimist: [], average: [], optimist: [], worstCase: [] };
 
+		// Derive disease probability from fight damage (5% per player hit)
+		const diseaseFromFights = this._computeDiseaseFromFights(damageDistribution, playerCount);
+
 		return {
 			occurrence,      // { "12": { pessimist, average, optimist, distribution }, ... }
 			damage: damageResult,
@@ -133,6 +136,7 @@ const FightCalculator = {
 			fightingPower,
 			grenadeCount,
 			playerCount,
+			diseaseFromFights,  // { pessimist, average, optimist } — disease chance from combat hits
 			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
 		};
 	},
@@ -260,8 +264,103 @@ const FightCalculator = {
 			damageInstances: DamageDistributionEngine.emptyDamageInstances(),
 			fightingPower: 0,
 			grenadeCount: 0,
-			playerCount: 0
+			playerCount: 0,
+			diseaseFromFights: { pessimist: 0, average: 0, optimist: 0 }
 		};
+	},
+
+	/**
+	 * Computes the disease count distribution caused by fight damage.
+	 * Each player hit by a fight has a 5% chance of contracting a disease.
+	 * playersHit = min(netDamage, playerCount) per expedition outcome.
+	 *
+	 * @param {Map<number, number>} damageDistribution - Total net damage distribution
+	 * @param {number} playerCount - Number of players in the expedition
+	 * @returns {{ pessimist: number, average: number, optimist: number }}
+	 * @private
+	 */
+	_computeDiseaseFromFights(damageDistribution, playerCount) {
+		if (!damageDistribution || damageDistribution.size === 0 || playerCount === 0) {
+			return { pessimist: 0, average: 0, optimist: 0 };
+		}
+
+		const DISEASE_CHANCE = 0.05;
+
+		// Build disease count distribution as a mixture of Binomials.
+		// For each total net damage value d (probability p):
+		//   playersHit = min(d, playerCount)
+		//   disease count ~ Binomial(playersHit, 0.05)
+		const diseaseDist = new Map();
+
+		for (const [damage, prob] of damageDistribution) {
+			const playersHit = Math.min(damage, playerCount);
+			for (let k = 0; k <= playersHit; k++) {
+				const binomProb = this._binomialProb(playersHit, k, DISEASE_CHANCE);
+				diseaseDist.set(k, (diseaseDist.get(k) || 0) + prob * binomProb);
+			}
+		}
+
+		return this._diseaseTailScenarios(diseaseDist);
+	},
+
+	/**
+	 * Computes { pessimist, average, optimist } from a disease count distribution
+	 * using conditional tail expectations (bottom/top 25%).
+	 * @private
+	 */
+	_diseaseTailScenarios(distribution) {
+		const sorted = [...distribution.entries()].sort((a, b) => a[0] - b[0]);
+
+		let average = 0;
+		for (const [value, prob] of sorted) {
+			average += value * prob;
+		}
+
+		const optimist  = this._diseaseTailExpectation(sorted, 0.25, 'bottom');
+		const pessimist = this._diseaseTailExpectation(sorted, 0.25, 'top');
+
+		return { pessimist, average, optimist };
+	},
+
+	/**
+	 * Conditional expectation of a tail fraction of a distribution.
+	 * @private
+	 */
+	_diseaseTailExpectation(sorted, tailFraction, side) {
+		const entries = side === 'top' ? [...sorted].reverse() : sorted;
+		let remaining = tailFraction;
+		let weightedSum = 0;
+		for (const [value, prob] of entries) {
+			const take = Math.min(prob, remaining);
+			weightedSum += value * take;
+			remaining -= take;
+			if (remaining <= 1e-10) break;
+		}
+		return weightedSum / tailFraction;
+	},
+
+	/**
+	 * Binomial probability: P(X = k) where X ~ Binomial(n, p).
+	 * @private
+	 */
+	_binomialProb(n, k, p) {
+		if (k > n) return 0;
+		if (n === 0) return k === 0 ? 1 : 0;
+		return this._binomialCoeff(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+	},
+
+	/**
+	 * Binomial coefficient C(n, k).
+	 * @private
+	 */
+	_binomialCoeff(n, k) {
+		if (k === 0 || k === n) return 1;
+		if (k > n - k) k = n - k;
+		let result = 1;
+		for (let i = 0; i < k; i++) {
+			result *= (n - i) / (i + 1);
+		}
+		return result;
 	}
 };
 
