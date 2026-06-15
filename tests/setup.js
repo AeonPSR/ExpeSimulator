@@ -59,8 +59,9 @@ const sourceFiles = [
   'js/domain/LoadoutBuilder.js',
   'js/domain/DamageSpreader.js',
   'js/domain/OxygenService.js',
+  'js/domain/PlanetSummary.js',
+  'js/domain/ChatParser.js',
   'js/services/ExpeditionRunner.js',
-  'js/services/PlanetExporter.js',
   'js/probability/DistributionCalculator.js',
   'js/probability/EventModifier.js',
   'js/probability/AbilityModifiers.js',
@@ -78,7 +79,8 @@ const sourceFiles = [
   'js/probability/DamageDistributionEngine.js',
   'js/probability/FightCalculator.js',
   'js/probability/EventDamageCalculator.js',
-  'js/services/ChatMessageDetector.js'
+  'js/io/Clipboard.js',
+  'js/io/ChatObserver.js'
   // 'js/app.js' - excluded: initializes UI
   // 'js/content.js' - excluded: entry point
 ];

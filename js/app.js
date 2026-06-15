@@ -44,7 +44,7 @@ class ExpeditionSimulatorApp {
 		this._createSections();
 
 		// Start watching chat for expedition messages
-		this._chatDetector = new ChatMessageDetector({
+		this._chatDetector = new ChatObserver({
 			onImport: (sectors, planetName, nav) => this._onImportSectors(sectors, planetName, nav)
 		});
 		this._chatDetector.start();
@@ -448,7 +448,7 @@ class ExpeditionSimulatorApp {
 		const overall = this._lastReviewData?.overall ?? null;
 		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
 		const nav = { direction: this._currentDirection, fuel: this._currentFuelCost };
-		return PlanetExporter.copyToClipboard(name, sectors, axes, overall, diplomacy, nav, this._lastPlanetResources || null);
+		return Clipboard.copyPlanetSummary(name, sectors, axes, overall, diplomacy, nav, this._lastPlanetResources || null);
 	}
 
 	/**

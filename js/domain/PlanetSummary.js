@@ -1,9 +1,8 @@
 /**
- * PlanetExporter
+ * PlanetSummary
  *
- * Formats a planet summary as a chat-ready string and writes it to the
- * clipboard. Sectors are emitted as their `:as_name:` icon codes, grouped
- * and ordered by category, each group on its own line.
+ * Pure formatter: builds the chat-ready planet summary string.
+ * No DOM, no clipboard — I/O lives in js/io/Clipboard.js.
  *
  * Group order:
  *   1. Resources   — Cristalite · Oxygen · Fuel
@@ -13,7 +12,7 @@
  *   5. Climate     — Wind · Cold · Hot
  *   6. Remainder   — Unknown + anything not covered above
  */
-class PlanetExporter {
+class PlanetSummary {
 
 	static EXPORT_GROUPS = [
 		['CRISTAL_FIELD', 'OXYGEN', 'HYDROCARBON'],
@@ -35,11 +34,11 @@ class PlanetExporter {
 	 * @param {Object|null} [planetResources] - Planet-level resource quartiles from ResourceCalculator
 	 * @returns {string}
 	 */
-	static formatSummary(name, sectors, axes = [], overall = null, diplomacy = false, nav = null, planetResources = null) {
+	static format(name, sectors, axes = [], overall = null, diplomacy = false, nav = null, planetResources = null) {
 		const filtered = sectors.filter(s => s !== 'LANDING');
 
 		const placed = new Set();
-		const groupLines = PlanetExporter.EXPORT_GROUPS.map(group => {
+		const groupLines = PlanetSummary.EXPORT_GROUPS.map(group => {
 			const line = [];
 			for (const id of group) {
 				const count = filtered.filter(s => s === id).length;
@@ -115,47 +114,7 @@ class PlanetExporter {
 		const parts = [titleLine, navStr, iconBlock, ...axesLines].filter(p => p.length > 0);
 		return '\n' + parts.join('\n');
 	}
-
-	/**
-	 * Copies the planet summary to the clipboard.
-	 * Returns a Promise that resolves on success and rejects on failure,
-	 * so callers can show visual feedback.
-	 *
-	 * @param {string}      name        - Planet display name
-	 * @param {string[]}    sectors     - Raw sector list
-	 * @param {Array}       [axes]      - Scored axes from PlanetReviewScorer
-	 * @param {number|null} [overall]   - Overall star score
-	 * @param {boolean}     [diplomacy] - Whether diplomacy mode is active
-	 * @param {{ direction: string, fuel: number }|null} [nav] - Direction and fuel cost
-	 * @param {Object|null} [planetResources] - Planet-level resource quartiles
-	 * @returns {Promise<void>}
-	 */
-	static copyToClipboard(name, sectors, axes = [], overall = null, diplomacy = false, nav = null, planetResources = null) {
-		const text = PlanetExporter.formatSummary(name, sectors, axes, overall, diplomacy, nav, planetResources);
-
-		if (navigator.clipboard?.writeText) {
-			return navigator.clipboard.writeText(text);
-		}
-
-		// execCommand fallback
-		return new Promise((resolve, reject) => {
-			try {
-				const ta = document.createElement('textarea');
-				ta.value = text;
-				ta.style.position = 'fixed';
-				ta.style.opacity = '0';
-				document.body.appendChild(ta);
-				ta.select();
-				const ok = document.execCommand('copy');
-				document.body.removeChild(ta);
-				ok ? resolve() : reject(new Error('execCommand returned false'));
-			} catch (e) {
-				reject(e);
-			}
-		});
-	}
 }
 
-if (typeof window !== 'undefined') {
-	window.PlanetExporter = PlanetExporter;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.PlanetSummary = PlanetSummary;
