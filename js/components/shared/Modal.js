@@ -62,7 +62,12 @@ class Modal extends Component {
 			const closeBtn = this.createElement('div', {
 				className: 'expe-close-btn modal-close',
 				onClick: () => this.close()
-			}, '×');
+			});
+			const iconSrc = (typeof chrome !== 'undefined' && chrome.runtime?.getURL)
+				? chrome.runtime.getURL('pictures/others/bin.png')
+				: 'pictures/others/bin.png';
+			const icon = this.createElement('img', { src: iconSrc, alt: '' });
+			closeBtn.appendChild(icon);
 			this._contentContainer.appendChild(closeBtn);
 		}
 
