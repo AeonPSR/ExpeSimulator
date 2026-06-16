@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FightCalculator Tests
  * 
  * Tests for fight occurrence and damage calculations using convolution.
@@ -9,20 +9,20 @@
 describe('FightCalculator', () => {
 
 	// Store originals for restoration
-	let originalEventWeightCalculator;
+	let originalExpeditionPipeline;
 	let originalOccurrenceCalculator;
 	let originalDamageDistributionEngine;
 	let originalFightingPowerService;
 
 	beforeAll(() => {
 		// Save originals
-		originalEventWeightCalculator = global.EventWeightCalculator;
+		originalExpeditionPipeline = global.ExpeditionPipeline;
 		originalOccurrenceCalculator = global.OccurrenceCalculator;
 		originalDamageDistributionEngine = global.DamageDistributionEngine;
 		originalFightingPowerService = global.FightingPowerService;
 
-		// Mock EventWeightCalculator
-		global.EventWeightCalculator = {
+		// Mock ExpeditionPipeline
+		global.ExpeditionPipeline = {
 			getSectorProbabilities: jest.fn((sectorName, loadout, cache) => {
 				switch (sectorName) {
 					case 'COMBAT_ZONE':
@@ -134,14 +134,14 @@ describe('FightCalculator', () => {
 	});
 
 	afterAll(() => {
-		global.EventWeightCalculator = originalEventWeightCalculator;
+		global.ExpeditionPipeline = originalExpeditionPipeline;
 		global.OccurrenceCalculator = originalOccurrenceCalculator;
 		global.DamageDistributionEngine = originalDamageDistributionEngine;
 		global.FightingPowerService = originalFightingPowerService;
 	});
 
 	beforeEach(() => {
-		EventWeightCalculator.getSectorProbabilities.mockClear();
+		ExpeditionPipeline.getSectorProbabilities.mockClear();
 		OccurrenceCalculator.calculateForType.mockClear();
 		DamageDistributionEngine.calculate.mockClear();
 		DamageDistributionEngine.emptyDamageResult.mockClear();

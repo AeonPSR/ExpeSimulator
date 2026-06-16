@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Jest Test Setup
  * 
  * Loads all source files in manifest order to populate window globals.
@@ -30,6 +30,10 @@ const sourceFiles = [
   'js/utils/helpers.js',
   'js/utils/EventClassifier.js',
   'js/utils/ValidationUtils.js',
+  'js/data/Translations.js',
+  'js/utils/I18n.js',
+  'js/utils/Hash.js',
+  'js/utils/Format.js',
   'js/data/SectorData.js',
   'js/data/CharacterData.js',
   'js/data/AbilityData.js',
@@ -51,28 +55,31 @@ const sourceFiles = [
   'js/components/ExampleWorlds.js',
   'js/components/StarRating.js',
   'js/components/PlanetaryReview.js',
-  'js/services/FightingPowerService.js',
-  'js/services/LoadoutBuilder.js',
-  'js/services/DamageSpreader.js',
-  'js/services/OxygenService.js',
+  'js/components/ResultsRenderer.js',
+  'js/domain/FightingPowerService.js',
+  'js/domain/LoadoutBuilder.js',
+  'js/domain/DamageSpreader.js',
+  'js/domain/OxygenService.js',
+  'js/domain/PlanetSummary.js',
+  'js/domain/ChatParser.js',
+  'js/services/ExpeditionRunner.js',
   'js/probability/DistributionCalculator.js',
   'js/probability/EventModifier.js',
-  'js/probability/AbilityModifiers.js',
-  'js/probability/ItemModifiers.js',
-  'js/probability/ProjectModifiers.js',
   'js/probability/ModifierApplicator.js',
   'js/probability/SectorSampler.js',
   'js/probability/PlanetReviewScorer.js',
-  'js/probability/EventWeightCalculator.js',
+  'js/probability/ExpeditionPipeline.js',
   'js/probability/DamageComparator.js',
   'js/probability/ResourceCalculator.js',
   'js/probability/NegativeEventCalculator.js',
   'js/probability/OccurrenceCalculator.js',
   'js/probability/DamagePathSampler.js',
   'js/probability/DamageDistributionEngine.js',
+  'js/probability/DamagePipeline.js',
   'js/probability/FightCalculator.js',
   'js/probability/EventDamageCalculator.js',
-  'js/services/ChatMessageDetector.js'
+  'js/io/Clipboard.js',
+  'js/io/ChatObserver.js'
   // 'js/app.js' - excluded: initializes UI
   // 'js/content.js' - excluded: entry point
 ];

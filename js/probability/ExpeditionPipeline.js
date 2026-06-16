@@ -1,12 +1,12 @@
-/**
- * EventWeightCalculator
+﻿/**
+ * ExpeditionPipeline
  * 
  * BACKEND: Pure calculation service for event probabilities.
  * Returns DATA STRUCTURES only - NO HTML generation.
  * 
- * @module probability/EventWeightCalculator
+ * @module probability/ExpeditionPipeline
  */
-const EventWeightCalculator = {
+const ExpeditionPipeline = {
 
 	// ========================================
 	// Sampling-Aware Calculation (Movement Speed)
@@ -654,4 +654,4 @@ const EventWeightCalculator = {
 
 // Export
 var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
-_global.EventWeightCalculator = EventWeightCalculator;
+_global.ExpeditionPipeline = ExpeditionPipeline;

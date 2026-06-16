@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DamageDistributionEngine Tests
  * 
  * Tests for the shared convolution pipeline for damage calculations.
@@ -7,18 +7,18 @@
 describe('DamageDistributionEngine', () => {
 
 	// Store originals
-	let originalEventWeightCalculator;
+	let originalExpeditionPipeline;
 	let originalDamagePathSampler;
 	let originalConstants;
 
 	beforeAll(() => {
 		// Save originals
-		originalEventWeightCalculator = global.EventWeightCalculator;
+		originalExpeditionPipeline = global.ExpeditionPipeline;
 		originalDamagePathSampler = global.DamagePathSampler;
 		originalConstants = global.Constants;
 
-		// Mock EventWeightCalculator
-		global.EventWeightCalculator = {
+		// Mock ExpeditionPipeline
+		global.ExpeditionPipeline = {
 			getSectorProbabilities: jest.fn((sectorName, loadout, cache) => {
 				switch (sectorName) {
 					case 'FOREST':
@@ -57,7 +57,7 @@ describe('DamageDistributionEngine', () => {
 	});
 
 	afterAll(() => {
-		global.EventWeightCalculator = originalEventWeightCalculator;
+		global.ExpeditionPipeline = originalExpeditionPipeline;
 		global.DamagePathSampler = originalDamagePathSampler;
 		global.Constants = originalConstants;
 	});

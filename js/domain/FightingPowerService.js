@@ -182,6 +182,5 @@ class FightingPowerService {
 }
 
 // Export
-if (typeof window !== 'undefined') {
-	window.FightingPowerService = FightingPowerService;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.FightingPowerService = FightingPowerService;

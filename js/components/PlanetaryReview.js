@@ -40,40 +40,6 @@ class PlanetaryReview extends Component {
 	// ─── Static helpers ──────────────────────────────────────────────────────
 
 	/**
-	 * Computes the CRC32b hash of a UTF-8 string, matching PHP's
-	 * hash('crc32', $str).  Returns an *unsigned* 32-bit integer so that
-	 * the subsequent % 5 always land in [0, 4], just like PHP's intval().
-	 *
-	 * @param {string} str
-	 * @returns {number}
-	 */
-	static _crc32(str) {
-		// Pre-compute the lookup table
-		const table = new Uint32Array(256);
-		for (let i = 0; i < 256; i++) {
-			let c = i;
-			for (let j = 0; j < 8; j++) {
-				c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-			}
-			table[i] = c;
-		}
-
-		// Encode as UTF-8 bytes (mirrors PHP string → CRC32 behaviour).
-		// Use Buffer in Node.js/Jest environments where TextEncoder is unavailable.
-		const bytes = (typeof TextEncoder !== 'undefined')
-			? new TextEncoder().encode(str)
-			: Buffer.from(str, 'utf8');
-
-		let crc = 0xFFFFFFFF;
-		for (const byte of bytes) {
-			crc = (crc >>> 8) ^ table[(crc ^ byte) & 0xFF];
-		}
-
-		// >>> 0 keeps the result unsigned (matches PHP intval of hex string)
-		return (crc ^ 0xFFFFFFFF) >>> 0;
-	}
-
-	/**
 	 * Returns the resolved URL for the planet image that corresponds to
 	 * the given name.  Falls back to planet_unknown.png when:
 	 *   - no name is provided, or
@@ -88,7 +54,7 @@ class PlanetaryReview extends Component {
 			return getResourceURL('pictures/astro/planet_unknown.png');
 		}
 		try {
-			const imageId = PlanetaryReview._crc32(planetName) % 5;
+			const imageId = Hash.crc32(planetName) % 5;
 			return getResourceURL(`pictures/astro/planet_${imageId}_small.png`);
 		} catch (_) {
 			return getResourceURL('pictures/astro/planet_unknown.png');

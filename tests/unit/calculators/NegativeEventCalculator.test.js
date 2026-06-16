@@ -1,4 +1,4 @@
-/**
+﻿/**
  * NegativeEventCalculator Tests
  * 
  * Tests for negative event occurrence calculations using convolution.
@@ -8,18 +8,18 @@
 describe('NegativeEventCalculator', () => {
 
 	// Store originals for restoration
-	let originalEventWeightCalculator;
+	let originalExpeditionPipeline;
 	let originalDistributionCalculator;
 	let originalEventClassifier;
 
 	beforeAll(() => {
 		// Save originals
-		originalEventWeightCalculator = global.EventWeightCalculator;
+		originalExpeditionPipeline = global.ExpeditionPipeline;
 		originalDistributionCalculator = global.DistributionCalculator;
 		originalEventClassifier = global.EventClassifier;
 
-		// Mock EventWeightCalculator
-		global.EventWeightCalculator = {
+		// Mock ExpeditionPipeline
+		global.ExpeditionPipeline = {
 			getSectorProbabilities: jest.fn((sectorName, loadout, cache) => {
 				switch (sectorName) {
 					case 'DANGEROUS':
@@ -99,13 +99,13 @@ describe('NegativeEventCalculator', () => {
 	});
 
 	afterAll(() => {
-		global.EventWeightCalculator = originalEventWeightCalculator;
+		global.ExpeditionPipeline = originalExpeditionPipeline;
 		global.DistributionCalculator = originalDistributionCalculator;
 		global.EventClassifier = originalEventClassifier;
 	});
 
 	beforeEach(() => {
-		EventWeightCalculator.getSectorProbabilities.mockClear();
+		ExpeditionPipeline.getSectorProbabilities.mockClear();
 		DistributionCalculator.convolveAll.mockClear();
 		EventClassifier.classify.mockClear();
 	});
@@ -182,7 +182,7 @@ describe('NegativeEventCalculator', () => {
 			const sectors = ['DANGEROUS'];
 			NegativeEventCalculator.calculate(sectors);
 
-			expect(EventWeightCalculator.getSectorProbabilities).toHaveBeenCalled();
+			expect(ExpeditionPipeline.getSectorProbabilities).toHaveBeenCalled();
 		});
 	});
 
