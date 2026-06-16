@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ExpeditionRunner
  *
  * Pure orchestration of one full expedition calculation.
@@ -56,11 +56,11 @@ const ExpeditionRunner = {
 
 		let results;
 		if (exploredCount < totalExplorableSectors) {
-			results = EventWeightCalculator.calculateWithSampling(
+			results = ExpeditionPipeline.calculateWithSampling(
 				sectorCounts, exploredCount, loadout, participatingPlayers, { alwaysInclude }
 			);
 		} else {
-			results = EventWeightCalculator.calculate(sectors, loadout, participatingPlayers);
+			results = ExpeditionPipeline.calculate(sectors, loadout, participatingPlayers);
 		}
 
 		// Damage distribution & player health

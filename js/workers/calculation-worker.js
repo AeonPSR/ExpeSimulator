@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Calculation Web Worker
  * 
  * Runs the expedition calculation pipeline off the main thread.
@@ -28,7 +28,7 @@ function _loadDependencies(baseURL) {
 			baseURL + 'js/probability/ProjectModifiers.js',
 			baseURL + 'js/probability/ModifierApplicator.js',
 			baseURL + 'js/probability/SectorSampler.js',
-			baseURL + 'js/probability/EventWeightCalculator.js',
+			baseURL + 'js/probability/ExpeditionPipeline.js',
 			baseURL + 'js/probability/DamageComparator.js',
 			baseURL + 'js/probability/ResourceCalculator.js',
 			baseURL + 'js/probability/NegativeEventCalculator.js',

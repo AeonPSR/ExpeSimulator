@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
@@ -172,7 +172,7 @@
 
 	<div class="section">
 		<h2>Full Integration Test</h2>
-		<p style="color:#888;">Tests the complete sampling pipeline with real EventWeightCalculator.</p>
+		<p style="color:#888;">Tests the complete sampling pipeline with real ExpeditionPipeline.</p>
 		<div class="input-group">
 			<label>Player Count:</label>
 			<input type="number" id="playerCount" value="2" min="1" max="5">
@@ -208,7 +208,7 @@
 	<script src="../js/probability/DamageComparator.js"></script>
 	<script src="../js/services/FightingPowerService.js"></script>
 	<script src="../js/probability/SectorSampler.js"></script>
-	<script src="../js/probability/EventWeightCalculator.js"></script>
+	<script src="../js/probability/ExpeditionPipeline.js"></script>
 
 	<script>
 		// Available sector types
@@ -551,11 +551,11 @@
 			const container = document.getElementById('integrationResults');
 
 			// Check if dependencies are loaded
-			if (typeof EventWeightCalculator === 'undefined') {
-				container.innerHTML = '<p style="color:#ff6b6b;">Error: EventWeightCalculator not loaded</p>';
+			if (typeof ExpeditionPipeline === 'undefined') {
+				container.innerHTML = '<p style="color:#ff6b6b;">Error: ExpeditionPipeline not loaded</p>';
 				return;
 			}
-			if (typeof EventWeightCalculator.calculateWithSampling === 'undefined') {
+			if (typeof ExpeditionPipeline.calculateWithSampling === 'undefined') {
 				container.innerHTML = '<p style="color:#ff6b6b;">Error: calculateWithSampling method not found</p>';
 				return;
 			}
@@ -569,7 +569,7 @@
 
 			try {
 				const start = performance.now();
-				const results = EventWeightCalculator.calculateWithSampling(
+				const results = ExpeditionPipeline.calculateWithSampling(
 					sectorCounts, 
 					movementSpeed, 
 					loadout, 

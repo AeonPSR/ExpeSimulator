@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ExpeditionRunner / Worker Parity Tests
  *
  * ExpeditionRunner.run() is the pure calculation function extracted from
@@ -9,7 +9,7 @@
  * participationStatus, planetResources.
  *
  * Parity: the EWC-calculation portions of ExpeditionRunner.run must produce the
- * same numeric values as calling EventWeightCalculator.calculate directly with
+ * same numeric values as calling ExpeditionPipeline.calculate directly with
  * the same sectors and loadout.
  */
 
@@ -106,10 +106,10 @@ describe('ExpeditionRunner', () => {
 	});
 
 	// =========================================================================
-	// Parity with EventWeightCalculator.calculate
+	// Parity with ExpeditionPipeline.calculate
 	// =========================================================================
 
-	describe('parity with EventWeightCalculator.calculate', () => {
+	describe('parity with ExpeditionPipeline.calculate', () => {
 
 		// Build the loadout the runner will use internally, so we can
 		// call EWC.calculate with an identical loadout.
@@ -125,7 +125,7 @@ describe('ExpeditionRunner', () => {
 			});
 
 			const loadout = equivalentLoadout(PLAYERS);
-			const directResult = EventWeightCalculator.calculate(SECTORS, loadout, PLAYERS);
+			const directResult = ExpeditionPipeline.calculate(SECTORS, loadout, PLAYERS);
 
 			// Compare scenario values for each resource type
 			for (const type of ['fruits', 'steaks', 'fuel', 'artefacts', 'mapFragments']) {
@@ -145,7 +145,7 @@ describe('ExpeditionRunner', () => {
 			});
 
 			const loadout = equivalentLoadout(PLAYERS);
-			const directResult = EventWeightCalculator.calculate(SECTORS, loadout, PLAYERS);
+			const directResult = ExpeditionPipeline.calculate(SECTORS, loadout, PLAYERS);
 
 			for (const type of ['disease', 'playerLost', 'again', 'itemLost']) {
 				const r = runnerResult.negativeEvents[type];
@@ -162,7 +162,7 @@ describe('ExpeditionRunner', () => {
 			});
 
 			const loadout = equivalentLoadout(PLAYERS);
-			const directResult = EventWeightCalculator.calculate(SECTORS, loadout, PLAYERS);
+			const directResult = ExpeditionPipeline.calculate(SECTORS, loadout, PLAYERS);
 
 			const rDmg = runnerResult.combat?.damage;
 			const dDmg = directResult.combat?.damage;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Integration Tests: Expedition Pipeline
  * 
  * These tests verify multiple modules working together end-to-end.
@@ -22,7 +22,7 @@ describe('Integration: Expedition Pipeline', () => {
 
 	describe('Full expedition calculation pipeline', () => {
 
-		test('Sectors → LoadoutBuilder → EventWeightCalculator produces results', () => {
+		test('Sectors → LoadoutBuilder → ExpeditionPipeline produces results', () => {
 			// Setup: Create a simple expedition
 			const sectors = ['LANDING', 'FOREST', 'DESERT'];
 			const players = [
@@ -40,7 +40,7 @@ describe('Integration: Expedition Pipeline', () => {
 			expect(loadout.abilities).toContain('PILOT');
 
 			// Step 2: Calculate probabilities
-			const result = EventWeightCalculator.calculate(sectors, loadout);
+			const result = ExpeditionPipeline.calculate(sectors, loadout);
 
 			// Verify result has correct structure AND meaningful values
 			expect(result).not.toBeNull();
@@ -75,7 +75,7 @@ describe('Integration: Expedition Pipeline', () => {
 			const loadout = LoadoutBuilder.build(players);
 
 			// Movement speed 4 < total 7 sectors → sampling triggered
-			const sampledResult = EventWeightCalculator.calculateWithSampling(
+			const sampledResult = ExpeditionPipeline.calculateWithSampling(
 				sectorCounts, 4, loadout, players, { alwaysInclude: ['LANDING'] }
 			);
 
@@ -108,7 +108,7 @@ describe('Integration: Expedition Pipeline', () => {
 			expect(loadout.abilities).toContain('PILOT');
 
 			// Get result with pilot
-			const result = EventWeightCalculator.calculate(sectors, loadout);
+			const result = ExpeditionPipeline.calculate(sectors, loadout);
 			expect(result).not.toBeNull();
 
 			// With Pilot, LANDING should have no damage events (TIRED_2, ACCIDENT_3_5, DISASTER_3_5 removed)
@@ -131,7 +131,7 @@ describe('Integration: Expedition Pipeline', () => {
 			];
 			const loadout = LoadoutBuilder.build(players);
 
-			const result = EventWeightCalculator.calculate(sectors, loadout);
+			const result = ExpeditionPipeline.calculate(sectors, loadout);
 			expect(result).not.toBeNull();
 
 			// Without pilot, LANDING should contain damage events
@@ -159,7 +159,7 @@ describe('Integration: Expedition Pipeline', () => {
 			];
 			const loadout = LoadoutBuilder.build(players);
 
-			const result = EventWeightCalculator.calculate(sectors, loadout);
+			const result = ExpeditionPipeline.calculate(sectors, loadout);
 
 			// With diplomacy, all fight scenarios should be 0
 			// combat.damage contains the damage values
@@ -180,7 +180,7 @@ describe('Integration: Expedition Pipeline', () => {
 			];
 			const loadout = LoadoutBuilder.build(players);
 
-			const result = EventWeightCalculator.calculate(sectors, loadout);
+			const result = ExpeditionPipeline.calculate(sectors, loadout);
 
 			// Without diplomacy, DESERT and MANKAROG have fight events → worst case must be > 0
 			expect(result.combat.damage.worstCase).toBeGreaterThan(0);
@@ -358,8 +358,8 @@ describe('Integration: Expedition Pipeline', () => {
 			const loadoutWith = LoadoutBuilder.build(playersWithBotanist);
 			const loadoutWithout = LoadoutBuilder.build(playersWithoutBotanist);
 
-			const resultWith = EventWeightCalculator.calculate(sectors, loadoutWith, playersWithBotanist);
-			const resultWithout = EventWeightCalculator.calculate(sectors, loadoutWithout, playersWithoutBotanist);
+			const resultWith = ExpeditionPipeline.calculate(sectors, loadoutWith, playersWithBotanist);
+			const resultWithout = ExpeditionPipeline.calculate(sectors, loadoutWithout, playersWithoutBotanist);
 
 			// Botanist adds +1 fruit per harvest event, so average fruit should be strictly higher
 			expect(resultWith.resources.fruits.average).toBeGreaterThan(
@@ -398,7 +398,7 @@ describe('Integration: Expedition Pipeline', () => {
 			expect(loadout.items).toContain('SPACE_SUIT');
 			expect(loadout.items).toContain('KNIFE');
 
-			const result = EventWeightCalculator.calculate(sectors, loadout, players);
+			const result = ExpeditionPipeline.calculate(sectors, loadout, players);
 			expect(result).not.toBeNull();
 
 			// Pilot should remove damage events from LANDING
@@ -433,7 +433,7 @@ describe('Integration: Expedition Pipeline', () => {
 	// ExpeditionState → Full Flow
 	// ========================================
 
-	describe('ExpeditionState → LoadoutBuilder → EventWeightCalculator', () => {
+	describe('ExpeditionState → LoadoutBuilder → ExpeditionPipeline', () => {
 
 		test('full state-to-results flow', () => {
 			// Create fresh state
@@ -451,7 +451,7 @@ describe('Integration: Expedition Pipeline', () => {
 			const loadout = LoadoutBuilder.build(players);
 
 			// Calculate results
-			const result = EventWeightCalculator.calculate(sectors, loadout);
+			const result = ExpeditionPipeline.calculate(sectors, loadout);
 
 			// Verify complete flow
 			expect(sectors).toContain('LANDING'); // Default
@@ -468,7 +468,7 @@ describe('Integration: Expedition Pipeline', () => {
 			const state = new ExpeditionState();
 
 			// Initial calculation
-			const initialResult = EventWeightCalculator.calculate(
+			const initialResult = ExpeditionPipeline.calculate(
 				state.getSectors(),
 				LoadoutBuilder.build(state.getPlayers())
 			);
@@ -478,7 +478,7 @@ describe('Integration: Expedition Pipeline', () => {
 			state.addSector('MANKAROG');
 
 			// Recalculate
-			const updatedResult = EventWeightCalculator.calculate(
+			const updatedResult = ExpeditionPipeline.calculate(
 				state.getSectors(),
 				LoadoutBuilder.build(state.getPlayers())
 			);

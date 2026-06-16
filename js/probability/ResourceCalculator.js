@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ResourceCalculator
  * 
  * BACKEND: Calculates expected resource yields using convolution.
@@ -75,7 +75,7 @@ const ResourceCalculator = {
 	 * @private
 	 */
 	_buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent, sectorProbabilities = null) {
-		const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+		const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		const dist = new Map();
 		let resourceProb = 0;
 
@@ -128,7 +128,7 @@ const ResourceCalculator = {
 	 * @private
 	 */
 	_buildFuelDistribution(sectorName, loadout, multiplier, sectorProbabilities = null) {
-		const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+		const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		const dist = new Map();
 		let fuelProb = 0;
 
@@ -161,7 +161,7 @@ const ResourceCalculator = {
 		const distributions = [];
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			const dist = new Map();
 			let artefactProb = 0;
 
@@ -204,7 +204,7 @@ const ResourceCalculator = {
 		let hasArtefact = false;
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			const dist = new Map();
 			let mapProb = 0;
 

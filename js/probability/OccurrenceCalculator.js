@@ -1,4 +1,4 @@
-/**
+﻿/**
  * OccurrenceCalculator
  * 
  * Shared utility for calculating event/fight occurrence distributions.
@@ -33,7 +33,7 @@ const OccurrenceCalculator = {
 
 		for (let i = 0; i < sectors.length; i++) {
 			const sectorName = sectors[i];
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			let eventProb = 0;
 
 			for (const [eventName, prob] of probs) {
@@ -135,7 +135,7 @@ const OccurrenceCalculator = {
 
 		for (const sectorName of sectors) {
 			const zeroed = excludedSectors && excludedSectors.has(sectorName);
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 
 			let anyEventProb = 0;
 			if (!zeroed) {

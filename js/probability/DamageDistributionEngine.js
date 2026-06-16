@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DamageDistributionEngine
  * 
  * BACKEND: Shared convolution pipeline for damage calculations.
@@ -69,7 +69,7 @@ const DamageDistributionEngine = {
 				continue;
 			}
 
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 
 			// Let the caller build the damage entries for this sector
 			const { dist: damageEntries, totalProb } = getSectorDamageDist(sectorName, probs);

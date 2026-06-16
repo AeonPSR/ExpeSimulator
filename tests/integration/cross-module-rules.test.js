@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Cross-Module Integration Tests
  *
  * Asserts behaviours that span multiple modules and were previously untested.
@@ -32,7 +32,7 @@ describe('Cross-module integration', () => {
 				{ abilities: [], items: [], health: 14 },
 				{ abilities: [], items: [], health: 14 }
 			];
-			const result = EventWeightCalculator.calculate(sectors, {}, players);
+			const result = ExpeditionPipeline.calculate(sectors, {}, players);
 
 			expect(result.combat.diseaseFromFights).toBeDefined();
 			expect(typeof result.combat.diseaseFromFights.pessimist).toBe('number');
@@ -47,7 +47,7 @@ describe('Cross-module integration', () => {
 				{ abilities: [], items: [], health: 14 },
 				{ abilities: [], items: [], health: 14 }
 			];
-			const result = EventWeightCalculator.calculate(sectors, {}, players);
+			const result = ExpeditionPipeline.calculate(sectors, {}, players);
 
 			// With FIGHT_12 and 3 players (FP=3, net≥9 per fight occurrence),
 			// diseaseFromFights.average must be strictly positive.
@@ -61,10 +61,10 @@ describe('Cross-module integration', () => {
 				{ abilities: [], items: [], health: 14 }
 			];
 
-			const result = EventWeightCalculator.calculate(sectors, {}, players);
+			const result = ExpeditionPipeline.calculate(sectors, {}, players);
 
 			// Compute sub-results independently using the same sectorProbabilities
-			const sectorProbs = EventWeightCalculator._precomputeSectorProbabilities(sectors, {});
+			const sectorProbs = ExpeditionPipeline._precomputeSectorProbabilities(sectors, {});
 			const necResult   = NegativeEventCalculator.calculate(sectors, {}, sectorProbs);
 			const fightResult = FightCalculator.calculate(sectors, {}, players, null, sectorProbs);
 
@@ -85,7 +85,7 @@ describe('Cross-module integration', () => {
 			// DESERT has only TIRED_2 and AGAIN — no FIGHT events.
 			const sectors = ['DESERT'];
 			const players = [{ abilities: [], items: [], health: 14 }];
-			const result = EventWeightCalculator.calculate(sectors, {}, players);
+			const result = ExpeditionPipeline.calculate(sectors, {}, players);
 
 			expect(result.combat.diseaseFromFights.average).toBe(0);
 			expect(result.combat.diseaseFromFights.pessimist).toBe(0);
@@ -105,7 +105,7 @@ describe('Cross-module integration', () => {
 			const sectors = ['PREDATOR'];
 			const players = [{ abilities: [], items: [], health: 14 }];
 
-			EventWeightCalculator.calculate(sectors, {}, players);
+			ExpeditionPipeline.calculate(sectors, {}, players);
 
 			expect(spy).toHaveBeenCalledTimes(1);
 			spy.mockRestore();
@@ -116,7 +116,7 @@ describe('Cross-module integration', () => {
 			// with 0 players it runs with power=0 (no exclusions generated).
 			const spy = jest.spyOn(DamageComparator, 'evaluateExpedition');
 
-			EventWeightCalculator.calculate(['PREDATOR'], {}, []);
+			ExpeditionPipeline.calculate(['PREDATOR'], {}, []);
 
 			expect(spy).toHaveBeenCalledTimes(1);
 			spy.mockRestore();
@@ -131,7 +131,7 @@ describe('Cross-module integration', () => {
 			const sectors = ['PREDATOR'];
 			const players = [{ abilities: [], items: [], health: 14 }];
 
-			EventWeightCalculator.calculate(sectors, {}, players);
+			ExpeditionPipeline.calculate(sectors, {}, players);
 
 			const fightExclusions = spyFight.mock.calls[0][3]; // 4th arg
 			const eventExclusions = spyEvent.mock.calls[0][3]; // 4th arg
@@ -158,7 +158,7 @@ describe('Cross-module integration', () => {
 				{ abilities: [], items: [], health: 14 }
 			];
 
-			EventWeightCalculator.calculate(sectors, {}, players);
+			ExpeditionPipeline.calculate(sectors, {}, players);
 
 			const fightExclusions = spyFight.mock.calls[0][3];
 			const eventExclusions = spyEvent.mock.calls[0][3];
@@ -182,11 +182,11 @@ describe('Cross-module integration', () => {
 	describe('sectorProbabilities computed once per unique sector type', () => {
 
 		test('getModifiedProbabilities called exactly once per unique sector, not per occurrence', () => {
-			const spy = jest.spyOn(EventWeightCalculator, 'getModifiedProbabilities');
+			const spy = jest.spyOn(ExpeditionPipeline, 'getModifiedProbabilities');
 
 			// 3 sector entries but only 2 unique types
 			const sectors = ['PREDATOR', 'PREDATOR', 'FOREST'];
-			EventWeightCalculator.calculate(sectors, {}, []);
+			ExpeditionPipeline.calculate(sectors, {}, []);
 
 			expect(spy).toHaveBeenCalledTimes(2);
 			const calledSectors = spy.mock.calls.map(c => c[0]);
@@ -198,7 +198,7 @@ describe('Cross-module integration', () => {
 
 		test('_precomputeSectorProbabilities cache has one entry per unique sector', () => {
 			const sectors = ['PREDATOR', 'PREDATOR', 'FOREST'];
-			const cache = EventWeightCalculator._precomputeSectorProbabilities(sectors, {});
+			const cache = ExpeditionPipeline._precomputeSectorProbabilities(sectors, {});
 
 			expect(cache.size).toBe(2);
 			expect(cache.has('PREDATOR')).toBe(true);
@@ -214,7 +214,7 @@ describe('Cross-module integration', () => {
 
 			const sectors = ['PREDATOR', 'FOREST'];
 			const players = [{ abilities: [], items: [], health: 14 }];
-			EventWeightCalculator.calculate(sectors, {}, players);
+			ExpeditionPipeline.calculate(sectors, {}, players);
 
 			const rcProbs  = spyRC.mock.calls[0]?.[3];
 			const necProbs = spyNEC.mock.calls[0]?.[2];
@@ -288,8 +288,8 @@ describe('Cross-module integration', () => {
 			}
 
 			const sectors = ['INTELLIGENT'];
-			const resultBase = EventWeightCalculator.calculate(sectors, {}, []);
-			const resultTrad = EventWeightCalculator.calculate(sectors, { items: ['TRAD_MODULE'] }, []);
+			const resultBase = ExpeditionPipeline.calculate(sectors, {}, []);
+			const resultTrad = ExpeditionPipeline.calculate(sectors, { items: ['TRAD_MODULE'] }, []);
 
 			expect(resultTrad.resources.artefacts.average).toBeGreaterThan(
 				resultBase.resources.artefacts.average
@@ -336,8 +336,8 @@ describe('Cross-module integration', () => {
 		test('single-composition sampling returns the same result as direct calculate', () => {
 			// {FOREST: 3}, movementSpeed=2 → only possible composition is {FOREST: 2}
 			// with probability 1.0 → no mixing, result is returned unchanged.
-			const directResult   = EventWeightCalculator.calculate(['FOREST', 'FOREST'], {}, []);
-			const samplingResult = EventWeightCalculator.calculateWithSampling({ FOREST: 3 }, 2, {}, []);
+			const directResult   = ExpeditionPipeline.calculate(['FOREST', 'FOREST'], {}, []);
+			const samplingResult = ExpeditionPipeline.calculateWithSampling({ FOREST: 3 }, 2, {}, []);
 
 			// Resources
 			expect(samplingResult.resources.fruits.average)
@@ -363,7 +363,7 @@ describe('Cross-module integration', () => {
 			// Compute each composition's result independently
 			const perComposition = compositions.map(({ composition, probability }) => ({
 				probability,
-				result: EventWeightCalculator.calculate(
+				result: ExpeditionPipeline.calculate(
 					SectorSampler.expandComposition(composition), {}, []
 				)
 			}));
@@ -375,7 +375,7 @@ describe('Cross-module integration', () => {
 				0
 			);
 
-			const samplingResult = EventWeightCalculator.calculateWithSampling(
+			const samplingResult = ExpeditionPipeline.calculateWithSampling(
 				sectorCounts, movementSpeed, {}, []
 			);
 

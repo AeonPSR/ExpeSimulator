@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DamageComparator
  * 
  * UTILITY: Compares damage events to determine which is "worse" for worst-case calculations.
@@ -16,7 +16,7 @@
  * - PREDATOR (FIGHT_12 vs ACCIDENT_3_5)
  * - LANDING, MOUNTAIN, COLD, HOT (TIRED_2 vs ACCIDENT_3_5 vs DISASTER_3_5)
  * 
- * IMPORTANT: Uses EventWeightCalculator.getModifiedProbabilities() to account for
+ * IMPORTANT: Uses ExpeditionPipeline.getModifiedProbabilities() to account for
  * abilities that remove events (e.g., Pilot removes ACCIDENT, Diplomat affects fights).
  * 
  * @module probability/DamageComparator
@@ -51,7 +51,7 @@ const DamageComparator = {
 	 */
 	getWorstEvent(sectorName, loadout, playerCount, fightingPower, grenadesAvailable = 0, sectorProbabilities = null) {
 		// Get the ACTUAL events present on this sector after ability modifications
-		const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+		const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		
 		if (!probs || probs.size === 0) {
 			return { worstEvent: null, score: 0, grenadesUsed: 0, eventType: null };
@@ -143,7 +143,7 @@ const DamageComparator = {
 		const sectorEventInfo = [];
 		
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			let hasFight = false;
 			let hasDamageEvent = false;
 			let maxFightDamage = 0;

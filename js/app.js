@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ExpeditionSimulator Application
  * 
  * Main application class - orchestrates components and state.
@@ -494,7 +494,7 @@ class ExpeditionSimulatorApp {
 		let results;
 		if (exploredCount < totalExplorableSectors) {
 			// console.log(`[SectorSampling] Using sampling: ${exploredCount} explored / ${totalExplorableSectors} total`);
-			results = EventWeightCalculator.calculateWithSampling(
+			results = ExpeditionPipeline.calculateWithSampling(
 				sectorCounts,
 				exploredCount,
 				loadout,
@@ -503,7 +503,7 @@ class ExpeditionSimulatorApp {
 			);
 		} else {
 			// Standard calculation - visit all sectors
-			results = EventWeightCalculator.calculate(sectors, loadout, participatingPlayers);
+			results = ExpeditionPipeline.calculate(sectors, loadout, participatingPlayers);
 		}
 
 		// Add player health calculations to the results (only for participating players)

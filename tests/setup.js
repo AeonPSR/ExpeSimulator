@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Jest Test Setup
  * 
  * Loads all source files in manifest order to populate window globals.
@@ -68,7 +68,7 @@ const sourceFiles = [
   'js/probability/ModifierApplicator.js',
   'js/probability/SectorSampler.js',
   'js/probability/PlanetReviewScorer.js',
-  'js/probability/EventWeightCalculator.js',
+  'js/probability/ExpeditionPipeline.js',
   'js/probability/DamageComparator.js',
   'js/probability/ResourceCalculator.js',
   'js/probability/NegativeEventCalculator.js',

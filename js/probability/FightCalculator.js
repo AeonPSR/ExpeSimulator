@@ -216,7 +216,7 @@ const FightCalculator = {
 		const fightTypes = new Set();
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			
 			for (const [eventName] of probs) {
 				if (eventName.startsWith('FIGHT_')) {

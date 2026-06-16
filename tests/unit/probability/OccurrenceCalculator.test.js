@@ -1,4 +1,4 @@
-/**
+﻿/**
  * OccurrenceCalculator Tests
  * 
  * Tests for event/fight occurrence distribution calculations.
@@ -7,15 +7,15 @@
 
 describe('OccurrenceCalculator', () => {
 
-	// Store original EventWeightCalculator for restoration
-	let originalEventWeightCalculator;
+	// Store original ExpeditionPipeline for restoration
+	let originalExpeditionPipeline;
 
 	beforeAll(() => {
 		// Save original
-		originalEventWeightCalculator = global.EventWeightCalculator;
+		originalExpeditionPipeline = global.ExpeditionPipeline;
 
-		// Mock EventWeightCalculator.getSectorProbabilities
-		global.EventWeightCalculator = {
+		// Mock ExpeditionPipeline.getSectorProbabilities
+		global.ExpeditionPipeline = {
 			getSectorProbabilities: jest.fn((sectorName, loadout, cache) => {
 				// Return different probabilities based on sector
 				switch (sectorName) {
@@ -49,12 +49,12 @@ describe('OccurrenceCalculator', () => {
 
 	afterAll(() => {
 		// Restore original
-		global.EventWeightCalculator = originalEventWeightCalculator;
+		global.ExpeditionPipeline = originalExpeditionPipeline;
 	});
 
 	beforeEach(() => {
 		// Clear mock call history
-		EventWeightCalculator.getSectorProbabilities.mockClear();
+		ExpeditionPipeline.getSectorProbabilities.mockClear();
 	});
 
 	// ========================================
