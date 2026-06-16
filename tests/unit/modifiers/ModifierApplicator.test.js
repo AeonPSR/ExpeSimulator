@@ -270,34 +270,4 @@ describe('ModifierApplicator', () => {
 			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
 		});
 	});
-	
-	describe('_applyModifiers', () => {
-		test('is generic helper that works for any modifier map', () => {
-			const events = { TEST_EVENT: 10 };
-			let callCount = 0;
-			
-			const modifierMap = {
-				'KEY1': (e, s) => { callCount++; return e; },
-				'KEY2': (e, s) => { callCount++; return e; }
-			};
-			
-			ModifierApplicator._applyModifiers(events, 'SECTOR', ['KEY1', 'KEY2'], modifierMap);
-			
-			expect(callCount).toBe(2);
-		});
-		
-		test('skips unknown keys', () => {
-			const events = { TEST_EVENT: 10 };
-			let callCount = 0;
-			
-			const modifierMap = {
-				'KEY1': (e, s) => { callCount++; return e; }
-			};
-			
-			// UNKNOWN not in map, should be skipped
-			ModifierApplicator._applyModifiers(events, 'SECTOR', ['KEY1', 'UNKNOWN'], modifierMap);
-			
-			expect(callCount).toBe(1);
-		});
-	});
 });

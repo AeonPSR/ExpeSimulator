@@ -1,76 +1,75 @@
-/**
+﻿/**
  * ModifierApplicator
- * 
- * Orchestrates applying all ability, item, and project modifiers
- * to a sector's event configuration.
- * 
- * @module probability/ModifierApplicator
+ *
+ * Data-driven modifier engine. The MODIFIER_REGISTRY table describes every
+ * modifier (ability, item, project) as a plain data entry. A single apply()
+ * method walks the table, so adding a modifier is a one-line data change —
+ * no new functions or files needed.
+ *
+ * Each registry entry:
+ *   key    — identifier matched against loadout.abilities / .items / .projects
+ *   kind   — 'ability' | 'item' | 'project'
+ *   sector — optional; modifier only activates for this sector when set
+ *   action — 'removeEvents' | 'removeByPrefix' | 'multiplyEvent'
+ *   params — event key array (removeEvents) or prefix string (removeByPrefix)
+ *   event  — event key (multiplyEvent only)
+ *   factor — multiplier  (multiplyEvent only)
  */
+
+const MODIFIER_REGISTRY = [
+// ── Abilities ──────────────────────────────────────────────────────────
+{ key: 'PILOT',              kind: 'ability', sector: 'LANDING',     action: 'removeEvents',   params: ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5'] },
+{ key: 'DIPLOMACY',          kind: 'ability',                        action: 'removeByPrefix', params: 'FIGHT_' },
+{ key: 'TRACKER',            kind: 'ability', sector: 'LOST',        action: 'removeEvents',   params: ['KILL_LOST'] },
+// ── Items ─────────────────────────────────────────────────────────────
+{ key: 'WHITE_FLAG',         kind: 'item',    sector: 'INTELLIGENT', action: 'removeByPrefix', params: 'FIGHT_' },
+{ key: 'QUAD_COMPASS',       kind: 'item',                           action: 'removeByPrefix', params: 'AGAIN' },
+{ key: 'TRAD_MODULE',        kind: 'item',    sector: 'INTELLIGENT', action: 'multiplyEvent',  event: 'ARTEFACT', factor: 2 },
+// ── Projects ──────────────────────────────────────────────────────────
+{ key: 'ANTIGRAV_PROPELLER', kind: 'project', sector: 'LANDING',     action: 'removeEvents',   params: ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5'] },
+];
+
 const ModifierApplicator = {
 
-	/**
-	 * Applies all relevant modifiers to a sector config based on player loadout.
-	 * 
-	 * @param {Object} sectorConfig - Original sector config from PlanetSectorConfigData
-	 * @param {string} sectorName - The sector name (e.g., 'LANDING', 'INTELLIGENT')
-	 * @param {Object} loadout - Player loadout { abilities: [], items: [], projects: [] }
-	 * @returns {Object} Modified sector config (cloned, original unchanged)
-	 */
-	apply(sectorConfig, sectorName, loadout) {
-		const config = EventModifier.cloneSectorConfig(sectorConfig);
-		
-		this._applyAbilities(config.explorationEvents, sectorName, loadout.abilities || []);
-		this._applyItems(config.explorationEvents, sectorName, loadout.items || []);
-		this._applyProjects(config.explorationEvents, sectorName, loadout.projects || []);
-		
-		return config;
-	},
+/**
+ * Applies all active modifiers for the given loadout to a cloned sector config.
+ *
+ * @param {Object} sectorConfig - Original sector config from SectorData
+ * @param {string} sectorName   - Current sector name (e.g. 'LANDING', 'INTELLIGENT')
+ * @param {Object} loadout      - { abilities: [], items: [], projects: [] }
+ * @returns {Object} Modified sector config (original unchanged)
+ */
+apply(sectorConfig, sectorName, loadout) {
+const config = EventModifier.cloneSectorConfig(sectorConfig);
+const events = config.explorationEvents;
 
-	/**
-	 * Applies ability modifiers.
-	 */
-	_applyAbilities(events, sectorName, abilities) {
-		const abilityMap = {
-			'PILOT': AbilityModifiers.applyPilot,
-			'DIPLOMACY': AbilityModifiers.applyDiplomacy,
-			'TRACKER': AbilityModifiers.applyTracker
-		};
-		this._applyModifiers(events, sectorName, abilities, abilityMap);
-	},
+const active = new Set([
+...(loadout.abilities || []).map(k => `ability:${k}`),
+...(loadout.items     || []).map(k => `item:${k}`),
+...(loadout.projects  || []).map(k => `project:${k}`),
+]);
 
-	/**
-	 * Applies item modifiers.
-	 */
-	_applyItems(events, sectorName, items) {
-		const itemMap = {
-			'WHITE_FLAG': ItemModifiers.applyWhiteFlag,
-			'QUAD_COMPASS': ItemModifiers.applyQuadCompass,
-			'TRAD_MODULE': ItemModifiers.applyTradModule
-		};
-		this._applyModifiers(events, sectorName, items, itemMap);
-	},
+for (const entry of MODIFIER_REGISTRY) {
+if (!active.has(`${entry.kind}:${entry.key}`)) continue;
+if (entry.sector && entry.sector !== sectorName) continue;
 
-	/**
-	 * Applies project modifiers.
-	 */
-	_applyProjects(events, sectorName, projects) {
-		const projectMap = {
-			'ANTIGRAV_PROPELLER': ProjectModifiers.applyAntigravPropeller
-		};
-		this._applyModifiers(events, sectorName, projects, projectMap);
-	},
+switch (entry.action) {
+case 'removeEvents':
+EventModifier.removeEvents(events, entry.params);
+break;
+case 'removeByPrefix':
+EventModifier.removeEventsByPrefix(events, entry.params);
+break;
+case 'multiplyEvent':
+if (events[entry.event] !== undefined) {
+events[entry.event] *= entry.factor;
+}
+break;
+}
+}
 
-	/**
-	 * Generic modifier application helper.
-	 */
-	_applyModifiers(events, sectorName, activeKeys, modifierMap) {
-		for (const key of activeKeys) {
-			const modifier = modifierMap[key];
-			if (modifier) {
-				modifier(events, sectorName);
-			}
-		}
-	}
+return config;
+},
 };
 
 // Export for use in other modules
