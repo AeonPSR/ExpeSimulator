@@ -7,6 +7,11 @@
  * 3. Window globals are accessible
  */
 
+const fs   = require('fs');
+const path = require('path');
+
+const ROOT = path.resolve(__dirname, '../..');
+
 describe('Test Infrastructure', () => {
   
   test('jsdom provides window global', () => {
@@ -28,6 +33,37 @@ describe('Test Infrastructure', () => {
   test('formatSectorName formats correctly', () => {
     expect(formatSectorName('CRISTAL_FIELD')).toBe('Cristal Field');
     expect(formatSectorName('FOREST')).toBe('Forest');
+  });
+
+});
+
+// =============================================================================
+// Manifest integrity — every script path must point to a real file
+// =============================================================================
+
+describe('Manifest integrity', () => {
+
+  test('every path in manifest.json content_scripts exists on disk', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8').replace(/^\uFEFF/, ''));
+    const scripts = manifest.content_scripts?.flatMap(cs => cs.js ?? []) ?? [];
+    const missing = scripts.filter(p => !fs.existsSync(path.join(ROOT, p)));
+    expect(missing).toEqual([]);
+  });
+
+  test('every path in tests/setup.js sourceFiles exists on disk', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'tests/setup.js'), 'utf8');
+    const paths = [...src.matchAll(/'([^']+\.js)'/g)]
+      .map(m => m[1])
+      .filter(p => p.startsWith('js/') || p === 'config.js');
+    const missing = paths.filter(p => !fs.existsSync(path.join(ROOT, p)));
+    expect(missing).toEqual([]);
+  });
+
+  test('every path in calculation-worker.js importScripts exists on disk', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'js/workers/calculation-worker.js'), 'utf8');
+    const paths = [...src.matchAll(/baseURL \+ '([^']+)'/g)].map(m => m[1]);
+    const missing = paths.filter(p => !fs.existsSync(path.join(ROOT, p)));
+    expect(missing).toEqual([]);
   });
 
 });
