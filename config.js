@@ -383,7 +383,7 @@ const AbilityEffects = {
 		effects: {
 			combatPowerBonus: 1,
 			requiresGun: true,
-			gunTypes: ['blaster', 'machine_gun', 'missile_launcher', 'natamy_riffle', 'sniper_riffle']
+			gunTypes: ['blaster', 'blaster_custom', 'machine_gun', 'missile_launcher', 'natamy_riffle', 'sniper_riffle']
 		}
 	},
 	'diplomacy': {
@@ -436,6 +436,12 @@ const ItemEffects = {
 		name: 'Blaster',
 		effects: {
 			combatPowerBonus: 1
+		}
+	},
+	'blaster_custom': {
+		name: 'Customized Blaster',
+		effects: {
+			combatPowerBonus: 2
 		}
 	},
 	'driller': {
@@ -559,9 +565,9 @@ const ProjectEffects = {
 	'antigrav_propeller': {
 		name: 'Antigrav Propeller',
 		effects: {
-			sectorEventModifier: {
+			sectorModifications: {
 				'LANDING': {
-					'NOTHING_TO_REPORT': 2 // Doubles the weight of the "Nothing" event in the Landing sector
+					removeEvents: ['TIRED_2', 'ACCIDENT_3_5', 'DISASTER_3_5']
 				}
 			}
 		}

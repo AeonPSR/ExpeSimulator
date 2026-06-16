@@ -33,7 +33,7 @@ class PlanetCardInjector {
 		}
 	}
 
-	// ── Private ────────────────────────────────────────────────────────────
+	// â”€â”€ Private â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 	/** @private */
 	_scanExisting() {
@@ -71,10 +71,10 @@ class PlanetCardInjector {
 		return planet.querySelector('h3')?.textContent?.trim() || null;
 	}
 
-	/** @private — reads sector icons from the analysis list */
+	/** @private â€” reads sector icons from the analysis list */
 	_parseSectors(planet) {
 		const imgs = planet.querySelectorAll('.analysis ul li img');
-		const map  = ChatMessageDetector.SECTOR_NAME_TO_ID;
+		const map  = ChatParser.SECTOR_NAME_TO_ID;
 		const sectors = [];
 		for (const img of imgs) {
 			const id = map.get(img.alt?.trim().toLowerCase());
@@ -83,10 +83,10 @@ class PlanetCardInjector {
 		return sectors;
 	}
 
-	/** @private — reads direction and fuel cost from the card <p> elements */
+	/** @private â€” reads direction and fuel cost from the card <p> elements */
 	_parseNav(planet) {
 		const ps  = planet.querySelectorAll('.card p');
-		const normalize = ChatMessageDetector.DIRECTION_NORMALIZE;
+		const normalize = ChatParser.DIRECTION_NORMALIZE;
 		let direction = null;
 		let fuel = 0;
 
@@ -98,10 +98,10 @@ class PlanetCardInjector {
 			// Check if this <p> is the direction or fuel row
 			const num = parseInt(value, 10);
 			if (isNaN(num)) {
-				// Non-numeric → direction
+				// Non-numeric â†’ direction
 				direction = normalize[value.toLowerCase()] || value;
 			} else {
-				// Numeric → fuel cost
+				// Numeric â†’ fuel cost
 				fuel = num;
 			}
 		}
@@ -109,3 +109,7 @@ class PlanetCardInjector {
 		return direction ? { direction, fuel } : null;
 	}
 }
+
+
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.PlanetCardInjector = PlanetCardInjector;

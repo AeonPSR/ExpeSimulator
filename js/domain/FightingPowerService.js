@@ -130,7 +130,7 @@ class FightingPowerService {
 		let power = itemConfig?.effects?.combatPowerBonus || 0;
 		
 		// Apply Centauri base effect for blasters
-		if (centauriActive && itemName === 'blaster') {
+		if (centauriActive && (itemName === 'blaster' || itemName === 'blaster_custom')) {
 			power += BaseEffects?.centauri?.effects?.blasterCombatBonus || 0;
 		}
 		
@@ -182,6 +182,5 @@ class FightingPowerService {
 }
 
 // Export
-if (typeof window !== 'undefined') {
-	window.FightingPowerService = FightingPowerService;
-}
+var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
+_global.FightingPowerService = FightingPowerService;

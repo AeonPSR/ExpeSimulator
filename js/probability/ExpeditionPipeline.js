@@ -1,12 +1,12 @@
-/**
- * EventWeightCalculator
+﻿/**
+ * ExpeditionPipeline
  * 
  * BACKEND: Pure calculation service for event probabilities.
  * Returns DATA STRUCTURES only - NO HTML generation.
  * 
- * @module probability/EventWeightCalculator
+ * @module probability/ExpeditionPipeline
  */
-const EventWeightCalculator = {
+const ExpeditionPipeline = {
 
 	// ========================================
 	// Sampling-Aware Calculation (Movement Speed)
@@ -530,6 +530,16 @@ const EventWeightCalculator = {
 		// Calculate fights using FightCalculator (convolution-based)
 		const combat = FightCalculator.calculate(sectors, loadout, players, fightExclusions, sectorProbabilities);
 
+		// Add fight-induced disease contribution to the disease negative event.
+		// Each player hit by combat (min(netDamage, playerCount)) has 5% chance of disease.
+		// FightCalculator already derived this from its damageDistribution.
+		const fightDisease = combat.diseaseFromFights || { pessimist: 0, average: 0, optimist: 0 };
+		negativeEvents.disease = {
+			pessimist: negativeEvents.disease.pessimist + fightDisease.pessimist,
+			average:   negativeEvents.disease.average   + fightDisease.average,
+			optimist:  negativeEvents.disease.optimist  + fightDisease.optimist
+		};
+
 		// Calculate event damage using EventDamageCalculator (convolution-based)
 		const eventDamage = EventDamageCalculator.calculate(sectors, loadout, players, eventExclusions, sectorProbabilities);
 
@@ -644,4 +654,4 @@ const EventWeightCalculator = {
 
 // Export
 var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};
-_global.EventWeightCalculator = EventWeightCalculator;
+_global.ExpeditionPipeline = ExpeditionPipeline;

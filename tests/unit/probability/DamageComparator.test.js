@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DamageComparator Tests
  * 
  * Tests for comparing damage events to determine worst-case scenarios.
@@ -10,14 +10,14 @@ describe('DamageComparator', () => {
 	// Store originals
 	let originalFightCalculator;
 	let originalEventDamageCalculator;
-	let originalEventWeightCalculator;
+	let originalExpeditionPipeline;
 	let originalFightingPowerService;
 
 	beforeAll(() => {
 		// Save originals
 		originalFightCalculator = global.FightCalculator;
 		originalEventDamageCalculator = global.EventDamageCalculator;
-		originalEventWeightCalculator = global.EventWeightCalculator;
+		originalExpeditionPipeline = global.ExpeditionPipeline;
 		originalFightingPowerService = global.FightingPowerService;
 
 		// Mock FightCalculator.FIGHT_DAMAGES
@@ -42,8 +42,8 @@ describe('DamageComparator', () => {
 			}
 		};
 
-		// Mock EventWeightCalculator.getSectorProbabilities
-		global.EventWeightCalculator = {
+		// Mock ExpeditionPipeline.getSectorProbabilities
+		global.ExpeditionPipeline = {
 			getSectorProbabilities: jest.fn((sectorName, loadout, cache) => {
 				switch (sectorName) {
 					case 'FOREST':
@@ -87,7 +87,7 @@ describe('DamageComparator', () => {
 	afterAll(() => {
 		global.FightCalculator = originalFightCalculator;
 		global.EventDamageCalculator = originalEventDamageCalculator;
-		global.EventWeightCalculator = originalEventWeightCalculator;
+		global.ExpeditionPipeline = originalExpeditionPipeline;
 		global.FightingPowerService = originalFightingPowerService;
 	});
 

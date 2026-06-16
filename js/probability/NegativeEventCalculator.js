@@ -1,4 +1,4 @@
-/**
+﻿/**
  * NegativeEventCalculator
  * 
  * BACKEND: Calculates expected negative event counts using convolution.
@@ -157,7 +157,7 @@ const NegativeEventCalculator = {
 	 * @returns {Map<number, number>} Distribution: {0 → noEventProb, 1 → eventProb}
 	 */
 	_buildSectorDistribution(sectorName, loadout, categories, sectorProbabilities) {
-		const probs = EventWeightCalculator.getSectorProbabilities(
+		const probs = ExpeditionPipeline.getSectorProbabilities(
 			sectorName, loadout, sectorProbabilities
 		);
 

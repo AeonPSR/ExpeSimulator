@@ -107,9 +107,9 @@ class ProbabilityDisplay extends Component {
 			}
 			return `<tr>
 				<td class="icon-cell">${icon}</td>
-				<td class="warning">${this._formatResourceValue(r.data.pessimist)}</td>
-				<td class="neutral">${this._formatResourceValue(r.data.average)}</td>
-				<td class="positive">${this._formatResourceValue(r.data.optimist)}</td>
+				<td class="warning">${Format.resourceValue(r.data.pessimist)}</td>
+				<td class="neutral">${Format.resourceValue(r.data.average)}</td>
+				<td class="positive">${Format.resourceValue(r.data.optimist)}</td>
 			</tr>`;
 		}).join('');
 
@@ -129,31 +129,6 @@ class ProbabilityDisplay extends Component {
 				</table>
 			</div>
 		`;
-	}
-
-	/**
-	 * Formats a resource value for display
-	 * @private
-	 */
-	_formatResourceValue(value) {
-		if (value === 0) return '0';
-		if (value < 0.1) return '<0.1';
-		return value.toFixed(1);
-	}
-
-	/**
-	 * Formats a probability as a percentage string with parentheses.
-	 * Shows "<0.1%" for very small non-zero values.
-	 * @private
-	 * @param {number|undefined} prob - Probability (0-1)
-	 * @returns {string}
-	 */
-	_formatProb(prob) {
-		if (prob === undefined) return '';
-		const pct = prob * 100;
-		if (pct === 0) return '(0%)';
-		if (pct < 0.1) return '(<0.1%)';
-		return `(${pct.toFixed(1)}%)`;
 	}
 
 	/**
@@ -183,7 +158,7 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (data.optimistProb || 0) + (data.averageProb || 0) + (data.pessimistProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.optimist_average_pessimist')}: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.optimist_average_pessimist')}: ${Format.prob(combinedProb)}</span>
 					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
@@ -191,46 +166,46 @@ class ProbabilityDisplay extends Component {
 			const combinedProb = (data.optimistProb || 0) + (data.averageProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.optimist_average')}: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.optimist_average')}: ${Format.prob(combinedProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.pessimist')}: ${this._formatProb(data.pessimistProb)}</span>
+					<span>${I18n.t('scenario.pessimist')}: ${Format.prob(data.pessimistProb)}</span>
 					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 			`);
 		} else if (averageEqualsPessimist) {
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.optimist')}: ${this._formatProb(data.optimistProb)}</span>
+					<span>${I18n.t('scenario.optimist')}: ${Format.prob(data.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			const combinedProb = (data.averageProb || 0) + (data.pessimistProb || 0);
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.average_pessimist')}: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.average_pessimist')}: ${Format.prob(combinedProb)}</span>
 					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 			`);
 		} else {
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.optimist')}: ${this._formatProb(data.optimistProb)}</span>
+					<span>${I18n.t('scenario.optimist')}: ${Format.prob(data.optimistProb)}</span>
 					<span class="positive">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.average')}: ${this._formatProb(data.averageProb)}</span>
+					<span>${I18n.t('scenario.average')}: ${Format.prob(data.averageProb)}</span>
 					<span class="danger">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 			`);
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.pessimist')}: ${this._formatProb(data.pessimistProb)}</span>
+					<span>${I18n.t('scenario.pessimist')}: ${Format.prob(data.pessimistProb)}</span>
 					<span class="critical">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 			`);
@@ -244,7 +219,7 @@ class ProbabilityDisplay extends Component {
 				rows.length = 0;
 				rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.all')}: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.all')}: ${Format.prob(combinedProb)}</span>
 					<span class="neutral">${hpIcon}<strong>${optimistDmg}</strong></span>
 				</div>
 				`);
@@ -252,7 +227,7 @@ class ProbabilityDisplay extends Component {
 				const combinedProb = (data.averageProb || 0) + (data.pessimistProb || 0) + (data.worstCaseProb || 0);
 				rows[rows.length - 1] = `
 				<div class="damage-item">
-					<span>${I18n.t('scenario.average_pessimist_worst')}: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.average_pessimist_worst')}: ${Format.prob(combinedProb)}</span>
 					<span class="critical">${hpIcon}<strong>${averageDmg}</strong></span>
 				</div>
 				`;
@@ -260,7 +235,7 @@ class ProbabilityDisplay extends Component {
 				const combinedProb = (data.pessimistProb || 0) + (data.worstCaseProb || 0);
 				rows[rows.length - 1] = `
 				<div class="damage-item">
-					<span>${I18n.t('scenario.pessimist_worst')}: ${this._formatProb(combinedProb)}</span>
+					<span>${I18n.t('scenario.pessimist_worst')}: ${Format.prob(combinedProb)}</span>
 					<span class="critical bold-damage">${hpIcon}<strong>${pessimistDmg}</strong></span>
 				</div>
 				`;
@@ -268,7 +243,7 @@ class ProbabilityDisplay extends Component {
 		} else {
 			rows.push(`
 				<div class="damage-item">
-					<span>${I18n.t('scenario.worst')}: ${this._formatProb(data.worstCaseProb)}</span>
+					<span>${I18n.t('scenario.worst')}: ${Format.prob(data.worstCaseProb)}</span>
 					<span class="critical bold-damage">${hpIcon}<strong>${worstDmg}</strong></span>
 				</div>
 			`);
@@ -359,7 +334,7 @@ class ProbabilityDisplay extends Component {
 		// Use occurrence data for per-event-type display (like Combat Risks)
 		const occurrence = eventDamage?.occurrence || {};
 		
-		// Event type display configuration — derived from EVENT_DAMAGES
+		// Event type display configuration â€” derived from EVENT_DAMAGES
 		const eventConfig = {};
 		for (const [type, info] of Object.entries(EventDamageCalculator.EVENT_DAMAGES)) {
 			const dmgStr = info.min === info.max ? `${info.min} dmg` : `${info.min}-${info.max} dmg`;
@@ -488,9 +463,9 @@ class ProbabilityDisplay extends Component {
 			}
 			return `<tr>
 				<td>${e.name}</td>
-				<td class="warning">${this._formatResourceValue(e.data.pessimist)}</td>
-				<td class="neutral">${this._formatResourceValue(e.data.average)}</td>
-				<td class="positive">${this._formatResourceValue(e.data.optimist)}</td>
+				<td class="warning">${Format.resourceValue(e.data.pessimist)}</td>
+				<td class="neutral">${Format.resourceValue(e.data.average)}</td>
+				<td class="positive">${Format.resourceValue(e.data.optimist)}</td>
 			</tr>`;
 		}).join('');
 

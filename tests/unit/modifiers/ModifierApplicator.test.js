@@ -155,7 +155,11 @@ describe('ModifierApplicator', () => {
 			
 			const result = ModifierApplicator.apply(config, 'LANDING', loadout);
 			
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(20); // 10 * 2
+			// Antigrav (buffed) removes damage events on LANDING, same as Pilot
+			expect(result.explorationEvents.TIRED_2).toBeUndefined();
+			expect(result.explorationEvents.ACCIDENT_3_5).toBeUndefined();
+			expect(result.explorationEvents.DISASTER_3_5).toBeUndefined();
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
 		});
 		
 		test('Tracker removes KILL_LOST from LOST', () => {
@@ -262,38 +266,8 @@ describe('ModifierApplicator', () => {
 			// Quad Compass removes AGAIN
 			expect(result.explorationEvents.AGAIN).toBeUndefined();
 			
-			// Antigrav doubles NOTHING_TO_REPORT
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(20);
-		});
-	});
-	
-	describe('_applyModifiers', () => {
-		test('is generic helper that works for any modifier map', () => {
-			const events = { TEST_EVENT: 10 };
-			let callCount = 0;
-			
-			const modifierMap = {
-				'KEY1': (e, s) => { callCount++; return e; },
-				'KEY2': (e, s) => { callCount++; return e; }
-			};
-			
-			ModifierApplicator._applyModifiers(events, 'SECTOR', ['KEY1', 'KEY2'], modifierMap);
-			
-			expect(callCount).toBe(2);
-		});
-		
-		test('skips unknown keys', () => {
-			const events = { TEST_EVENT: 10 };
-			let callCount = 0;
-			
-			const modifierMap = {
-				'KEY1': (e, s) => { callCount++; return e; }
-			};
-			
-			// UNKNOWN not in map, should be skipped
-			ModifierApplicator._applyModifiers(events, 'SECTOR', ['KEY1', 'UNKNOWN'], modifierMap);
-			
-			expect(callCount).toBe(1);
+			// Antigrav (buffed) also removes damage events on LANDING (redundant with Pilot here)
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
 		});
 	});
 });

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ResourceCalculator Tests
  * 
  * Tests for resource yield calculations using convolution.
@@ -8,20 +8,20 @@
 describe('ResourceCalculator', () => {
 
 	// Store originals for restoration
-	let originalEventWeightCalculator;
+	let originalExpeditionPipeline;
 	let originalDistributionCalculator;
 	let originalConstants;
 	let originalFilenameToId;
 
 	beforeAll(() => {
 		// Save originals
-		originalEventWeightCalculator = global.EventWeightCalculator;
+		originalExpeditionPipeline = global.ExpeditionPipeline;
 		originalDistributionCalculator = global.DistributionCalculator;
 		originalConstants = global.Constants;
 		originalFilenameToId = global.filenameToId;
 
-		// Mock EventWeightCalculator
-		global.EventWeightCalculator = {
+		// Mock ExpeditionPipeline
+		global.ExpeditionPipeline = {
 			getSectorProbabilities: jest.fn((sectorName, loadout, cache) => {
 				switch (sectorName) {
 					case 'FOREST':
@@ -103,14 +103,14 @@ describe('ResourceCalculator', () => {
 	});
 
 	afterAll(() => {
-		global.EventWeightCalculator = originalEventWeightCalculator;
+		global.ExpeditionPipeline = originalExpeditionPipeline;
 		global.DistributionCalculator = originalDistributionCalculator;
 		global.Constants = originalConstants;
 		global.filenameToId = originalFilenameToId;
 	});
 
 	beforeEach(() => {
-		EventWeightCalculator.getSectorProbabilities.mockClear();
+		ExpeditionPipeline.getSectorProbabilities.mockClear();
 		DistributionCalculator.convolveAll.mockClear();
 		filenameToId.mockClear();
 	});
@@ -160,7 +160,7 @@ describe('ResourceCalculator', () => {
 			ResourceCalculator.calculate(sectors);
 
 			// Each resource type queries each sector
-			expect(EventWeightCalculator.getSectorProbabilities).toHaveBeenCalled();
+			expect(ExpeditionPipeline.getSectorProbabilities).toHaveBeenCalled();
 		});
 	});
 
@@ -305,7 +305,7 @@ describe('ResourceCalculator', () => {
 			const sectors = ['ARTEFACT_ZONE'];
 			
 			// Manually test the distribution building
-			const probs = EventWeightCalculator.getSectorProbabilities('ARTEFACT_ZONE', {}, null);
+			const probs = ExpeditionPipeline.getSectorProbabilities('ARTEFACT_ZONE', {}, null);
 			const artefactProb = probs.get('ARTEFACT') || 0;
 			
 			// 40% chance of ARTEFACT * 8/9 = real artefact

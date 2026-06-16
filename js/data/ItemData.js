@@ -5,7 +5,7 @@
  */
 const ItemData = {
 	available: [
-		'blaster.jpg', 'driller.jpg', 'echo_sounder.jpg', 'grenade.jpg', 
+		'blaster.jpg', 'blaster_custom.jpg', 'driller.jpg', 'echo_sounder.jpg', 'grenade.jpg', 
 		'heat_seeker.jpg', 'knife.jpg', 'machine_gun.jpg', 'missile_launcher.jpg', 
 		'natamy_riffle.jpg', 'plastenite_armor.jpg', 'postit.jpg', 'quad_compass.jpg', 
 		'rope.jpg', 'sniper_riffle.jpg', 'space_suit.jpg', 'trad_module.jpg', 

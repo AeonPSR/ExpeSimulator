@@ -52,95 +52,73 @@ const FightCalculator = {
 			return this._emptyResult();
 		}
 
-		// Get fighting power
-		const fightingPower = this._getFightingPower(players);
-		const grenadeCount = this._getGrenadeCount(players);
-		const playerCount = players.length;
+                const fightingPower = this._getFightingPower(players);
+                const grenadeCount = this._getGrenadeCount(players);
+                const fightTypes = this._getAllFightTypes(sectors, loadout, sectorProbabilities);
+                const self = this;
 
-		// Calculate occurrence for each fight type, tracking which sectors can produce each type
-		const fightTypes = this._getAllFightTypes(sectors, loadout, sectorProbabilities);
-		const occurrence = {};
-		const sectorsByFightType = {};  // Track which sectors can produce each fight type
-		
-		for (const fightType of fightTypes) {
-			const fightEvent = `FIGHT_${fightType}`;
-			const occResult = OccurrenceCalculator.calculateForType(sectors, loadout, fightEvent, sectorProbabilities);
-			occurrence[fightType] = occResult.occurrence;
-			sectorsByFightType[fightType] = occResult.sectors;
-		}
+                const { occurrenceWithSources, damage: damageResult, damageInstances,
+                        damageDistribution, sampledPaths, playerCount, worstCaseExclusions: wce } =
+                        DamagePipeline.run({
+                                eventTypes: fightTypes.map(t => `FIGHT_${t}`),
+                                sectors, loadout, players, sectorProbabilities, worstCaseExclusions,
+                                getSectorDamageDist: (sectorName, probs) => {
+                                        const dist = new Map();
+                                        let totalProb = 0;
+                                        for (const [eventName, eventProb] of probs) {
+                                                if (!eventName.startsWith('FIGHT_') || eventProb <= 0) continue;
+                                                totalProb += eventProb;
+                                                const damageDistForFight = self._getFightDamageDistribution(eventName.replace('FIGHT_', ''), fightingPower);
+                                                for (const [damageVal, damageProb] of damageDistForFight) {
+                                                        dist.set(damageVal, (dist.get(damageVal) || 0) + eventProb * damageProb);
+                                                }
+                                        }
+                                        return { dist, totalProb };
+                                },
+                                getDetailedSectorOutcomes: (sectorName, probs) => {
+                                        const outcomes = [];
+                                        let totalProb = 0;
+                                        for (const [eventName, eventProb] of probs) {
+                                                if (!eventName.startsWith('FIGHT_') || eventProb <= 0) continue;
+                                                totalProb += eventProb;
+                                                const damageDistForFight = self._getFightDamageDistribution(eventName.replace('FIGHT_', ''), fightingPower);
+                                                for (const [damageVal, damageProb] of damageDistForFight) {
+                                                        outcomes.push({ eventType: eventName, damage: damageVal, probability: eventProb * damageProb });
+                                                }
+                                        }
+                                        const noFightProb = Math.max(0, 1 - totalProb);
+                                        if (noFightProb > 0.0001) outcomes.push({ eventType: null, damage: 0, probability: noFightProb });
+                                        return outcomes;
+                                },
+                                postProcessDistribution: (dist) => self._applyGrenadesToDistribution(dist, grenadeCount),
+                                logLabel: 'FightDamage'
+                        });
 
-		// Reference to this for closures
-		const self = this;
+                // Remap occurrence from 'FIGHT_12' → '12' format
+                const occurrence = {};
+                for (const fightType of fightTypes) {
+                        occurrence[fightType] = occurrenceWithSources[`FIGHT_${fightType}`].occurrence;
+                }
 
-		// Build full damage distribution via shared engine
-		const { damage: damageResult, damageInstances, damageDistribution, sampledPaths } = DamageDistributionEngine.calculate({
-			sectors,
-			loadout,
-			sectorProbabilities,
-			worstCaseExclusions,
-			getSectorDamageDist: (sectorName, probs) => {
-				const dist = new Map();
-				let totalProb = 0;
-				for (const [eventName, eventProb] of probs) {
-					if (!eventName.startsWith('FIGHT_')) continue;
-					if (eventProb <= 0) continue;
-					totalProb += eventProb;
-					const fightType = eventName.replace('FIGHT_', '');
-					const damageDistForFight = self._getFightDamageDistribution(fightType, fightingPower);
-					for (const [damageVal, damageProb] of damageDistForFight) {
-						dist.set(damageVal, (dist.get(damageVal) || 0) + eventProb * damageProb);
-					}
-				}
-				return { dist, totalProb };
-			},
-			// Detailed outcomes for path sampling - includes fight types
-			getDetailedSectorOutcomes: (sectorName, probs) => {
-				const outcomes = [];
-				let totalProb = 0;
-				for (const [eventName, eventProb] of probs) {
-					if (!eventName.startsWith('FIGHT_')) continue;
-					if (eventProb <= 0) continue;
-					totalProb += eventProb;
-					const fightType = eventName.replace('FIGHT_', '');
-					const damageDistForFight = self._getFightDamageDistribution(fightType, fightingPower);
-					for (const [damageVal, damageProb] of damageDistForFight) {
-						outcomes.push({
-							eventType: eventName,
-							damage: damageVal,
-							probability: eventProb * damageProb
-						});
-					}
-				}
-				// Add "no fight" case
-				const noFightProb = Math.max(0, 1 - totalProb);
-				if (noFightProb > 0.0001) {
-					outcomes.push({ eventType: null, damage: 0, probability: noFightProb });
-				}
-				return outcomes;
-			},
-			postProcessDistribution: (dist) => self._applyGrenadesToDistribution(dist, grenadeCount),
-			logLabel: 'FightDamage'
-		});
-		// Add breakdown for backward compatibility
-		damageResult.breakdown = { pessimist: [], average: [], optimist: [], worstCase: [] };
+                damageResult.breakdown = { pessimist: [], average: [], optimist: [], worstCase: [] };
+                const diseaseFromFights = this._computeDiseaseFromFights(damageDistribution, playerCount);
 
-		return {
-			occurrence,      // { "12": { pessimist, average, optimist, distribution }, ... }
-			damage: damageResult,
-			damageInstances,  // Per-scenario damage instances with sources
-			damageDistribution,  // Full damage distribution for advanced analysis
-			sampledPaths,  // Sampled explaining paths for each scenario
-			fightingPower,
-			grenadeCount,
-			playerCount,
-			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
-		};
-	},
+                return {
+                        occurrence,
+                        damage: damageResult,
+                        damageInstances,
+                        damageDistribution,
+                        sampledPaths,
+                        fightingPower,
+                        grenadeCount,
+                        playerCount,
+                        diseaseFromFights,
+                        worstCaseExclusions: wce
+                };
+        },
 
 	/**
 	 * Gets the damage distribution for a fight type after applying fighting power.
-	 * 
-	 * @param {string} fightType - The fight type (e.g., "12", "8_10_12_15_18_32")
 	 * @param {number} fightingPower - Team's fighting power
 	 * @returns {Map<number, number>} Damage value â†’ probability
 	 * @private
@@ -212,7 +190,7 @@ const FightCalculator = {
 		const fightTypes = new Set();
 
 		for (const sectorName of sectors) {
-			const probs = EventWeightCalculator.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 			
 			for (const [eventName] of probs) {
 				if (eventName.startsWith('FIGHT_')) {
@@ -260,8 +238,103 @@ const FightCalculator = {
 			damageInstances: DamageDistributionEngine.emptyDamageInstances(),
 			fightingPower: 0,
 			grenadeCount: 0,
-			playerCount: 0
+			playerCount: 0,
+			diseaseFromFights: { pessimist: 0, average: 0, optimist: 0 }
 		};
+	},
+
+	/**
+	 * Computes the disease count distribution caused by fight damage.
+	 * Each player hit by a fight has a 5% chance of contracting a disease.
+	 * playersHit = min(netDamage, playerCount) per expedition outcome.
+	 *
+	 * @param {Map<number, number>} damageDistribution - Total net damage distribution
+	 * @param {number} playerCount - Number of players in the expedition
+	 * @returns {{ pessimist: number, average: number, optimist: number }}
+	 * @private
+	 */
+	_computeDiseaseFromFights(damageDistribution, playerCount) {
+		if (!damageDistribution || damageDistribution.size === 0 || playerCount === 0) {
+			return { pessimist: 0, average: 0, optimist: 0 };
+		}
+
+		const DISEASE_CHANCE = 0.05;
+
+		// Build disease count distribution as a mixture of Binomials.
+		// For each total net damage value d (probability p):
+		//   playersHit = min(d, playerCount)
+		//   disease count ~ Binomial(playersHit, 0.05)
+		const diseaseDist = new Map();
+
+		for (const [damage, prob] of damageDistribution) {
+			const playersHit = Math.min(damage, playerCount);
+			for (let k = 0; k <= playersHit; k++) {
+				const binomProb = this._binomialProb(playersHit, k, DISEASE_CHANCE);
+				diseaseDist.set(k, (diseaseDist.get(k) || 0) + prob * binomProb);
+			}
+		}
+
+		return this._diseaseTailScenarios(diseaseDist);
+	},
+
+	/**
+	 * Computes { pessimist, average, optimist } from a disease count distribution
+	 * using conditional tail expectations (bottom/top 25%).
+	 * @private
+	 */
+	_diseaseTailScenarios(distribution) {
+		const sorted = [...distribution.entries()].sort((a, b) => a[0] - b[0]);
+
+		let average = 0;
+		for (const [value, prob] of sorted) {
+			average += value * prob;
+		}
+
+		const optimist  = this._diseaseTailExpectation(sorted, 0.25, 'bottom');
+		const pessimist = this._diseaseTailExpectation(sorted, 0.25, 'top');
+
+		return { pessimist, average, optimist };
+	},
+
+	/**
+	 * Conditional expectation of a tail fraction of a distribution.
+	 * @private
+	 */
+	_diseaseTailExpectation(sorted, tailFraction, side) {
+		const entries = side === 'top' ? [...sorted].reverse() : sorted;
+		let remaining = tailFraction;
+		let weightedSum = 0;
+		for (const [value, prob] of entries) {
+			const take = Math.min(prob, remaining);
+			weightedSum += value * take;
+			remaining -= take;
+			if (remaining <= 1e-10) break;
+		}
+		return weightedSum / tailFraction;
+	},
+
+	/**
+	 * Binomial probability: P(X = k) where X ~ Binomial(n, p).
+	 * @private
+	 */
+	_binomialProb(n, k, p) {
+		if (k > n) return 0;
+		if (n === 0) return k === 0 ? 1 : 0;
+		return this._binomialCoeff(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+	},
+
+	/**
+	 * Binomial coefficient C(n, k).
+	 * @private
+	 */
+	_binomialCoeff(n, k) {
+		if (k === 0 || k === n) return 1;
+		if (k > n - k) k = n - k;
+		let result = 1;
+		for (let i = 0; i < k; i++) {
+			result *= (n - i) / (i + 1);
+		}
+		return result;
 	}
 };
 

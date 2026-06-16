@@ -1,10 +1,10 @@
-/**
- * EventWeightCalculator Tests
+﻿/**
+ * ExpeditionPipeline Tests
  * 
  * Tests for event probability calculations and weight modifications.
  */
 
-describe('EventWeightCalculator', () => {
+describe('ExpeditionPipeline', () => {
 
 	// Store originals for restoration
 	let originalPlanetSectorConfigData;
@@ -108,12 +108,16 @@ describe('EventWeightCalculator', () => {
 			}))
 		};
 
-		// Mock NegativeEventCalculator
+		// Mock NegativeEventCalculator (real keys per EventClassifier categories)
 		global.NegativeEventCalculator = {
 			calculate: jest.fn(() => ({
-				tired: { pessimist: 0, average: 0.5, optimist: 1 },
-				hurt: { pessimist: 0, average: 0, optimist: 0 },
-				sick: { pessimist: 0, average: 0, optimist: 0 }
+				disease:    { pessimist: 0, average: 0, optimist: 0 },
+				playerLost: { pessimist: 0, average: 0, optimist: 0 },
+				again:      { pessimist: 0, average: 0, optimist: 0 },
+				itemLost:   { pessimist: 0, average: 0, optimist: 0 },
+				killAll:    { pessimist: 0, average: 0, optimist: 0 },
+				killOne:    { pessimist: 0, average: 0, optimist: 0 },
+				mushTrap:   { pessimist: 0, average: 0, optimist: 0 }
 			}))
 		};
 
@@ -145,11 +149,12 @@ describe('EventWeightCalculator', () => {
 			countGrenades: jest.fn(() => 0)
 		};
 
-		// Mock FightCalculator
+		// Mock FightCalculator (must include diseaseFromFights for the EWC fold)
 		global.FightCalculator = {
 			calculate: jest.fn(() => ({
 				totalFights: { pessimist: 0, average: 0.5, optimist: 1 },
-				totalDamage: { pessimist: 0, average: 4, optimist: 12 }
+				totalDamage: { pessimist: 0, average: 4, optimist: 12 },
+				diseaseFromFights: { pessimist: 0, average: 0, optimist: 0 }
 			}))
 		};
 
@@ -186,7 +191,7 @@ describe('EventWeightCalculator', () => {
 			// FOREST: NOTHING=40, FRUIT=20, FIGHT_12=15, STEAK=10, TIRED_2=15
 			// Total = 100
 			const config = PlanetSectorConfigData.find(s => s.sectorName === 'FOREST');
-			const probs = EventWeightCalculator.calculateProbabilities(config);
+			const probs = ExpeditionPipeline.calculateProbabilities(config);
 
 			expect(probs.get('NOTHING')).toBeCloseTo(0.40, 10);
 			expect(probs.get('FRUIT')).toBeCloseTo(0.20, 10);
@@ -197,25 +202,25 @@ describe('EventWeightCalculator', () => {
 
 		test('calculateProbabilities sums to 1.0', () => {
 			const config = PlanetSectorConfigData.find(s => s.sectorName === 'DESERT');
-			const probs = EventWeightCalculator.calculateProbabilities(config);
+			const probs = ExpeditionPipeline.calculateProbabilities(config);
 
 			const sum = Array.from(probs.values()).reduce((a, b) => a + b, 0);
 			expect(sum).toBeCloseTo(1.0, 10);
 		});
 
 		test('calculateProbabilities handles null config', () => {
-			const probs = EventWeightCalculator.calculateProbabilities(null);
+			const probs = ExpeditionPipeline.calculateProbabilities(null);
 			expect(probs.size).toBe(0);
 		});
 
 		test('calculateProbabilities handles missing explorationEvents', () => {
-			const probs = EventWeightCalculator.calculateProbabilities({});
+			const probs = ExpeditionPipeline.calculateProbabilities({});
 			expect(probs.size).toBe(0);
 		});
 
 		test('calculateProbabilities handles zero total weight', () => {
 			const config = { explorationEvents: { EVENT_A: 0, EVENT_B: 0 } };
-			const probs = EventWeightCalculator.calculateProbabilities(config);
+			const probs = ExpeditionPipeline.calculateProbabilities(config);
 			expect(probs.size).toBe(0);
 		});
 
@@ -228,13 +233,13 @@ describe('EventWeightCalculator', () => {
 	describe('getSectorConfig', () => {
 
 		test('getSectorConfig finds sector by name', () => {
-			const config = EventWeightCalculator.getSectorConfig('FOREST');
+			const config = ExpeditionPipeline.getSectorConfig('FOREST');
 			expect(config).not.toBeNull();
 			expect(config.sectorName).toBe('FOREST');
 		});
 
 		test('getSectorConfig returns null for unknown sector', () => {
-			const config = EventWeightCalculator.getSectorConfig('UNKNOWN_SECTOR');
+			const config = ExpeditionPipeline.getSectorConfig('UNKNOWN_SECTOR');
 			expect(config).toBeNull();
 		});
 
@@ -247,13 +252,13 @@ describe('EventWeightCalculator', () => {
 	describe('getModifiedProbabilities', () => {
 
 		test('getModifiedProbabilities returns base probabilities without loadout', () => {
-			const probs = EventWeightCalculator.getModifiedProbabilities('FOREST');
+			const probs = ExpeditionPipeline.getModifiedProbabilities('FOREST');
 			expect(probs.get('FRUIT')).toBeCloseTo(0.20, 10);
 		});
 
 		test('getModifiedProbabilities applies modifiers from loadout', () => {
 			const loadout = { abilities: ['survivalist'] };
-			const probs = EventWeightCalculator.getModifiedProbabilities('FOREST', loadout);
+			const probs = ExpeditionPipeline.getModifiedProbabilities('FOREST', loadout);
 
 			// ModifierApplicator doubles FRUIT weight: 20 → 40
 			// New total: 40 + 40 + 15 + 10 + 15 = 120
@@ -263,7 +268,7 @@ describe('EventWeightCalculator', () => {
 		});
 
 		test('getModifiedProbabilities returns empty map for unknown sector', () => {
-			const probs = EventWeightCalculator.getModifiedProbabilities('UNKNOWN');
+			const probs = ExpeditionPipeline.getModifiedProbabilities('UNKNOWN');
 			expect(probs.size).toBe(0);
 		});
 
@@ -280,7 +285,7 @@ describe('EventWeightCalculator', () => {
 			const cachedProbs = new Map([['CACHED_EVENT', 1.0]]);
 			cache.set('FOREST', cachedProbs);
 
-			const result = EventWeightCalculator.getSectorProbabilities('FOREST', {}, cache);
+			const result = ExpeditionPipeline.getSectorProbabilities('FOREST', {}, cache);
 
 			expect(result).toBe(cachedProbs);
 			expect(result.get('CACHED_EVENT')).toBe(1.0);
@@ -289,14 +294,14 @@ describe('EventWeightCalculator', () => {
 		test('getSectorProbabilities computes when cache miss', () => {
 			const cache = new Map(); // Empty cache
 
-			const result = EventWeightCalculator.getSectorProbabilities('FOREST', {}, cache);
+			const result = ExpeditionPipeline.getSectorProbabilities('FOREST', {}, cache);
 
 			// Should compute and return probabilities
 			expect(result.get('NOTHING')).toBeCloseTo(0.40, 10);
 		});
 
 		test('getSectorProbabilities computes when no cache provided', () => {
-			const result = EventWeightCalculator.getSectorProbabilities('FOREST', {});
+			const result = ExpeditionPipeline.getSectorProbabilities('FOREST', {});
 			expect(result.get('NOTHING')).toBeCloseTo(0.40, 10);
 		});
 
@@ -309,13 +314,13 @@ describe('EventWeightCalculator', () => {
 	describe('calculate', () => {
 
 		test('calculate returns null for empty sectors', () => {
-			const result = EventWeightCalculator.calculate([]);
+			const result = ExpeditionPipeline.calculate([]);
 			expect(result).toBeNull();
 		});
 
 		test('calculate returns results object with all sections', () => {
 			const sectors = ['FOREST', 'DESERT'];
-			const result = EventWeightCalculator.calculate(sectors);
+			const result = ExpeditionPipeline.calculate(sectors);
 
 			expect(result).toHaveProperty('resources');
 			expect(result).toHaveProperty('negativeEvents');
@@ -325,7 +330,7 @@ describe('EventWeightCalculator', () => {
 
 		test('calculate builds sector counts correctly', () => {
 			const sectors = ['FOREST', 'FOREST', 'DESERT'];
-			EventWeightCalculator.calculate(sectors);
+			ExpeditionPipeline.calculate(sectors);
 
 			// Check that ResourceCalculator received correct sectors
 			const callArgs = ResourceCalculator.calculate.mock.calls[0];
@@ -344,7 +349,7 @@ describe('EventWeightCalculator', () => {
 			const sectorCounts = { FOREST: 2, DESERT: 1 };
 			const movementSpeed = 5; // More than 3 total sectors
 
-			EventWeightCalculator.calculateWithSampling(sectorCounts, movementSpeed);
+			ExpeditionPipeline.calculateWithSampling(sectorCounts, movementSpeed);
 
 			// Should not call SectorSampler
 			expect(SectorSampler.generateWeightedCompositions).not.toHaveBeenCalled();
@@ -354,7 +359,7 @@ describe('EventWeightCalculator', () => {
 			const sectorCounts = { FOREST: 2, DESERT: 2 };
 			const movementSpeed = 2;
 
-			EventWeightCalculator.calculateWithSampling(sectorCounts, movementSpeed);
+			ExpeditionPipeline.calculateWithSampling(sectorCounts, movementSpeed);
 
 			expect(SectorSampler.generateWeightedCompositions).toHaveBeenCalledWith(
 				sectorCounts, movementSpeed, expect.any(Object)
@@ -365,7 +370,7 @@ describe('EventWeightCalculator', () => {
 			const sectorCounts = { FOREST: 2 };
 			const movementSpeed = 5; // No sampling needed
 
-			EventWeightCalculator.calculateWithSampling(
+			ExpeditionPipeline.calculateWithSampling(
 				sectorCounts, movementSpeed, {}, [],
 				{ alwaysInclude: ['LANDING'] }
 			);
@@ -382,7 +387,7 @@ describe('EventWeightCalculator', () => {
 			const sectorCounts = { FOREST: 2 };
 			const movementSpeed = 1;
 
-			const result = EventWeightCalculator.calculateWithSampling(sectorCounts, movementSpeed);
+			const result = ExpeditionPipeline.calculateWithSampling(sectorCounts, movementSpeed);
 
 			expect(result).toBeNull();
 		});
@@ -391,7 +396,7 @@ describe('EventWeightCalculator', () => {
 			const sectorCounts = { FOREST: 2, DESERT: 2 };
 			const movementSpeed = 2;
 
-			const result = EventWeightCalculator.calculateWithSampling(sectorCounts, movementSpeed);
+			const result = ExpeditionPipeline.calculateWithSampling(sectorCounts, movementSpeed);
 
 			expect(result._sampling).toBeDefined();
 			expect(result._sampling.enabled).toBe(true);
