@@ -66,4 +66,26 @@ describe('Manifest integrity', () => {
     expect(missing).toEqual([]);
   });
 
+  test('every path in calculation-worker.js importScripts is covered by web_accessible_resources', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8').replace(/^\uFEFF/, ''));
+    const globs = manifest.web_accessible_resources?.flatMap(r => r.resources ?? []) ?? [];
+
+    // Build a simple glob matcher: only supports trailing * and **/
+    function matchesAnyGlob(filePath, globs) {
+      return globs.some(glob => {
+        if (glob === filePath) return true;
+        if (glob.endsWith('*.js')) {
+          const prefix = glob.slice(0, -'*.js'.length);
+          return filePath.startsWith(prefix) && !filePath.slice(prefix.length).includes('/');
+        }
+        return false;
+      });
+    }
+
+    const src = fs.readFileSync(path.join(ROOT, 'js/workers/calculation-worker.js'), 'utf8');
+    const paths = [...src.matchAll(/baseURL \+ '([^']+)'/g)].map(m => m[1]);
+    const uncovered = paths.filter(p => !matchesAnyGlob(p, globs));
+    expect(uncovered).toEqual([]);
+  });
+
 });

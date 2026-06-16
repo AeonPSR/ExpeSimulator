@@ -90,6 +90,7 @@
         "config.js",
         "js/utils/*.js",
         "js/data/*.js",
+        "js/domain/*.js",
         "js/services/*.js",
         "js/probability/*.js"
       ],
