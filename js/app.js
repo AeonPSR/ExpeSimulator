@@ -616,177 +616,20 @@ class ExpeditionSimulatorApp {
 
 	_updateResultsDisplay(results) {
 		const players = this._state.getPlayers();
-		
+
 		if (players.length > 0 && results) {
-			const resultsHTML = this._renderExpeditionResults(
-				players, 
-				results.healthByScenario || {}, 
+			const resultsHTML = ResultsRenderer.render(
+				players,
+				results.healthByScenario || {},
 				results.participationStatus || [],
-				results.effectsByScenario || {}
+				results.effectsByScenario || {},
+				getResourceURL
 			);
 			this._resultsDisplay.setContent(resultsHTML);
 			this._resultsDisplay.showDefaultLegend();
 		} else {
 			this._resultsDisplay.clear();
 		}
-	}
-
-	/**
-	 * Renders expedition results HTML for all players
-	 * @param {Array} players - Array of player objects
-	 * @param {Object} healthByScenario - { pessimist, average, optimist, worstCase } health arrays
-	 * @param {Array} participationStatus - Participation status for each player
-	 * @param {Object} effectsByScenario - { pessimist, average, optimist, worstCase } effect arrays per player
-	 * @returns {string} - HTML string for expedition results
-	 */
-	_renderExpeditionResults(players, healthByScenario, participationStatus, effectsByScenario = {}) {
-		// Build a map of participating player indices for health lookup
-		let participatingIndex = 0;
-		
-		return players.map((player, playerIndex) => {
-			const status = participationStatus[playerIndex];
-			const canParticipate = status?.canParticipate ?? true;
-			
-			// If player can't participate, show stuck in ship icon in each scenario
-			if (!canParticipate) {
-				const stuckIcon = `<img src="${getResourceURL('pictures/others/stuck_in_ship.png')}" alt="Stuck in Ship" class="stuck-icon" title="No oxygen - stuck in ship" />`;
-				return `
-					<div class="expedition-result-card">
-						<div class="expedition-result-avatar">
-							<img src="${getResourceURL(`pictures/characters/${player.avatar}`)}" alt="Player Avatar" />
-						</div>
-						<div class="expedition-result-health-container">
-							<div class="expedition-result-health optimist health-stuck">
-								${stuckIcon}
-							</div>
-							<div class="expedition-result-health median health-stuck">
-								${stuckIcon}
-							</div>
-							<div class="expedition-result-health pessimist health-stuck">
-								${stuckIcon}
-							</div>
-							<div class="expedition-result-health worst health-stuck">
-								${stuckIcon}
-							</div>
-						</div>
-					</div>
-				`;
-			}
-			
-			// Get health values for this participating player
-			const optimist = healthByScenario.optimist?.[participatingIndex] ?? player.health;
-			const average = healthByScenario.average?.[participatingIndex] ?? player.health;
-			const pessimist = healthByScenario.pessimist?.[participatingIndex] ?? player.health;
-			const worst = healthByScenario.worstCase?.[participatingIndex] ?? player.health;
-			
-			// Get effects for this participating player
-			const optimistEffects = effectsByScenario.optimist?.[participatingIndex] || [];
-			const averageEffects = effectsByScenario.average?.[participatingIndex] || [];
-			const pessimistEffects = effectsByScenario.pessimist?.[participatingIndex] || [];
-			const worstEffects = effectsByScenario.worstCase?.[participatingIndex] || [];
-			
-			// Collect all unique effects for card-level display (deduplicated by type)
-			const allEffects = [optimistEffects, averageEffects, pessimistEffects, worstEffects];
-			const cardLevelEffects = [];
-			const seenCardTypes = new Set();
-			for (const scenarioEffects of allEffects) {
-				for (const effect of scenarioEffects) {
-					if (!seenCardTypes.has(effect.type)) {
-						seenCardTypes.add(effect.type);
-						cardLevelEffects.push(effect);
-					}
-				}
-			}
-			
-			participatingIndex++;
-
-			return `
-				<div class="expedition-result-card">
-					<div class="expedition-result-avatar">
-						<img src="${getResourceURL(`pictures/characters/${player.avatar}`)}" alt="Player Avatar" />
-					</div>
-					<div class="expedition-result-health-container">
-						<div class="expedition-result-health optimist ${this._getHealthClass(optimist)}">
-							${this._renderHealthValue(optimist)}
-						</div>
-						<div class="expedition-result-health median ${this._getHealthClass(average)}">
-							${this._renderHealthValue(average)}
-						</div>
-						<div class="expedition-result-health pessimist ${this._getHealthClass(pessimist)}">
-							${this._renderHealthValue(pessimist)}
-						</div>
-						<div class="expedition-result-health worst ${this._getHealthClass(worst)}">
-							${this._renderHealthValue(worst)}
-						</div>
-					</div>
-					${cardLevelEffects.length > 0 ? `<div class="expedition-result-effects">${this._renderEffectIcons(cardLevelEffects)}</div>` : ''}
-				</div>
-			`;
-		}).join('');
-	}
-
-	/**
-	 * Renders the health value display (number + icon or dead icon)
-	 * @param {number} health - Health value
-	 * @returns {string} - HTML string
-	 */
-	_renderHealthValue(health) {
-		if (health <= 0) {
-			return `<img src="${getResourceURL('pictures/others/dead.png')}" alt="Dead" class="dead-icon" />`;
-		}
-		return `${health}<img src="${getResourceURL('pictures/astro/hp.png')}" alt="HP" class="hp-icon" />`;
-	}
-
-	/**
-	 * Renders effect icons for items/abilities that triggered
-	 * @param {Array} effects - Array of { type, ... } effect objects
-	 * @returns {string} - HTML string with effect icons
-	 */
-	_renderEffectIcons(effects) {
-		if (!effects || effects.length === 0) return '';
-		
-		// Map effect types to their icon paths
-		const effectIcons = {
-			'ROPE': 'pictures/items_exploration/rope.jpg',
-			'SURVIVAL': 'pictures/abilities/survival.png',
-			'PLASTENITE_ARMOR': 'pictures/items_exploration/plastenite_armor.jpg'
-		};
-		
-		// Deduplicate effects by type
-		const seenTypes = new Set();
-		const uniqueEffects = effects.filter(e => {
-			if (seenTypes.has(e.type)) return false;
-			seenTypes.add(e.type);
-			return true;
-		});
-		
-		return uniqueEffects.map(effect => {
-			const iconPath = effectIcons[effect.type];
-			if (!iconPath) return '';
-			
-			const title = effect.type === 'ROPE' 
-				? `Rope blocked ${effect.damagePrevented || '?'} damage`
-				: effect.type === 'SURVIVAL'
-				? `Survival reduced ${effect.reductions || '?'} damage`
-				: effect.type === 'PLASTENITE_ARMOR'
-				? `Armor reduced ${effect.reductions || '?'} combat damage`
-				: effect.type;
-			
-			return `<img src="${getResourceURL(iconPath)}" alt="${effect.type}" class="effect-icon" title="${title}" />`;
-		}).join('');
-	}
-
-	/**
-	 * Gets the CSS class for health status coloring
-	 * @param {number} health - Health value
-	 * @returns {string} - CSS class name
-	 */
-	_getHealthClass(health) {
-		if (health <= 0) return 'health-dead';
-		if (health <= 3) return 'health-critical';
-		if (health <= 6) return 'health-low';
-		if (health <= 10) return 'health-medium';
-		return 'health-high';
 	}
 
 	// ========================================

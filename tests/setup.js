@@ -55,6 +55,7 @@ const sourceFiles = [
   'js/components/ExampleWorlds.js',
   'js/components/StarRating.js',
   'js/components/PlanetaryReview.js',
+  'js/components/ResultsRenderer.js',
   'js/domain/FightingPowerService.js',
   'js/domain/LoadoutBuilder.js',
   'js/domain/DamageSpreader.js',
