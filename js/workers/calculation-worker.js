@@ -33,6 +33,7 @@ function _loadDependencies(baseURL) {
 			baseURL + 'js/probability/OccurrenceCalculator.js',
 			baseURL + 'js/probability/DamagePathSampler.js',
 			baseURL + 'js/probability/DamageDistributionEngine.js',
+			baseURL + 'js/probability/DamagePipeline.js',
 			baseURL + 'js/probability/FightCalculator.js',
 			baseURL + 'js/probability/EventDamageCalculator.js',
 			baseURL + 'js/services/ExpeditionRunner.js'

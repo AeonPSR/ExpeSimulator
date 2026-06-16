@@ -92,93 +92,70 @@ const EventDamageCalculator = {
 		}
 
 		const playerCount = players.length;
+                const eventTypes = Object.keys(this.EVENT_DAMAGES);
+                const self = this;
 
-		// Calculate occurrences with source tracking for each event type
-		// Delegates to OccurrenceCalculator (shared with FightCalculator)
-		const eventTypes = Object.keys(this.EVENT_DAMAGES);
-		const occurrenceWithSources = {};
-		for (const eventType of eventTypes) {
-			occurrenceWithSources[eventType] = OccurrenceCalculator.calculateForType(sectors, loadout, eventType, sectorProbabilities);
-		}
+                const { occurrenceWithSources, damage: damageResult, damageInstances,
+                        damageDistribution, sampledPaths, worstCaseExclusions: wce } =
+                        DamagePipeline.run({
+                                eventTypes,
+                                sectors, loadout, players, sectorProbabilities, worstCaseExclusions,
+                                getSectorDamageDist: (sectorName, probs) => {
+                                        const dist = new Map();
+                                        let totalProb = 0;
+                                        for (const eventType of eventTypes) {
+                                                const eventProb = probs.get(eventType) || 0;
+                                                if (eventProb <= 0) continue;
+                                                totalProb += eventProb;
+                                                const eventInfo = self.EVENT_DAMAGES[eventType];
+                                                if (!eventInfo || !eventInfo.getDamageDistribution) continue;
+                                                for (const [damageVal, damageProb] of eventInfo.getDamageDistribution(playerCount)) {
+                                                        dist.set(damageVal, (dist.get(damageVal) || 0) + eventProb * damageProb);
+                                                }
+                                        }
+                                        return { dist, totalProb };
+                                },
+                                getDetailedSectorOutcomes: (sectorName, probs) => {
+                                        const outcomes = [];
+                                        let totalProb = 0;
+                                        for (const eventType of eventTypes) {
+                                                const eventProb = probs.get(eventType) || 0;
+                                                if (eventProb <= 0) continue;
+                                                totalProb += eventProb;
+                                                const eventInfo = self.EVENT_DAMAGES[eventType];
+                                                if (!eventInfo || !eventInfo.getDamageDistribution) continue;
+                                                for (const [damageVal, damageProb] of eventInfo.getDamageDistribution(playerCount)) {
+                                                        outcomes.push({ eventType, damage: damageVal, probability: eventProb * damageProb });
+                                                }
+                                        }
+                                        const noEventProb = Math.max(0, 1 - totalProb);
+                                        if (noEventProb > 0.0001) outcomes.push({ eventType: null, damage: 0, probability: noEventProb });
+                                        return outcomes;
+                                },
+                                logLabel: 'EventDamage'
+                        });
 
-		// Reference to this for closures
-		const self = this;
+                // Build flat occurrence map
+                const occurrence = {};
+                for (const eventType of eventTypes) {
+                        occurrence[eventType] = occurrenceWithSources[eventType].occurrence;
+                }
 
-		// Build full damage distribution via shared engine
-		const { damage: damageResult, damageInstances, damageDistribution, sampledPaths } = DamageDistributionEngine.calculate({
-			sectors,
-			loadout,
-			sectorProbabilities,
-			worstCaseExclusions,
-			getSectorDamageDist: (sectorName, probs) => {
-				const dist = new Map();
-				let totalProb = 0;
-				for (const eventType of eventTypes) {
-					const eventProb = probs.get(eventType) || 0;
-					if (eventProb <= 0) continue;
-					totalProb += eventProb;
-					const eventInfo = self.EVENT_DAMAGES[eventType];
-					if (!eventInfo || !eventInfo.getDamageDistribution) continue;
-					const damageDist = eventInfo.getDamageDistribution(playerCount);
-					for (const [damageVal, damageProb] of damageDist) {
-						dist.set(damageVal, (dist.get(damageVal) || 0) + eventProb * damageProb);
-					}
-				}
-				return { dist, totalProb };
-			},
-			// Detailed outcomes for path sampling - includes event types
-			getDetailedSectorOutcomes: (sectorName, probs) => {
-				const outcomes = [];
-				let totalProb = 0;
-				for (const eventType of eventTypes) {
-					const eventProb = probs.get(eventType) || 0;
-					if (eventProb <= 0) continue;
-					totalProb += eventProb;
-					const eventInfo = self.EVENT_DAMAGES[eventType];
-					if (!eventInfo || !eventInfo.getDamageDistribution) continue;
-					const damageDist = eventInfo.getDamageDistribution(playerCount);
-					for (const [damageVal, damageProb] of damageDist) {
-						outcomes.push({
-							eventType: eventType,
-							damage: damageVal,
-							probability: eventProb * damageProb
-						});
-					}
-				}
-				// Add "no event" case
-				const noEventProb = Math.max(0, 1 - totalProb);
-				if (noEventProb > 0.0001) {
-					outcomes.push({ eventType: null, damage: 0, probability: noEventProb });
-				}
-				return outcomes;
-			},
-			logLabel: 'EventDamage'
-		});
-
-		// Legacy occurrence format (without sources)
-		const occurrence = {};
-		for (const eventType of Object.keys(occurrenceWithSources)) {
-			occurrence[eventType] = occurrenceWithSources[eventType].occurrence;
-		}
-
-		return {
-			occurrence,
-			damage: damageResult,
-			damageInstances,  // Per-scenario damage instances with sources
-			damageDistribution,  // Full damage distribution for advanced analysis
-			sampledPaths,  // Sampled explaining paths for each scenario
-			playerCount,
-			// Legacy format for backward compatibility
-			// Combine both accident types for display
-			tired: occurrence.TIRED_2?.average || 0,
-			accident: (occurrence.ACCIDENT_3_5?.average || 0) + (occurrence.ACCIDENT_ROPE_3_5?.average || 0),
-			disaster: occurrence.DISASTER_3_5?.average || 0,
-			worstCaseExclusions: worstCaseExclusions ? Array.from(worstCaseExclusions) : []
-		};
-	},
+                return {
+                        occurrence,
+                        damage: damageResult,
+                        damageInstances,
+                        damageDistribution,
+                        sampledPaths,
+                        playerCount,
+                        tired: occurrence.TIRED_2?.average || 0,
+                        accident: (occurrence.ACCIDENT_3_5?.average || 0) + (occurrence.ACCIDENT_ROPE_3_5?.average || 0),
+                        disaster: occurrence.DISASTER_3_5?.average || 0,
+                        worstCaseExclusions: wce
+                };
+        },
 
 	/**
-	 * Returns empty result structure.
 	 * @private
 	 */
 	_emptyResult() {

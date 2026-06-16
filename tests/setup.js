@@ -75,6 +75,7 @@ const sourceFiles = [
   'js/probability/OccurrenceCalculator.js',
   'js/probability/DamagePathSampler.js',
   'js/probability/DamageDistributionEngine.js',
+  'js/probability/DamagePipeline.js',
   'js/probability/FightCalculator.js',
   'js/probability/EventDamageCalculator.js',
   'js/io/Clipboard.js',
