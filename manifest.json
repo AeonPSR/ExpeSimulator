@@ -76,7 +76,8 @@
         "styles/players.css",
         "styles/tables.css",
         "styles/results.css",
-        "styles/modals.css"
+        "styles/modals.css",
+        "styles/retro-theme.css"
       ]
     }
   ],

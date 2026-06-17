@@ -221,7 +221,12 @@ class PlayerCard extends Component {
 		const removeBtn = this.createElement('div', {
 			className: 'expe-close-btn',
 			dataset: { playerId: this.player.id.toString() }
-		}, '×');
+		});
+		const icon = this.createElement('img', {
+			src: this.getResourceURL('pictures/others/bin.png'),
+			alt: ''
+		});
+		removeBtn.appendChild(icon);
 
 		this.addEventListener(removeBtn, 'click', () => {
 			this.onRemove?.(this.player.id);

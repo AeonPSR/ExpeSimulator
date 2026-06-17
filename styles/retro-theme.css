@@ -1,0 +1,217 @@
+/* ==========================================================================
+   Retro Theme — active when <body class="retro-theme">
+   All selectors include #expedition-simulator to beat the default specificity.
+   ========================================================================== */
+
+/* ── Chamfer definition ──────────────────────────────────────────────── */
+body.retro-theme {
+	--chamfer-size: 5px;
+}
+
+/* ── Freeze ALL transitions for the single frame of the theme toggle ─── */
+/* Must live outside retro-theme selectors so it works in both directions. */
+.retro-theme-switching * {
+	transition: none !important;
+}
+
+/* ── Chamfer: all chamfered elements ─────────────────────────────────── */
+body.retro-theme #expedition-simulator button,
+body.retro-theme #expedition-simulator input,
+body.retro-theme #expedition-simulator .player-profile,
+body.retro-theme #expedition-simulator .player-avatar,
+body.retro-theme #expedition-simulator .ability-slot,
+body.retro-theme #expedition-simulator .item-slot,
+body.retro-theme #expedition-simulator .health-slot,
+body.retro-theme #expedition-simulator .morale-slot,
+body.retro-theme #expedition-simulator .sector-item,
+body.retro-theme #expedition-simulator .selected-sector-item,
+body.retro-theme #expedition-simulator .expedition-result-card,
+body.retro-theme #expedition-simulator .expedition-result-avatar,
+body.retro-theme #expedition-simulator .selected-grid,
+body.retro-theme #expedition-simulator .expe-close-btn,
+body.retro-theme #expedition-simulator .prob-content,
+body.retro-theme #expedition-simulator .resource-table,
+body.retro-theme #expedition-simulator .events-table,
+body.retro-theme #expedition-simulator .results-content,
+body.retro-theme #expedition-simulator .expedition-legend,
+/* ── Modal (mounted on body, scoped via [data-expe-sim]) ────────────── */
+body.retro-theme [data-expe-sim] button,
+body.retro-theme [data-expe-sim] input,
+body.retro-theme [data-expe-sim] .expe-close-btn,
+body.retro-theme [data-expe-sim] .ability-selection,
+body.retro-theme [data-expe-sim] .modal-close,
+body.retro-theme [data-expe-sim] .character-option,
+body.retro-theme [data-expe-sim] .modal-container {
+	border-radius: var(--chamfer-size);
+	corner-shape: bevel;
+}
+
+/* ── Per-element chamfer size overrides ──────────────────────────────── */
+body.retro-theme #expedition-simulator .sector-item,
+body.retro-theme #expedition-simulator .player-profile,
+body.retro-theme #expedition-simulator .add-player-btn,
+body.retro-theme #expedition-simulator .resource-table,
+body.retro-theme #expedition-simulator .prob-content,
+body.retro-theme #expedition-simulator .events-table,
+body.retro-theme #expedition-simulator .results-content,
+body.retro-theme #expedition-simulator .expedition-legend,
+/* Modal elements (mounted on body, scoped via [data-expe-sim]) */
+body.retro-theme [data-expe-sim] .character-option,
+body.retro-theme [data-expe-sim] .ability-selection {
+	border-radius: 10px;
+}
+
+body.retro-theme #expedition-simulator .tab-bar button {
+	border-radius: 0px;
+}
+
+body.retro-theme #expedition-simulator .panel-tongue {
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 10px;
+	corner-top-right-shape: bevel;
+	corner-bottom-right-shape: bevel;
+}
+
+body.retro-theme #expedition-simulator .selected-grid {
+	border-radius: 15px;
+}
+
+body.retro-theme #expedition-simulator .fuel-arrow {
+	border-radius: 0;
+	corner-shape: square;
+}
+
+body.retro-theme #expedition-simulator .selected-sector-item {
+	border-radius: 5px;
+}
+
+/* ── Panel structure ─────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .panel-header,
+body.retro-theme #expedition-simulator .panel-tongue {
+	background: linear-gradient(135deg, #db3498 0%, #b92980 100%);
+}
+
+body.retro-theme #expedition-simulator .panel-main {
+	border-right-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .panel-main:hover,
+body.retro-theme #expedition-simulator .panel-main:focus-within {
+	border-color: #db3498;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .panel-content::-webkit-scrollbar-track,
+body.retro-theme #expedition-simulator .prob-content::-webkit-scrollbar-track,
+body.retro-theme #expedition-simulator .results-content::-webkit-scrollbar-track {
+	background: rgba(219, 52, 152, 0.1);
+	border-radius: 0;
+}
+
+body.retro-theme #expedition-simulator .panel-content::-webkit-scrollbar-thumb,
+body.retro-theme #expedition-simulator .prob-content::-webkit-scrollbar-thumb,
+body.retro-theme #expedition-simulator .results-content::-webkit-scrollbar-thumb {
+	background: #db3498;
+	border-radius: 0;
+}
+
+/* ── Probability display ─────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .probability-display h4 {
+	color: #db3498;
+	border-bottom-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .outcome-category h5 {
+	color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .outcome-category {
+	border-bottom-color: rgba(219, 52, 152, 0.2);
+}
+
+/* ── Expedition result cards ─────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .expedition-result-card {
+	border-color: #db3498;
+	box-shadow: 0 2px 8px rgba(219, 52, 152, 0.3);
+}
+
+body.retro-theme #expedition-simulator .expedition-result-avatar {
+	border-color: #db3498;
+}
+
+/* ── Legend ──────────────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .expedition-legend {
+	border-color: rgba(219, 52, 152, 0.3);
+}
+
+body.retro-theme #expedition-simulator .expedition-legend h5 {
+	color: #db3498;
+}
+
+/* ── Tabs / active indicators ────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .tab-btn.active,
+body.retro-theme #expedition-simulator .tab-btn:hover {
+	color: #db3498;
+	border-bottom-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .tab-content.active {
+	border-color: #db3498;
+}
+
+/* ── Sectors ─────────────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .sector-grid-title {
+	color: #db3498;
+	border-bottom-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .sector-category-title {
+	border-bottom-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .sector-btn.selected,
+body.retro-theme #expedition-simulator .sector-btn:focus {
+	border-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .diplomacy-toggle-btn.active {
+	border-color: #db3498;
+}
+
+/* ── Import buttons ──────────────────────────────────────────────────── */
+body.retro-theme .expe-import-btn {
+	background: #df0074;
+	background: linear-gradient(0deg, #c3003b 2%, #df0074 6% 46%, #e5008e 54% 94%, #e5499a 96%);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .results-table thead th {
+	background: #db3498;
+}
+
+body.retro-theme #expedition-simulator .highlighted-row td:first-child {
+	color: #db3498;
+}
+
+/* ── Modals ──────────────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .modal-container {
+	border-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .modal-search-input:focus {
+	border-color: #db3498;
+}
+
+body.retro-theme #expedition-simulator .modal-title {
+	color: #db3498;
+}
+
+/* ── Results / progress ──────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .probability-bar-fill {
+	background: #db3498;
+}
+
+/* ── Planet review ───────────────────────────────────────────────────── */
+body.retro-theme #expedition-simulator .planetary-review .planet-nav {
+	/*color: #db3498;*/
+}
