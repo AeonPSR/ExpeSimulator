@@ -22,9 +22,10 @@ module.exports = {
   
   // Coverage configuration (optional, for future use)
   collectCoverageFrom: [
-    'js/**/*.js',
-    '!js/content.js',
-    '!js/app.js'
+    'general/js/**/*.js',
+    'expeditionSimulator/js/**/*.js',
+    '!expeditionSimulator/js/app.js',
+    '!content.js'
   ],
   
   // Custom progress bar reporter (only shows failures verbosely)

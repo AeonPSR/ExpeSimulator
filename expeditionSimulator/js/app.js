@@ -655,7 +655,7 @@ class ExpeditionSimulatorApp {
 			// Content scripts can't create workers via chrome.runtime.getURL() directly
 			// (cross-origin restriction). Use a Blob wrapper — importScripts is not
 			// subject to same-origin policy, so it can load extension resources.
-			const workerScriptURL = getResourceURL('js/workers/calculation-worker.js');
+			const workerScriptURL = getResourceURL('expeditionSimulator/js/workers/calculation-worker.js');
 			this._baseURL = getResourceURL('');
 			const blob = new Blob(
 				[`importScripts("${workerScriptURL}");`],
