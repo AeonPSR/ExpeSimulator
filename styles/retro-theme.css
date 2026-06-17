@@ -1,6 +1,6 @@
 /* ==========================================================================
    Retro Theme — active when <body class="retro-theme">
-   All selectors include .expedition-panel to beat the default specificity.
+   All selectors include .app-panel to beat the default specificity.
    ========================================================================== */
 
 /* ── Chamfer definition ──────────────────────────────────────────────── */
@@ -15,25 +15,25 @@ body.retro-theme {
 }
 
 /* ── Chamfer: all chamfered elements ─────────────────────────────────── */
-body.retro-theme .expedition-panel button,
-body.retro-theme .expedition-panel input,
-body.retro-theme .expedition-panel .player-profile,
-body.retro-theme .expedition-panel .player-avatar,
-body.retro-theme .expedition-panel .ability-slot,
-body.retro-theme .expedition-panel .item-slot,
-body.retro-theme .expedition-panel .health-slot,
-body.retro-theme .expedition-panel .morale-slot,
-body.retro-theme .expedition-panel .sector-item,
-body.retro-theme .expedition-panel .selected-sector-item,
-body.retro-theme .expedition-panel .expedition-result-card,
-body.retro-theme .expedition-panel .expedition-result-avatar,
-body.retro-theme .expedition-panel .selected-grid,
-body.retro-theme .expedition-panel .expe-close-btn,
-body.retro-theme .expedition-panel .prob-content,
-body.retro-theme .expedition-panel .resource-table,
-body.retro-theme .expedition-panel .events-table,
-body.retro-theme .expedition-panel .results-content,
-body.retro-theme .expedition-panel .expedition-legend,
+body.retro-theme .app-panel button,
+body.retro-theme .app-panel input,
+body.retro-theme .app-panel .player-profile,
+body.retro-theme .app-panel .player-avatar,
+body.retro-theme .app-panel .ability-slot,
+body.retro-theme .app-panel .item-slot,
+body.retro-theme .app-panel .health-slot,
+body.retro-theme .app-panel .morale-slot,
+body.retro-theme .app-panel .sector-item,
+body.retro-theme .app-panel .selected-sector-item,
+body.retro-theme .app-panel .expedition-result-card,
+body.retro-theme .app-panel .expedition-result-avatar,
+body.retro-theme .app-panel .selected-grid,
+body.retro-theme .app-panel .expe-close-btn,
+body.retro-theme .app-panel .prob-content,
+body.retro-theme .app-panel .resource-table,
+body.retro-theme .app-panel .events-table,
+body.retro-theme .app-panel .results-content,
+body.retro-theme .app-panel .expedition-legend,
 /* ── Modal (mounted on body, scoped via [data-expe-sim]) ────────────── */
 body.retro-theme [data-expe-sim] button,
 body.retro-theme [data-expe-sim] input,
@@ -47,134 +47,134 @@ body.retro-theme [data-expe-sim] .modal-container {
 }
 
 /* ── Per-element chamfer size overrides ──────────────────────────────── */
-body.retro-theme .expedition-panel .sector-item,
-body.retro-theme .expedition-panel .player-profile,
-body.retro-theme .expedition-panel .add-player-btn,
-body.retro-theme .expedition-panel .resource-table,
-body.retro-theme .expedition-panel .prob-content,
-body.retro-theme .expedition-panel .events-table,
-body.retro-theme .expedition-panel .results-content,
-body.retro-theme .expedition-panel .expedition-legend,
+body.retro-theme .app-panel .sector-item,
+body.retro-theme .app-panel .player-profile,
+body.retro-theme .app-panel .add-player-btn,
+body.retro-theme .app-panel .resource-table,
+body.retro-theme .app-panel .prob-content,
+body.retro-theme .app-panel .events-table,
+body.retro-theme .app-panel .results-content,
+body.retro-theme .app-panel .expedition-legend,
 /* Modal elements (mounted on body, scoped via [data-expe-sim]) */
 body.retro-theme [data-expe-sim] .character-option,
 body.retro-theme [data-expe-sim] .ability-selection {
 	border-radius: 10px;
 }
 
-body.retro-theme .expedition-panel .tab-bar button {
+body.retro-theme .app-panel .tab-bar button {
 	border-radius: 0px;
 }
 
-body.retro-theme .expedition-panel .panel-tongue {
+body.retro-theme .app-panel .panel-tongue {
 	border-top-right-radius: 10px;
 	border-bottom-right-radius: 10px;
 	corner-top-right-shape: bevel;
 	corner-bottom-right-shape: bevel;
 }
 
-body.retro-theme .expedition-panel .selected-grid {
+body.retro-theme .app-panel .selected-grid {
 	border-radius: 15px;
 }
 
-body.retro-theme .expedition-panel .fuel-arrow {
+body.retro-theme .app-panel .fuel-arrow {
 	border-radius: 0;
 	corner-shape: square;
 }
 
-body.retro-theme .expedition-panel .selected-sector-item {
+body.retro-theme .app-panel .selected-sector-item {
 	border-radius: 5px;
 }
 
 /* ── Panel structure ─────────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .panel-header,
-body.retro-theme .expedition-panel .panel-tongue {
+body.retro-theme .app-panel .panel-header,
+body.retro-theme .app-panel .panel-tongue {
 	background: linear-gradient(135deg, #db3498 0%, #b92980 100%);
 }
 
-body.retro-theme .expedition-panel .panel-main {
+body.retro-theme .app-panel .panel-main {
 	border-right-color: #db3498;
 }
 
-body.retro-theme .expedition-panel .panel-main:hover,
-body.retro-theme .expedition-panel .panel-main:focus-within {
+body.retro-theme .app-panel .panel-main:hover,
+body.retro-theme .app-panel .panel-main:focus-within {
 	border-color: #db3498;
 }
 
 /* ── Scrollbar ───────────────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .panel-content::-webkit-scrollbar-track,
-body.retro-theme .expedition-panel .prob-content::-webkit-scrollbar-track,
-body.retro-theme .expedition-panel .results-content::-webkit-scrollbar-track {
+body.retro-theme .app-panel .panel-content::-webkit-scrollbar-track,
+body.retro-theme .app-panel .prob-content::-webkit-scrollbar-track,
+body.retro-theme .app-panel .results-content::-webkit-scrollbar-track {
 	background: rgba(219, 52, 152, 0.1);
 	border-radius: 0;
 }
 
-body.retro-theme .expedition-panel .panel-content::-webkit-scrollbar-thumb,
-body.retro-theme .expedition-panel .prob-content::-webkit-scrollbar-thumb,
-body.retro-theme .expedition-panel .results-content::-webkit-scrollbar-thumb {
+body.retro-theme .app-panel .panel-content::-webkit-scrollbar-thumb,
+body.retro-theme .app-panel .prob-content::-webkit-scrollbar-thumb,
+body.retro-theme .app-panel .results-content::-webkit-scrollbar-thumb {
 	background: #db3498;
 	border-radius: 0;
 }
 
 /* ── Probability display ─────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .probability-display h4 {
+body.retro-theme .app-panel .probability-display h4 {
 	color: #db3498;
 	border-bottom-color: #db3498;
 }
 
-body.retro-theme .expedition-panel .outcome-category h5 {
+body.retro-theme .app-panel .outcome-category h5 {
 	color: #db3498;
 }
 
-body.retro-theme .expedition-panel .outcome-category {
+body.retro-theme .app-panel .outcome-category {
 	border-bottom-color: rgba(219, 52, 152, 0.2);
 }
 
 /* ── Expedition result cards ─────────────────────────────────────────── */
-body.retro-theme .expedition-panel .expedition-result-card {
+body.retro-theme .app-panel .expedition-result-card {
 	border-color: #db3498;
 	box-shadow: 0 2px 8px rgba(219, 52, 152, 0.3);
 }
 
-body.retro-theme .expedition-panel .expedition-result-avatar {
+body.retro-theme .app-panel .expedition-result-avatar {
 	border-color: #db3498;
 }
 
 /* ── Legend ──────────────────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .expedition-legend {
+body.retro-theme .app-panel .expedition-legend {
 	border-color: rgba(219, 52, 152, 0.3);
 }
 
-body.retro-theme .expedition-panel .expedition-legend h5 {
+body.retro-theme .app-panel .expedition-legend h5 {
 	color: #db3498;
 }
 
 /* ── Tabs / active indicators ────────────────────────────────────────── */
-body.retro-theme .expedition-panel .tab-btn.active,
-body.retro-theme .expedition-panel .tab-btn:hover {
+body.retro-theme .app-panel .tab-btn.active,
+body.retro-theme .app-panel .tab-btn:hover {
 	color: #db3498;
 	border-bottom-color: #db3498;
 }
 
-body.retro-theme .expedition-panel .tab-content.active {
+body.retro-theme .app-panel .tab-content.active {
 	border-color: #db3498;
 }
 
 /* ── Sectors ─────────────────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .sector-grid-title {
+body.retro-theme .app-panel .sector-grid-title {
 	color: #db3498;
 	border-bottom-color: #db3498;
 }
 
-body.retro-theme .expedition-panel .sector-category-title {
+body.retro-theme .app-panel .sector-category-title {
 	border-bottom-color: #db3498;
 }
 
-body.retro-theme .expedition-panel .sector-btn.selected,
-body.retro-theme .expedition-panel .sector-btn:focus {
+body.retro-theme .app-panel .sector-btn.selected,
+body.retro-theme .app-panel .sector-btn:focus {
 	border-color: #db3498;
 }
 
-body.retro-theme .expedition-panel .diplomacy-toggle-btn.active {
+body.retro-theme .app-panel .diplomacy-toggle-btn.active {
 	border-color: #db3498;
 }
 
@@ -185,33 +185,33 @@ body.retro-theme .expe-import-btn {
 }
 
 /* ── Tables ──────────────────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .results-table thead th {
+body.retro-theme .app-panel .results-table thead th {
 	background: #db3498;
 }
 
-body.retro-theme .expedition-panel .highlighted-row td:first-child {
+body.retro-theme .app-panel .highlighted-row td:first-child {
 	color: #db3498;
 }
 
 /* ── Modals ──────────────────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .modal-container {
+body.retro-theme .app-panel .modal-container {
 	border-color: #db3498;
 }
 
-body.retro-theme .expedition-panel .modal-search-input:focus {
+body.retro-theme .app-panel .modal-search-input:focus {
 	border-color: #db3498;
 }
 
-body.retro-theme .expedition-panel .modal-title {
+body.retro-theme .app-panel .modal-title {
 	color: #db3498;
 }
 
 /* ── Results / progress ──────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .probability-bar-fill {
+body.retro-theme .app-panel .probability-bar-fill {
 	background: #db3498;
 }
 
 /* ── Planet review ───────────────────────────────────────────────────── */
-body.retro-theme .expedition-panel .planetary-review .planet-nav {
+body.retro-theme .app-panel .planetary-review .planet-nav {
 	/*color: #db3498;*/
 }

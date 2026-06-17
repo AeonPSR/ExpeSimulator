@@ -4,8 +4,6 @@
    ========================================================================== */
 
 /* Main Panel Container */
-#expedition-simulator { z-index: 10000; }
-
 .app-panel {
 	position: fixed;
 	top: 0;
@@ -72,6 +70,10 @@
 }
 
 /* Panel Tongue — lives inside the panel; CSS :hover cascade opens it */
+.app-panel.panel-on-top {
+	z-index: 10001;
+}
+
 .app-panel .panel-tongue {
 	position: absolute;
 	left: 100%;

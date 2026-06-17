@@ -146,12 +146,15 @@ class Panel extends Component {
 			className: 'panel-theme-btn',
 			title: 'Toggle retro theme'
 		}, '★');
+		themeBtn.classList.toggle('panel-theme-btn--active', document.body.classList.contains('retro-theme'));
 		this.addEventListener(themeBtn, 'click', () => {
 			document.body.classList.add('retro-theme-switching');
 			const isRetro = document.body.classList.toggle('retro-theme');
 			document.body.getBoundingClientRect(); // force reflow so the freeze applies
 			document.body.classList.remove('retro-theme-switching');
-			themeBtn.classList.toggle('panel-theme-btn--active', isRetro);
+			document.querySelectorAll('.panel-theme-btn').forEach(btn => {
+				btn.classList.toggle('panel-theme-btn--active', isRetro);
+			});
 		});
 		header.appendChild(themeBtn);
 
@@ -205,6 +208,11 @@ class Panel extends Component {
 	onMount() {
 		// Prevent click propagation to underlying page elements
 		this._setupClickPrevention();
+		// Keep the last-interacted panel on top persistently
+		this.addEventListener(this.element, 'mouseenter', () => {
+			document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('panel-on-top'));
+			this.element.classList.add('panel-on-top');
+		});
 	}
 
 	/**
