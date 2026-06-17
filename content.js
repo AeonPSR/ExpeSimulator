@@ -27,6 +27,7 @@ function initializeApp() {
 
 		// Create the application
 		window.expeditionSimulator = new ExpeditionSimulatorApp();
+		window.settingsApp = new SettingsApp();
 		// console.log('Expedition Simulator initialized');
 
 	} catch (error) {

@@ -4,11 +4,11 @@
    ========================================================================== */
 
 /* Players Section Container */
-#expedition-simulator .players-section {
+.expedition-panel .players-section {
 	margin: 20px 0;
 }
 
-#expedition-simulator .players-section h4 {
+.expedition-panel .players-section h4 {
 	margin: 0 0 15px 0;
 	font-size: 16px;
 	color: #e67e22;
@@ -20,7 +20,7 @@
 }
 
 /* Players Header */
-#expedition-simulator .players-header {
+.expedition-panel .players-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -28,14 +28,14 @@
 	flex-direction: row;
 }
 
-#expedition-simulator .players-header h4 {
+.expedition-panel .players-header h4 {
 	margin: 0;
 	border-bottom: 2px solid #e67e22;
 	padding-bottom: 8px;
 	flex: 1;
 }
 
-#expedition-simulator .players-controls {
+.expedition-panel .players-controls {
 	display: flex;
 	align-items: center;
 	flex-direction: row;
@@ -44,7 +44,7 @@
 }
 
 /* Players Container */
-#expedition-simulator .players-container {
+.expedition-panel .players-container {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -54,7 +54,7 @@
    Player Profile Card
    ========================================================================== */
 
-#expedition-simulator .player-profile {
+.expedition-panel .player-profile {
 	display: flex;
 	background: rgba(0, 0, 0, 0.2);
 	border: 2px solid #e67e22;
@@ -67,7 +67,7 @@
 }
 
 /* Player Avatar */
-#expedition-simulator .player-avatar {
+.expedition-panel .player-avatar {
 	width: 42px;
 	height: 60px;
 	border-radius: 4px;
@@ -81,19 +81,19 @@
 	transition: all 0.3s ease;
 }
 
-#expedition-simulator .player-avatar:hover {
+.expedition-panel .player-avatar:hover {
 	border-color: #3498db;
 	transform: scale(1.05);
 }
 
-#expedition-simulator .player-avatar img {
+.expedition-panel .player-avatar img {
 	width: auto;
 	height: 100%;
 	object-fit: cover;
 }
 
 /* Player Details */
-#expedition-simulator .player-details {
+.expedition-panel .player-details {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
@@ -104,13 +104,13 @@
    Ability Slots
    ========================================================================== */
 
-#expedition-simulator .player-abilities {
+.expedition-panel .player-abilities {
 	display: flex;
 	flex-direction: row;
 	gap: 4px;
 }
 
-#expedition-simulator .ability-slot {
+.expedition-panel .ability-slot {
 	width: 30px;
 	height: 30px;
 	border: 2px solid #34495e;
@@ -124,13 +124,13 @@
 	overflow: hidden;
 }
 
-#expedition-simulator .ability-slot:hover {
+.expedition-panel .ability-slot:hover {
 	border-color: #3498db;
 	background: rgba(52, 152, 219, 0.2);
 }
 
 
-#expedition-simulator .ability-slot img {
+.expedition-panel .ability-slot img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
@@ -140,14 +140,14 @@
    Item Slots
    ========================================================================== */
 
-#expedition-simulator .player-bottom-row {
+.expedition-panel .player-bottom-row {
 	display: flex;
 	flex-direction: row;
 	gap: 4px;
 	align-items: center;
 }
 
-#expedition-simulator .item-slot {
+.expedition-panel .item-slot {
 	width: 30px;
 	height: 30px;
 	border: 2px solid #34495e;
@@ -161,12 +161,12 @@
 	overflow: hidden;
 }
 
-#expedition-simulator .item-slot:hover {
+.expedition-panel .item-slot:hover {
 	border-color: #27ae60;
 	background: rgba(39, 174, 96, 0.2);
 }
 
-#expedition-simulator .item-slot img {
+.expedition-panel .item-slot img {
 	width: 100%;
 	height: 100%;
 	object-fit: contain;
@@ -176,8 +176,8 @@
    Health & Morale Slots
    ========================================================================== */
 
-#expedition-simulator .health-slot,
-#expedition-simulator .morale-slot {
+.expedition-panel .health-slot,
+.expedition-panel .morale-slot {
 	width: 40px;
 	height: 30px;
 	border: 2px solid #e74c3c;
@@ -194,23 +194,24 @@
 	flex-direction: row;
 }
 
-#expedition-simulator .morale-slot {
+.expedition-panel .morale-slot {
 	border-color: #f39c12;
 	background: rgba(243, 156, 18, 0.2);
 }
 
-#expedition-simulator .health-slot:hover {
+.expedition-panel .health-slot:hover {
 	border-color: #c0392b;
 	background: rgba(231, 76, 60, 0.3);
 }
 
-#expedition-simulator .morale-slot:hover {
+.expedition-panel .morale-slot:hover {
 	border-color: #e67e22;
 	background: rgba(243, 156, 18, 0.3);
 }
 
-#expedition-simulator .hp-icon {
+.expedition-panel .hp-icon {
 	width: 14px;
 	height: 14px;
 	margin-left: 2px;
 }
+

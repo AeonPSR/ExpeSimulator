@@ -71,6 +71,7 @@
       ],
       "css": [
         "styles/main.css",
+        "styles/settings.css",
         "styles/utilities.css", 
         "styles/buttons.css",
         "styles/sectors.css",

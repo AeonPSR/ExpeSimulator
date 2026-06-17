@@ -1,0 +1,8 @@
+/* ==========================================================================
+   Settings Panel
+   z-index override only — all layout/theme styles come from .app-panel in main.css
+   ========================================================================== */
+
+#settings-panel {
+	z-index: 9998;
+}

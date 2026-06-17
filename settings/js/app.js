@@ -2,15 +2,23 @@
  * Settings Panel
  *
  * Entry point for the Settings panel.
- * Placeholder — implementation pending.
  */
 class SettingsApp {
-	constructor(container) {
-		this._container = container;
+	constructor() {
+		this._panel = null;
+		this._init();
 	}
 
-	init() {
-		// TODO: build settings UI
+	_init() {
+		this._panel = new Panel({
+			id: 'settings-panel',
+			panelClass: 'settings-panel',
+			title: 'Settings',
+			tongueIcon: getResourceURL('pictures/abilities/creatif.png'),
+			tongueAlt: 'Settings',
+			getResourceURL: getResourceURL
+		});
+		this._panel.mount(document.body);
 	}
 }
 

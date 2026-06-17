@@ -7,7 +7,7 @@
    Probability Display Container
    ========================================================================== */
 
-#expedition-simulator .prob-content {
+.expedition-panel .prob-content {
 	background: rgba(0, 0, 0, 0.2);
 	border-radius: 8px;
 	padding: 15px;
@@ -15,11 +15,11 @@
 	overflow-y: auto;
 }
 
-#expedition-simulator .prob-content::-webkit-scrollbar {
+.expedition-panel .prob-content::-webkit-scrollbar {
 	width: 6px;
 }
 
-#expedition-simulator .prob-content::-webkit-scrollbar-thumb {
+.expedition-panel .prob-content::-webkit-scrollbar-thumb {
 	background: #3498db;
 	border-radius: 3px;
 }
@@ -28,18 +28,18 @@
    Outcome Categories
    ========================================================================== */
 
-#expedition-simulator .outcome-category {
+.expedition-panel .outcome-category {
 	margin-bottom: 20px;
 	padding-bottom: 15px;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-#expedition-simulator .outcome-category:last-child {
+.expedition-panel .outcome-category:last-child {
 	border-bottom: none;
 	margin-bottom: 0;
 }
 
-#expedition-simulator .outcome-category h5 {
+.expedition-panel .outcome-category h5 {
 	margin: 0 0 10px 0;
 	font-size: 14px;
 	color: #3498db;
@@ -48,11 +48,11 @@
 	letter-spacing: 0.5px;
 }
 
-#expedition-simulator .fight-stats {
+.expedition-panel .fight-stats {
 	align-items: center;
 }
 
-#expedition-simulator .outcome-item {
+.expedition-panel .outcome-item {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -60,7 +60,7 @@
 	font-size: 12px;
 }
 
-#expedition-simulator .outcome-item span:first-child {
+.expedition-panel .outcome-item span:first-child {
 	color: #ecf0f1;
 	font-weight: 500;
 }
@@ -69,7 +69,7 @@
    Resource Table
    ========================================================================== */
 
-#expedition-simulator .resource-table {
+.expedition-panel .resource-table {
 	width: 100%;
 	border-collapse: collapse;
 	margin-top: 10px;
@@ -79,18 +79,18 @@
 	font-size: 13px;
 }
 
-#expedition-simulator .resource-table th,
-#expedition-simulator .resource-table td {
+.expedition-panel .resource-table th,
+.expedition-panel .resource-table td {
 	padding: 8px 12px;
 	text-align: left;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-#expedition-simulator .resource-table thead {
+.expedition-panel .resource-table thead {
 	background: linear-gradient(135deg, #34495e, #2c3e50);
 }
 
-#expedition-simulator .resource-table th {
+.expedition-panel .resource-table th {
 	font-weight: 600;
 	font-size: 11px;
 	text-transform: uppercase;
@@ -99,49 +99,49 @@
 	padding: 10px 8px;
 }
 
-#expedition-simulator .resource-table tbody tr {
+.expedition-panel .resource-table tbody tr {
 	transition: background-color 0.2s ease;
 }
 
-#expedition-simulator .resource-table tbody tr:hover {
+.expedition-panel .resource-table tbody tr:hover {
 	background: rgba(255, 255, 255, 0.05);
 }
 
-#expedition-simulator .resource-table tbody tr:last-child td {
+.expedition-panel .resource-table tbody tr:last-child td {
 	border-bottom: none;
 }
 
-#expedition-simulator .resource-table td:first-child {
+.expedition-panel .resource-table td:first-child {
 	font-weight: 500;
 	color: #ecf0f1;
 	width: 35%;
 }
 
-#expedition-simulator .pessimist-col,
-#expedition-simulator .median-col,
-#expedition-simulator .optimist-col {
+.expedition-panel .pessimist-col,
+.expedition-panel .median-col,
+.expedition-panel .optimist-col {
 	width: 21.66%;
 	text-align: center;
 }
 
-#expedition-simulator .resource-table .warning,
-#expedition-simulator .resource-table .neutral,
-#expedition-simulator .resource-table .positive {
+.expedition-panel .resource-table .warning,
+.expedition-panel .resource-table .neutral,
+.expedition-panel .resource-table .positive {
 	font-weight: 600;
 }
 
 /* Special styling for "none" rows */
-#expedition-simulator .resource-table td[colspan="3"] {
+.expedition-panel .resource-table td[colspan="3"] {
 	opacity: 0.6;
 	font-size: 12px;
 }
 
-#expedition-simulator .resource-table .icon-cell {
+.expedition-panel .resource-table .icon-cell {
 	text-align: left;
 	vertical-align: middle;
 }
 
-#expedition-simulator .resource-table .none-row {
+.expedition-panel .resource-table .none-row {
 	text-align: center;
 	font-style: italic;
 }
@@ -150,7 +150,7 @@
    Events Table
    ========================================================================== */
 
-#expedition-simulator .events-table {
+.expedition-panel .events-table {
 	width: 100%;
 	border-collapse: collapse;
 	margin-top: 10px;
@@ -160,18 +160,18 @@
 	font-size: 13px;
 }
 
-#expedition-simulator .events-table th,
-#expedition-simulator .events-table td {
+.expedition-panel .events-table th,
+.expedition-panel .events-table td {
 	padding: 8px 12px;
 	text-align: left;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-#expedition-simulator .events-table thead {
+.expedition-panel .events-table thead {
 	background: linear-gradient(135deg, #34495e, #2c3e50);
 }
 
-#expedition-simulator .events-table th {
+.expedition-panel .events-table th {
 	font-weight: 600;
 	font-size: 11px;
 	text-transform: uppercase;
@@ -180,49 +180,50 @@
 	padding: 10px 8px;
 }
 
-#expedition-simulator .events-table th:first-child {
+.expedition-panel .events-table th:first-child {
 	width: 40%;
 }
 
-#expedition-simulator .events-table th:nth-child(2),
-#expedition-simulator .events-table th:nth-child(3),
-#expedition-simulator .events-table th:nth-child(4) {
+.expedition-panel .events-table th:nth-child(2),
+.expedition-panel .events-table th:nth-child(3),
+.expedition-panel .events-table th:nth-child(4) {
 	width: 20%;
 	text-align: center;
 }
 
-#expedition-simulator .events-table tbody tr {
+.expedition-panel .events-table tbody tr {
 	transition: background-color 0.2s ease;
 }
 
-#expedition-simulator .events-table tbody tr:hover {
+.expedition-panel .events-table tbody tr:hover {
 	background: rgba(255, 255, 255, 0.05);
 }
 
-#expedition-simulator .events-table tbody tr:last-child td {
+.expedition-panel .events-table tbody tr:last-child td {
 	border-bottom: none;
 }
 
-#expedition-simulator .events-table td:first-child {
+.expedition-panel .events-table td:first-child {
 	font-weight: 500;
 	color: #ecf0f1;
 }
 
-#expedition-simulator .events-table td:nth-child(2),
-#expedition-simulator .events-table td:nth-child(3),
-#expedition-simulator .events-table td:nth-child(4) {
+.expedition-panel .events-table td:nth-child(2),
+.expedition-panel .events-table td:nth-child(3),
+.expedition-panel .events-table td:nth-child(4) {
 	text-align: center;
 	font-weight: 600;
 }
 
-#expedition-simulator .events-table .warning,
-#expedition-simulator .events-table .neutral,
-#expedition-simulator .events-table .positive {
+.expedition-panel .events-table .warning,
+.expedition-panel .events-table .neutral,
+.expedition-panel .events-table .positive {
 	font-weight: 600;
 }
 
-#expedition-simulator .events-table .none-row {
+.expedition-panel .events-table .none-row {
 	text-align: center;
 	font-style: italic;
 	opacity: 0.6;
 }
+

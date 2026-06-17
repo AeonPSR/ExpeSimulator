@@ -13,14 +13,20 @@
 class Panel extends Component {
 	/**
 	 * @param {Object} options
+	 * @param {string} [options.id='expedition-simulator'] - Element id for the panel
+	 * @param {string} [options.panelClass='app-panel'] - CSS class for the panel
 	 * @param {string} [options.title='Expedition Simulator'] - Panel header title
 	 * @param {string} [options.tongueIcon] - URL for the tongue icon image
+	 * @param {string} [options.tongueAlt='Panel'] - Alt text for the tongue icon
 	 * @param {Function} [options.getResourceURL] - Function to resolve resource URLs
 	 */
 	constructor(options = {}) {
 		super(options);
+		this.panelId = options.id || 'expedition-simulator';
+		this.panelClass = options.panelClass || 'expedition-panel';
 		this.title = options.title || I18n.t('panel.title');
 		this.tongueIcon = options.tongueIcon || null;
+		this.tongueAlt = options.tongueAlt || 'Panel';
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 		
 		// References to key internal elements
@@ -36,8 +42,8 @@ class Panel extends Component {
 	render() {
 		// Main panel container
 		this.element = this.createElement('div', {
-			id: 'expedition-simulator',
-			className: 'expedition-panel'
+			id: this.panelId,
+			className: 'app-panel ' + this.panelClass
 		});
 
 		// Check if we're in test mode and keep panel expanded
@@ -45,7 +51,7 @@ class Panel extends Component {
 			this.element.classList.add('test-mode');
 		}
 
-		// Panel tongue (expand tab)
+		// Tongue is a child of the panel — CSS :hover cascade opens the panel
 		this._tongue = this._createTongue();
 		this.element.appendChild(this._tongue);
 
@@ -67,7 +73,7 @@ class Panel extends Component {
 		if (this.tongueIcon) {
 			const img = this.createElement('img', {
 				src: this.tongueIcon,
-				alt: 'Expedition'
+				alt: this.tongueAlt
 			});
 			tongue.appendChild(img);
 		}
@@ -175,6 +181,22 @@ class Panel extends Component {
 				this.element.classList.remove('force-close');
 			}, { once: true });
 		}
+	}
+
+	/**
+	 * Overrides Component.mount() to place panels into a shared #panels-container.
+	 * nth-child CSS then handles tongue stacking automatically.
+	 * @param {HTMLElement} [container]
+	 * @returns {HTMLElement}
+	 */
+	mount(container = null) {
+		let panelsContainer = document.getElementById('panels-container');
+		if (!panelsContainer) {
+			panelsContainer = document.createElement('div');
+			panelsContainer.id = 'panels-container';
+			document.body.insertBefore(panelsContainer, document.body.firstChild);
+		}
+		return super.mount(panelsContainer);
 	}
 
 	/**
