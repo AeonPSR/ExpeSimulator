@@ -29,6 +29,11 @@ body.retro-theme #expedition-simulator .expedition-result-card,
 body.retro-theme #expedition-simulator .expedition-result-avatar,
 body.retro-theme #expedition-simulator .selected-grid,
 body.retro-theme #expedition-simulator .expe-close-btn,
+body.retro-theme #expedition-simulator .prob-content,
+body.retro-theme #expedition-simulator .resource-table,
+body.retro-theme #expedition-simulator .events-table,
+body.retro-theme #expedition-simulator .results-content,
+body.retro-theme #expedition-simulator .expedition-legend,
 /* ── Modal (mounted on body, scoped via [data-expe-sim]) ────────────── */
 body.retro-theme [data-expe-sim] button,
 body.retro-theme [data-expe-sim] input,
@@ -42,14 +47,17 @@ body.retro-theme [data-expe-sim] .modal-container {
 }
 
 /* ── Per-element chamfer size overrides ──────────────────────────────── */
-body.retro-theme [data-expe-sim] .character-option,
-body.retro-theme [data-expe-sim] .ability-selection {
-	border-radius: 10px;
-}
-
 body.retro-theme #expedition-simulator .sector-item,
 body.retro-theme #expedition-simulator .player-profile,
-body.retro-theme #expedition-simulator .add-player-btn {
+body.retro-theme #expedition-simulator .add-player-btn,
+body.retro-theme #expedition-simulator .resource-table,
+body.retro-theme #expedition-simulator .prob-content,
+body.retro-theme #expedition-simulator .events-table,
+body.retro-theme #expedition-simulator .results-content,
+body.retro-theme #expedition-simulator .expedition-legend,
+/* Modal elements (mounted on body, scoped via [data-expe-sim]) */
+body.retro-theme [data-expe-sim] .character-option,
+body.retro-theme [data-expe-sim] .ability-selection {
 	border-radius: 10px;
 }
 
@@ -66,6 +74,11 @@ body.retro-theme #expedition-simulator .panel-tongue {
 
 body.retro-theme #expedition-simulator .selected-grid {
 	border-radius: 15px;
+}
+
+body.retro-theme #expedition-simulator .fuel-arrow {
+	border-radius: 0;
+	corner-shape: square;
 }
 
 body.retro-theme #expedition-simulator .selected-sector-item {
@@ -202,6 +215,3 @@ body.retro-theme #expedition-simulator .probability-bar-fill {
 body.retro-theme #expedition-simulator .planetary-review .planet-nav {
 	/*color: #db3498;*/
 }
-
-
-expe-close-btn
