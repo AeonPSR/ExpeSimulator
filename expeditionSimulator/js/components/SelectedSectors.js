@@ -125,7 +125,7 @@ class SelectedSectors extends Component {
 
 		// Main image
 		const img = this.createElement('img', {
-			src: this.getResourceURL(`pictures/astro/${sectorName.toLowerCase()}.png`),
+			src: this.getResourceURL(`pictures/sectors/${sectorName.toLowerCase()}.png`),
 			alt: sectorName
 		});
 		sectorDiv.appendChild(img);
@@ -133,7 +133,7 @@ class SelectedSectors extends Component {
 		// Fight icon if applicable
 		if (SectorData.hasFightEvents(sectorName)) {
 			const fightImg = this.createElement('img', {
-				src: this.getResourceURL('pictures/others/fight.png'),
+				src: this.getResourceURL('pictures/ui/fight.png'),
 				alt: 'Fight',
 				className: 'fight-icon'
 			});

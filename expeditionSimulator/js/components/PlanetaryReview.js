@@ -7,8 +7,8 @@
  *
  *   imageId = intval(hash('crc32', $planet->getName()->toString()), 16) % 5
  *
- * Images used: pictures/astro/planet_0_small.png … planet_4_small.png
- * Fallback:    pictures/astro/planet_unknown.png  (no name / error)
+ * Images used: pictures/planets/planet_0_small.png … planet_4_small.png
+ * Fallback:    pictures/planets/planet_unknown.png  (no name / error)
  */
 class PlanetaryReview extends Component {
 	/**
@@ -51,13 +51,13 @@ class PlanetaryReview extends Component {
 	 */
 	static getPlanetImage(planetName, getResourceURL) {
 		if (!planetName) {
-			return getResourceURL('pictures/astro/planet_unknown.png');
+			return getResourceURL('pictures/planets/planet_unknown.png');
 		}
 		try {
 			const imageId = Hash.crc32(planetName) % 5;
-			return getResourceURL(`pictures/astro/planet_${imageId}_small.png`);
+			return getResourceURL(`pictures/planets/planet_${imageId}_small.png`);
 		} catch (_) {
-			return getResourceURL('pictures/astro/planet_unknown.png');
+			return getResourceURL('pictures/planets/planet_unknown.png');
 		}
 	}
 
@@ -74,7 +74,7 @@ class PlanetaryReview extends Component {
 			dataset: { active: 'true' }
 		});
 		const compassImg = this.createElement('img', {
-			src: this.getResourceURL('pictures/items_exploration/quad_compass.jpg'),
+			src: this.getResourceURL('pictures/gear/quad_compass.jpg'),
 			alt: 'Direction'
 		});
 		this._compassBtn.appendChild(compassImg);
@@ -100,7 +100,7 @@ class PlanetaryReview extends Component {
 
 		const fuelDisplay = this.createElement('button', { className: 'fuel-btn' });
 		const fuelImg = this.createElement('img', {
-			src: this.getResourceURL('pictures/others/fuel.jpg'),
+			src: this.getResourceURL('pictures/ui/fuel.jpg'),
 			alt: 'Fuel cost'
 		});
 		fuelDisplay.appendChild(fuelImg);
@@ -233,7 +233,7 @@ this._imgElement.alt  = this._planetName || I18n.t('planet.unknown');
 		this._navElement.innerHTML = '';
 		const textNode = this.createElement('span', {}, this._formatNav(direction, fuelCost) + '\u00a0');
 		const icon = this.createElement('img', {
-			src: this.getResourceURL('pictures/others/fuel_icon.png'),
+			src: this.getResourceURL('pictures/ui/fuel_icon.png'),
 			className: 'fuel-icon',
 			alt: 'fuel'
 		});

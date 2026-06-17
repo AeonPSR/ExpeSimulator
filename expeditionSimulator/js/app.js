@@ -37,7 +37,7 @@ class ExpeditionSimulatorApp {
 	_init() {
 		this._panel = new Panel({
 			title: 'Expedition Simulator',
-			tongueIcon: getResourceURL('pictures/astro/astrophysicist.png'),
+			tongueIcon: getResourceURL('pictures/ui/astrophysicist.png'),
 			getResourceURL: getResourceURL
 		});
 		this._panel.mount(document.body);

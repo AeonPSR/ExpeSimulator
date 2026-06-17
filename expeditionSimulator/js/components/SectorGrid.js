@@ -127,7 +127,7 @@ class SectorGrid extends Component {
 
 		// Main sector image
 		const img = this.createElement('img', {
-			src: this.getResourceURL(`pictures/astro/${sectorName.toLowerCase()}.png`),
+			src: this.getResourceURL(`pictures/sectors/${sectorName.toLowerCase()}.png`),
 			alt: sectorName,
 			title: formatSectorName(sectorName),
 			className: 'sector-main-img'
@@ -137,7 +137,7 @@ class SectorGrid extends Component {
 		// Fight icon if sector has fight events
 		if (SectorData.hasFightEvents(sectorName)) {
 			const fightImg = this.createElement('img', {
-				src: this.getResourceURL('pictures/others/fight.png'),
+				src: this.getResourceURL('pictures/ui/fight.png'),
 				alt: 'Fight Event',
 				className: 'fight-icon'
 			});

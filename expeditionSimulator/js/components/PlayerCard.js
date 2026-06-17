@@ -176,7 +176,7 @@ class PlayerCard extends Component {
 
 			if (item) {
 				const img = this.createElement('img', {
-					src: this.getResourceURL(`pictures/items_exploration/${item}`),
+					src: this.getResourceURL(`pictures/gear/${item}`),
 					alt: 'Item'
 				});
 				slot.appendChild(img);
@@ -197,7 +197,7 @@ class PlayerCard extends Component {
 		healthSlot.textContent = this.player.health;
 
 		const hpIcon = this.createElement('img', {
-			src: this.getResourceURL('pictures/astro/hp.png'),
+			src: this.getResourceURL('pictures/ui/hp.png'),
 			alt: 'HP',
 			className: 'hp-icon'
 		});
@@ -223,7 +223,7 @@ class PlayerCard extends Component {
 			dataset: { playerId: this.player.id.toString() }
 		});
 		const icon = this.createElement('img', {
-			src: this.getResourceURL('pictures/others/bin.png'),
+			src: this.getResourceURL('pictures/ui/bin.png'),
 			alt: ''
 		});
 		removeBtn.appendChild(icon);
@@ -289,7 +289,7 @@ class PlayerCard extends Component {
 			slot.innerHTML = '';
 			if (itemFile) {
 				const img = this.createElement('img', {
-					src: this.getResourceURL(`pictures/items_exploration/${itemFile}`),
+					src: this.getResourceURL(`pictures/gear/${itemFile}`),
 					alt: 'Item'
 				});
 				slot.appendChild(img);

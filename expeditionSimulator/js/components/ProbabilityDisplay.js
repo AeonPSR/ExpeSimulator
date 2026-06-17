@@ -84,12 +84,12 @@ class ProbabilityDisplay extends Component {
 
 	_renderResources(resources) {
 		const items = [
-			{ name: I18n.t('resource.fruits'),       icon: 'pictures/items/fruit10.jpg',    data: resources.fruits },
-			{ name: I18n.t('resource.steaks'),       icon: 'pictures/items/alien_steak.jpg', data: resources.steaks },
-			{ name: I18n.t('resource.fuel'),         icon: 'pictures/items/fuel_capsule.jpg', data: resources.fuel },
-			{ name: I18n.t('resource.oxygen'),       icon: 'pictures/items/oxy_capsule.jpg', data: resources.oxygen },
-			{ name: I18n.t('resource.artefacts'),    icon: 'pictures/items/artefact.png',   data: resources.artefacts },
-			{ name: I18n.t('resource.map_fragments'), icon: 'pictures/items/super_map.jpg',  data: resources.mapFragments }
+			{ name: I18n.t('resource.fruits'),       icon: 'pictures/consumables/fruit10.jpg',    data: resources.fruits },
+			{ name: I18n.t('resource.steaks'),       icon: 'pictures/consumables/alien_steak.jpg', data: resources.steaks },
+			{ name: I18n.t('resource.fuel'),         icon: 'pictures/consumables/fuel_capsule.jpg', data: resources.fuel },
+			{ name: I18n.t('resource.oxygen'),       icon: 'pictures/consumables/oxy_capsule.jpg', data: resources.oxygen },
+			{ name: I18n.t('resource.artefacts'),    icon: 'pictures/consumables/artefact.png',   data: resources.artefacts },
+			{ name: I18n.t('resource.map_fragments'), icon: 'pictures/consumables/super_map.jpg',  data: resources.mapFragments }
 		];
 
 		// Sort: items with values first (check both average and optimist)
@@ -308,7 +308,7 @@ class ProbabilityDisplay extends Component {
 	}
 
 	_renderCombatDamage(combat) {
-		const hpIcon = this._icon('pictures/astro/hp.png', 'hp-icon');
+		const hpIcon = this._icon('pictures/ui/hp.png', 'hp-icon');
 		const damage = combat?.damage;
 		
 		if (!damage || (damage.pessimist === 0 && damage.average === 0 && damage.optimist === 0 && damage.worstCase === 0)) {
@@ -413,7 +413,7 @@ class ProbabilityDisplay extends Component {
 	}
 
 	_renderEventDamage(eventDamage) {
-		const hpIcon = this._icon('pictures/astro/hp.png', 'hp-icon');
+		const hpIcon = this._icon('pictures/ui/hp.png', 'hp-icon');
 		const scenarios = eventDamage?.damage;
 		
 		// Check if there's any event damage by looking at the damage scenarios

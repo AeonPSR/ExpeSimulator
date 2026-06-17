@@ -28,7 +28,7 @@ class ResultsRenderer {
 			const canParticipate = status?.canParticipate ?? true;
 
 			if (!canParticipate) {
-				const stuckIcon = `<img src="${getURL('pictures/others/stuck_in_ship.png')}" alt="Stuck in Ship" class="stuck-icon" title="No oxygen - stuck in ship" />`;
+				const stuckIcon = `<img src="${getURL('pictures/ui/stuck_in_ship.png')}" alt="Stuck in Ship" class="stuck-icon" title="No oxygen - stuck in ship" />`;
 				return `
 					<div class="expedition-result-card">
 						<div class="expedition-result-avatar">
@@ -111,9 +111,9 @@ class ResultsRenderer {
 	 */
 	static renderHealthValue(health, getURL) {
 		if (health <= 0) {
-			return `<img src="${getURL('pictures/others/dead.png')}" alt="Dead" class="dead-icon" />`;
+			return `<img src="${getURL('pictures/ui/dead.png')}" alt="Dead" class="dead-icon" />`;
 		}
-		return `${health}<img src="${getURL('pictures/astro/hp.png')}" alt="HP" class="hp-icon" />`;
+		return `${health}<img src="${getURL('pictures/ui/hp.png')}" alt="HP" class="hp-icon" />`;
 	}
 
 	/**
@@ -128,9 +128,9 @@ class ResultsRenderer {
 		if (!effects || effects.length === 0) return '';
 
 		const effectIcons = {
-			'ROPE':             'pictures/items_exploration/rope.jpg',
+			'ROPE':             'pictures/gear/rope.jpg',
 			'SURVIVAL':         'pictures/abilities/survival.png',
-			'PLASTENITE_ARMOR': 'pictures/items_exploration/plastenite_armor.jpg',
+			'PLASTENITE_ARMOR': 'pictures/gear/plastenite_armor.jpg',
 		};
 
 		const seenTypes = new Set();

@@ -111,13 +111,13 @@ class Panel extends Component {
 			title: I18n.t('panel.lang.label')
 		});
 		const langImg = this.createElement('img', {
-			src: this.getResourceURL(`pictures/others/${I18n.locale}.png`),
+			src: this.getResourceURL(`pictures/ui/${I18n.locale}.png`),
 			alt: I18n.locale.toUpperCase()
 		});
 		langBtn.appendChild(langImg);
 		this.addEventListener(langBtn, 'click', () => {
 			I18n.cycleLocale();
-			langImg.src = this.getResourceURL(`pictures/others/${I18n.locale}.png`);
+			langImg.src = this.getResourceURL(`pictures/ui/${I18n.locale}.png`);
 			langImg.alt = I18n.locale.toUpperCase();
 		});
 		header.appendChild(langBtn);
@@ -128,7 +128,7 @@ class Panel extends Component {
 			title: I18n.t('panel.pin')
 		});
 		const pinImg = this.createElement('img', {
-			src: this.getResourceURL('pictures/others/pin.png'),
+			src: this.getResourceURL('pictures/ui/pin.png'),
 			alt: 'Pin'
 		});
 		pinBtn.appendChild(pinImg);

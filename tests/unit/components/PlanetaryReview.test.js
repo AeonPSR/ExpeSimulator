@@ -18,24 +18,24 @@ describe('PlanetaryReview', () => {
 
 		test('returns planet_unknown when name is null', () => {
 			expect(PlanetaryReview.getPlanetImage(null, url))
-				.toBe('pictures/astro/planet_unknown.png');
+				.toBe('pictures/planets/planet_unknown.png');
 		});
 
 		test('returns planet_unknown when name is undefined', () => {
 			expect(PlanetaryReview.getPlanetImage(undefined, url))
-				.toBe('pictures/astro/planet_unknown.png');
+				.toBe('pictures/planets/planet_unknown.png');
 		});
 
 		test('returns planet_unknown when name is an empty string', () => {
 			expect(PlanetaryReview.getPlanetImage('', url))
-				.toBe('pictures/astro/planet_unknown.png');
+				.toBe('pictures/planets/planet_unknown.png');
 		});
 
 		// ── Image index [0-4] ─────────────────────────────────────────────────
 
 		test('returned path is always one of planet_0_small … planet_4_small', () => {
 			const validPaths = Array.from({ length: 5 }, (_, i) =>
-				`pictures/astro/planet_${i}_small.png`
+				`pictures/planets/planet_${i}_small.png`
 			);
 			const names = ['Rocky World', 'Fugubos', 'Vie Heureuse', 'Polyphemus', 'Museum'];
 			for (const name of names) {
@@ -54,7 +54,7 @@ describe('PlanetaryReview', () => {
 			['Thousands Cuts', 2],
 		])('"%s" maps to planet_%i_small.png', (name, expectedId) => {
 			expect(PlanetaryReview.getPlanetImage(name, url))
-				.toBe(`pictures/astro/planet_${expectedId}_small.png`);
+				.toBe(`pictures/planets/planet_${expectedId}_small.png`);
 		});
 
 		// ── getResourceURL is called with the correct path ────────────────────
@@ -63,16 +63,16 @@ describe('PlanetaryReview', () => {
 			const mockGetURL = jest.fn((path) => `chrome-extension://abc/${path}`);
 			const result = PlanetaryReview.getPlanetImage('Fugubos', mockGetURL);
 
-			expect(mockGetURL).toHaveBeenCalledWith('pictures/astro/planet_0_small.png');
-			expect(result).toBe('chrome-extension://abc/pictures/astro/planet_0_small.png');
+			expect(mockGetURL).toHaveBeenCalledWith('pictures/planets/planet_0_small.png');
+			expect(result).toBe('chrome-extension://abc/pictures/planets/planet_0_small.png');
 		});
 
 		test('passes planet_unknown through getResourceURL on fallback', () => {
 			const mockGetURL = jest.fn((path) => `chrome-extension://abc/${path}`);
 			const result = PlanetaryReview.getPlanetImage(null, mockGetURL);
 
-			expect(mockGetURL).toHaveBeenCalledWith('pictures/astro/planet_unknown.png');
-			expect(result).toBe('chrome-extension://abc/pictures/astro/planet_unknown.png');
+			expect(mockGetURL).toHaveBeenCalledWith('pictures/planets/planet_unknown.png');
+			expect(result).toBe('chrome-extension://abc/pictures/planets/planet_unknown.png');
 		});
 	});
 });
