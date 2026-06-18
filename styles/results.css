@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Results Styles
    Expedition results display, result cards, health counters, legend
    ========================================================================== */
@@ -7,11 +7,11 @@
    Results Container
    ========================================================================== */
 
-.expedition-panel .expedition-results {
+.app-panel .expedition-results {
 	margin-top: 20px;
 }
 
-.expedition-panel .results-content {
+.app-panel .results-content {
 	background: rgba(0, 0, 0, 0.2);
 	border-radius: 8px;
 	padding: 15px;
@@ -23,11 +23,11 @@
 	gap: 10px;
 }
 
-.expedition-panel .results-content::-webkit-scrollbar {
+.app-panel .results-content::-webkit-scrollbar {
 	width: 6px;
 }
 
-.expedition-panel .results-content::-webkit-scrollbar-thumb {
+.app-panel .results-content::-webkit-scrollbar-thumb {
 	background: #3498db;
 	border-radius: 3px;
 }
@@ -36,7 +36,7 @@
    Expedition Result Card
    ========================================================================== */
 
-.expedition-panel .expedition-result-card {
+.app-panel .expedition-result-card {
 	display: flex;
 	background: rgba(0, 0, 0, 0.2);
 	border: 2px solid #e67e22;
@@ -51,7 +51,7 @@
 }
 
 /* Result Avatar */
-.expedition-panel .expedition-result-avatar {
+.app-panel .expedition-result-avatar {
 	width: 42px;
 	height: 60px;
 	border-radius: 4px;
@@ -63,14 +63,14 @@
 	justify-content: center;
 }
 
-.expedition-panel .expedition-result-avatar img {
+.app-panel .expedition-result-avatar img {
 	width: auto;
 	height: 100%;
 	object-fit: cover;
 }
 
 /* Result Effects (card-level icons for effects that triggered in one scenario) */
-.expedition-panel .expedition-result-effects {
+.app-panel .expedition-result-effects {
 	gap: 4px;
 	justify-content: center;
 	margin-top: 4px;
@@ -85,7 +85,7 @@
    Health Display
    ========================================================================== */
 
-.expedition-panel .expedition-result-health {
+.app-panel .expedition-result-health {
 	width: 42px;
 	height: 40px;
 	border: 2px solid #e74c3c;
@@ -100,7 +100,7 @@
 	flex-direction: column;
 }
 
-.expedition-panel .expedition-result-health-container {
+.app-panel .expedition-result-health-container {
 	display: flex;
 	flex-direction: column;
 	gap: 3px;
@@ -108,44 +108,44 @@
 }
 
 /* Scenario-based Health Counter Colors */
-.expedition-panel .expedition-result-health.pessimist {
+.app-panel .expedition-result-health.pessimist {
 	border-color: #e74c3c;
 	background: rgba(231, 76, 60, 0.3);
 }
 
-.expedition-panel .expedition-result-health.median {
+.app-panel .expedition-result-health.median {
 	border-color: #f39c12;
 	background: rgba(243, 156, 18, 0.3);
 }
 
-.expedition-panel .expedition-result-health.optimist {
+.app-panel .expedition-result-health.optimist {
 	border-color: #2ecc71;
 	background: rgba(46, 204, 113, 0.3);
 }
 
-.expedition-panel .expedition-result-health.worst {
+.app-panel .expedition-result-health.worst {
 	border-color: #e67e22;
 	background: rgba(44, 62, 80, 0.4);
 }
 
 /* Health Status Colors */
-.expedition-panel .expedition-result-health.health-critical {
+.app-panel .expedition-result-health.health-critical {
 	color: #e74c3c;
 }
 
-.expedition-panel .expedition-result-health.health-low {
+.app-panel .expedition-result-health.health-low {
 	color: #f39c12;
 }
 
-.expedition-panel .expedition-result-health.health-medium {
+.app-panel .expedition-result-health.health-medium {
 	color: #f1c40f;
 }
 
-.expedition-panel .expedition-result-health.health-high {
+.app-panel .expedition-result-health.health-high {
 	color: #2ecc71;
 }
 
-.expedition-panel .expedition-result-health.health-dead {
+.app-panel .expedition-result-health.health-dead {
 	color: #95a5a6;
 	display: flex;
 	justify-content: center;
@@ -153,14 +153,14 @@
 }
 
 /* HP and Dead Icons */
-.expedition-panel .expedition-result-health .hp-icon {
+.app-panel .expedition-result-health .hp-icon {
 	width: 16px;
 	height: 16px;
 	margin-left: 3px;
 	vertical-align: middle;
 }
 
-.expedition-panel .expedition-result-health .dead-icon {
+.app-panel .expedition-result-health .dead-icon {
 	width: 20px;
 	height: 20px;
 	filter: grayscale(100%);
@@ -170,20 +170,20 @@
    Stuck in Ship (No Oxygen)
    ========================================================================== */
 
-.expedition-panel .expedition-result-health.health-stuck {
+.app-panel .expedition-result-health.health-stuck {
 	color: #95a5a6;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
-.expedition-panel .expedition-result-health .stuck-icon {
+.app-panel .expedition-result-health .stuck-icon {
 	width: 20px;
 	height: 20px;
 }
 
 /* Effect Icons (rope, survival, etc.) */
-.expedition-panel .expedition-result-effects .effect-icon {
+.app-panel .expedition-result-effects .effect-icon {
 	width: 18px;
 	height: 18px;
 	border-radius: 3px;
@@ -194,7 +194,7 @@
    Expedition Legend
    ========================================================================== */
 
-.expedition-panel .expedition-legend {
+.app-panel .expedition-legend {
 	margin-top: 15px;
 	padding: 10px;
 	background: rgba(0, 0, 0, 0.1);
@@ -202,7 +202,7 @@
 	border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.expedition-panel .expedition-legend h5 {
+.app-panel .expedition-legend h5 {
 	margin: 0 0 8px 0;
 	font-size: 12px;
 	color: #bdc3c7;
@@ -212,7 +212,7 @@
 	text-align: center;
 }
 
-.expedition-panel .expedition-legend .legend-items {
+.app-panel .expedition-legend .legend-items {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
@@ -220,14 +220,14 @@
 	align-items: stretch;
 }
 
-.expedition-panel .expedition-legend .legend-item {
+.app-panel .expedition-legend .legend-item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	flex: 1;
 }
 
-.expedition-panel .legend-color {
+.app-panel .legend-color {
 	width: 20px;
 	height: 15px;
 	border: 2px solid;
@@ -235,27 +235,27 @@
 	margin-bottom: 3px;
 }
 
-.expedition-panel .legend-color.pessimist {
+.app-panel .legend-color.pessimist {
 	border-color: #e74c3c;
 	background: rgba(231, 76, 60, 0.3);
 }
 
-.expedition-panel .legend-color.median {
+.app-panel .legend-color.median {
 	border-color: #f39c12;
 	background: rgba(243, 156, 18, 0.3);
 }
 
-.expedition-panel .legend-color.optimist {
+.app-panel .legend-color.optimist {
 	border-color: #2ecc71;
 	background: rgba(46, 204, 113, 0.3);
 }
 
-.expedition-panel .legend-color.worst {
+.app-panel .legend-color.worst {
 	border-color: #e67e22;
 	background: rgba(44, 62, 80, 0.4);
 }
 
-.expedition-panel .legend-text {
+.app-panel .legend-text {
 	font-size: 9px;
 	color: #95a5a6;
 	text-align: center;
@@ -266,11 +266,11 @@
    Probability Display
    ========================================================================== */
 
-.expedition-panel .probability-display {
+.app-panel .probability-display {
 	margin: 20px 0;
 }
 
-.expedition-panel .probability-display h4 {
+.app-panel .probability-display h4 {
 	font-weight: 600;
 }
 

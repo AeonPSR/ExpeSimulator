@@ -6,3 +6,76 @@
 #settings-panel {
 	z-index: 10000;
 }
+
+/* ── Settings Page ─────────────────────────────────────────────────────────── */
+
+.settings-page {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 12px 4px;
+}
+
+.settings-section {
+	margin: 0;
+}
+
+/* Section title — same treatment as .players-section h4 */
+.app-panel .settings-section h4 {
+	margin: 0 0 10px 0;
+	font-size: 16px;
+	color: #e67e22;
+	border-bottom: 2px solid #e67e22;
+	padding-bottom: 8px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* ── Language buttons ──────────────────────────────────────────────────────── */
+
+/* panel-lang-btn styles are inherited from main.css — no overrides needed */
+.settings-lang-row {
+	display: flex;
+	flex-direction: row;
+	gap: 6px;
+}
+
+/* ── Theme select ──────────────────────────────────────────────────────────── */
+
+.settings-theme-select {
+	width: 100%;
+	padding: 6px 8px;
+	background: var(--color-bg-input, #222);
+	color: var(--color-text, #eee);
+	border: 1px solid var(--color-border, #444);
+	border-radius: 4px;
+	font-size: 0.875rem;
+	cursor: pointer;
+}
+
+.settings-theme-select:focus {
+	outline: none;
+	border-color: #e67e22;
+}
+
+/* ── Developer tools toggle ────────────────────────────────────────────────── */
+
+.settings-devtools-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.settings-devtools-checkbox {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	accent-color: #e67e22;
+}
+
+.settings-devtools-label {
+	font-size: 0.875rem;
+	cursor: pointer;
+	user-select: none;
+}

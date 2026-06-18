@@ -19,6 +19,9 @@ class SettingsApp {
 			getResourceURL: getResourceURL
 		});
 		this._panel.mount(document.body);
+
+		this._page = new SettingsPage();
+		this._page.mount(this._panel.getContentArea());
 	}
 }
 

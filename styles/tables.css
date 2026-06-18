@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Table Styles
    Resource tables and events tables for probability display
    ========================================================================== */
@@ -7,7 +7,7 @@
    Probability Display Container
    ========================================================================== */
 
-.expedition-panel .prob-content {
+.app-panel .prob-content {
 	background: rgba(0, 0, 0, 0.2);
 	border-radius: 8px;
 	padding: 15px;
@@ -15,11 +15,11 @@
 	overflow-y: auto;
 }
 
-.expedition-panel .prob-content::-webkit-scrollbar {
+.app-panel .prob-content::-webkit-scrollbar {
 	width: 6px;
 }
 
-.expedition-panel .prob-content::-webkit-scrollbar-thumb {
+.app-panel .prob-content::-webkit-scrollbar-thumb {
 	background: #3498db;
 	border-radius: 3px;
 }
@@ -28,18 +28,18 @@
    Outcome Categories
    ========================================================================== */
 
-.expedition-panel .outcome-category {
+.app-panel .outcome-category {
 	margin-bottom: 20px;
 	padding-bottom: 15px;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.expedition-panel .outcome-category:last-child {
+.app-panel .outcome-category:last-child {
 	border-bottom: none;
 	margin-bottom: 0;
 }
 
-.expedition-panel .outcome-category h5 {
+.app-panel .outcome-category h5 {
 	margin: 0 0 10px 0;
 	font-size: 14px;
 	color: #3498db;
@@ -48,11 +48,11 @@
 	letter-spacing: 0.5px;
 }
 
-.expedition-panel .fight-stats {
+.app-panel .fight-stats {
 	align-items: center;
 }
 
-.expedition-panel .outcome-item {
+.app-panel .outcome-item {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -60,7 +60,7 @@
 	font-size: 12px;
 }
 
-.expedition-panel .outcome-item span:first-child {
+.app-panel .outcome-item span:first-child {
 	color: #ecf0f1;
 	font-weight: 500;
 }
@@ -69,7 +69,7 @@
    Resource Table
    ========================================================================== */
 
-.expedition-panel .resource-table {
+.app-panel .resource-table {
 	width: 100%;
 	border-collapse: collapse;
 	margin-top: 10px;
@@ -79,18 +79,18 @@
 	font-size: 13px;
 }
 
-.expedition-panel .resource-table th,
-.expedition-panel .resource-table td {
+.app-panel .resource-table th,
+.app-panel .resource-table td {
 	padding: 8px 12px;
 	text-align: left;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.expedition-panel .resource-table thead {
+.app-panel .resource-table thead {
 	background: linear-gradient(135deg, #34495e, #2c3e50);
 }
 
-.expedition-panel .resource-table th {
+.app-panel .resource-table th {
 	font-weight: 600;
 	font-size: 11px;
 	text-transform: uppercase;
@@ -99,49 +99,49 @@
 	padding: 10px 8px;
 }
 
-.expedition-panel .resource-table tbody tr {
+.app-panel .resource-table tbody tr {
 	transition: background-color 0.2s ease;
 }
 
-.expedition-panel .resource-table tbody tr:hover {
+.app-panel .resource-table tbody tr:hover {
 	background: rgba(255, 255, 255, 0.05);
 }
 
-.expedition-panel .resource-table tbody tr:last-child td {
+.app-panel .resource-table tbody tr:last-child td {
 	border-bottom: none;
 }
 
-.expedition-panel .resource-table td:first-child {
+.app-panel .resource-table td:first-child {
 	font-weight: 500;
 	color: #ecf0f1;
 	width: 35%;
 }
 
-.expedition-panel .pessimist-col,
-.expedition-panel .median-col,
-.expedition-panel .optimist-col {
+.app-panel .pessimist-col,
+.app-panel .median-col,
+.app-panel .optimist-col {
 	width: 21.66%;
 	text-align: center;
 }
 
-.expedition-panel .resource-table .warning,
-.expedition-panel .resource-table .neutral,
-.expedition-panel .resource-table .positive {
+.app-panel .resource-table .warning,
+.app-panel .resource-table .neutral,
+.app-panel .resource-table .positive {
 	font-weight: 600;
 }
 
 /* Special styling for "none" rows */
-.expedition-panel .resource-table td[colspan="3"] {
+.app-panel .resource-table td[colspan="3"] {
 	opacity: 0.6;
 	font-size: 12px;
 }
 
-.expedition-panel .resource-table .icon-cell {
+.app-panel .resource-table .icon-cell {
 	text-align: left;
 	vertical-align: middle;
 }
 
-.expedition-panel .resource-table .none-row {
+.app-panel .resource-table .none-row {
 	text-align: center;
 	font-style: italic;
 }
@@ -150,7 +150,7 @@
    Events Table
    ========================================================================== */
 
-.expedition-panel .events-table {
+.app-panel .events-table {
 	width: 100%;
 	border-collapse: collapse;
 	margin-top: 10px;
@@ -160,18 +160,18 @@
 	font-size: 13px;
 }
 
-.expedition-panel .events-table th,
-.expedition-panel .events-table td {
+.app-panel .events-table th,
+.app-panel .events-table td {
 	padding: 8px 12px;
 	text-align: left;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.expedition-panel .events-table thead {
+.app-panel .events-table thead {
 	background: linear-gradient(135deg, #34495e, #2c3e50);
 }
 
-.expedition-panel .events-table th {
+.app-panel .events-table th {
 	font-weight: 600;
 	font-size: 11px;
 	text-transform: uppercase;
@@ -180,48 +180,48 @@
 	padding: 10px 8px;
 }
 
-.expedition-panel .events-table th:first-child {
+.app-panel .events-table th:first-child {
 	width: 40%;
 }
 
-.expedition-panel .events-table th:nth-child(2),
-.expedition-panel .events-table th:nth-child(3),
-.expedition-panel .events-table th:nth-child(4) {
+.app-panel .events-table th:nth-child(2),
+.app-panel .events-table th:nth-child(3),
+.app-panel .events-table th:nth-child(4) {
 	width: 20%;
 	text-align: center;
 }
 
-.expedition-panel .events-table tbody tr {
+.app-panel .events-table tbody tr {
 	transition: background-color 0.2s ease;
 }
 
-.expedition-panel .events-table tbody tr:hover {
+.app-panel .events-table tbody tr:hover {
 	background: rgba(255, 255, 255, 0.05);
 }
 
-.expedition-panel .events-table tbody tr:last-child td {
+.app-panel .events-table tbody tr:last-child td {
 	border-bottom: none;
 }
 
-.expedition-panel .events-table td:first-child {
+.app-panel .events-table td:first-child {
 	font-weight: 500;
 	color: #ecf0f1;
 }
 
-.expedition-panel .events-table td:nth-child(2),
-.expedition-panel .events-table td:nth-child(3),
-.expedition-panel .events-table td:nth-child(4) {
+.app-panel .events-table td:nth-child(2),
+.app-panel .events-table td:nth-child(3),
+.app-panel .events-table td:nth-child(4) {
 	text-align: center;
 	font-weight: 600;
 }
 
-.expedition-panel .events-table .warning,
-.expedition-panel .events-table .neutral,
-.expedition-panel .events-table .positive {
+.app-panel .events-table .warning,
+.app-panel .events-table .neutral,
+.app-panel .events-table .positive {
 	font-weight: 600;
 }
 
-.expedition-panel .events-table .none-row {
+.app-panel .events-table .none-row {
 	text-align: center;
 	font-style: italic;
 	opacity: 0.6;

@@ -111,23 +111,6 @@ class Panel extends Component {
 		const title = this.createElement('h3', { 'data-i18n': 'panel.title' }, I18n.t('panel.title'));
 		header.appendChild(title);
 
-		// Language cycle button
-		const langBtn = this.createElement('button', {
-			className: 'panel-lang-btn',
-			title: I18n.t('panel.lang.label')
-		});
-		const langImg = this.createElement('img', {
-			src: this.getResourceURL(`pictures/ui/${I18n.locale}.png`),
-			alt: I18n.locale.toUpperCase()
-		});
-		langBtn.appendChild(langImg);
-		this.addEventListener(langBtn, 'click', () => {
-			I18n.cycleLocale();
-			langImg.src = this.getResourceURL(`pictures/ui/${I18n.locale}.png`);
-			langImg.alt = I18n.locale.toUpperCase();
-		});
-		header.appendChild(langBtn);
-
 		// Pin button to lock the panel open
 		const pinBtn = this.createElement('button', {
 			className: 'panel-pin-btn',
@@ -140,23 +123,6 @@ class Panel extends Component {
 		pinBtn.appendChild(pinImg);
 		this.addEventListener(pinBtn, 'click', () => this._togglePin(pinBtn));
 		header.appendChild(pinBtn);
-
-		// Theme toggle button
-		const themeBtn = this.createElement('button', {
-			className: 'panel-theme-btn',
-			title: 'Toggle retro theme'
-		}, '★');
-		themeBtn.classList.toggle('panel-theme-btn--active', document.body.classList.contains('retro-theme'));
-		this.addEventListener(themeBtn, 'click', () => {
-			document.body.classList.add('retro-theme-switching');
-			const isRetro = document.body.classList.toggle('retro-theme');
-			document.body.getBoundingClientRect(); // force reflow so the freeze applies
-			document.body.classList.remove('retro-theme-switching');
-			document.querySelectorAll('.panel-theme-btn').forEach(btn => {
-				btn.classList.toggle('panel-theme-btn--active', isRetro);
-			});
-		});
-		header.appendChild(themeBtn);
 
 		return header;
 	}

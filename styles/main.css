@@ -175,6 +175,16 @@
 	background: rgba(149, 165, 166, 0.5);
 }
 
+.app-panel .panel-lang-btn--active {
+	border-color: #e67e22;
+	background: rgba(230, 126, 34, 0.3);
+}
+
+.app-panel .panel-lang-btn--active:hover {
+	border-color: #d35400;
+	background: rgba(230, 126, 34, 0.5);
+}
+
 /* Pin Button */
 .app-panel .panel-pin-btn {
 	width: 40px;

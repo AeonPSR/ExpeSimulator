@@ -14,6 +14,7 @@
         "general/js/utils/constants.js",
         "general/js/utils/helpers.js",
         "general/js/utils/ValidationUtils.js",
+        "general/js/utils/Settings.js",
         "expeditionSimulator/js/data/Translations.js",
         "general/js/utils/I18n.js",
         "expeditionSimulator/js/utils/EventClassifier.js",
@@ -66,6 +67,7 @@
         "expeditionSimulator/js/io/ChatObserver.js",
         "expeditionSimulator/js/io/PlanetCardInjector.js",
         "expeditionSimulator/js/app.js",
+        "settings/js/SettingsPage.js",
         "settings/js/app.js",
         "content.js"
       ],
