@@ -19,6 +19,13 @@ class SettingsPage extends Component {
 		this.element.appendChild(this._renderSection('Theme', this._renderThemeControls()));
 		this.element.appendChild(this._renderSection('Developer tools', this._renderDevtoolsControls(), 'settings-section--devtools'));
 
+		const visibilitySection = this._renderSection('Visibility', this._renderVisibilityControls(), 'settings-section--devtools');
+		this.element.appendChild(visibilitySection);
+
+		const applyDevtools = (enabled) => { visibilitySection.style.display = enabled ? '' : 'none'; };
+		applyDevtools(Settings.devtools);
+		this.addEventListener(document, 'settings:devtools-change', (e) => applyDevtools(e.detail.devtools));
+
 		// Keep language buttons in sync when locale changes from any source
 		this.addEventListener(document, 'i18n:change', (e) => {
 			this._syncLangButtons(e.detail.locale);
@@ -106,6 +113,31 @@ class SettingsPage extends Component {
 		this.addEventListener(btn, 'click', () => {
 			Settings.setDevtools(!Settings.devtools);
 			btn.classList.toggle('panel-lang-btn--active', Settings.devtools);
+		});
+
+		row.appendChild(btn);
+		return row;
+	}
+
+	// ─── Visibility ──────────────────────────────────────────────────────────
+
+	_renderVisibilityControls() {
+		const row = this.createElement('div', { className: 'settings-devtools-row' });
+
+		const btn = this.createElement('button', {
+			className: 'panel-lang-btn panel-lang-btn--active',
+			title: 'Expedition Simulator'
+		});
+		const img = this.createElement('img', {
+			src: getResourceURL('pictures/ui/astrophysicist.png'),
+			alt: 'Expedition Simulator'
+		});
+		btn.appendChild(img);
+		this.addEventListener(btn, 'click', () => {
+			const visible = btn.classList.toggle('panel-lang-btn--active');
+			const panel = document.getElementById('expedition-simulator');
+			if (panel) panel.classList.toggle('panel--hidden', !visible);
+			Panel.repositionTongues();
 		});
 
 		row.appendChild(btn);

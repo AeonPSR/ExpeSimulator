@@ -179,6 +179,32 @@ class Panel extends Component {
 			document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('panel-on-top'));
 			this.element.classList.add('panel-on-top');
 		});
+		Panel.repositionTongues();
+	}
+
+	/**
+	 * Recalculates and sets the vertical position of every panel tongue.
+	 * Visible panels are stacked and centered; hidden panels are ignored.
+	 * Call this whenever a panel is added or its visibility changes.
+	 * @static
+	 */
+	static repositionTongues() {
+		const TONGUE_HEIGHT = 60;
+		const GAP = 8;
+		const SLOT = TONGUE_HEIGHT + GAP; // 68px per panel slot
+
+		const allPanels = Array.from(document.querySelectorAll('#panels-container .app-panel'));
+		const visiblePanels = allPanels.filter(p => !p.classList.contains('panel--hidden'));
+		const n = visiblePanels.length;
+
+		visiblePanels.forEach((panel, i) => {
+			const tongue = panel.querySelector('.panel-tongue');
+			if (!tongue) return;
+			// Center the stack: top of tongue i = 50% - tongueHeight/2 + (i - (n-1)/2) * SLOT
+			const topPx = -(TONGUE_HEIGHT / 2) + (i - (n - 1) / 2) * SLOT;
+			tongue.style.top = `calc(50% + ${topPx}px)`;
+			tongue.style.transform = 'none';
+		});
 	}
 
 	/**

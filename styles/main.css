@@ -91,6 +91,7 @@
 	align-items: center;
 	justify-content: center;
 	z-index: -1;
+	transition: top 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .app-panel .panel-tongue img {
@@ -100,20 +101,11 @@
 }
 
 /*
- * Tongue stacking — CSS-only, depends on number of panels present.
- * Tongue height: 60px, gap: 8px → 68px per slot.
- * 2 panels: stack is 128px tall, centered at 50vh.
- *   slot 1 top = 50% - 64px
- *   slot 2 top = 50% + 4px
- * To add a 3rd panel: extend the :has() block with nth-child(3).
+ * Tongue stacking is handled dynamically by Panel.repositionTongues().
+ * .panel--hidden panels are excluded from the visible count.
  */
-#panels-container:has(.app-panel:nth-child(2)) .app-panel:nth-child(1) .panel-tongue {
-	top: calc(50% - 64px);
-	transform: none;
-}
-#panels-container:has(.app-panel:nth-child(2)) .app-panel:nth-child(2) .panel-tongue {
-	top: calc(50% + 4px);
-	transform: none;
+.app-panel.panel--hidden {
+	display: none;
 }
 
 /* Main Panel Body */
