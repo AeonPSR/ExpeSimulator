@@ -17,3 +17,4 @@ Chromee web extension for simulating planet expeditions with combat mechanics an
 - Making a logo for the app ?
 - Fix some missing translation on the hovers (fuel button)
 - Fix that awful fucking bug that prevent a pannel from collapsing, and it stays stuck open
+- Style the import from chat button

@@ -17,7 +17,7 @@ class SettingsPage extends Component {
 
 		this.element.appendChild(this._renderSection('Language', this._renderLanguageControls()));
 		this.element.appendChild(this._renderSection('Theme', this._renderThemeControls()));
-		this.element.appendChild(this._renderSection('Developer tools', this._renderDevtoolsControls()));
+		this.element.appendChild(this._renderSection('Developer tools', this._renderDevtoolsControls(), 'settings-section--devtools'));
 
 		// Keep language buttons in sync when locale changes from any source
 		this.addEventListener(document, 'i18n:change', (e) => {
@@ -29,8 +29,8 @@ class SettingsPage extends Component {
 
 	// ─── Sections ────────────────────────────────────────────────────────────
 
-	_renderSection(titleText, controls) {
-		const section = this.createElement('div', { className: 'settings-section' });
+	_renderSection(titleText, controls, extraClass = '') {
+		const section = this.createElement('div', { className: ('settings-section ' + extraClass).trim() });
 		const title = this.createElement('h4', {}, titleText);
 		section.appendChild(title);
 		section.appendChild(controls);

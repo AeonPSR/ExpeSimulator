@@ -20,25 +20,41 @@
 	margin: 0;
 }
 
-/* Section title — same treatment as .players-section h4 */
+/* Section title — same treatment as .section-selector h4 (blue) */
 .app-panel .settings-section h4 {
 	margin: 0 0 10px 0;
 	font-size: 16px;
-	color: #e67e22;
-	border-bottom: 2px solid #e67e22;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
 	padding-bottom: 8px;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 }
 
+/* Developer tools section — purple like Example Worlds */
+.app-panel .settings-section--devtools h4 {
+	color: #9b59b6;
+	border-bottom-color: #9b59b6;
+}
+
 /* ── Language buttons ──────────────────────────────────────────────────────── */
 
-/* panel-lang-btn styles are inherited from main.css — no overrides needed */
+/* panel-lang-btn active state overridden to blue in the settings context */
 .settings-lang-row {
 	display: flex;
 	flex-direction: row;
 	gap: 6px;
+}
+
+#settings-panel .panel-lang-btn--active {
+	border-color: #3498db;
+	background: rgba(52, 152, 219, 0.3);
+}
+
+#settings-panel .panel-lang-btn--active:hover {
+	border-color: #2980b9;
+	background: rgba(52, 152, 219, 0.5);
 }
 
 /* ── Theme select ──────────────────────────────────────────────────────────── */
@@ -56,7 +72,7 @@
 
 .settings-theme-select:focus {
 	outline: none;
-	border-color: #e67e22;
+	border-color: #3498db;
 }
 
 /* ── Developer tools toggle ────────────────────────────────────────────────── */
@@ -71,7 +87,7 @@
 	width: 16px;
 	height: 16px;
 	cursor: pointer;
-	accent-color: #e67e22;
+	accent-color: #9b59b6;
 }
 
 .settings-devtools-label {
