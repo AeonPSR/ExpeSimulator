@@ -93,21 +93,22 @@ class SettingsPage extends Component {
 
 	_renderDevtoolsControls() {
 		const row = this.createElement('div', { className: 'settings-devtools-row' });
-		const id = 'settings-devtools-checkbox';
 
-		const checkbox = this.createElement('input', {
-			type: 'checkbox',
-			id,
-			className: 'settings-devtools-checkbox'
+		const btn = this.createElement('button', {
+			className: 'panel-lang-btn' + (Settings.devtools ? ' panel-lang-btn--active' : ''),
+			title: 'Developer tools'
 		});
-		if (Settings.devtools) checkbox.checked = true;
-		this.addEventListener(checkbox, 'change', () => Settings.setDevtools(checkbox.checked));
+		const img = this.createElement('img', {
+			src: getResourceURL('pictures/abilities/technician.png'),
+			alt: 'Developer tools'
+		});
+		btn.appendChild(img);
+		this.addEventListener(btn, 'click', () => {
+			Settings.setDevtools(!Settings.devtools);
+			btn.classList.toggle('panel-lang-btn--active', Settings.devtools);
+		});
 
-		const label = this.createElement('label', { 'for': id, className: 'settings-devtools-label' },
-			'Enable developer tools');
-
-		row.appendChild(checkbox);
-		row.appendChild(label);
+		row.appendChild(btn);
 		return row;
 	}
 }

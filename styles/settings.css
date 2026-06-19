@@ -83,15 +83,12 @@
 	gap: 10px;
 }
 
-.settings-devtools-checkbox {
-	width: 16px;
-	height: 16px;
-	cursor: pointer;
-	accent-color: #9b59b6;
+#settings-panel .settings-section--devtools .panel-lang-btn--active {
+	border-color: #9b59b6;
+	background: rgba(155, 89, 182, 0.3);
 }
 
-.settings-devtools-label {
-	font-size: 0.875rem;
-	cursor: pointer;
-	user-select: none;
+#settings-panel .settings-section--devtools .panel-lang-btn--active:hover {
+	border-color: #8e44ad;
+	background: rgba(155, 89, 182, 0.5);
 }

@@ -91,6 +91,10 @@ class ExpeditionSimulatorApp {
 			onWorldSelect: (name) => this._onWorldSelect(name)
 		});
 		this._exampleWorlds.mount(contentArea);
+		this._exampleWorlds.element.style.display = Settings.devtools ? '' : 'none';
+		document.addEventListener('settings:devtools-change', (e) => {
+			this._exampleWorlds.element.style.display = e.detail.devtools ? '' : 'none';
+		});
 
 		// Tabs: Planetary Review (future) and Expedition Simulation
 		this._tabContainer = new TabContainer({
