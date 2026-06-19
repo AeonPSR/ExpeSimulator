@@ -4,7 +4,7 @@
    ========================================================================== */
 
 /* Main Panel Container */
-#expedition-simulator {
+.app-panel {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -28,49 +28,53 @@
 	-webkit-tap-highlight-color: transparent;
 }
 
-#expedition-simulator:hover {
+.app-panel:hover {
 	transform: translateX(0);
 	transition-delay: 0s;
 }
 
-#expedition-simulator.collapsed {
+.app-panel.collapsed {
 	transform: translateX(-360px);
 }
 
 /* Pinned mode - lock panel open */
-#expedition-simulator.pinned {
+.app-panel.pinned {
 	transform: translateX(0);
 }
 
 /* Force-close: overrides hover while the panel slides away after unpinning */
-#expedition-simulator.force-close,
-#expedition-simulator.force-close:hover {
+.app-panel.force-close,
+.app-panel.force-close:hover {
 	transform: translateX(-400px);
 	transition-delay: 0s;
 }
 
 /* Import mode - temporarily force panel open */
-#expedition-simulator.import-open {
+.app-panel.import-open {
 	transform: translateX(0);
 }
 
 /* Modal open - keep panel open while a modal is visible */
-#expedition-simulator.modal-open {
+.app-panel.modal-open {
 	transform: translateX(0);
 }
 
 /* Test mode - lock panel open and disable hover */
-#expedition-simulator.test-mode {
+.app-panel.test-mode {
 	transform: translateX(0) !important;
 	transition: none !important;
 }
 
-#expedition-simulator.test-mode:hover {
+.app-panel.test-mode:hover {
 	transform: translateX(0) !important;
 }
 
-/* Panel Tongue (Tab to expand) */
-#expedition-simulator .panel-tongue {
+/* Panel Tongue — lives inside the panel; CSS :hover cascade opens it */
+.app-panel.panel-on-top {
+	z-index: 10001;
+}
+
+.app-panel .panel-tongue {
 	position: absolute;
 	left: 100%;
 	top: 50%;
@@ -87,16 +91,25 @@
 	align-items: center;
 	justify-content: center;
 	z-index: -1;
+	transition: top 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-#expedition-simulator .panel-tongue img {
+.app-panel .panel-tongue img {
 	width: 30px;
 	height: 30px;
 	object-fit: contain;
 }
 
+/*
+ * Tongue stacking is handled dynamically by Panel.repositionTongues().
+ * .panel--hidden panels are excluded from the visible count.
+ */
+.app-panel.panel--hidden {
+	display: none;
+}
+
 /* Main Panel Body */
-#expedition-simulator .panel-main {
+.app-panel .panel-main {
 	width: 400px;
 	height: 100vh;
 	background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
@@ -107,7 +120,7 @@
 }
 
 /* Panel Header */
-#expedition-simulator .panel-header {
+.app-panel .panel-header {
 	background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 	padding: 15px 20px;
 	display: flex;
@@ -117,7 +130,7 @@
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-#expedition-simulator .panel-header h3 {
+.app-panel .panel-header h3 {
 	flex: 1;
 	margin: 0;
 	font-size: 18px;
@@ -126,7 +139,7 @@
 }
 
 /* Language Button */
-#expedition-simulator .panel-lang-btn {
+.app-panel .panel-lang-btn {
 	width: 40px;
 	height: 40px;
 	padding: 0;
@@ -142,20 +155,30 @@
 	margin-right: 6px;
 }
 
-#expedition-simulator .panel-lang-btn img {
+.app-panel .panel-lang-btn img {
 	width: 28px;
 	height: 28px;
 	object-fit: contain;
 	border-radius: 2px;
 }
 
-#expedition-simulator .panel-lang-btn:hover {
+.app-panel .panel-lang-btn:hover {
 	border-color: #7f8c8d;
 	background: rgba(149, 165, 166, 0.5);
 }
 
+.app-panel .panel-lang-btn--active {
+	border-color: #e67e22;
+	background: rgba(230, 126, 34, 0.3);
+}
+
+.app-panel .panel-lang-btn--active:hover {
+	border-color: #d35400;
+	background: rgba(230, 126, 34, 0.5);
+}
+
 /* Pin Button */
-#expedition-simulator .panel-pin-btn {
+.app-panel .panel-pin-btn {
 	width: 40px;
 	height: 40px;
 	border: 2px solid #95a5a6;
@@ -170,28 +193,28 @@
 	flex-shrink: 0;
 }
 
-#expedition-simulator .panel-pin-btn img {
+.app-panel .panel-pin-btn img {
 	width: 30px;
 	height: 30px;
 	opacity: 0.5;
 	transition: opacity 0.3s ease;
 }
 
-#expedition-simulator .panel-pin-btn:hover {
+.app-panel .panel-pin-btn:hover {
 	border-color: #7f8c8d;
 	background: rgba(149, 165, 166, 0.5);
 }
 
-#expedition-simulator .panel-pin-btn.active {
+.app-panel .panel-pin-btn.active {
 	border-color: #3498db;
 	background: rgba(52, 152, 219, 0.3);
 }
 
-#expedition-simulator .panel-pin-btn.active img {
+.app-panel .panel-pin-btn.active img {
 	opacity: 1;
 }
 
-#expedition-simulator .panel-theme-btn {
+.app-panel .panel-theme-btn {
 	width: 40px;
 	height: 40px;
 	border: 2px solid #95a5a6;
@@ -208,12 +231,12 @@
 	color: #95a5a6;
 }
 
-#expedition-simulator .panel-theme-btn:hover {
+.app-panel .panel-theme-btn:hover {
 	border-color: #7f8c8d;
 	background: rgba(149, 165, 166, 0.5);
 }
 
-#expedition-simulator .panel-theme-btn--active {
+.app-panel .panel-theme-btn--active {
 	border-color: #db3498;
 	background: rgba(219, 52, 152, 0.3);
 	color: #db3498;
@@ -223,11 +246,11 @@
    Tab Container
    ========================================================================== */
 
-#expedition-simulator .tab-container {
+.app-panel .tab-container {
 	margin-bottom: 20px;
 }
 
-#expedition-simulator .tab-bar {
+.app-panel .tab-bar {
 	display: flex;
 	flex-direction: row;
 	gap: 0;
@@ -235,7 +258,7 @@
 	margin-bottom: 15px;
 }
 
-#expedition-simulator .tab-btn {
+.app-panel .tab-btn {
 	flex: 1;
 	padding: 10px 12px;
 	background: transparent;
@@ -252,21 +275,21 @@
 	display: block;
 }
 
-#expedition-simulator .tab-btn:hover {
+.app-panel .tab-btn:hover {
 	color: #ecf0f1;
 	background: rgba(52, 152, 219, 0.1);
 }
 
-#expedition-simulator .tab-btn.active {
+.app-panel .tab-btn.active {
 	color: #3498db;
 	border-bottom-color: #3498db;
 }
 
-#expedition-simulator .tab-panel {
+.app-panel .tab-panel {
 	display: none;
 }
 
-#expedition-simulator .tab-panel.active {
+.app-panel .tab-panel.active {
 	display: block;
 }
 
@@ -274,7 +297,7 @@
    Planetary Review
    ========================================================================== */
 
-#expedition-simulator .planetary-review {
+.app-panel .planetary-review {
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -283,7 +306,7 @@
 	padding: 20px 10px;
 }
 
-#expedition-simulator .planetary-review__controls-left {
+.app-panel .planetary-review__controls-left {
 	position: absolute;
 	top: 10px;
 	left: 10px;
@@ -292,13 +315,13 @@
 	gap: 6px;
 }
 
-#expedition-simulator .planetary-review__toggle {
+.app-panel .planetary-review__toggle {
 	position: absolute;
 	top: 10px;
 	right: 10px;
 }
 
-#expedition-simulator .planetary-review .planet-image {
+.app-panel .planetary-review .planet-image {
 	width: 120px;
 	height: 120px;
 	object-fit: contain;
@@ -306,7 +329,7 @@
 	box-shadow: 0 0 20px rgba(52, 152, 219, 0.4);
 }
 
-#expedition-simulator .planetary-review .planet-name {
+.app-panel .planetary-review .planet-name {
 	margin: 0;
 	font-size: 15px;
 	font-weight: 700;
@@ -316,7 +339,7 @@
 	text-align: center;
 }
 
-#expedition-simulator .planetary-review .planet-nav {
+.app-panel .planetary-review .planet-nav {
 	margin: -6px 0 0;
 	font-size: 11px;
 	color: #95a5a6;
@@ -324,7 +347,7 @@
 	letter-spacing: 0.04em;
 }
 
-#expedition-simulator .planetary-review__export-btn {
+.app-panel .planetary-review__export-btn {
 	margin-top: 8px;
 	padding: 5px 14px;
 	border: 1px solid rgba(255, 255, 255, 0.2);
@@ -337,19 +360,19 @@
 	transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
-#expedition-simulator .planetary-review__export-btn:hover {
+.app-panel .planetary-review__export-btn:hover {
 	background: rgba(52, 152, 219, 0.25);
 	color: #ecf0f1;
 	border-color: #3498db;
 }
 
-#expedition-simulator .planetary-review__export-btn--success {
+.app-panel .planetary-review__export-btn--success {
 	background: rgba(46, 204, 113, 0.2);
 	color: #2ecc71;
 	border-color: #2ecc71;
 }
 
-#expedition-simulator .planetary-review__export-btn--error {
+.app-panel .planetary-review__export-btn--error {
 	background: rgba(231, 76, 60, 0.2);
 	color: #e74c3c;
 	border-color: #e74c3c;
@@ -359,12 +382,12 @@
    Star Rating
    ========================================================================== */
 
-#expedition-simulator .star-rating {
+.app-panel .star-rating {
 	width: 100%;
 	max-width: 280px;
 }
 
-#expedition-simulator .star-rating-placeholder {
+.app-panel .star-rating-placeholder {
 	margin: 0;
 	font-size: 12px;
 	color: #7f8c8d;
@@ -374,7 +397,7 @@
 
 /* ── Overall ───────────────────────────────────────────────────────────── */
 
-#expedition-simulator .star-rating-overall {
+.app-panel .star-rating-overall {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -384,7 +407,7 @@
 	margin-bottom: 8px;
 }
 
-#expedition-simulator .star-rating-overall-label {
+.app-panel .star-rating-overall-label {
 	font-size: 13px;
 	font-weight: 700;
 	font-variant: small-caps;
@@ -392,7 +415,7 @@
 	color: #ecf0f1;
 }
 
-#expedition-simulator .star-rating-overall-value {
+.app-panel .star-rating-overall-value {
 	font-size: 13px;
 	font-weight: 600;
 	color: #f1c40f;
@@ -400,19 +423,19 @@
 	text-align: right;
 }
 
-#expedition-simulator .star-rating-overall .star-rating-stars .star {
+.app-panel .star-rating-overall .star-rating-stars .star {
 	font-size: 16px;
 }
 
 /* ── Per-axis rows ─────────────────────────────────────────────────────── */
 
-#expedition-simulator .star-rating-axes {
+.app-panel .star-rating-axes {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 4px 12px;
 }
 
-#expedition-simulator .star-rating-axis {
+.app-panel .star-rating-axis {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -420,7 +443,7 @@
 	padding: 2px 0;
 }
 
-#expedition-simulator .star-rating-axis-label {
+.app-panel .star-rating-axis-label {
 	font-size: 11px;
 	font-weight: 600;
 	color: #bdc3c7;
@@ -429,27 +452,27 @@
 	letter-spacing: 0.04em;
 }
 
-#expedition-simulator .star-rating-axis .star-rating-stars .star {
+.app-panel .star-rating-axis .star-rating-stars .star {
 	font-size: 13px;
 }
 
 /* ── Stars ─────────────────────────────────────────────────────────────── */
 
-#expedition-simulator .star-rating-stars {
+.app-panel .star-rating-stars {
 	display: inline-flex;
 	gap: 1px;
 }
 
-#expedition-simulator .star-rating-stars .star {
+.app-panel .star-rating-stars .star {
 	line-height: 1;
 	transition: color 0.2s ease;
 }
 
-#expedition-simulator .star-rating-stars .star--full {
+.app-panel .star-rating-stars .star--full {
 	color: #f1c40f;
 }
 
-#expedition-simulator .star-rating-stars .star--half {
+.app-panel .star-rating-stars .star--half {
 	color: #f1c40f;
 	-webkit-background-clip: text;
 	background-clip: text;
@@ -457,15 +480,15 @@
 	-webkit-text-fill-color: transparent;
 }
 
-#expedition-simulator .star-rating-stars .star--empty {
+.app-panel .star-rating-stars .star--empty {
 	color: #555;
 }
 
-#expedition-simulator .star-rating-stars .star--sixth.star--full {
+.app-panel .star-rating-stars .star--sixth.star--full {
 	color: #e74c3c;
 }
 
-#expedition-simulator .star-rating-stars .star--sixth.star--half {
+.app-panel .star-rating-stars .star--sixth.star--half {
 	color: #e74c3c;
 	-webkit-background-clip: text;
 	background-clip: text;
@@ -473,17 +496,17 @@
 	-webkit-text-fill-color: transparent;
 }
 
-#expedition-simulator .star-rating-stars .star--sixth.star--empty {
+.app-panel .star-rating-stars .star--sixth.star--empty {
 	color: #555;
 }
 
-#expedition-simulator .star-rating-stars .star--hidden {
+.app-panel .star-rating-stars .star--hidden {
 	opacity: 0%;
 }
 
 /* ── Boolean indicators ────────────────────────────────────────────────── */
 
-#expedition-simulator .star-rating-boolean-list {
+.app-panel .star-rating-boolean-list {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px;
@@ -494,7 +517,7 @@
 	gap: 3px;
 }
 
-#expedition-simulator .star-rating-boolean-item {
+.app-panel .star-rating-boolean-item {
 	gap: 5px;
 	padding: 2px 8px 2px 5px;
 	border-radius: 999px;
@@ -510,15 +533,15 @@
 	cursor: default;
 }
 
-#expedition-simulator .star-rating-boolean-item:hover {
+.app-panel .star-rating-boolean-item:hover {
 	background-color: color-mix(in srgb, var(--badge-color, #888) 25%, transparent);
 }
 
-#expedition-simulator .star-rating-boolean-item[data-tooltip] {
+.app-panel .star-rating-boolean-item[data-tooltip] {
 	position: relative;
 }
 
-#expedition-simulator .star-rating-boolean-item[data-tooltip]::after {
+.app-panel .star-rating-boolean-item[data-tooltip]::after {
 	content: attr(data-tooltip);
 	position: absolute;
 	bottom: calc(100% + 6px);
@@ -543,11 +566,11 @@
 	z-index: 100;
 }
 
-#expedition-simulator .star-rating-boolean-item[data-tooltip]:hover::after {
+.app-panel .star-rating-boolean-item[data-tooltip]:hover::after {
 	opacity: 1;
 }
 
-#expedition-simulator .star-rating-boolean-item-dot {
+.app-panel .star-rating-boolean-item-dot {
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
@@ -555,46 +578,46 @@
 	flex-shrink: 0;
 }
 
-#expedition-simulator .star-rating-boolean-item-label {
+.app-panel .star-rating-boolean-item-label {
 	color: #e0e0e0;
 	font-variant: small-caps;
 	letter-spacing: 0.04em;
 }
 
 /* Panel Content Area */
-#expedition-simulator .panel-content {
+.app-panel .panel-content {
 	height: calc(100vh - 70px);
 	overflow-y: auto;
 	padding: 20px;
 }
 
 /* Scrollbar Styling */
-#expedition-simulator .panel-content::-webkit-scrollbar {
+.app-panel .panel-content::-webkit-scrollbar {
 	width: 8px;
 }
 
-#expedition-simulator .panel-content::-webkit-scrollbar-track {
+.app-panel .panel-content::-webkit-scrollbar-track {
 	background: rgba(255, 255, 255, 0.1);
 	border-radius: 4px;
 }
 
-#expedition-simulator .panel-content::-webkit-scrollbar-thumb {
+.app-panel .panel-content::-webkit-scrollbar-thumb {
 	background: #3498db;
 	border-radius: 4px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-	#expedition-simulator {
+	.app-panel {
 		width: 100vw;
 		transform: translateX(-100vw);
 	}
 	
-	#expedition-simulator:hover {
+	.app-panel:hover {
 		transform: translateX(0);
 	}
 	
-	#expedition-simulator .panel-main {
+	.app-panel .panel-main {
 		width: 100vw;
 	}
 }

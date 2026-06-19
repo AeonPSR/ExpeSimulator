@@ -1,13 +1,13 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Sector Styles
    Available sectors grid, selected sectors, and sector items
    ========================================================================== */
 
 /* Section Headers */
-#expedition-simulator .section-selector h4,
-#expedition-simulator .selected-sectors h4,
-#expedition-simulator .probability-display h4,
-#expedition-simulator .expedition-results h4 {
+.app-panel .section-selector h4,
+.app-panel .selected-sectors h4,
+.app-panel .probability-display h4,
+.app-panel .expedition-results h4 {
 	margin: 0 0 15px 0;
 	font-size: 16px;
 	color: #3498db;
@@ -16,7 +16,7 @@
 }
 
 /* Sectors Header with Toggle Buttons */
-#expedition-simulator .sectors-header {
+.app-panel .sectors-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -24,14 +24,14 @@
 	flex-direction: row;
 }
 
-#expedition-simulator .sectors-header h4 {
+.app-panel .sectors-header h4 {
 	margin: 0;
 	border-bottom: 2px solid #3498db;
 	padding-bottom: 8px;
 	flex: 1;
 }
 
-#expedition-simulator .sectors-buttons {
+.app-panel .sectors-buttons {
 	display: flex;
 	flex-direction: row;
 	gap: 5px;
@@ -39,7 +39,7 @@
 }
 
 /* Available Sectors Grid */
-#expedition-simulator .sector-grid {
+.app-panel .sector-grid {
 	display: grid;
 	grid-template-columns: repeat(5, 1fr);
 	gap: 8px;
@@ -47,7 +47,7 @@
 }
 
 /* Sector Item */
-#expedition-simulator .sector-item {
+.app-panel .sector-item {
 	background: rgba(255, 255, 255, 0.1);
 	border: 2px solid transparent;
 	border-radius: 8px;
@@ -62,21 +62,21 @@
 	position: relative;
 }
 
-#expedition-simulator .sector-item:hover {
+.app-panel .sector-item:hover {
 	background: rgba(52, 152, 219, 0.3);
 	border-color: #3498db;
 	transform: translateY(-2px);
 	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-#expedition-simulator .sector-item img {
+.app-panel .sector-item img {
 	width: 40px;
 	height: 40px;
 	object-fit: cover;
 	border-radius: 4px;
 }
 
-#expedition-simulator .sector-item img.fight-icon {
+.app-panel .sector-item img.fight-icon {
 	width: 24px;
 	height: 24px;
 	position: absolute;
@@ -88,7 +88,7 @@
 	object-fit: contain;
 }
 
-#expedition-simulator .sector-item img.negative-level-icon {
+.app-panel .sector-item img.negative-level-icon {
 	width: 24px;
 	height: 24px;
 	position: absolute;
@@ -100,7 +100,7 @@
 	object-fit: contain;
 }
 
-#expedition-simulator .sector-item span {
+.app-panel .sector-item span {
 	display: block;
 	font-size: 10px;
 	color: #bdc3c7;
@@ -109,21 +109,21 @@
 }
 
 /* Disabled Sector */
-#expedition-simulator .sector-item.sector-disabled {
+.app-panel .sector-item.sector-disabled {
 	background: rgba(100, 100, 100, 0.1);
 	border-color: rgba(150, 150, 150, 0.3);
 	cursor: not-allowed;
 	opacity: 0.4;
 }
 
-#expedition-simulator .sector-item.sector-disabled:hover {
+.app-panel .sector-item.sector-disabled:hover {
 	background: rgba(100, 100, 100, 0.1);
 	border-color: rgba(150, 150, 150, 0.3);
 	transform: none;
 	box-shadow: none;
 }
 
-#expedition-simulator .sector-item.sector-disabled img {
+.app-panel .sector-item.sector-disabled img {
 	filter: grayscale(100%);
 }
 
@@ -137,13 +137,13 @@
 	100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
 }
 
-#expedition-simulator .selected-grid.import-highlight {
+.app-panel .selected-grid.import-highlight {
 	animation: import-highlight 1.5s ease-in-out;
 	border-radius: 8px;
 }
 
 /* Selected Sectors Grid */
-#expedition-simulator .selected-grid {
+.app-panel .selected-grid {
 	display: grid;
 	grid-template-columns: repeat(5, 55px);
 	gap: 8px;
@@ -155,7 +155,7 @@
 }
 
 /* Selected Sector Item */
-#expedition-simulator .selected-sector-item {
+.app-panel .selected-sector-item {
 	background: rgba(52, 152, 219, 0.2);
 	border: 2px solid #3498db;
 	border-radius: 8px;
@@ -170,20 +170,20 @@
 	position: relative;
 }
 
-#expedition-simulator .selected-sector-item:hover {
+.app-panel .selected-sector-item:hover {
 	background: rgba(231, 76, 60, 0.3);
 	border-color: #e74c3c;
 	transform: translateY(-2px);
 	box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
 }
 
-#expedition-simulator .selected-sector-item img {
+.app-panel .selected-sector-item img {
 	width: 40px;
 	height: 40px;
 	object-fit: cover;
 }
 
-#expedition-simulator .selected-sector-item img.fight-icon {
+.app-panel .selected-sector-item img.fight-icon {
 	width: 24px;
 	height: 24px;
 	position: absolute;
@@ -195,7 +195,7 @@
 	object-fit: contain;
 }
 
-#expedition-simulator .selected-sector-item img.negative-level-icon {
+.app-panel .selected-sector-item img.negative-level-icon {
 	width: 24px;
 	height: 24px;
 	position: absolute;
@@ -211,4 +211,5 @@
 body.diplomacy-active .fight-icon {
 	display: none;
 }
+
 

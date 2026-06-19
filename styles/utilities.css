@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Utility Styles
    Colors, status classes, icons, and reusable utility classes
    ========================================================================== */
@@ -7,31 +7,31 @@
    Status Colors
    ========================================================================== */
 
-#expedition-simulator .positive,
+.app-panel .positive,
 [data-expe-sim] .positive {
 	color: #2ecc71 !important;
 	font-weight: 600;
 }
 
-#expedition-simulator .neutral,
+.app-panel .neutral,
 [data-expe-sim] .neutral {
 	color: #95a5a6 !important;
 	font-weight: 600;
 }
 
-#expedition-simulator .warning,
+.app-panel .warning,
 [data-expe-sim] .warning {
 	color: #f39c12 !important;
 	font-weight: 600;
 }
 
-#expedition-simulator .danger,
+.app-panel .danger,
 [data-expe-sim] .danger {
 	color: #e67e22 !important;
 	font-weight: 600;
 }
 
-#expedition-simulator .critical,
+.app-panel .critical,
 [data-expe-sim] .critical {
 	color: #e74c3c !important;
 	font-weight: 600;
@@ -42,14 +42,14 @@
    ========================================================================== */
 
 /* Resource Icons */
-#expedition-simulator .resource-icon {
+.app-panel .resource-icon {
 	width: 48px;
 	height: 48px;
 	vertical-align: middle;
 }
 
 /* HP Icon */
-#expedition-simulator .hp-icon {
+.app-panel .hp-icon {
 	width: 16px;
 	height: 16px;
 	vertical-align: middle;
@@ -57,7 +57,7 @@
 }
 
 /* Dead Icon */
-#expedition-simulator .dead-icon {
+.app-panel .dead-icon {
 	width: 20px;
 	height: 20px;
 	vertical-align: middle;
@@ -68,7 +68,7 @@
    Text Utilities
    ========================================================================== */
 
-#expedition-simulator .bold-damage {
+.app-panel .bold-damage {
 	font-weight: bold;
 }
 
@@ -77,7 +77,7 @@
    Vertically stacked, centered layout
    ========================================================================== */
 
-#expedition-simulator .damage-item {
+.app-panel .damage-item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -85,7 +85,7 @@
 	font-size: 12px;
 }
 
-#expedition-simulator .damage-item span:first-child {
+.app-panel .damage-item span:first-child {
 	color: #ecf0f1;
 	font-weight: 500;
 	margin-bottom: 2px;
@@ -95,8 +95,8 @@
    Selection Prevention (for drag/select issues)
    ========================================================================== */
 
-#expedition-simulator .sector-item,
-#expedition-simulator .selected-sector-item {
+.app-panel .sector-item,
+.app-panel .selected-sector-item {
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -105,8 +105,8 @@
 	-webkit-tap-highlight-color: transparent;
 }
 
-#expedition-simulator .sector-item img,
-#expedition-simulator .selected-sector-item img {
+.app-panel .sector-item img,
+.app-panel .selected-sector-item img {
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -116,7 +116,8 @@
 	pointer-events: none;
 }
 
-#expedition-simulator .sector-item:focus,
-#expedition-simulator .selected-sector-item:focus {
+.app-panel .sector-item:focus,
+.app-panel .selected-sector-item:focus {
 	outline: none;
 }
+

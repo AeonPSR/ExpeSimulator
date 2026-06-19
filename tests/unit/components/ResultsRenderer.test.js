@@ -62,8 +62,8 @@ describe('ResultsRenderer', () => {
 		test('getURL is used for the icon path', () => {
 			const mockGetURL = jest.fn(p => `chrome-ext://${p}`);
 			const html = ResultsRenderer.renderHealthValue(5, mockGetURL);
-			expect(mockGetURL).toHaveBeenCalledWith('pictures/astro/hp.png');
-			expect(html).toContain('chrome-ext://pictures/astro/hp.png');
+			expect(mockGetURL).toHaveBeenCalledWith('pictures/ui/hp.png');
+			expect(html).toContain('chrome-ext://pictures/ui/hp.png');
 		});
 
 	});

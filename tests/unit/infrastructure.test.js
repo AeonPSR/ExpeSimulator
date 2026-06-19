@@ -60,7 +60,7 @@ describe('Manifest integrity', () => {
   });
 
   test('every path in calculation-worker.js importScripts exists on disk', () => {
-    const src = fs.readFileSync(path.join(ROOT, 'js/workers/calculation-worker.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'expeditionSimulator/js/workers/calculation-worker.js'), 'utf8');
     const paths = [...src.matchAll(/baseURL \+ '([^']+)'/g)].map(m => m[1]);
     const missing = paths.filter(p => !fs.existsSync(path.join(ROOT, p)));
     expect(missing).toEqual([]);
@@ -82,7 +82,7 @@ describe('Manifest integrity', () => {
       });
     }
 
-    const src = fs.readFileSync(path.join(ROOT, 'js/workers/calculation-worker.js'), 'utf8');
+    const src = fs.readFileSync(path.join(ROOT, 'expeditionSimulator/js/workers/calculation-worker.js'), 'utf8');
     const paths = [...src.matchAll(/baseURL \+ '([^']+)'/g)].map(m => m[1]);
     const uncovered = paths.filter(p => !matchesAnyGlob(p, globs));
     expect(uncovered).toEqual([]);
