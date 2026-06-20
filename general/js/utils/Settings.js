@@ -20,13 +20,15 @@ const Settings = (() => {
 		DEVTOOLS: 'expe-sim-devtools'
 	};
 
-	let _theme = 'retro';
+	const _isFirefox = /Firefox\//.test(navigator.userAgent);
+
+	let _theme = _isFirefox ? 'default' : 'retro';
 	let _devtools = false;
 
 	// Restore persisted values
 	try {
 		const t = localStorage.getItem(STORAGE.THEME);
-		if (t && THEMES.includes(t)) _theme = t;
+		if (t && THEMES.includes(t) && !(t === 'retro' && _isFirefox)) _theme = t;
 		const d = localStorage.getItem(STORAGE.DEVTOOLS);
 		if (d !== null) _devtools = d === 'true';
 	} catch (_) { /* storage unavailable in some contexts */ }
@@ -42,6 +44,7 @@ const Settings = (() => {
 		get theme() { return _theme; },
 		get devtools() { return _devtools; },
 		get themes() { return [...THEMES]; },
+		get isFirefox() { return _isFirefox; },
 
 		/**
 		 * Switches the active theme, persists, and dispatches 'settings:theme-change'.
@@ -49,6 +52,7 @@ const Settings = (() => {
 		 */
 		setTheme(theme) {
 			if (!THEMES.includes(theme)) return;
+			if (theme === 'retro' && _isFirefox) return;
 			_theme = theme;
 			try { localStorage.setItem(STORAGE.THEME, theme); } catch (_) {}
 			_applyTheme(theme);

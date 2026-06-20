@@ -77,12 +77,24 @@ class SettingsPage extends Component {
 	// ─── Theme ───────────────────────────────────────────────────────────────
 
 	_renderThemeControls() {
-		const labels = { default: I18n.t('settings.theme.default'), retro: I18n.t('settings.theme.retro') };
 		const select = this.createElement('select', { className: 'settings-theme-select' });
+		const optionMap = {};
+
+		const _buildLabel = (theme) => {
+			const name = I18n.t(`settings.theme.${theme}`);
+			if (theme === 'retro' && Settings.isFirefox) {
+				return name + ' — ' + I18n.t('settings.theme.unavailable_firefox');
+			}
+			return name;
+		};
 
 		Settings.themes.forEach(theme => {
-			const opt = this.createElement('option', { value: theme, 'data-i18n': `settings.theme.${theme}` }, labels[theme] || theme);
+			const isUnavailable = theme === 'retro' && Settings.isFirefox;
+			const attrs = { value: theme };
+			if (isUnavailable) attrs.disabled = true;
+			const opt = this.createElement('option', attrs, _buildLabel(theme));
 			if (Settings.theme === theme) opt.selected = true;
+			optionMap[theme] = opt;
 			select.appendChild(opt);
 		});
 
@@ -91,6 +103,13 @@ class SettingsPage extends Component {
 		// Keep in sync if theme changed via the panel header button
 		this.addEventListener(document, 'settings:theme-change', (e) => {
 			select.value = e.detail.theme;
+		});
+
+		// Re-translate labels (including the Firefox suffix) on locale change
+		this.addEventListener(document, 'i18n:change', () => {
+			Object.keys(optionMap).forEach(theme => {
+				optionMap[theme].textContent = _buildLabel(theme);
+			});
 		});
 
 		return select;

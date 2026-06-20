@@ -206,9 +206,7 @@ const Translations = {
 		'settings.section.visibility':       'Visibility',
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
-
-		// Expedition results
-		'player.health_prompt':              'Enter health value:',
+		'settings.theme.unavailable_firefox': 'Unavailable on Firefox',
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -411,9 +409,7 @@ const Translations = {
 		'settings.section.visibility':       'Visibilité',
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
-
-		// Expedition results
-		'player.health_prompt':              'Entrez la valeur de santé :',
+		'settings.theme.unavailable_firefox': 'Indisponible sur Firefox',
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -616,9 +612,7 @@ const Translations = {
 		'settings.section.visibility':       'Visibilidad',
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
-
-		// Expedition results
-		'player.health_prompt':              'Ingrese el valor de salud:',
+		'settings.theme.unavailable_firefox': 'No disponible en Firefox',
 	},
 };
 
