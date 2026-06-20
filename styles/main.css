@@ -52,6 +52,7 @@
 /* Import mode - temporarily force panel open */
 .app-panel.import-open {
 	transform: translateX(0);
+	transition-delay: 0s;
 }
 
 /* Modal open - keep panel open while a modal is visible */

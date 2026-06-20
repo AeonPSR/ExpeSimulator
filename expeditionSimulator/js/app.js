@@ -268,34 +268,44 @@ class ExpeditionSimulatorApp {
 
 		// Open the panel temporarily
 		const panel = this._panel.element;
+		const wasAlreadyOpen = panel.getBoundingClientRect().left >= 0;
 		panel.classList.add('import-open');
+
+		// Bring this panel to the front, same as hovering does
+		document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('panel-on-top'));
+		panel.classList.add('panel-on-top');
 
 		const filtered = sectorIds.filter(s => s !== 'LANDING');
 		this._state.setSectors(['LANDING', ...filtered]);
 		this._selectedSectorsComponent.update(this._state.getSectors());
 
-		// Scroll the selected sectors into view and highlight
-		const grid = this._selectedSectorsComponent.element?.querySelector('.selected-grid');
-		if (grid) {
-			grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-			grid.classList.remove('import-highlight');
-			// Force reflow so the animation replays
-			void grid.offsetWidth;
-			grid.classList.add('import-highlight');
-			grid.addEventListener('animationend', () => {
+		// Run scroll + highlight animation — deferred until the panel is fully open
+		const runAnimation = () => {
+			const grid = this._selectedSectorsComponent.element?.querySelector('.selected-grid');
+			if (grid) {
+				grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 				grid.classList.remove('import-highlight');
-				// Close the panel after the highlight unless it's pinned
-				if (!panel.classList.contains('pinned')) {
+				// Force reflow so the animation replays
+				void grid.offsetWidth;
+				grid.classList.add('import-highlight');
+				grid.addEventListener('animationend', () => {
+					grid.classList.remove('import-highlight');
+					// Always remove import-open — pinned class already keeps the panel
+					// open if needed, so leaving import-open causes a stuck-open bug.
 					panel.classList.remove('import-open');
-				}
-			}, { once: true });
+				}, { once: true });
+			} else {
+				// Fallback: close after a delay if grid not found
+				setTimeout(() => {
+					panel.classList.remove('import-open');
+				}, 2000);
+			}
+		};
+
+		if (wasAlreadyOpen) {
+			runAnimation();
 		} else {
-			// Fallback: close after a delay if grid not found
-			setTimeout(() => {
-				if (!panel.classList.contains('pinned')) {
-					panel.classList.remove('import-open');
-				}
-			}, 2000);
+			panel.addEventListener('transitionend', runAnimation, { once: true });
 		}
 	}
 

@@ -87,6 +87,8 @@ class Panel extends Component {
 				this.element.classList.remove('pinned');
 				this._pinBtn?.classList.remove('active');
 			}
+			// Clear any import-open that may have survived a pinned import
+			this.element.classList.remove('import-open');
 			// Close immediately, then restore normal hover behaviour
 			this.element.classList.add('force-close');
 			this.element.addEventListener('transitionend', () => {
