@@ -15,11 +15,11 @@ class SettingsPage extends Component {
 	render() {
 		this.element = this.createElement('div', { className: 'settings-page' });
 
-		this.element.appendChild(this._renderSection('Language', this._renderLanguageControls()));
-		this.element.appendChild(this._renderSection('Theme', this._renderThemeControls()));
-		this.element.appendChild(this._renderSection('Developer tools', this._renderDevtoolsControls(), 'settings-section--devtools'));
+		this.element.appendChild(this._renderSection('settings.section.language', this._renderLanguageControls()));
+		this.element.appendChild(this._renderSection('settings.section.theme', this._renderThemeControls()));
+		this.element.appendChild(this._renderSection('settings.section.devtools', this._renderDevtoolsControls(), 'settings-section--devtools'));
 
-		const visibilitySection = this._renderSection('Visibility', this._renderVisibilityControls(), 'settings-section--devtools');
+		const visibilitySection = this._renderSection('settings.section.visibility', this._renderVisibilityControls(), 'settings-section--devtools');
 		this.element.appendChild(visibilitySection);
 
 		const applyDevtools = (enabled) => { visibilitySection.style.display = enabled ? '' : 'none'; };
@@ -36,9 +36,9 @@ class SettingsPage extends Component {
 
 	// ─── Sections ────────────────────────────────────────────────────────────
 
-	_renderSection(titleText, controls, extraClass = '') {
+	_renderSection(titleKey, controls, extraClass = '') {
 		const section = this.createElement('div', { className: ('settings-section ' + extraClass).trim() });
-		const title = this.createElement('h4', {}, titleText);
+		const title = this.createElement('h4', { 'data-i18n': titleKey }, I18n.t(titleKey));
 		section.appendChild(title);
 		section.appendChild(controls);
 		return section;
@@ -57,7 +57,7 @@ class SettingsPage extends Component {
 			});
 			const img = this.createElement('img', {
 				src: getResourceURL(`pictures/ui/${locale}.png`),
-				alt: locale.toUpperCase()
+				alt: ''
 			});
 			btn.appendChild(img);
 			this.addEventListener(btn, 'click', () => I18n.setLocale(locale));
@@ -77,11 +77,11 @@ class SettingsPage extends Component {
 	// ─── Theme ───────────────────────────────────────────────────────────────
 
 	_renderThemeControls() {
-		const labels = { default: 'Default', retro: 'Retro' };
+		const labels = { default: I18n.t('settings.theme.default'), retro: I18n.t('settings.theme.retro') };
 		const select = this.createElement('select', { className: 'settings-theme-select' });
 
 		Settings.themes.forEach(theme => {
-			const opt = this.createElement('option', { value: theme }, labels[theme] || theme);
+			const opt = this.createElement('option', { value: theme, 'data-i18n': `settings.theme.${theme}` }, labels[theme] || theme);
 			if (Settings.theme === theme) opt.selected = true;
 			select.appendChild(opt);
 		});
@@ -103,11 +103,10 @@ class SettingsPage extends Component {
 
 		const btn = this.createElement('button', {
 			className: 'panel-lang-btn' + (Settings.devtools ? ' panel-lang-btn--active' : ''),
-			title: 'Developer tools'
 		});
 		const img = this.createElement('img', {
 			src: getResourceURL('pictures/abilities/technician.png'),
-			alt: 'Developer tools'
+			alt: ''
 		});
 		btn.appendChild(img);
 		this.addEventListener(btn, 'click', () => {
@@ -126,11 +125,10 @@ class SettingsPage extends Component {
 
 		const btn = this.createElement('button', {
 			className: 'panel-lang-btn panel-lang-btn--active',
-			title: 'Expedition Simulator'
 		});
 		const img = this.createElement('img', {
 			src: getResourceURL('pictures/ui/astrophysicist.png'),
-			alt: 'Expedition Simulator'
+			alt: ''
 		});
 		btn.appendChild(img);
 		this.addEventListener(btn, 'click', () => {

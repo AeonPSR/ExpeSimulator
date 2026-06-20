@@ -25,6 +25,7 @@ class Panel extends Component {
 		this.panelId = options.id || 'expedition-simulator';
 		this.panelClass = options.panelClass || 'expedition-panel';
 		this.title = options.title || I18n.t('panel.title');
+		this.titleKey = options.titleKey || 'panel.title';
 		this.tongueIcon = options.tongueIcon || null;
 		this.tongueAlt = options.tongueAlt || 'Panel';
 		this.getResourceURL = options.getResourceURL || ((path) => path);
@@ -108,17 +109,16 @@ class Panel extends Component {
 	_createHeader() {
 		const header = this.createElement('div', { className: 'panel-header' });
 		
-		const title = this.createElement('h3', { 'data-i18n': 'panel.title' }, I18n.t('panel.title'));
+		const title = this.createElement('h3', { 'data-i18n': this.titleKey }, I18n.t(this.titleKey));
 		header.appendChild(title);
 
 		// Pin button to lock the panel open
 		const pinBtn = this.createElement('button', {
 			className: 'panel-pin-btn',
-			title: I18n.t('panel.pin')
 		});
 		const pinImg = this.createElement('img', {
 			src: this.getResourceURL('pictures/ui/pin.png'),
-			alt: 'Pin'
+			alt: ''
 		});
 		pinBtn.appendChild(pinImg);
 		this.addEventListener(pinBtn, 'click', () => this._togglePin(pinBtn));
@@ -137,11 +137,9 @@ class Panel extends Component {
 		if (this._pinned) {
 			this.element.classList.add('pinned');
 			pinBtn.classList.add('active');
-			pinBtn.title = I18n.t('panel.unpin');
 		} else {
 			this.element.classList.remove('pinned');
 			pinBtn.classList.remove('active');
-			pinBtn.title = I18n.t('panel.pin');
 			// Force the panel to slide away even if the mouse is still over it.
 			// The class is removed once the CSS transition ends so normal
 			// hover behaviour resumes immediately afterward.

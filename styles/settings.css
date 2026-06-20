@@ -5,6 +5,9 @@
 
 #settings-panel {
 	z-index: 10000;
+	/* The settings panel must never be hidden — it is the only way to restore
+	   visibility of other panels. Override any panel--hidden or inline style. */
+	display: flex !important;
 }
 
 /* ── Settings Page ─────────────────────────────────────────────────────────── */

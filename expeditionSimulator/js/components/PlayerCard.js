@@ -71,7 +71,7 @@ class PlayerCard extends Component {
 
 		const img = this.createElement('img', {
 			src: this.getResourceURL(`pictures/characters/${this.player.avatar}`),
-			alt: 'Player Avatar'
+			alt: ''
 		});
 		avatar.appendChild(img);
 
@@ -138,7 +138,7 @@ class PlayerCard extends Component {
 			if (ability) {
 				const img = this.createElement('img', {
 					src: this._getAbilityIcon(ability),
-					alt: 'Ability'
+					alt: ''
 				});
 				slot.appendChild(img);
 			}
@@ -177,7 +177,7 @@ class PlayerCard extends Component {
 			if (item) {
 				const img = this.createElement('img', {
 					src: this.getResourceURL(`pictures/gear/${item}`),
-					alt: 'Item'
+					alt: ''
 				});
 				slot.appendChild(img);
 			}
@@ -198,7 +198,7 @@ class PlayerCard extends Component {
 
 		const hpIcon = this.createElement('img', {
 			src: this.getResourceURL('pictures/ui/hp.png'),
-			alt: 'HP',
+			alt: '',
 			className: 'hp-icon'
 		});
 		healthSlot.appendChild(hpIcon);

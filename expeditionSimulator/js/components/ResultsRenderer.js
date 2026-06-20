@@ -28,11 +28,11 @@ class ResultsRenderer {
 			const canParticipate = status?.canParticipate ?? true;
 
 			if (!canParticipate) {
-				const stuckIcon = `<img src="${getURL('pictures/ui/stuck_in_ship.png')}" alt="Stuck in Ship" class="stuck-icon" title="No oxygen - stuck in ship" />`;
+				const stuckIcon = `<img src="${getURL('pictures/ui/stuck_in_ship.png')}" alt="" class="stuck-icon" />`;
 				return `
 					<div class="expedition-result-card">
 						<div class="expedition-result-avatar">
-							<img src="${getURL(`pictures/characters/${player.avatar}`)}" alt="Player Avatar" />
+							<img src="${getURL(`pictures/characters/${player.avatar}`)}" alt="" />
 						</div>
 						<div class="expedition-result-health-container">
 							<div class="expedition-result-health optimist health-stuck">
@@ -80,7 +80,7 @@ class ResultsRenderer {
 			return `
 				<div class="expedition-result-card">
 					<div class="expedition-result-avatar">
-						<img src="${getURL(`pictures/characters/${player.avatar}`)}" alt="Player Avatar" />
+						<img src="${getURL(`pictures/characters/${player.avatar}`)}" alt="" />
 					</div>
 					<div class="expedition-result-health-container">
 						<div class="expedition-result-health optimist ${ResultsRenderer.getHealthClass(optimist)}">
@@ -111,9 +111,9 @@ class ResultsRenderer {
 	 */
 	static renderHealthValue(health, getURL) {
 		if (health <= 0) {
-			return `<img src="${getURL('pictures/ui/dead.png')}" alt="Dead" class="dead-icon" />`;
+			return `<img src="${getURL('pictures/ui/dead.png')}" alt="" class="dead-icon" />`;
 		}
-		return `${health}<img src="${getURL('pictures/ui/hp.png')}" alt="HP" class="hp-icon" />`;
+		return `${health}<img src="${getURL('pictures/ui/hp.png')}" alt="" class="hp-icon" />`;
 	}
 
 	/**
@@ -144,15 +144,7 @@ class ResultsRenderer {
 			const iconPath = effectIcons[effect.type];
 			if (!iconPath) return '';
 
-			const title = effect.type === 'ROPE'
-				? `Rope blocked ${effect.damagePrevented || '?'} damage`
-				: effect.type === 'SURVIVAL'
-				? `Survival reduced ${effect.reductions || '?'} damage`
-				: effect.type === 'PLASTENITE_ARMOR'
-				? `Armor reduced ${effect.reductions || '?'} combat damage`
-				: effect.type;
-
-			return `<img src="${getURL(iconPath)}" alt="${effect.type}" class="effect-icon" title="${title}" />`;
+			return `<img src="${getURL(iconPath)}" alt="" class="effect-icon" />`;
 		}).join('');
 	}
 

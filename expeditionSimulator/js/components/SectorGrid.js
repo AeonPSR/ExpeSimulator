@@ -72,7 +72,7 @@ class SectorGrid extends Component {
 				id: 'diplomacy-toggle-btn',
 				className: 'diplomacy-toggle-btn',
 				icon: this.getResourceURL('pictures/abilities/diplomacy.png'),
-				alt: 'Toggle Diplomacy',
+				alt: '',
 				activeColor: 'blue',
 				onToggle: (isActive) => {
 					if (isActive) {
@@ -138,7 +138,7 @@ class SectorGrid extends Component {
 		if (SectorData.hasFightEvents(sectorName)) {
 			const fightImg = this.createElement('img', {
 				src: this.getResourceURL('pictures/ui/fight.png'),
-				alt: 'Fight Event',
+				alt: '',
 				className: 'fight-icon'
 			});
 			sectorDiv.appendChild(fightImg);

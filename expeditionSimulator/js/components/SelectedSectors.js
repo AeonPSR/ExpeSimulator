@@ -120,7 +120,6 @@ class SelectedSectors extends Component {
 		const sectorDiv = this.createElement('div', {
 			className: 'selected-sector-item',
 			dataset: { index: index.toString() },
-			title: I18n.t('sectors.remove_hint', { name: formatSectorName(sectorName) })
 		});
 
 		// Main image
@@ -134,7 +133,7 @@ class SelectedSectors extends Component {
 		if (SectorData.hasFightEvents(sectorName)) {
 			const fightImg = this.createElement('img', {
 				src: this.getResourceURL('pictures/ui/fight.png'),
-				alt: 'Fight',
+				alt: '',
 				className: 'fight-icon'
 			});
 			sectorDiv.appendChild(fightImg);

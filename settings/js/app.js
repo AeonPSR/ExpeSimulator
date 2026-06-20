@@ -13,9 +13,10 @@ class SettingsApp {
 		this._panel = new Panel({
 			id: 'settings-panel',
 			panelClass: 'settings-panel',
-			title: 'Settings',
+			titleKey: 'settings.title',
+			title: I18n.t('settings.title'),
 			tongueIcon: getResourceURL('pictures/abilities/creatif.png'),
-			tongueAlt: 'Settings',
+			tongueAlt: '',
 			getResourceURL: getResourceURL
 		});
 		this._panel.mount(document.body);

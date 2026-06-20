@@ -12,8 +12,6 @@ const Translations = {
 	en: {
 		// Panel
 		'panel.title':              'Expedition Simulator',
-		'panel.pin':                'Pin panel open',
-		'panel.unpin':              'Unpin panel',
 		'panel.lang.label':         'Language',
 
 		// Tabs
@@ -24,7 +22,6 @@ const Translations = {
 		'sectors.header':           'Selected Expedition ({regular}/{max})',
 		'sectors.special_suffix':   '+ {count} special',
 		'sectors.clear_all':        'Clear All',
-		'sectors.remove_hint':      '{name} — Click to remove',
 
 		// Sector grid
 		'sectors.available':        'Available Sectors',
@@ -92,10 +89,6 @@ const Translations = {
 
 		// Planetary review
 		'planet.unknown':           'Unknown planet',
-		'planet.direction_title':   'Change direction',
-		'planet.fuel_up':           'Increase fuel cost',
-		'planet.fuel_down':         'Decrease fuel cost',
-		'planet.export_title':      'Copy planet summary to clipboard',
 		'planet.export_btn':        '📋 Export',
 		'planet.export_success':    '✓ Copied!',
 		'planet.export_error':      '✗ Failed',
@@ -204,6 +197,18 @@ const Translations = {
 		'tag.quad_strong_wind.desc':         '4 Strong Wind sectors.',
 		'tag.quad_seismic_activity.desc':    '4 Seismic Activity sectors.',
 		'tag.quad_volcanic_activity.desc':   '4 Volcanic Activity sectors.',
+
+		// Settings panel
+		'settings.title':                    'Settings',
+		'settings.section.language':         'Language',
+		'settings.section.theme':            'Theme',
+		'settings.section.devtools':         'Developer tools',
+		'settings.section.visibility':       'Visibility',
+		'settings.theme.default':            'Default',
+		'settings.theme.retro':              'Retro',
+
+		// Expedition results
+		'player.health_prompt':              'Enter health value:',
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -212,8 +217,6 @@ const Translations = {
 	fr: {
 		// Panel
 		'panel.title':              'Simulateur d\'Expédition',
-		'panel.pin':                'Épingler le panneau',
-		'panel.unpin':              'Désépingler le panneau',
 		'panel.lang.label':         'Langue',
 
 		// Tabs
@@ -224,7 +227,6 @@ const Translations = {
 		'sectors.header':           'Expédition sélectionnée ({regular}/{max})',
 		'sectors.special_suffix':   '+ {count} spécial',
 		'sectors.clear_all':        'Tout effacer',
-		'sectors.remove_hint':      '{name} — Cliquer pour retirer',
 
 		// Sector grid
 		'sectors.available':        'Secteurs disponibles',
@@ -292,10 +294,6 @@ const Translations = {
 
 		// Planetary review
 		'planet.unknown':           'Planète inconnue',
-		'planet.direction_title':   'Changer de direction',
-		'planet.fuel_up':           'Augmenter le coût en carburant',
-		'planet.fuel_down':         'Diminuer le coût en carburant',
-		'planet.export_title':      'Copier le résumé de la planète',
 		'planet.export_btn':        '📋 Exporter',
 		'planet.export_success':    '✓ Copié !',
 		'planet.export_error':      '✗ Échec',
@@ -404,6 +402,18 @@ const Translations = {
 		'tag.quad_strong_wind.desc':         '4 secteurs Vents forts.',
 		'tag.quad_seismic_activity.desc':    '4 secteurs Activité sismique.',
 		'tag.quad_volcanic_activity.desc':   '4 secteurs Activité volcanique.',
+
+		// Settings panel
+		'settings.title':                    'Réglages',
+		'settings.section.language':         'Langue',
+		'settings.section.theme':            'Thème',
+		'settings.section.devtools':         'Outils développeur',
+		'settings.section.visibility':       'Visibilité',
+		'settings.theme.default':            'Défaut',
+		'settings.theme.retro':              'Rétro',
+
+		// Expedition results
+		'player.health_prompt':              'Entrez la valeur de santé :',
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -412,8 +422,6 @@ const Translations = {
 	es: {
 		// Panel
 		'panel.title':              'Simulador de Expedición',
-		'panel.pin':                'Anclar panel',
-		'panel.unpin':              'Desanclar panel',
 		'panel.lang.label':         'Idioma',
 
 		// Tabs
@@ -424,7 +432,6 @@ const Translations = {
 		'sectors.header':           'Expedición seleccionada ({regular}/{max})',
 		'sectors.special_suffix':   '+ {count} especial',
 		'sectors.clear_all':        'Borrar todo',
-		'sectors.remove_hint':      '{name} — Clic para eliminar',
 
 		// Sector grid
 		'sectors.available':        'Sectores disponibles',
@@ -492,10 +499,6 @@ const Translations = {
 
 		// Planetary review
 		'planet.unknown':           'Planeta desconocido',
-		'planet.direction_title':   'Cambiar dirección',
-		'planet.fuel_up':           'Aumentar coste de combustible',
-		'planet.fuel_down':         'Reducir coste de combustible',
-		'planet.export_title':      'Copiar resumen del planeta',
 		'planet.export_btn':        '📋 Exportar',
 		'planet.export_success':    '✓ ¡Copiado!',
 		'planet.export_error':      '✗ Error',
@@ -604,6 +607,18 @@ const Translations = {
 		'tag.quad_strong_wind.desc':         '4 sectores de Vientos Fuertes.',
 		'tag.quad_seismic_activity.desc':    '4 sectores de Actividad Sísmica.',
 		'tag.quad_volcanic_activity.desc':   '4 sectores de Actividad Volcánica.',
+
+		// Settings panel
+		'settings.title':                    'Ajustes',
+		'settings.section.language':         'Idioma',
+		'settings.section.theme':            'Tema',
+		'settings.section.devtools':         'Herramientas de desarrollador',
+		'settings.section.visibility':       'Visibilidad',
+		'settings.theme.default':            'Por defecto',
+		'settings.theme.retro':              'Retro',
+
+		// Expedition results
+		'player.health_prompt':              'Ingrese el valor de salud:',
 	},
 };
 

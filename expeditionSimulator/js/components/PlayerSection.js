@@ -98,7 +98,7 @@ class PlayerSection extends Component {
 		this._exploredSectorsBtn.appendChild(this._exploredSectorsValue);
 		const esIcon = this.createElement('img', {
 			src: this.getResourceURL('pictures/abilities/sprint.png'),
-			alt: 'Explored Sectors',
+			alt: '',
 			className: 'explored-sectors-icon'
 		});
 		this._exploredSectorsBtn.appendChild(esIcon);
@@ -113,7 +113,7 @@ class PlayerSection extends Component {
 		this._fightingPowerBtn.appendChild(this._fightingPowerValue);
 		const fpIcon = this.createElement('img', {
 			src: this.getResourceURL('pictures/ui/fight.png'),
-			alt: 'Fighting Power',
+			alt: '',
 			className: 'fight-power-icon'
 		});
 		this._fightingPowerBtn.appendChild(fpIcon);
@@ -127,7 +127,7 @@ class PlayerSection extends Component {
 		});
 		const modeImg = this.createElement('img', {
 			src: this.getResourceURL('pictures/projects/icarus_access.png'),
-			alt: 'Mode'
+			alt: ''
 		});
 		this._modeBtn.appendChild(modeImg);
 		this.addEventListener(this._modeBtn, 'click', () => this._toggleMode());
@@ -138,7 +138,7 @@ class PlayerSection extends Component {
 			id: 'antigrav-propeller-btn',
 			className: 'antigrav-propeller-btn',
 			icon: this.getResourceURL('pictures/projects/icarus_antigrav_propeller.png'),
-			alt: 'Antigrav Propeller',
+			alt: '',
 			activeColor: 'orange',
 			onToggle: (isActive) => this.onAntigravToggle?.(isActive)
 		});
@@ -150,7 +150,7 @@ class PlayerSection extends Component {
 			id: 'players-toggle-btn',
 			className: 'players-toggle-btn',
 			icon: this.getResourceURL('pictures/projects/base03.png'),
-			alt: 'Toggle Base',
+			alt: '',
 			activeColor: 'orange',
 			onToggle: (isActive) => this.onBaseToggle?.(isActive)
 		});

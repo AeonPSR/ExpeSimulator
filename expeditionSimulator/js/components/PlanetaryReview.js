@@ -70,12 +70,11 @@ class PlanetaryReview extends Component {
 		const DIRECTIONS = ['North', 'East', 'South', 'West'];
 		this._compassBtn = this.createElement('button', {
 			className: 'compass-btn',
-			title: I18n.t('planet.direction_title'),
 			dataset: { active: 'true' }
 		});
 		const compassImg = this.createElement('img', {
 			src: this.getResourceURL('pictures/gear/quad_compass.jpg'),
-			alt: 'Direction'
+			alt: ''
 		});
 		this._compassBtn.appendChild(compassImg);
 		this._compassBtn.addEventListener('click', () => {
@@ -90,7 +89,6 @@ class PlanetaryReview extends Component {
 
 		const fuelUpBtn = this.createElement('button', {
 			className: 'fuel-arrow fuel-arrow--up',
-			title: I18n.t('planet.fuel_up')
 		});
 		fuelUpBtn.addEventListener('click', () => {
 			this._fuelCost = Math.min(9, this._fuelCost + 1);
@@ -101,13 +99,12 @@ class PlanetaryReview extends Component {
 		const fuelDisplay = this.createElement('button', { className: 'fuel-btn' });
 		const fuelImg = this.createElement('img', {
 			src: this.getResourceURL('pictures/ui/fuel.jpg'),
-			alt: 'Fuel cost'
+			alt: ''
 		});
 		fuelDisplay.appendChild(fuelImg);
 
 		const fuelDownBtn = this.createElement('button', {
 			className: 'fuel-arrow fuel-arrow--down',
-			title: I18n.t('planet.fuel_down')
 		});
 		fuelDownBtn.addEventListener('click', () => {
 			this._fuelCost = Math.max(0, this._fuelCost - 1);
@@ -131,7 +128,7 @@ class PlanetaryReview extends Component {
 				id: 'review-diplomacy-toggle',
 				className: 'diplomacy-toggle-btn',
 				icon: this.getResourceURL('pictures/abilities/diplomacy.png'),
-				alt: 'Toggle Diplomacy',
+				alt: '',
 				activeColor: 'blue',
 				onToggle: (isActive) => {
 					this.onDiplomacyToggle?.(isActive);
@@ -167,7 +164,6 @@ class PlanetaryReview extends Component {
 		// Export to clipboard button
 		this._exportBtn = this.createElement('button', {
 			className: 'planetary-review__export-btn',
-			title: I18n.t('planet.export_title')
 		}, I18n.t('planet.export_btn'));
 		this._exportBtn.addEventListener('click', () => {
 			const result = this.onExportClick?.();
