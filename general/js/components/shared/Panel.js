@@ -33,6 +33,7 @@ class Panel extends Component {
 		// References to key internal elements
 		this._contentArea = null;
 		this._tongue = null;
+		this._pinBtn = null;
 		this._pinned = false;
 	}
 
@@ -79,6 +80,20 @@ class Panel extends Component {
 			tongue.appendChild(img);
 		}
 
+		this.addEventListener(tongue, 'click', () => {
+			// Unpin if currently pinned
+			if (this._pinned) {
+				this._pinned = false;
+				this.element.classList.remove('pinned');
+				this._pinBtn?.classList.remove('active');
+			}
+			// Close immediately, then restore normal hover behaviour
+			this.element.classList.add('force-close');
+			this.element.addEventListener('transitionend', () => {
+				this.element.classList.remove('force-close');
+			}, { once: true });
+		});
+
 		return tongue;
 	}
 
@@ -113,16 +128,16 @@ class Panel extends Component {
 		header.appendChild(title);
 
 		// Pin button to lock the panel open
-		const pinBtn = this.createElement('button', {
+		this._pinBtn = this.createElement('button', {
 			className: 'panel-pin-btn',
 		});
 		const pinImg = this.createElement('img', {
 			src: this.getResourceURL('pictures/ui/pin.png'),
 			alt: ''
 		});
-		pinBtn.appendChild(pinImg);
-		this.addEventListener(pinBtn, 'click', () => this._togglePin(pinBtn));
-		header.appendChild(pinBtn);
+		this._pinBtn.appendChild(pinImg);
+		this.addEventListener(this._pinBtn, 'click', () => this._togglePin(this._pinBtn));
+		header.appendChild(this._pinBtn);
 
 		return header;
 	}
@@ -140,13 +155,8 @@ class Panel extends Component {
 		} else {
 			this.element.classList.remove('pinned');
 			pinBtn.classList.remove('active');
-			// Force the panel to slide away even if the mouse is still over it.
-			// The class is removed once the CSS transition ends so normal
-			// hover behaviour resumes immediately afterward.
-			this.element.classList.add('force-close');
-			this.element.addEventListener('transitionend', () => {
-				this.element.classList.remove('force-close');
-			}, { once: true });
+			// Normal hover behaviour takes over immediately — if the mouse is
+			// still over the panel it stays open; if not it slides away on its own.
 		}
 	}
 
