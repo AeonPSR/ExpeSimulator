@@ -204,8 +204,8 @@ const Translations = {
 		'settings.section.theme':            'Theme',
 		'settings.section.devtools':         'Developer tools',
 		'settings.section.visibility':       'Visibility',
-		'settings.theme.default':            'Default',
-		'settings.theme.retro':              'Retro',
+		'settings.theme.default':            'Beta',
+		'settings.theme.retro':              'Aeon\'s Lab',
 
 		// Expedition results
 		'player.health_prompt':              'Enter health value:',
@@ -409,8 +409,8 @@ const Translations = {
 		'settings.section.theme':            'Thème',
 		'settings.section.devtools':         'Outils développeur',
 		'settings.section.visibility':       'Visibilité',
-		'settings.theme.default':            'Défaut',
-		'settings.theme.retro':              'Rétro',
+		'settings.theme.default':            'Beta',
+		'settings.theme.retro':              'Aeon\'s Lab',
 
 		// Expedition results
 		'player.health_prompt':              'Entrez la valeur de santé :',
@@ -614,8 +614,8 @@ const Translations = {
 		'settings.section.theme':            'Tema',
 		'settings.section.devtools':         'Herramientas de desarrollador',
 		'settings.section.visibility':       'Visibilidad',
-		'settings.theme.default':            'Por defecto',
-		'settings.theme.retro':              'Retro',
+		'settings.theme.default':            'Beta',
+		'settings.theme.retro':              'Aeon\'s Lab',
 
 		// Expedition results
 		'player.health_prompt':              'Ingrese el valor de salud:',

@@ -14,13 +14,13 @@
  *   'settings:devtools-change' → { detail: { devtools } }
  */
 const Settings = (() => {
-	const THEMES = ['default', 'retro'];
+	const THEMES = ['retro', 'default'];
 	const STORAGE = {
 		THEME: 'expe-sim-theme',
 		DEVTOOLS: 'expe-sim-devtools'
 	};
 
-	let _theme = 'default';
+	let _theme = 'retro';
 	let _devtools = false;
 
 	// Restore persisted values

@@ -15,10 +15,10 @@
  *   I18n.t('sectors.header', { regular: 3, max: 20 }) → 'Selected Expedition (3/20)'
  */
 const I18n = (() => {
-	const SUPPORTED = ['en', 'fr', 'es'];
+	const SUPPORTED = ['fr', 'en', 'es'];
 	const STORAGE_KEY = 'expe-sim-locale';
 
-	let _locale = 'en';
+	let _locale = 'fr';
 
 	// Restore previously chosen locale if available
 	try {
