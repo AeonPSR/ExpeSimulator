@@ -54,15 +54,22 @@ const CombatRewardCalculator = {
 
 		if (!rewardPaths) return result;
 
-		for (const scenario of this.SCENARIOS) {
-			const path = rewardPaths[scenario];
+		// The raw fight distribution's percentiles are semantically inverted relative
+		// to resource conventions: P75 (pessimist) = most fights = highest reward,
+		// P25 (optimist) = fewest fights = lowest reward. Map accordingly so that
+		// high reward lands in the resource optimist column and low reward in pessimist.
+		const REWARD_TO_RESOURCE = { optimist: 'pessimist', average: 'average', pessimist: 'optimist' };
+
+		for (const rewardScenario of this.SCENARIOS) {
+			const path = rewardPaths[rewardScenario];
 			if (!path || !Array.isArray(path.sources)) continue;
 
 			const expected = this._expectedItemsForPath(path.sources, basePower, grenadeCount);
+			const resourceScenario = REWARD_TO_RESOURCE[rewardScenario];
 
 			for (const itemId in expected) {
 				const bucket = this.ITEM_TO_RESOURCE[itemId];
-				if (bucket) result[bucket][scenario] += expected[itemId];
+				if (bucket) result[bucket][resourceScenario] += expected[itemId];
 			}
 		}
 
