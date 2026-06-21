@@ -45,6 +45,24 @@ const EventModifier = {
 	},
 
 	/**
+	 * Replaces all events matching a prefix with NOTHING_TO_REPORT of equal total weight.
+	 * Used by Diplomacy and White Flag to keep probability mass conserved.
+	 *
+	 * @param {Object} events - The explorationEvents object (will be mutated)
+	 * @param {string} prefix - The prefix to match (e.g., 'FIGHT_')
+	 * @returns {Object} The modified events object
+	 */
+	replaceWithNothingByPrefix(events, prefix) {
+		for (const eventName of Object.keys(events)) {
+			if (eventName.startsWith(prefix)) {
+				events['NOTHING_TO_REPORT'] = (events['NOTHING_TO_REPORT'] || 0) + events[eventName];
+				delete events[eventName];
+			}
+		}
+		return events;
+	},
+
+	/**
 	 * Multiplies the weight of a specific event.
 	 * 
 	 * @param {Object} events - The explorationEvents object (will be mutated)

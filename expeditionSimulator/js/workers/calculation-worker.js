@@ -18,7 +18,9 @@ function _loadDependencies(baseURL) {
 			baseURL + 'expeditionSimulator/js/data/SectorData.js',
 			baseURL + 'expeditionSimulator/js/data/AbilityData.js',
 			baseURL + 'expeditionSimulator/js/data/ItemData.js',
+			baseURL + 'expeditionSimulator/js/data/CombatRewardData.js',
 			baseURL + 'expeditionSimulator/js/domain/FightingPowerService.js',
+			baseURL + 'expeditionSimulator/js/domain/CombatRewardService.js',
 			baseURL + 'expeditionSimulator/js/domain/OxygenService.js',
 			baseURL + 'expeditionSimulator/js/domain/LoadoutBuilder.js',
 			baseURL + 'expeditionSimulator/js/domain/DamageSpreader.js',
@@ -35,6 +37,7 @@ function _loadDependencies(baseURL) {
 			baseURL + 'expeditionSimulator/js/probability/DamageDistributionEngine.js',
 			baseURL + 'expeditionSimulator/js/probability/DamagePipeline.js',
 			baseURL + 'expeditionSimulator/js/probability/FightCalculator.js',
+			baseURL + 'expeditionSimulator/js/probability/CombatRewardCalculator.js',
 			baseURL + 'expeditionSimulator/js/probability/EventDamageCalculator.js',
 			baseURL + 'expeditionSimulator/js/services/ExpeditionRunner.js'
 		);

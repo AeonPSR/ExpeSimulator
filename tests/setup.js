@@ -57,6 +57,8 @@ const sourceFiles = [
   'expeditionSimulator/js/components/PlanetaryReview.js',
   'expeditionSimulator/js/components/ResultsRenderer.js',
   'expeditionSimulator/js/domain/FightingPowerService.js',
+  'expeditionSimulator/js/data/CombatRewardData.js',
+  'expeditionSimulator/js/domain/CombatRewardService.js',
   'expeditionSimulator/js/domain/LoadoutBuilder.js',
   'expeditionSimulator/js/domain/DamageSpreader.js',
   'expeditionSimulator/js/domain/OxygenService.js',
@@ -77,6 +79,7 @@ const sourceFiles = [
   'expeditionSimulator/js/probability/DamageDistributionEngine.js',
   'expeditionSimulator/js/probability/DamagePipeline.js',
   'expeditionSimulator/js/probability/FightCalculator.js',
+  'expeditionSimulator/js/probability/CombatRewardCalculator.js',
   'expeditionSimulator/js/probability/EventDamageCalculator.js',
   'expeditionSimulator/js/io/Clipboard.js',
   'expeditionSimulator/js/io/ChatObserver.js'

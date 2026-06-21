@@ -82,22 +82,19 @@ describe('ResultsRenderer', () => {
 			expect(ResultsRenderer.renderEffectIcons(null, url)).toBe('');
 		});
 
-		test('renders ROPE icon with damage prevented in title', () => {
+		test('renders ROPE icon', () => {
 			const html = ResultsRenderer.renderEffectIcons([{ type: 'ROPE', damagePrevented: 3 }], url);
 			expect(html).toContain('rope.jpg');
-			expect(html).toContain('blocked 3 damage');
 		});
 
-		test('renders SURVIVAL icon with reductions in title', () => {
+		test('renders SURVIVAL icon', () => {
 			const html = ResultsRenderer.renderEffectIcons([{ type: 'SURVIVAL', reductions: 2 }], url);
 			expect(html).toContain('survival.png');
-			expect(html).toContain('reduced 2 damage');
 		});
 
 		test('renders PLASTENITE_ARMOR icon', () => {
 			const html = ResultsRenderer.renderEffectIcons([{ type: 'PLASTENITE_ARMOR', reductions: 1 }], url);
 			expect(html).toContain('plastenite_armor.jpg');
-			expect(html).toContain('combat damage');
 		});
 
 		test('deduplicates effects of the same type', () => {

@@ -141,6 +141,59 @@ describe('EventModifier', () => {
 		});
 	});
 	
+	describe('replaceWithNothingByPrefix', () => {
+		test('replaces matching events with NOTHING_TO_REPORT of equal weight', () => {
+			const events = {
+				FIGHT_12: 5,
+				FIGHT_8: 3,
+				HARVEST_1: 10
+			};
+
+			const result = EventModifier.replaceWithNothingByPrefix(events, 'FIGHT_');
+
+			expect(result.FIGHT_12).toBeUndefined();
+			expect(result.FIGHT_8).toBeUndefined();
+			expect(result.NOTHING_TO_REPORT).toBe(8); // 5 + 3
+			expect(result.HARVEST_1).toBe(10);
+		});
+
+		test('adds to existing NOTHING_TO_REPORT', () => {
+			const events = {
+				FIGHT_12: 4,
+				NOTHING_TO_REPORT: 10,
+				HARVEST_1: 6
+			};
+
+			EventModifier.replaceWithNothingByPrefix(events, 'FIGHT_');
+
+			expect(events.FIGHT_12).toBeUndefined();
+			expect(events.NOTHING_TO_REPORT).toBe(14); // 10 + 4
+		});
+
+		test('handles no matching events gracefully', () => {
+			const events = { HARVEST_1: 10, ARTEFACT: 5 };
+
+			EventModifier.replaceWithNothingByPrefix(events, 'FIGHT_');
+
+			expect(events.HARVEST_1).toBe(10);
+			expect(events.ARTEFACT).toBe(5);
+			expect(events.NOTHING_TO_REPORT).toBeUndefined();
+		});
+
+		test('also handles variable fight events', () => {
+			const events = {
+				FIGHT_8_10_12_15_18_32: 2,
+				ARTEFACT: 4
+			};
+
+			EventModifier.replaceWithNothingByPrefix(events, 'FIGHT_');
+
+			expect(events.FIGHT_8_10_12_15_18_32).toBeUndefined();
+			expect(events.NOTHING_TO_REPORT).toBe(2);
+			expect(events.ARTEFACT).toBe(4);
+		});
+	});
+
 	describe('multiplyEventWeight', () => {
 		test('multiplies existing event weight', () => {
 			const events = {

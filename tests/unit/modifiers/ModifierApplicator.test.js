@@ -7,36 +7,43 @@
 
 describe('ModifierApplicator', () => {
 	
-	// Sample sector config for testing
+	// Sample sector configs matching real config.js data
 	const createLandingConfig = () => ({
 		name: 'LANDING',
 		explorationEvents: {
-			NOTHING_TO_REPORT: 10,
-			TIRED_2: 5,
-			ACCIDENT_3_5: 3,
-			DISASTER_3_5: 2,
-			FIGHT_12: 4,
-			AGAIN: 6
+			NOTHING_TO_REPORT: 4,
+			TIRED_2: 3,
+			ACCIDENT_3_5: 2,
+			DISASTER_3_5: 1
 		}
 	});
 	
 	const createIntelligentConfig = () => ({
 		name: 'INTELLIGENT',
 		explorationEvents: {
-			ARTEFACT: 5,
-			FIGHT_12: 8,
-			FIGHT_8: 3,
-			HARVEST_1: 10,
-			AGAIN: 4
+			FIGHT_12: 4,
+			PROVISION_2: 3,
+			ARTEFACT: 2,
+			ITEM_LOST: 1
 		}
 	});
 	
 	const createLostConfig = () => ({
 		name: 'LOST',
 		explorationEvents: {
-			KILL_LOST: 5,
-			PLAYER_LOST: 3,
-			NOTHING_TO_REPORT: 10
+			FIND_LOST: 7,
+			AGAIN: 2,
+			KILL_LOST: 1
+		}
+	});
+
+	const createPredatorConfig = () => ({
+		name: 'PREDATOR',
+		explorationEvents: {
+			FIGHT_12: 4,
+			ACCIDENT_3_5: 3,
+			NOTHING_TO_REPORT: 2,
+			PROVISION_3: 1
 		}
 	});
 	
@@ -52,7 +59,7 @@ describe('ModifierApplicator', () => {
 			expect(result.explorationEvents).not.toBe(original.explorationEvents);
 			
 			// Original unchanged
-			expect(original.explorationEvents.TIRED_2).toBe(5);
+			expect(original.explorationEvents.TIRED_2).toBe(3);
 		});
 		
 		test('calls correct ability modifiers', () => {
@@ -69,29 +76,26 @@ describe('ModifierApplicator', () => {
 			expect(result.explorationEvents.TIRED_2).toBeUndefined();
 			expect(result.explorationEvents.ACCIDENT_3_5).toBeUndefined();
 			expect(result.explorationEvents.DISASTER_3_5).toBeUndefined();
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(4);
 		});
 		
-		test('Pilot + Diplomacy both applied', () => {
-			const config = createLandingConfig();
+		test('Diplomacy replaces fight events with NOTHING_TO_REPORT', () => {
+			const config = createPredatorConfig();
 			const loadout = {
-				abilities: ['PILOT', 'DIPLOMACY'],
+				abilities: ['DIPLOMACY'],
 				items: [],
 				projects: []
 			};
 			
-			const result = ModifierApplicator.apply(config, 'LANDING', loadout);
+			const result = ModifierApplicator.apply(config, 'PREDATOR', loadout);
 			
-			// Pilot removes damage events
-			expect(result.explorationEvents.TIRED_2).toBeUndefined();
-			expect(result.explorationEvents.ACCIDENT_3_5).toBeUndefined();
-			expect(result.explorationEvents.DISASTER_3_5).toBeUndefined();
-			
-			// Diplomacy removes fights
+			// Diplomacy replaces FIGHT_12 (weight 4) with NOTHING_TO_REPORT
 			expect(result.explorationEvents.FIGHT_12).toBeUndefined();
-			
-			// Other events remain
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
+			// NOTHING_TO_REPORT gains fight weight: 2 + 4 = 6
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(6);
+			// Other events unchanged
+			expect(result.explorationEvents.ACCIDENT_3_5).toBe(3);
+			expect(result.explorationEvents.PROVISION_3).toBe(1);
 		});
 		
 		test('calls correct item modifiers', () => {
@@ -104,10 +108,11 @@ describe('ModifierApplicator', () => {
 			
 			const result = ModifierApplicator.apply(config, 'INTELLIGENT', loadout);
 			
-			// White Flag removes fights from INTELLIGENT
+			// White Flag replaces FIGHT_12 (weight 4) with NOTHING_TO_REPORT
 			expect(result.explorationEvents.FIGHT_12).toBeUndefined();
-			expect(result.explorationEvents.FIGHT_8).toBeUndefined();
-			expect(result.explorationEvents.ARTEFACT).toBe(5);
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(4);
+			expect(result.explorationEvents.ARTEFACT).toBe(2);
+			expect(result.explorationEvents.PROVISION_2).toBe(3);
 		});
 		
 		test('WHITE_FLAG + QUAD_COMPASS both applied', () => {
@@ -120,16 +125,15 @@ describe('ModifierApplicator', () => {
 			
 			const result = ModifierApplicator.apply(config, 'INTELLIGENT', loadout);
 			
-			// White Flag removes fights
+			// White Flag replaces FIGHT_12 (weight 4) with NOTHING_TO_REPORT
 			expect(result.explorationEvents.FIGHT_12).toBeUndefined();
-			expect(result.explorationEvents.FIGHT_8).toBeUndefined();
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(4);
 			
-			// Quad Compass removes AGAIN
-			expect(result.explorationEvents.AGAIN).toBeUndefined();
-			
+			// INTELLIGENT has no AGAIN, so Quad Compass is a no-op here
 			// Other events remain
-			expect(result.explorationEvents.ARTEFACT).toBe(5);
-			expect(result.explorationEvents.HARVEST_1).toBe(10);
+			expect(result.explorationEvents.ARTEFACT).toBe(2);
+			expect(result.explorationEvents.PROVISION_2).toBe(3);
+			expect(result.explorationEvents.ITEM_LOST).toBe(1);
 		});
 		
 		test('TRAD_MODULE doubles ARTEFACT in INTELLIGENT', () => {
@@ -142,7 +146,7 @@ describe('ModifierApplicator', () => {
 			
 			const result = ModifierApplicator.apply(config, 'INTELLIGENT', loadout);
 			
-			expect(result.explorationEvents.ARTEFACT).toBe(10); // 5 * 2
+			expect(result.explorationEvents.ARTEFACT).toBe(4); // 2 * 2
 		});
 		
 		test('calls correct project modifiers', () => {
@@ -155,11 +159,11 @@ describe('ModifierApplicator', () => {
 			
 			const result = ModifierApplicator.apply(config, 'LANDING', loadout);
 			
-			// Antigrav (buffed) removes damage events on LANDING, same as Pilot
+			// Antigrav removes damage events on LANDING, same as Pilot
 			expect(result.explorationEvents.TIRED_2).toBeUndefined();
 			expect(result.explorationEvents.ACCIDENT_3_5).toBeUndefined();
 			expect(result.explorationEvents.DISASTER_3_5).toBeUndefined();
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(4);
 		});
 		
 		test('Tracker removes KILL_LOST from LOST', () => {
@@ -173,7 +177,7 @@ describe('ModifierApplicator', () => {
 			const result = ModifierApplicator.apply(config, 'LOST', loadout);
 			
 			expect(result.explorationEvents.KILL_LOST).toBeUndefined();
-			expect(result.explorationEvents.PLAYER_LOST).toBe(3);
+			expect(result.explorationEvents.FIND_LOST).toBe(7);
 		});
 		
 		test('handles empty loadout', () => {
@@ -187,9 +191,9 @@ describe('ModifierApplicator', () => {
 			const result = ModifierApplicator.apply(config, 'LANDING', loadout);
 			
 			// All events unchanged
-			expect(result.explorationEvents.TIRED_2).toBe(5);
-			expect(result.explorationEvents.ACCIDENT_3_5).toBe(3);
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
+			expect(result.explorationEvents.TIRED_2).toBe(3);
+			expect(result.explorationEvents.ACCIDENT_3_5).toBe(2);
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(4);
 		});
 		
 		test('handles undefined loadout properties', () => {
@@ -217,7 +221,7 @@ describe('ModifierApplicator', () => {
 			
 			// Events unchanged
 			const result = ModifierApplicator.apply(config, 'LANDING', loadout);
-			expect(result.explorationEvents.TIRED_2).toBe(5);
+			expect(result.explorationEvents.TIRED_2).toBe(3);
 		});
 		
 		test('handles unknown item names gracefully', () => {
@@ -258,16 +262,12 @@ describe('ModifierApplicator', () => {
 			
 			const result = ModifierApplicator.apply(config, 'LANDING', loadout);
 			
-			// Pilot removes damage
+			// Pilot + Antigrav remove damage events (redundant, both have same effect)
 			expect(result.explorationEvents.TIRED_2).toBeUndefined();
 			expect(result.explorationEvents.ACCIDENT_3_5).toBeUndefined();
 			expect(result.explorationEvents.DISASTER_3_5).toBeUndefined();
-			
-			// Quad Compass removes AGAIN
-			expect(result.explorationEvents.AGAIN).toBeUndefined();
-			
-			// Antigrav (buffed) also removes damage events on LANDING (redundant with Pilot here)
-			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(10);
+			// LANDING has no AGAIN, so Quad Compass is a no-op here
+			expect(result.explorationEvents.NOTHING_TO_REPORT).toBe(4);
 		});
 	});
 });

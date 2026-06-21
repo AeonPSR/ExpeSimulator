@@ -27,14 +27,20 @@ const ResourceCalculator = {
 		// Count modifiers
 		const modifiers = this._countModifiers(players);
 
+		// Compute fighting power parameters for combat reward integration
+		const basePower = typeof FightingPowerService !== 'undefined'
+			? FightingPowerService.calculateBaseFightingPower(players) : 0;
+		const grenadeCount = typeof FightingPowerService !== 'undefined'
+			? FightingPowerService.countGrenades(players) : 0;
+
 		// Build and convolve distributions for each resource type
 		return {
-			fruits: this._calculateWithConvolution(sectors, loadout, 'HARVEST', modifiers.botanistCount, sectorProbabilities),
-			steaks: this._calculateWithConvolution(sectors, loadout, 'PROVISION', modifiers.survivalCount, sectorProbabilities),
+			fruits: this._calculateWithConvolution(sectors, loadout, 'HARVEST', modifiers.botanistCount, sectorProbabilities, basePower, grenadeCount),
+			steaks: this._calculateWithConvolution(sectors, loadout, 'PROVISION', modifiers.survivalCount, sectorProbabilities, basePower, grenadeCount),
 			fuel: this._calculateFuelWithConvolution(sectors, loadout, modifiers.drillerCount, sectorProbabilities),
 			oxygen: this._calculateOxygen(sectors, loadout, sectorProbabilities),
-			artefacts: this._calculateArtefacts(sectors, loadout, sectorProbabilities),
-			mapFragments: this._calculateMapFragments(sectors, loadout, sectorProbabilities)
+			artefacts: this._calculateArtefacts(sectors, loadout, sectorProbabilities, basePower, grenadeCount),
+			mapFragments: this._calculateMapFragments(sectors, loadout, sectorProbabilities, basePower, grenadeCount)
 		};
 	},
 
@@ -53,11 +59,11 @@ const ResourceCalculator = {
 	 * Calculates resource using convolution with additive bonus.
 	 * @private
 	 */
-	_calculateWithConvolution(sectors, loadout, eventPrefix, bonusPerEvent, sectorProbabilities = null) {
+	_calculateWithConvolution(sectors, loadout, eventPrefix, bonusPerEvent, sectorProbabilities = null, basePower = 0, grenadeCount = 0) {
 		const distributions = [];
 
 		for (const sectorName of sectors) {
-			const dist = this._buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent, sectorProbabilities);
+			const dist = this._buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent, sectorProbabilities, basePower, grenadeCount);
 			distributions.push(dist);
 		}
 
@@ -74,7 +80,7 @@ const ResourceCalculator = {
 	 * Applies bonus to each resource event.
 	 * @private
 	 */
-	_buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent, sectorProbabilities = null) {
+	_buildSectorDistribution(sectorName, loadout, eventPrefix, bonusPerEvent, sectorProbabilities = null, basePower = 0, grenadeCount = 0) {
 		const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
 		const dist = new Map();
 		let resourceProb = 0;
@@ -83,6 +89,20 @@ const ResourceCalculator = {
 			if (eventName.startsWith(eventPrefix + '_')) {
 				const baseAmount = parseInt(eventName.split('_')[1]) || 1;
 				const finalAmount = baseAmount + bonusPerEvent;
+				dist.set(finalAmount, (dist.get(finalAmount) || 0) + prob);
+				resourceProb += prob;
+			}
+		}
+
+		// Fight reward contributions for PROVISION (steaks) and HARVEST (fruits)
+		const rewardItemId = eventPrefix === 'PROVISION' ? 'ALIEN_STEAK'
+			: eventPrefix === 'HARVEST' ? 'FRUIT'
+			: null;
+		if (rewardItemId && typeof CombatRewardService !== 'undefined') {
+			const contributions = this._getFightRewardContributions(sectorName, probs, basePower, grenadeCount);
+			for (const { itemId, qty, prob } of contributions) {
+				if (itemId !== rewardItemId) continue;
+				const finalAmount = qty + bonusPerEvent;
 				dist.set(finalAmount, (dist.get(finalAmount) || 0) + prob);
 				resourceProb += prob;
 			}
@@ -157,7 +177,7 @@ const ResourceCalculator = {
 	 * Calculates artefacts (8/9 of ARTEFACT events).
 	 * @private
 	 */
-	_calculateArtefacts(sectors, loadout, sectorProbabilities = null) {
+	_calculateArtefacts(sectors, loadout, sectorProbabilities = null, basePower = 0, grenadeCount = 0) {
 		const distributions = [];
 
 		for (const sectorName of sectors) {
@@ -170,6 +190,17 @@ const ResourceCalculator = {
 					// 8/9 chance it's a real artefact
 					const realArtefactProb = prob * (8 / 9);
 					dist.set(1, (dist.get(1) || 0) + realArtefactProb);
+					artefactProb += realArtefactProb;
+				}
+			}
+
+			// Fight reward ARTEFACT items — same 8/9 split applies
+			if (typeof CombatRewardService !== 'undefined') {
+				const contributions = this._getFightRewardContributions(sectorName, probs, basePower, grenadeCount);
+				for (const { itemId, qty, prob } of contributions) {
+					if (itemId !== 'ARTEFACT') continue;
+					const realArtefactProb = prob * (8 / 9);
+					dist.set(qty, (dist.get(qty) || 0) + realArtefactProb);
 					artefactProb += realArtefactProb;
 				}
 			}
@@ -199,7 +230,7 @@ const ResourceCalculator = {
 	 * If any ARTEFACT exists, optimist is at least 0.1 (important for ending)
 	 * @private
 	 */
-	_calculateMapFragments(sectors, loadout, sectorProbabilities = null) {
+	_calculateMapFragments(sectors, loadout, sectorProbabilities = null, basePower = 0, grenadeCount = 0) {
 		const distributions = [];
 		let hasArtefact = false;
 
@@ -218,6 +249,23 @@ const ResourceCalculator = {
 					const mapFragmentProb = prob * (1 / 9);
 					dist.set(1, (dist.get(1) || 0) + mapFragmentProb);
 					mapProb += mapFragmentProb;
+				}
+			}
+
+			// Fight reward contributions to map fragments
+			if (typeof CombatRewardService !== 'undefined') {
+				const contributions = this._getFightRewardContributions(sectorName, probs, basePower, grenadeCount);
+				for (const { itemId, qty, prob } of contributions) {
+					if (itemId === 'ARTEFACT') {
+						hasArtefact = true;
+						const mapFragProb = prob * (1 / 9);
+						dist.set(qty, (dist.get(qty) || 0) + mapFragProb);
+						mapProb += mapFragProb;
+					} else if (itemId === 'STARMAP') {
+						hasArtefact = true;
+						dist.set(qty, (dist.get(qty) || 0) + prob);
+						mapProb += prob;
+					}
 				}
 			}
 
@@ -301,6 +349,45 @@ const ResourceCalculator = {
 		}
 
 		return weightedSum / tailFraction;
+	},
+
+	/**
+	 * Returns all possible fight reward contributions for a sector as {itemId, qty, prob} entries.
+	 * Handles both fixed (FIGHT_8) and variable (FIGHT_8_10_12_15_18_32) fight events.
+	 * @private
+	 */
+	_getFightRewardContributions(sectorName, probs, basePower, grenadeCount) {
+		if (typeof CombatRewardData === 'undefined' || !CombatRewardData.tables[sectorName]) return [];
+
+		const table = CombatRewardData.tables[sectorName];
+		const totalWeight = table.lots.reduce((sum, lot) => sum + lot.weight, 0);
+		const grenadePower = typeof FightingPowerService !== 'undefined' ? FightingPowerService.getGrenadePower() : 0;
+		const effectivePower = basePower + Math.min(grenadeCount, 1) * grenadePower;
+
+		const contributions = [];
+		for (const [eventName, eventProb] of probs) {
+			if (!eventName.startsWith('FIGHT_') || eventProb <= 0) continue;
+
+			const strengths = eventName.slice(6).split('_').map(Number);
+			const strengthProb = 1 / strengths.length;
+
+			for (const strength of strengths) {
+				const rewardProb = CombatRewardService._getRewardProbability(effectivePower, strength);
+				if (rewardProb <= 0) continue;
+
+				for (const lot of table.lots) {
+					const lotProb = lot.weight / totalWeight;
+					for (const item of lot.items) {
+						contributions.push({
+							itemId: item.id,
+							qty: item.qty,
+							prob: eventProb * strengthProb * rewardProb * lotProb,
+						});
+					}
+				}
+			}
+		}
+		return contributions;
 	},
 
 	/**
