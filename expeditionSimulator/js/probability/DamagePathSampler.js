@@ -37,18 +37,6 @@ const DamagePathSampler = {
 			return { totalDamage: targetTotal, sources: [] };
 		}
 
-		// Edge case: target 0 means all sectors contributed 0
-		if (targetTotal === 0) {
-			return {
-				totalDamage: 0,
-				sources: sectorOutcomes.map(s => ({
-					sector: s.sectorName,
-					eventType: null,
-					damage: 0
-				}))
-			};
-		}
-
 		// Step 1: Build DP table
 		// ways[sector][remaining] = total probability weight of paths from sector to end
 		// that sum to exactly `remaining`
@@ -170,17 +158,6 @@ const DamagePathSampler = {
 		const ways = this._buildWaysTable(sectorOutcomes, maxTarget);
 
 		return targetTotals.map(target => {
-			if (target === 0) {
-				return {
-					totalDamage: 0,
-					sources: sectorOutcomes.map(s => ({
-						sector: s.sectorName,
-						eventType: null,
-						damage: 0
-					}))
-				};
-			}
-
 			const sources = [];
 			let remaining = target;
 

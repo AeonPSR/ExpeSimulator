@@ -79,6 +79,7 @@ const sourceFiles = [
   'expeditionSimulator/js/probability/DamageDistributionEngine.js',
   'expeditionSimulator/js/probability/DamagePipeline.js',
   'expeditionSimulator/js/probability/FightCalculator.js',
+  'expeditionSimulator/js/probability/CombatRewardCalculator.js',
   'expeditionSimulator/js/probability/EventDamageCalculator.js',
   'expeditionSimulator/js/io/Clipboard.js',
   'expeditionSimulator/js/io/ChatObserver.js'

@@ -530,6 +530,21 @@ const ExpeditionPipeline = {
 		// Calculate fights using FightCalculator (convolution-based)
 		const combat = FightCalculator.calculate(sectors, loadout, players, fightExclusions, sectorProbabilities);
 
+		// Fold expected combat-reward items into the matching resource yields.
+		// Done here so the movement-sampling path mixes reward-augmented resources
+		// automatically (via _mixResourceResults), with no extra handling.
+		if (typeof CombatRewardCalculator !== 'undefined') {
+			const rewards = CombatRewardCalculator.calculate(
+				combat.sampledPaths, combat.fightingPower, combat.grenadeCount
+			);
+			for (const bucket in rewards) {
+				if (!resources[bucket]) continue;
+				resources[bucket].pessimist += rewards[bucket].pessimist;
+				resources[bucket].average   += rewards[bucket].average;
+				resources[bucket].optimist  += rewards[bucket].optimist;
+			}
+		}
+
 		// Add fight-induced disease contribution to the disease negative event.
 		// Each player hit by combat (min(netDamage, playerCount)) has 5% chance of disease.
 		// FightCalculator already derived this from its damageDistribution.

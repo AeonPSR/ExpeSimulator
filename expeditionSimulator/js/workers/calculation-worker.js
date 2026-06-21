@@ -37,6 +37,7 @@ function _loadDependencies(baseURL) {
 			baseURL + 'expeditionSimulator/js/probability/DamageDistributionEngine.js',
 			baseURL + 'expeditionSimulator/js/probability/DamagePipeline.js',
 			baseURL + 'expeditionSimulator/js/probability/FightCalculator.js',
+			baseURL + 'expeditionSimulator/js/probability/CombatRewardCalculator.js',
 			baseURL + 'expeditionSimulator/js/probability/EventDamageCalculator.js',
 			baseURL + 'expeditionSimulator/js/services/ExpeditionRunner.js'
 		);
