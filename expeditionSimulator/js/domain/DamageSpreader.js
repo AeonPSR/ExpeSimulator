@@ -35,17 +35,23 @@ class DamageSpreader {
 		const playerDamageTotals = new Array(playerCount).fill(0);
 		const appliedEffects = Array.from({ length: playerCount }, () => []);
 
+		// Determine which players are alive (health > 0)
+		const aliveIndices = players.reduce((acc, p, i) => {
+			if (p.health > 0) acc.push(i);
+			return acc;
+		}, []);
+
 		// Distribute fight damage
 		if (fightInstances && Array.isArray(fightInstances)) {
 			for (const instance of fightInstances) {
-				this._distributeFightDamage(instance, playerBreakdown, playerDamageTotals);
+				this._distributeFightDamage(instance, playerBreakdown, playerDamageTotals, players, aliveIndices);
 			}
 		}
 
 		// Distribute event damage
 		if (eventInstances && Array.isArray(eventInstances)) {
 			for (const instance of eventInstances) {
-				this._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects);
+				this._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects, aliveIndices);
 			}
 		}
 
@@ -101,32 +107,47 @@ class DamageSpreader {
 
 	/**
 	 * Distributes damage from a fight instance.
-	 * Combat damage: each unit of damage is randomly assigned to a player.
-	 * 
+	 * Each point is randomly assigned to an alive player. Once a player's HP
+	 * reaches 0, they are removed from the pool so overflow goes to survivors.
+	 *
 	 * @param {Object} instance - { sources: [{ eventType, sector, damage }] }
 	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
 	 * @param {Array<number>} playerDamageTotals - Totals to update
+	 * @param {Array<Object>} players - Player objects (for health tracking)
+	 * @param {Array<number>} aliveIndices - Indices of players alive at fight start
 	 * @private
 	 */
-	static _distributeFightDamage(instance, playerBreakdown, playerDamageTotals) {
-		const playerCount = playerBreakdown.length;
-		if (playerCount === 0) return;
+	static _distributeFightDamage(instance, playerBreakdown, playerDamageTotals, players, aliveIndices) {
+		if (aliveIndices.length === 0) return;
 
 		const { sources } = instance;
+
+		// Track remaining health so we can remove players from the pool as they die
+		const remainingHealth = players.map(p => p.health);
+		let currentAlive = [...aliveIndices];
 
 		for (const source of sources) {
 			const damage = Math.round(source.damage || 0);
 			if (damage <= 0) continue;
 
-			// Fight damage: distribute each point randomly
 			for (let d = 0; d < damage; d++) {
-				const targetPlayer = Math.floor(Math.random() * playerCount);
+				if (currentAlive.length === 0) break;
+
+				const pickIdx = Math.floor(Math.random() * currentAlive.length);
+				const targetPlayer = currentAlive[pickIdx];
+
 				playerBreakdown[targetPlayer].push({
 					type: source.eventType,
 					source: source.sector,
 					damage: 1
 				});
 				playerDamageTotals[targetPlayer]++;
+				remainingHealth[targetPlayer]--;
+
+				// Remove player from pool once their HP hits 0
+				if (remainingHealth[targetPlayer] <= 0) {
+					currentAlive.splice(pickIdx, 1);
+				}
 			}
 		}
 	}
@@ -134,20 +155,21 @@ class DamageSpreader {
 	/**
 	 * Distributes damage from an event instance.
 	 * Uses event type information to determine distribution:
-	 * - affectsAll: true → all players take the full damage
-	 * - affectsAll: false → one random player takes all damage
-	 * 
+	 * - affectsAll: true → all alive players take the per-player damage
+	 * - affectsAll: false → one random alive player takes all damage
+	 *
 	 * @param {Object} instance - { sources: [{ eventType, sector, damage }] }
 	 * @param {Array<Array>} playerBreakdown - Breakdown arrays to update
 	 * @param {Array<number>} playerDamageTotals - Totals to update
 	 * @param {Array<Object>} players - Array of player objects (for item immunity checks)
 	 * @param {Array<Array>} appliedEffects - Effects that triggered (e.g., rope immunity)
+	 * @param {Array<number>} aliveIndices - Indices of alive players
 	 * @private
 	 */
-	static _distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players = [], appliedEffects = []) {
-		const playerCount = playerBreakdown.length;
-		if (playerCount === 0) return;
+	static _distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players = [], appliedEffects = [], aliveIndices = []) {
+		if (aliveIndices.length === 0) return;
 
+		const playerCount = playerBreakdown.length;
 		const { sources } = instance;
 
 		for (const source of sources) {
@@ -159,11 +181,10 @@ class DamageSpreader {
 			const affectsAll = eventInfo?.affectsAll ?? false;
 
 			if (affectsAll) {
-				// TIRED_2, DISASTER_3_5: All players take damage
-				// The damage value from path sampling is already total (perPlayer × playerCount)
-				// So we divide back to get per-player damage
+				// TIRED_2, DISASTER_3_5: alive players take per-player damage
+				// damage = perPlayer × totalPlayerCount (from path sampling)
 				const perPlayerDamage = Math.round(damage / playerCount);
-				for (let p = 0; p < playerCount; p++) {
+				for (const p of aliveIndices) {
 					if (perPlayerDamage > 0) {
 						playerBreakdown[p].push({
 							type: eventType,
@@ -174,19 +195,17 @@ class DamageSpreader {
 					}
 				}
 			} else {
-				// ACCIDENT_3_5, ACCIDENT_ROPE_3_5: One random player takes all damage
-				const targetPlayer = Math.floor(Math.random() * playerCount);
-				
-				// Check for rope immunity: if ACCIDENT_ROPE_3_5 and target has rope, no damage
+				// ACCIDENT_3_5, ACCIDENT_ROPE_3_5: One random alive player takes all damage
+				const targetPlayer = aliveIndices[Math.floor(Math.random() * aliveIndices.length)];
+
+				// Check for rope immunity
 				if (eventType === 'ACCIDENT_ROPE_3_5' && this._playerHasRope(players[targetPlayer])) {
-					// console.log(`[DamageSpreader] P${targetPlayer + 1} immune to rope damage (has rope)`);
-					// Track the applied effect
 					if (appliedEffects[targetPlayer]) {
 						appliedEffects[targetPlayer].push({ type: 'ROPE', damagePrevented: damage, sector: source.sector });
 					}
-					continue; // Skip this damage
+					continue;
 				}
-				
+
 				playerBreakdown[targetPlayer].push({
 					type: eventType,
 					source: source.sector,
