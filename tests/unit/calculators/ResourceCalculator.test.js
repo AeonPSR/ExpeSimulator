@@ -490,4 +490,217 @@ describe('ResourceCalculator', () => {
 			expect(result.mapFragments).toEqual({ pessimist: 0, average: 0, optimist: 0 });
 		});
 	});
+
+	// ========================================
+	// Combat reward integration
+	// ========================================
+
+	describe('combat reward integration', () => {
+
+		let originalCombatRewardData;
+		let originalCombatRewardService;
+		let originalFightingPowerService;
+
+		beforeAll(() => {
+			originalCombatRewardData    = global.CombatRewardData;
+			originalCombatRewardService = global.CombatRewardService;
+			originalFightingPowerService = global.FightingPowerService;
+
+			global.CombatRewardData = {
+				tables: {
+					MANKAROG: {
+						lots: [
+							{ weight: 1, items: [{ id: 'STARMAP',  qty: 1 }] },
+							{ weight: 2, items: [{ id: 'ARTEFACT', qty: 3 }] },
+						]
+					},
+					RUMINANT: {
+						lots: [
+							{ weight: 1, items: [{ id: 'ALIEN_STEAK', qty: 3 }] },
+							{ weight: 1, items: [{ id: 'ALIEN_STEAK', qty: 4 }] },
+							{ weight: 1, items: [{ id: 'ALIEN_STEAK', qty: 5 }] },
+						]
+					},
+					CRISTAL_FIELD: {
+						lots: [
+							{ weight: 1, items: [{ id: 'STARMAP', qty: 1 }] },
+						]
+					},
+				}
+			};
+
+			global.CombatRewardService = {
+				_getRewardProbability: (power, strength) => {
+					const threshold = strength / 2;
+					if (power < threshold) return 0;
+					return Math.min(Math.max(power - threshold + 1, 0) / (strength - threshold + 1), 1);
+				}
+			};
+
+			global.FightingPowerService = {
+				calculateBaseFightingPower: jest.fn(() => 40),
+				countGrenades:              jest.fn(() => 0),
+				getGrenadePower:            () => 0,
+			};
+		});
+
+		afterAll(() => {
+			global.CombatRewardData     = originalCombatRewardData;
+			global.CombatRewardService  = originalCombatRewardService;
+			global.FightingPowerService = originalFightingPowerService;
+		});
+
+		beforeEach(() => {
+			ExpeditionPipeline.getSectorProbabilities.mockImplementation((sectorName) => {
+				switch (sectorName) {
+					case 'MANKAROG':
+						return new Map([
+							['KILL_RANDOM', 0.4],
+							['FIGHT_32',    0.3],
+							['BACK',        0.2],
+							['ARTEFACT',    0.1],
+						]);
+					case 'RUMINANT':
+						return new Map([
+							['PROVISION_4',   0.4],
+							['PROVISION_2',   0.3],
+							['ACCIDENT_3_5',  0.2],
+							['FIGHT_8',       0.1],
+						]);
+					case 'CRISTAL_FIELD':
+						return new Map([
+							['MUSH_TRAP',   0.4],
+							['STARMAP',     0.3],
+							['FIGHT_18',    0.2],
+							['PLAYER_LOST', 0.1],
+						]);
+					default:
+						return new Map([['NOTHING', 1.0]]);
+				}
+			});
+		});
+
+		// ---- _getFightRewardContributions ----
+
+		describe('_getFightRewardContributions', () => {
+
+			test('returns empty array when sector has no reward table', () => {
+				const probs = new Map([['FIGHT_12', 0.5]]);
+				const result = ResourceCalculator._getFightRewardContributions('FOREST', probs, 40, 0);
+				expect(result).toEqual([]);
+			});
+
+			test('returns contributions for fixed fight with guaranteed win', () => {
+				const probs = new Map([['FIGHT_8', 0.1]]);
+				const contributions = ResourceCalculator._getFightRewardContributions('RUMINANT', probs, 40, 0);
+
+				// 3 lots → 3 contributions
+				expect(contributions).toHaveLength(3);
+				expect(contributions.every(c => c.itemId === 'ALIEN_STEAK')).toBe(true);
+				contributions.forEach(c => expect(c.prob).toBeCloseTo(0.1 / 3, 10));
+				expect(contributions.map(c => c.qty).sort((a, b) => a - b)).toEqual([3, 4, 5]);
+			});
+
+			test('splits probability equally across all fight strengths for variable events', () => {
+				// Using MANKAROG table (2 lots) with FIGHT_8_10_12_15_18_32 (6 strengths)
+				const probs = new Map([['FIGHT_8_10_12_15_18_32', 0.1]]);
+				const contributions = ResourceCalculator._getFightRewardContributions('MANKAROG', probs, 40, 0);
+
+				// 6 strengths × 2 lots = 12 contributions
+				expect(contributions).toHaveLength(12);
+				// Total probability must equal fightEventProb × rewardProb
+				const totalProb = contributions.reduce((sum, c) => sum + c.prob, 0);
+				expect(totalProb).toBeCloseTo(0.1, 10);
+			});
+
+			test('returns no contributions when power is too low to win', () => {
+				// FIGHT_32: threshold = 16; power=0 < 16 → rewardProb = 0
+				const probs = new Map([['FIGHT_32', 0.3]]);
+				const contributions = ResourceCalculator._getFightRewardContributions('MANKAROG', probs, 0, 0);
+				expect(contributions).toHaveLength(0);
+			});
+		});
+
+		// ---- _buildSectorDistribution with fight rewards ----
+
+		describe('_buildSectorDistribution fight rewards', () => {
+
+			test('RUMINANT: fight reward steaks merged into PROVISION distribution', () => {
+				const dist = ResourceCalculator._buildSectorDistribution('RUMINANT', {}, 'PROVISION', 0, null, 40, 0);
+
+				const fightRewardProb = 0.1 / 3; // each of 3 equal lots
+				expect(dist.get(3)).toBeCloseTo(fightRewardProb, 5);          // fight reward only
+				expect(dist.get(4)).toBeCloseTo(0.4 + fightRewardProb, 5);   // PROVISION_4 + fight reward lot
+				expect(dist.get(5)).toBeCloseTo(fightRewardProb, 5);          // fight reward only
+				expect(dist.get(2)).toBeCloseTo(0.3, 5);                      // PROVISION_2 unaffected
+				expect(dist.get(0)).toBeCloseTo(1 - 0.4 - 0.3 - 0.1, 5);    // zero = accidents + no-fight
+			});
+
+			test('bonusPerEvent applies to fight reward qty the same as provision events', () => {
+				// survival bonus +1: all resource amounts (event AND fight) shift by 1
+				const dist = ResourceCalculator._buildSectorDistribution('RUMINANT', {}, 'PROVISION', 1, null, 40, 0);
+
+				const fightRewardProb = 0.1 / 3;
+				expect(dist.get(4)).toBeCloseTo(fightRewardProb, 5);          // 3+1 from fight
+				expect(dist.get(5)).toBeCloseTo(0.4 + fightRewardProb, 5);   // PROVISION_4+1 + fight 4+1
+				expect(dist.get(6)).toBeCloseTo(fightRewardProb, 5);          // 5+1 from fight
+				expect(dist.get(3)).toBeCloseTo(0.3, 5);                      // PROVISION_2+1
+			});
+
+			test('no fight rewards when power is too low', () => {
+				// power=0 vs FIGHT_8 (threshold=4): 0 < 4 → rewardProb = 0
+				const dist = ResourceCalculator._buildSectorDistribution('RUMINANT', {}, 'PROVISION', 0, null, 0, 0);
+
+				expect(dist.get(4)).toBeCloseTo(0.4, 5);
+				expect(dist.get(2)).toBeCloseTo(0.3, 5);
+				expect(dist.has(3)).toBe(false);
+				expect(dist.has(5)).toBe(false);
+			});
+		});
+
+		// ---- _calculateArtefacts with fight rewards ----
+
+		describe('_calculateArtefacts fight rewards', () => {
+
+			test('MANKAROG: fight reward 3-artefact lot applies 8/9 split', () => {
+				// ARTEFACT event (0.1) → 1 real artefact × 8/9 = 8/90
+				// FIGHT_32 (0.3) × win(1.0) × lot2(2/3) → 3 artefacts × 8/9 = 16/90
+				// average = (1×8 + 3×16) / 90 = 56/90
+				const result = ResourceCalculator._calculateArtefacts(['MANKAROG'], {}, null, 40, 0);
+
+				expect(result.average).toBeCloseTo(56 / 90, 3);
+				expect(result.pessimist).toBe(0); // 66/90 of runs yield 0 artefacts
+				expect(result.optimist).toBeCloseTo(2.422, 2);
+			});
+		});
+
+		// ---- _calculateMapFragments with fight rewards ----
+
+		describe('_calculateMapFragments fight rewards', () => {
+
+			test('MANKAROG: STARMAP fight reward adds directly, ARTEFACT fight reward uses 1/9', () => {
+				// Sources of map fragments:
+				//   ARTEFACT event × 1/9 = 1/90 (qty 1)
+				//   FIGHT_32 × win × lot1(1/3) = 0.1 (STARMAP, qty 1)
+				//   FIGHT_32 × win × lot2(2/3) × 1/9 = 2/90 (ARTEFACT→frag, qty 3)
+				// average = 1×(1/90 + 0.1) + 3×(2/90) = 1×(10/90 + 1/90) + 6/90 = 11/90 + 6/90 = 17/90?
+				// Wait: 0.1 = 9/90, so 1/90 + 9/90 + 3×(2/90) = 10/90 + 6/90 = 16/90
+				const result = ResourceCalculator._calculateMapFragments(['MANKAROG'], {}, null, 40, 0);
+
+				expect(result.average).toBeCloseTo(16 / 90, 3);
+				expect(result.pessimist).toBe(0);
+			});
+
+			test('CRISTAL_FIELD: STARMAP fight reward contributes to map fragments', () => {
+				// STARMAP event: 0.3 → qty 1
+				// FIGHT_18 (0.2) × win(1.0) × lot(1.0) → STARMAP qty 1
+				// average = 0.3 + 0.2 = 0.5
+				const result = ResourceCalculator._calculateMapFragments(['CRISTAL_FIELD'], {}, null, 40, 0);
+
+				expect(result.average).toBeCloseTo(0.5, 3);
+				// hasArtefact is set by the STARMAP fight reward → floor applies
+				expect(result.optimist).toBeGreaterThanOrEqual(0.1);
+			});
+		});
+	});
 });
