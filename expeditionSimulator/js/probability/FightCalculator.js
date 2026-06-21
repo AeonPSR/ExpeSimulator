@@ -103,12 +103,56 @@ const FightCalculator = {
                 damageResult.breakdown = { pessimist: [], average: [], optimist: [], worstCase: [] };
                 const diseaseFromFights = this._computeDiseaseFromFights(damageDistribution, playerCount);
 
+                // Build raw-strength sector outcomes for reward path sampling.
+                // These use fight strengths with no power reduction so that won fights
+                // (which collapse to 0 in the damage distribution) remain visible.
+                const rawSectorOutcomes = [];
+                for (const sectorName of sectors) {
+                        const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+                        const outcomes = [];
+                        let totalProb = 0;
+                        for (const [eventName, eventProb] of probs) {
+                                if (!eventName.startsWith('FIGHT_') || eventProb <= 0) continue;
+                                totalProb += eventProb;
+                                const rawDist = self._getFightDamageDistribution(eventName.replace('FIGHT_', ''), 0);
+                                for (const [rawVal, rawProb] of rawDist) {
+                                        outcomes.push({ eventType: eventName, damage: rawVal, probability: eventProb * rawProb });
+                                }
+                        }
+                        if (totalProb > 0) {
+                                const noFightProb = Math.max(0, 1 - totalProb);
+                                if (noFightProb > 0.0001) outcomes.push({ eventType: null, damage: 0, probability: noFightProb });
+                                rawSectorOutcomes.push({ sectorName, outcomes });
+                        }
+                }
+
+                let rewardPaths = null;
+                if (rawSectorOutcomes.length > 0 && typeof DamagePathSampler !== 'undefined') {
+                        const rawDists = rawSectorOutcomes.map(s => {
+                                const dist = new Map();
+                                for (const o of s.outcomes) {
+                                        dist.set(o.damage, (dist.get(o.damage) || 0) + o.probability);
+                                }
+                                return dist;
+                        });
+                        const rawTotal = DistributionCalculator.convolveAll(rawDists);
+                        const rawScenarios = DistributionCalculator.getScenarios(rawTotal);
+                        const targetTotals = [
+                                rawScenarios.optimist,
+                                Math.round(rawScenarios.average),
+                                rawScenarios.pessimist
+                        ];
+                        const paths = DamagePathSampler.samplePaths(rawSectorOutcomes, targetTotals);
+                        rewardPaths = { optimist: paths[0], average: paths[1], pessimist: paths[2] };
+                }
+
                 return {
                         occurrence,
                         damage: damageResult,
                         damageInstances,
                         damageDistribution,
                         sampledPaths,
+                        rewardPaths,
                         fightingPower,
                         grenadeCount,
                         playerCount,
@@ -236,6 +280,7 @@ const FightCalculator = {
 			occurrence: {},
 			damage,
 			damageInstances: DamageDistributionEngine.emptyDamageInstances(),
+			rewardPaths: null,
 			fightingPower: 0,
 			grenadeCount: 0,
 			playerCount: 0,

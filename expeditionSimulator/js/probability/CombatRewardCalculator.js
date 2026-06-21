@@ -34,16 +34,17 @@ const CombatRewardCalculator = {
 	SCENARIOS: ['optimist', 'average', 'pessimist'],
 
 	/**
-	 * Computes expected reward items per scenario from sampled fight paths.
+	 * Computes expected reward items per scenario from raw-strength fight paths.
 	 *
-	 * @param {Object|null} sampledPaths - { optimist, average, pessimist, worstCase },
-	 *   each { totalDamage, sources: Array<{ sector, eventType, damage }> }
+	 * @param {Object|null} rewardPaths - { optimist, average, pessimist }, each
+	 *   { totalDamage, sources: Array<{ sector, eventType, damage }> } where
+	 *   damage is the raw fight strength (no power reduction applied).
 	 * @param {number} basePower    - Team base fighting power (without grenades)
 	 * @param {number} grenadeCount - Total grenades available to the team
 	 * @returns {Object} Per-bucket scenario yields:
 	 *   { steaks: {optimist,average,pessimist}, fruits: {...}, artefacts: {...}, mapFragments: {...} }
 	 */
-	calculate(sampledPaths, basePower = 0, grenadeCount = 0) {
+	calculate(rewardPaths, basePower = 0, grenadeCount = 0) {
 		const result = {
 			steaks:       { optimist: 0, average: 0, pessimist: 0 },
 			fruits:       { optimist: 0, average: 0, pessimist: 0 },
@@ -51,10 +52,10 @@ const CombatRewardCalculator = {
 			mapFragments: { optimist: 0, average: 0, pessimist: 0 },
 		};
 
-		if (!sampledPaths) return result;
+		if (!rewardPaths) return result;
 
 		for (const scenario of this.SCENARIOS) {
-			const path = sampledPaths[scenario];
+			const path = rewardPaths[scenario];
 			if (!path || !Array.isArray(path.sources)) continue;
 
 			const expected = this._expectedItemsForPath(path.sources, basePower, grenadeCount);
@@ -71,12 +72,13 @@ const CombatRewardCalculator = {
 	/**
 	 * Computes expected reward item counts for a single sampled path.
 	 *
-	 * Grenades are allocated to the toughest fights first, spending up to the
-	 * amount needed to defeat each fight. Each fight's effective power then
-	 * drives its reward probability via CombatRewardService.
+	 * Each fight source carries its raw strength (no power reduction). Grenades
+	 * are spent on the toughest fights first, up to the amount needed to defeat
+	 * each one, giving each fight an effective power for the reward probability.
 	 *
 	 * @private
-	 * @param {Array<{ sector, eventType, damage }>} sources - One sampled path's sources
+	 * @param {Array<{ sector, eventType, damage }>} sources - One path's sources,
+	 *   where damage is the raw fight strength.
 	 * @param {number} basePower
 	 * @param {number} grenadeCount
 	 * @returns {Object} itemId -> expected quantity
@@ -86,12 +88,10 @@ const CombatRewardCalculator = {
 			? FightingPowerService.getGrenadePower()
 			: 3;
 
-		// Recover the fights faced. The sampled damage is max(0, strength - basePower),
-		// so strength = damage + basePower (when already won, this yields strength = basePower,
-		// which still resolves to a guaranteed reward).
+		// source.damage is the raw fight strength.
 		const fights = sources
 			.filter(s => s.eventType && s.eventType.indexOf('FIGHT_') === 0)
-			.map(s => ({ sector: s.sector, strength: s.damage + basePower }));
+			.map(s => ({ sector: s.sector, strength: s.damage }));
 
 		// Toughest fights first so scarce grenades secure the hardest wins.
 		fights.sort((a, b) => b.strength - a.strength);

@@ -535,7 +535,7 @@ const ExpeditionPipeline = {
 		// automatically (via _mixResourceResults), with no extra handling.
 		if (typeof CombatRewardCalculator !== 'undefined') {
 			const rewards = CombatRewardCalculator.calculate(
-				combat.sampledPaths, combat.fightingPower, combat.grenadeCount
+				combat.rewardPaths, combat.fightingPower, combat.grenadeCount
 			);
 			for (const bucket in rewards) {
 				if (!resources[bucket]) continue;
