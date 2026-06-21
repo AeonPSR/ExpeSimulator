@@ -27,7 +27,7 @@ class ExpeditionState {
 		// Player 1: Has Pilot ability
 		this._players.push({
 			id: this._nextPlayerId++,
-			avatar: Constants.DEFAULT_AVATAR,
+			avatar: this._pickRandomAvatar(),
 			abilities: ['pilot.png', ...Array(Constants.ABILITY_SLOTS - 1).fill(null)],
 			items: Array(Constants.ITEM_SLOTS).fill(null),
 			health: Constants.DEFAULT_HEALTH
@@ -37,12 +37,27 @@ class ExpeditionState {
 		for (let i = 0; i < 3; i++) {
 			this._players.push({
 				id: this._nextPlayerId++,
-				avatar: Constants.DEFAULT_AVATAR,
+				avatar: this._pickRandomAvatar(),
 				abilities: Array(Constants.ABILITY_SLOTS).fill(null),
 				items: Array(Constants.ITEM_SLOTS).fill(null),
 				health: Constants.DEFAULT_HEALTH
 			});
 		}
+	}
+
+	/**
+	 * Picks a random avatar not already used by any current player.
+	 * Falls back to DEFAULT_AVATAR if all named characters are taken.
+	 * @returns {string}
+	 * @private
+	 */
+	_pickRandomAvatar() {
+		const used = new Set(this._players.map(p => p.avatar));
+		const candidates = CharacterData.available.filter(
+			c => c !== Constants.DEFAULT_AVATAR && !used.has(c)
+		);
+		if (candidates.length === 0) return Constants.DEFAULT_AVATAR;
+		return candidates[Math.floor(Math.random() * candidates.length)];
 	}
 
 	/**
@@ -101,7 +116,7 @@ class ExpeditionState {
 	addPlayer() {
 		const player = {
 			id: this._nextPlayerId++,
-			avatar: Constants.DEFAULT_AVATAR,
+			avatar: this._pickRandomAvatar(),
 			abilities: Array(Constants.ABILITY_SLOTS).fill(null),
 			items: Array(Constants.ITEM_SLOTS).fill(null),
 			health: Constants.DEFAULT_HEALTH
