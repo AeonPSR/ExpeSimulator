@@ -132,9 +132,9 @@ const PlanetSectorConfigData = [
 		weightAtPlanetExploration: 10,
 		maxPerPlanet: 1,
 		explorationEvents: {
-			'MUSH_TRAP': 4,
+			'MUSH_TRAP': 3,
 			'STARMAP': 3,
-			'FIGHT_18': 2,
+			'FIGHT_18': 3,
 			'PLAYER_LOST': 1
 		}
 	},

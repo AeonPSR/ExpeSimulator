@@ -569,9 +569,9 @@ describe('ResourceCalculator', () => {
 						]);
 					case 'CRISTAL_FIELD':
 						return new Map([
-							['MUSH_TRAP',   0.4],
-							['STARMAP',     0.3],
-							['FIGHT_18',    0.2],
+						['MUSH_TRAP',   0.3],
+						['STARMAP',     0.3],
+						['FIGHT_18',    0.3],
 							['PLAYER_LOST', 0.1],
 						]);
 					default:
@@ -693,11 +693,11 @@ describe('ResourceCalculator', () => {
 
 			test('CRISTAL_FIELD: STARMAP fight reward contributes to map fragments', () => {
 				// STARMAP event: 0.3 → qty 1
-				// FIGHT_18 (0.2) × win(1.0) × lot(1.0) → STARMAP qty 1
-				// average = 0.3 + 0.2 = 0.5
+				// FIGHT_18 (0.3) × win(1.0) × lot(1.0) → STARMAP qty 1
+				// average = 0.3 + 0.3 = 0.6
 				const result = ResourceCalculator._calculateMapFragments(['CRISTAL_FIELD'], {}, null, 40, 0);
 
-				expect(result.average).toBeCloseTo(0.5, 3);
+				expect(result.average).toBeCloseTo(0.6, 3);
 				// hasArtefact is set by the STARMAP fight reward → floor applies
 				expect(result.optimist).toBeGreaterThanOrEqual(0.1);
 			});
