@@ -285,8 +285,8 @@ describe('Integration: Expedition Pipeline', () => {
 
 		test('combines fight and event damage correctly', () => {
 			const players = [
-				{ items: [], abilities: [] },
-				{ items: [], abilities: [] }
+				{ items: [], abilities: [], health: 14 },
+				{ items: [], abilities: [], health: 14 }
 			];
 
 			const fightInstances = {
@@ -306,7 +306,7 @@ describe('Integration: Expedition Pipeline', () => {
 
 		test('rope prevents ACCIDENT_ROPE damage', () => {
 			const players = [
-				{ items: ['rope.jpg'], abilities: [] }
+				{ items: ['rope.jpg'], abilities: [], health: 14 }
 			];
 
 			// Mock EventDamageCalculator.EVENT_DAMAGES for rope test
