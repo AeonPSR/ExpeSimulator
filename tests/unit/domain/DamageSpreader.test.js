@@ -83,7 +83,7 @@ describe('DamageSpreader', () => {
 			// Mock random to always select player 0
 			Math.random = () => 0;
 
-			const players = [{ items: [] }, { items: [] }];
+			const players = [{ items: [], health: 14 }, { items: [], health: 14 }];
 			const fightInstances = [
 				{ sources: [{ eventType: 'FIGHT_6', sector: 'DESERT', damage: 3 }] }
 			];
@@ -98,7 +98,7 @@ describe('DamageSpreader', () => {
 			// Mock random to always select player 1
 			Math.random = () => 0.9;
 
-			const players = [{ items: [] }, { items: [] }];
+			const players = [{ items: [], health: 14 }, { items: [], health: 14 }];
 			const eventInstances = [
 				{ sources: [{ eventType: 'ACCIDENT_3_5', sector: 'FOREST', damage: 4 }] }
 			];
@@ -117,7 +117,7 @@ describe('DamageSpreader', () => {
 				return 0; // Always player 0
 			};
 
-			const players = [{ items: [] }];
+			const players = [{ items: [], health: 14 }];
 			const fightInstances = [
 				{ sources: [{ eventType: 'FIGHT_6', sector: 'DESERT', damage: 2 }] }
 			];
@@ -139,7 +139,7 @@ describe('DamageSpreader', () => {
 	describe('distributeAllScenarios', () => {
 
 		test('distributes for all scenarios', () => {
-			const players = [{ items: [] }];
+			const players = [{ items: [], health: 14 }];
 			const fightDamage = {
 				pessimist: [{ sources: [{ eventType: 'FIGHT_6', sector: 'A', damage: 3 }] }],
 				average: [{ sources: [{ eventType: 'FIGHT_6', sector: 'A', damage: 2 }] }],
@@ -177,7 +177,7 @@ describe('DamageSpreader', () => {
 			const playerDamageTotals = [0, 0];
 			const instance = { sources: [{ eventType: 'FIGHT_6', sector: 'TEST', damage: 3 }] };
 
-			DamageSpreader._distributeFightDamage(instance, playerBreakdown, playerDamageTotals);
+			DamageSpreader._distributeFightDamage(instance, playerBreakdown, playerDamageTotals, [{}, {}], [0, 1]);
 
 			expect(playerDamageTotals[0]).toBe(2);
 			expect(playerDamageTotals[1]).toBe(1);
@@ -188,7 +188,7 @@ describe('DamageSpreader', () => {
 			const playerDamageTotals = [0];
 			const instance = { sources: [{ eventType: 'FIGHT_6', sector: 'TEST', damage: 0 }] };
 
-			DamageSpreader._distributeFightDamage(instance, playerBreakdown, playerDamageTotals);
+			DamageSpreader._distributeFightDamage(instance, playerBreakdown, playerDamageTotals, [{}], [0]);
 
 			expect(playerDamageTotals[0]).toBe(0);
 		});
@@ -205,7 +205,7 @@ describe('DamageSpreader', () => {
 				]
 			};
 
-			DamageSpreader._distributeFightDamage(instance, playerBreakdown, playerDamageTotals);
+			DamageSpreader._distributeFightDamage(instance, playerBreakdown, playerDamageTotals, [{}], [0]);
 
 			expect(playerDamageTotals[0]).toBe(5);
 			expect(playerBreakdown[0].length).toBe(5); // One entry per damage point
@@ -227,7 +227,7 @@ describe('DamageSpreader', () => {
 				sources: [{ eventType: 'TIRED_2', sector: 'FOREST', damage: 6 }]
 			};
 
-			DamageSpreader._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects);
+			DamageSpreader._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects, [0, 1, 2]);
 
 			// 6 total damage / 3 players = 2 each
 			expect(playerDamageTotals).toEqual([2, 2, 2]);
@@ -244,7 +244,7 @@ describe('DamageSpreader', () => {
 				sources: [{ eventType: 'ACCIDENT_3_5', sector: 'DESERT', damage: 4 }]
 			};
 
-			DamageSpreader._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects);
+			DamageSpreader._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects, [0, 1]);
 
 			expect(playerDamageTotals[0]).toBe(4);
 			expect(playerDamageTotals[1]).toBe(0);
@@ -264,7 +264,7 @@ describe('DamageSpreader', () => {
 				sources: [{ eventType: 'ACCIDENT_ROPE_3_5', sector: 'CLIFF', damage: 5 }]
 			};
 
-			DamageSpreader._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects);
+			DamageSpreader._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects, [0, 1]);
 
 			expect(playerDamageTotals[0]).toBe(0);
 			expect(appliedEffects[0][0].type).toBe('ROPE');
@@ -282,7 +282,7 @@ describe('DamageSpreader', () => {
 				sources: [{ eventType: 'ACCIDENT_3_5', sector: 'DESERT', damage: 4 }]
 			};
 
-			DamageSpreader._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects);
+			DamageSpreader._distributeEventDamage(instance, playerBreakdown, playerDamageTotals, players, appliedEffects, [0]);
 
 			expect(playerDamageTotals[0]).toBe(4);
 		});
