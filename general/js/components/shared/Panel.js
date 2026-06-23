@@ -178,6 +178,9 @@ class Panel extends Component {
 			panelsContainer = document.createElement('div');
 			panelsContainer.id = 'panels-container';
 			document.body.insertBefore(panelsContainer, document.body.firstChild);
+			if (typeof Settings !== 'undefined') {
+				panelsContainer.classList.toggle('aeons-lab', Settings.theme === 'retro');
+			}
 		}
 		return super.mount(panelsContainer);
 	}

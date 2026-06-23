@@ -75,6 +75,7 @@
         "content.js"
       ],
       "css": [
+        "styles/fonts.css",
         "styles/main.css",
         "styles/settings.css",
         "styles/utilities.css", 
@@ -84,13 +85,13 @@
         "styles/tables.css",
         "styles/results.css",
         "styles/modals.css",
-        "styles/retro-theme.css"
+        "styles/aeons-lab.css"
       ]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["pictures/abilities/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*", "pictures/consumables/*", "pictures/gear/*", "*.png", "*.jpg", "*.gif"],
+      "resources": ["pictures/abilities/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*", "pictures/consumables/*", "pictures/gear/*", "*.png", "*.jpg", "*.gif", "font/*"],
       "matches": ["<all_urls>"]
     },
     {
