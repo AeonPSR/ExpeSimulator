@@ -132,11 +132,25 @@
 }
 
 .app-panel .panel-header h3 {
-	flex: 1;
 	margin: 0;
 	font-size: 18px;
 	font-weight: 600;
 	color: white;
+}
+
+.app-panel .panel-header-left {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.app-panel .panel-brand {
+	font-size: 10px;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: 0.15em;
+	color: white;
+	padding-bottom: 5px;
 }
 
 /* Language Button */
