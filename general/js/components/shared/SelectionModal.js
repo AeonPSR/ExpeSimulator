@@ -76,7 +76,8 @@ class SelectionModal extends Modal {
 	_createOption(item) {
 		const isSelected = item.id === this.selectedId;
 		const sizeClass = this.itemSize === 'large' ? 'character-option--large' : '';
-		const classes = ['character-option', sizeClass, isSelected ? 'selected' : ''].filter(Boolean).join(' ');
+		const debugClass = item.debug ? 'debug' : '';
+		const classes = ['character-option', sizeClass, debugClass, isSelected ? 'selected' : ''].filter(Boolean).join(' ');
 
 		const option = this.createElement('div', {
 			className: classes,

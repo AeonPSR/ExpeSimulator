@@ -125,6 +125,11 @@
 	box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
+[data-expe-sim] .character-option.debug:hover {
+	border-color: #9b59b6;
+	box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+}
+
 [data-expe-sim] .character-option img {
 	width: auto;
 	height: auto;

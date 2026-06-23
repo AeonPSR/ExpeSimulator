@@ -557,6 +557,13 @@ const ItemEffects = {
 		effects: {
 			removeCombatEvents: true
 		}
+	},
+	'derek_face': {
+		name: 'Derek\'s Face',
+		debug: true,
+		effects: {
+			combatPowerBonus: 31
+		}
 	}
 };
 

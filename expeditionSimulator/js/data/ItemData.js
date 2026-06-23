@@ -12,17 +12,35 @@ const ItemData = {
 		'white_flag.jpg'
 	],
 
+	/** Debug-only items — visible only when developer tools are enabled. */
+	debug: [
+		'derek_face.png'
+	],
+
 	/**
-	 * Gets all items as selection items
+	 * Gets all items as selection items.
+	 * Debug items are included only when Settings.devtools is active.
 	 * @param {Function} getResourceURL - URL resolver
 	 * @returns {Array<Object>}
 	 */
 	getSelectionItems(getResourceURL) {
-		return this.available.map(item => ({
+		const items = this.available.map(item => ({
 			id: item,
 			image: getResourceURL(`pictures/gear/${item}`),
-			label: item.replace('.jpg', '').replace(/_/g, ' ')
+			label: item.replace(/\.(jpg|png)$/, '').replace(/_/g, ' ')
 		}));
+
+		if (typeof Settings !== 'undefined' && Settings.devtools) {
+			const debugItems = this.debug.map(item => ({
+				id: item,
+				image: getResourceURL(`pictures/gear/${item}`),
+				label: item.replace(/\.(jpg|png)$/, '').replace(/_/g, ' '),
+				debug: true
+			}));
+			items.push(...debugItems);
+		}
+
+		return items;
 	}
 };
 
