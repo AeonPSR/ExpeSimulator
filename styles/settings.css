@@ -1,16 +1,16 @@
 /* ==========================================================================
    Settings Panel
-   z-index override only — all layout/theme styles come from .app-panel in main.css
+   z-index override only â€” all layout/theme styles come from .app-panel in main.css
    ========================================================================== */
 
 #settings-panel {
 	z-index: 10000;
-	/* The settings panel must never be hidden — it is the only way to restore
+	/* The settings panel must never be hidden â€” it is the only way to restore
 	   visibility of other panels. Override any panel--hidden or inline style. */
 	display: flex !important;
 }
 
-/* ── Settings Page ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Settings Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .settings-page {
 	display: flex;
@@ -23,7 +23,7 @@
 	margin: 0;
 }
 
-/* Section title — same treatment as .section-selector h4 (blue) */
+/* Section title â€” same treatment as .section-selector h4 (blue) */
 .app-panel .settings-section h4 {
 	margin: 0 0 10px 0;
 	font-size: 16px;
@@ -32,16 +32,15 @@
 	padding-bottom: 8px;
 	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
 }
 
-/* Developer tools section — purple like Example Worlds */
+/* Developer tools section â€” purple like Example Worlds */
 .app-panel .settings-section--devtools h4 {
 	color: #9b59b6;
 	border-bottom-color: #9b59b6;
 }
 
-/* ── Language buttons ──────────────────────────────────────────────────────── */
+/* â”€â”€ Language buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* panel-lang-btn active state overridden to blue in the settings context */
 .settings-lang-row {
@@ -60,7 +59,7 @@
 	background: rgba(52, 152, 219, 0.5);
 }
 
-/* ── Theme select ──────────────────────────────────────────────────────────── */
+/* â”€â”€ Theme select â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .settings-theme-select {
 	width: 100%;
@@ -78,7 +77,7 @@
 	border-color: #3498db;
 }
 
-/* ── Developer tools toggle ────────────────────────────────────────────────── */
+/* â”€â”€ Developer tools toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .settings-devtools-row {
 	display: flex;

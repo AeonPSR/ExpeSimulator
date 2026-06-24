@@ -4,7 +4,8 @@
    ========================================================================== */
 
 /* ── Chamfer definition ──────────────────────────────────────────────── */
-#panels-container.aeons-lab {
+#panels-container.aeons-lab,
+body:has(#panels-container.aeons-lab) {
 	--chamfer-size: 5px;
 }
 
