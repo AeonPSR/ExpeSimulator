@@ -11,7 +11,7 @@ const Translations = {
 	// ─────────────────────────────────────────────────────────────────────────
 	en: {
 		// Panel
-		'panel.title':              'Expedition Simulator',
+		'panel.title':              'Planetary Analyser',
 		'panel.lang.label':         'Language',
 
 		// Tabs
@@ -19,8 +19,8 @@ const Translations = {
 		'tab.expedition_sim':       'Expedition Simulation',
 
 		// Sector selection
-		'sectors.header':           'Selected Expedition ({regular}/{max})',
-		'sectors.special_suffix':   '+ {count} special',
+		'sectors.header':           'Sectors Present ({regular}/{max})',
+		'sectors.special_suffix':   '+ {count}',
 		'sectors.clear_all':        'Clear All',
 
 		// Sector grid
@@ -98,7 +98,7 @@ const Translations = {
 		// Results legend
 		'legend.scenarios':         'Scenarios',
 		'legend.optimist':          'Optimist',
-		'legend.median':            'Median',
+		'legend.median':            'Average',
 		'legend.pessimist':         'Pessimist',
 		'legend.worst':             'Worst',
 
@@ -214,7 +214,7 @@ const Translations = {
 	// ─────────────────────────────────────────────────────────────────────────
 	fr: {
 		// Panel
-		'panel.title':              'Simulateur d\'Expédition',
+		'panel.title':              'Analyseur Planétaire',
 		'panel.lang.label':         'Langue',
 
 		// Tabs
@@ -222,8 +222,8 @@ const Translations = {
 		'tab.expedition_sim':       'Simulation d\'Expédition',
 
 		// Sector selection
-		'sectors.header':           'Expédition sélectionnée ({regular}/{max})',
-		'sectors.special_suffix':   '+ {count} spécial',
+		'sectors.header':           'Secteurs présents ({regular}/{max})',
+		'sectors.special_suffix':   '+ {count}',
 		'sectors.clear_all':        'Tout effacer',
 
 		// Sector grid
@@ -260,7 +260,7 @@ const Translations = {
 		// Combat / event damage sections
 		'prob.combat.header':       'Dégâts de combat',
 		'prob.combat.none':         'Aucun dégât de combat prévu',
-		'prob.event.header':        'Dégâts d\'événement',
+		'prob.event.header':        'Dégâts d\'événements',
 		'prob.event.none':          'Aucun dégât d\'événement prévu',
 
 		// Damage scenario labels
@@ -282,7 +282,7 @@ const Translations = {
 		'event.unexplored':         'Secteur non exploré',
 		'event.disease':            'Maladie',
 		'event.item_lost':          'Perte d\'objet',
-		'event.kill_all':           'Mort de tous',
+		'event.kill_all':           'Mort du groupe',
 		'event.kill_one':           'Mort d\'un joueur',
 		'event.mush_trap':          'Piège Mush',
 
@@ -301,7 +301,7 @@ const Translations = {
 		// Results legend
 		'legend.scenarios':         'Scénarios',
 		'legend.optimist':          'Optimiste',
-		'legend.median':            'Médian',
+		'legend.median':            'Moyen',
 		'legend.pessimist':         'Pessimiste',
 		'legend.worst':             'Pire',
 
@@ -417,7 +417,7 @@ const Translations = {
 	// ─────────────────────────────────────────────────────────────────────────
 	es: {
 		// Panel
-		'panel.title':              'Simulador de Expedición',
+		'panel.title':              'Analizador Planetario',
 		'panel.lang.label':         'Idioma',
 
 		// Tabs
@@ -425,8 +425,8 @@ const Translations = {
 		'tab.expedition_sim':       'Simulación de Expedición',
 
 		// Sector selection
-		'sectors.header':           'Expedición seleccionada ({regular}/{max})',
-		'sectors.special_suffix':   '+ {count} especial',
+		'sectors.header':           'Sectores presentes ({regular}/{max})',
+		'sectors.special_suffix':   '+ {count}',
 		'sectors.clear_all':        'Borrar todo',
 
 		// Sector grid
@@ -504,7 +504,7 @@ const Translations = {
 		// Results legend
 		'legend.scenarios':         'Escenarios',
 		'legend.optimist':          'Optimista',
-		'legend.median':            'Mediana',
+		'legend.median':            'Promedio',
 		'legend.pessimist':         'Pesimista',
 		'legend.worst':             'Peor',
 
