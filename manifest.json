@@ -1,14 +1,14 @@
 ﻿{
   "manifest_version": 3,
-  "name": "Expedition Simulator",
-  "version": "2.0",
-  "description": "Simulate planet expeditions and calculate event probabilities",
+  "name": "Aeon's Lab",
+  "version": "1.0",
+  "description": "An ensemble of tools designed to simplify and simulate several aspects of eMush's mecanics.",
   "permissions": [
     "activeTab"
   ],
   "content_scripts": [
     {
-      "matches": ["https://emush.eternaltwin.org/game*", "http://localhost/*"],
+      "matches": ["https://emush.eternaltwin.org/game*"],
       "js": [
         "config.js",
         "general/js/utils/constants.js",
