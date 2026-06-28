@@ -207,6 +207,13 @@ const Translations = {
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
 		'settings.theme.unavailable_firefox': 'Unavailable on Firefox',
+
+		// Credits
+		'credits.warning':                   'ATTENTION: The tools in this script require a basic understanding of their associated mechanics. You can find all this information on the',
+		'credits.wiki.url':                  'https://en.emushpedia.com/wiki/Home',
+		'credits.wiki.label':                'community wiki.',
+		'credits.author.title':              'A script created by aeon_psr',
+		'credits.contact':                   'Questions? Suggestions? Bugs? Send me a message on Discord!',
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -410,6 +417,13 @@ const Translations = {
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
 		'settings.theme.unavailable_firefox': 'Indisponible sur Firefox',
+
+		// Credits
+		'credits.warning':                   'ATTENTION: Les outils de cette application demandent une maitrise des bases de leurs mécaniques associés. Vous pouvez trouvez toutes ces infos sur le',
+		'credits.wiki.url':                  'https://fr.emushpedia.com/wiki/Accueil',
+		'credits.wiki.label':                'wiki de la communauté.',
+		'credits.author.title':              'Un script créé par aeon_psr',
+		'credits.contact':                   'Questions ? Suggestions ? Bugs ? Envoyez moi un message sur Discord !',
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -613,6 +627,13 @@ const Translations = {
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
 		'settings.theme.unavailable_firefox': 'No disponible en Firefox',
+
+		// Credits
+		'credits.warning':                   'ATENCIÓN: Las herramientas de este script requieren conocimientos básicos de sus mecánicas asociadas. Puedes encontrar toda esta información en la',
+		'credits.wiki.url':                  'https://es.emushpedia.com/wiki/Inicio',
+		'credits.wiki.label':                'wiki de la comunidad.',
+		'credits.author.title':              'Un script creado por aeon_psr',
+		'credits.contact':                   '¿Preguntas? ¿Sugerencias? ¿Bugs? ¡Envíame un mensaje en Discord!',
 	},
 };
 

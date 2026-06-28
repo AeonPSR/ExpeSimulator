@@ -46,6 +46,7 @@ const sourceFiles = [
   'general/js/components/shared/SelectionModal.js',
   'general/js/components/shared/Panel.js',
   'general/js/components/shared/TabContainer.js',
+  'general/js/components/shared/InfoPanel.js',
   'expeditionSimulator/js/components/SectorGrid.js',
   'expeditionSimulator/js/components/SelectedSectors.js',
   'expeditionSimulator/js/components/PlayerCard.js',

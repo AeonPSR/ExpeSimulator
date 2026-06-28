@@ -26,6 +26,8 @@ class SettingsPage extends Component {
 		applyDevtools(Settings.devtools);
 		this.addEventListener(document, 'settings:devtools-change', (e) => applyDevtools(e.detail.devtools));
 
+		this.element.appendChild(this._renderCredits());
+
 		// Keep language buttons in sync when locale changes from any source
 		this.addEventListener(document, 'i18n:change', (e) => {
 			this._syncLangButtons(e.detail.locale);
@@ -138,7 +140,6 @@ class SettingsPage extends Component {
 	}
 
 	// ─── Visibility ──────────────────────────────────────────────────────────
-
 	_renderVisibilityControls() {
 		const row = this.createElement('div', { className: 'settings-devtools-row' });
 
@@ -159,6 +160,35 @@ class SettingsPage extends Component {
 
 		row.appendChild(btn);
 		return row;
+	}
+
+	// ─── Credits ─────────────────────────────────────────────────────────────
+
+	_renderCredits() {
+		const wrapper = this.createElement('div');
+
+		const rebuild = () => {
+			const url   = I18n.t('credits.wiki.url');
+			const label = I18n.t('credits.wiki.label');
+			const credits = new InfoPanel({
+				title: 'Aeon\'s Lab - Version 1.0',
+				sections: [
+					{
+						content: `<p>${I18n.t('credits.warning')} <a href="${url}" target="_blank">${label}</a></p>`
+					},
+					{
+						title:   I18n.t('credits.author.title'),
+						content: `<p>${I18n.t('credits.contact')}</p>`
+					}
+				]
+			});
+			wrapper.innerHTML = '';
+			wrapper.appendChild(credits.render());
+		};
+
+		rebuild();
+		this.addEventListener(document, 'i18n:change', rebuild);
+		return wrapper;
 	}
 }
 
