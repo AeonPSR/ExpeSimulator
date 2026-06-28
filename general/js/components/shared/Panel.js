@@ -128,6 +128,11 @@ class Panel extends Component {
 
 		const left = this.createElement('div', { className: 'panel-header-left' });
 		const brand = this.createElement('span', { className: 'panel-brand' }, "Aeon's Lab");
+		const bars = this.createElement('span', { className: 'brand-bars' });
+		for (let i = 1; i <= 4; i++) {
+			bars.appendChild(this.createElement('span', { className: `brand-bar brand-bar--${i}` }));
+		}
+		brand.appendChild(bars);
 		const title = this.createElement('h3', { 'data-i18n': this.titleKey }, I18n.t(this.titleKey));
 		left.appendChild(brand);
 		left.appendChild(title);

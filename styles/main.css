@@ -150,6 +150,83 @@
 	text-transform: uppercase;
 	color: white;
 	padding-bottom: 5px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.brand-bars {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	width: 225px;
+	height: 14px;
+	flex-shrink: 0;
+	overflow: hidden;
+}
+
+.brand-bar {
+	flex: 1;
+	min-height: 0;
+	animation-iteration-count: infinite;
+	animation-timing-function: ease-in-out;
+	animation-fill-mode: both;
+}
+
+.brand-bar--1 {
+	background: #44298F;
+	animation-name: brand-bar-1;
+	animation-duration: 30s;
+	animation-delay: 0s;
+}
+.brand-bar--2 {
+	background: #9ADCFF;
+	animation-name: brand-bar-2;
+	animation-duration: 20s;
+	animation-delay: 0.17s;
+}
+.brand-bar--3 {
+	background: #FFE74C;
+	animation-name: brand-bar-3;
+	animation-duration: 25s;
+	animation-delay: 0.43s;
+}
+.brand-bar--4 {
+	background: #F75590;
+	animation-name: brand-bar-4;
+	animation-duration: 45s;
+	animation-delay: 0.09s;
+}
+
+@keyframes brand-bar-1 {
+	0%   { width: 30%; }
+	20%  { width: 80%; }
+	45%  { width: 15%; }
+	70%  { width: 60%; }
+	85%  { width: 5%;  }
+	100% { width: 30%; }
+}
+@keyframes brand-bar-2 {
+	0%   { width: 65%; }
+	15%  { width: 10%; }
+	40%  { width: 90%; }
+	65%  { width: 40%; }
+	80%  { width: 70%; }
+	100% { width: 65%; }
+}
+@keyframes brand-bar-3 {
+	0%   { width: 50%; }
+	25%  { width: 75%; }
+	50%  { width: 20%; }
+	75%  { width: 55%; }
+	100% { width: 50%; }
+}
+@keyframes brand-bar-4 {
+	0%   { width: 80%; }
+	30%  { width: 35%; }
+	55%  { width: 85%; }
+	80%  { width: 10%; }
+	100% { width: 80%; }
 }
 
 /* Language Button */
