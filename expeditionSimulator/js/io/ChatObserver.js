@@ -141,7 +141,10 @@ class ChatObserver {
 
 		const button = document.createElement('button');
 		button.className = 'expe-import-btn expe-import-btn--overlay';
-		button.textContent = 'Import';
+		const img = document.createElement('img');
+		img.src = getResourceURL('pictures/ui/import_planet.png');
+		img.alt = 'Import';
+		button.appendChild(img);
 
 		button.addEventListener('click', (e) => {
 			e.stopPropagation();

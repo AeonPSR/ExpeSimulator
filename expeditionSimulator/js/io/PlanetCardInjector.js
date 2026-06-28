@@ -52,7 +52,10 @@ class PlanetCardInjector {
 
 		const button = document.createElement('button');
 		button.className = 'expe-import-btn';
-		button.textContent = 'Import';
+		const img = document.createElement('img');
+		img.src = getResourceURL('pictures/ui/import_planet.png');
+		img.alt = 'Import';
+		button.appendChild(img);
 
 		button.addEventListener('click', (e) => {
 			e.stopPropagation();

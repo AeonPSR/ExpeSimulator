@@ -735,25 +735,23 @@
 
 .expe-import-btn {
 	margin: .2rem;
-	flex-flow: row wrap;
 	display: flex;
-	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-	padding: 1px 4px 3px;
+	padding: 2px;
 	border: none;
 	border-radius: 1px;
-	color: #fff;
-	font-size: 1rem;
-	font-weight: 700;
-	font-variant: small-caps;
-	text-decoration: none;
-	text-align: center;
-	text-shadow: 0 0 4px rgb(21, 39, 60), 0 0 4px rgb(21, 39, 60);
 	box-shadow: 0 0 0 1px #0c120d;
 	background: #0074df;
 	background: linear-gradient(0deg, #003bc3 2%, #0074df 6% 46%, #008ee5 54% 94%, #499ae5 96%);
 	cursor: pointer;
+}
+
+.expe-import-btn img {
+	display: block;
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
 }
 
 .expe-import-btn--overlay {
