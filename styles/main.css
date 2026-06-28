@@ -11,7 +11,6 @@
 	width: 400px;
 	height: 100vh;
 	z-index: 10000;
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	color: #ecf0f1;
 	transform: translateX(-400px); /* Comment to lock panel open */
 	transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s;
@@ -70,7 +69,7 @@
 	transform: translateX(0) !important;
 }
 
-/* Panel Tongue — lives inside the panel; CSS :hover cascade opens it */
+/* Panel Tongue â€” lives inside the panel; CSS :hover cascade opens it */
 .app-panel.panel-on-top {
 	z-index: 10001;
 }
@@ -133,11 +132,24 @@
 }
 
 .app-panel .panel-header h3 {
-	flex: 1;
 	margin: 0;
 	font-size: 18px;
 	font-weight: 600;
 	color: white;
+}
+
+.app-panel .panel-header-left {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.app-panel .panel-brand {
+	font-size: 10px;
+	font-weight: 400;
+	text-transform: uppercase;
+	color: white;
+	padding-bottom: 5px;
 }
 
 /* Language Button */
@@ -270,7 +282,6 @@
 	font-size: 13px;
 	font-weight: 600;
 	font-variant: small-caps;
-	letter-spacing: 0.05em;
 	cursor: pointer;
 	transition: all 0.3s ease;
 	text-align: center;
@@ -336,7 +347,6 @@
 	font-size: 15px;
 	font-weight: 700;
 	font-variant: small-caps;
-	letter-spacing: 0.08em;
 	color: #ecf0f1;
 	text-align: center;
 }
@@ -346,7 +356,6 @@
 	font-size: 11px;
 	color: #95a5a6;
 	text-align: center;
-	letter-spacing: 0.04em;
 }
 
 .app-panel .planetary-review__export-btn {
@@ -397,7 +406,7 @@
 	font-style: italic;
 }
 
-/* ── Overall ───────────────────────────────────────────────────────────── */
+/* â”€â”€ Overall â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .app-panel .star-rating-overall {
 	display: flex;
@@ -413,8 +422,8 @@
 	font-size: 13px;
 	font-weight: 700;
 	font-variant: small-caps;
-	letter-spacing: 0.06em;
 	color: #ecf0f1;
+	letter-spacing: 0.5px;
 }
 
 .app-panel .star-rating-overall-value {
@@ -429,7 +438,7 @@
 	font-size: 16px;
 }
 
-/* ── Per-axis rows ─────────────────────────────────────────────────────── */
+/* â”€â”€ Per-axis rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .app-panel .star-rating-axes {
 	display: grid;
@@ -443,6 +452,7 @@
 	justify-content: space-between;
 	gap: 6px;
 	padding: 2px 0;
+	letter-spacing: 0.5px;
 }
 
 .app-panel .star-rating-axis-label {
@@ -451,14 +461,13 @@
 	color: #bdc3c7;
 	min-width: 70px;
 	font-variant: small-caps;
-	letter-spacing: 0.04em;
 }
 
 .app-panel .star-rating-axis .star-rating-stars .star {
 	font-size: 13px;
 }
 
-/* ── Stars ─────────────────────────────────────────────────────────────── */
+/* â”€â”€ Stars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .app-panel .star-rating-stars {
 	display: inline-flex;
@@ -506,7 +515,7 @@
 	opacity: 0%;
 }
 
-/* ── Boolean indicators ────────────────────────────────────────────────── */
+/* â”€â”€ Boolean indicators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .app-panel .star-rating-boolean-list {
 	display: flex;
@@ -554,7 +563,6 @@
 	font-size: 11px;
 	font-weight: 400;
 	font-variant: normal;
-	letter-spacing: normal;
 	white-space: normal;
 	width: max-content;
 	max-width: 200px;
@@ -566,6 +574,7 @@
 	opacity: 0;
 	transition: opacity 0.15s ease-in-out;
 	z-index: 100;
+	letter-spacing: 0.25px;
 }
 
 .app-panel .star-rating-boolean-item[data-tooltip]:hover::after {
@@ -583,7 +592,6 @@
 .app-panel .star-rating-boolean-item-label {
 	color: #e0e0e0;
 	font-variant: small-caps;
-	letter-spacing: 0.04em;
 }
 
 /* Panel Content Area */

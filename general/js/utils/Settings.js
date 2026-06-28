@@ -34,7 +34,8 @@ const Settings = (() => {
 	} catch (_) { /* storage unavailable in some contexts */ }
 
 	function _applyTheme(theme) {
-		document.body.classList.toggle('retro-theme', theme === 'retro');
+		const container = document.getElementById('panels-container');
+		if (container) container.classList.toggle('aeons-lab', theme === 'retro');
 	}
 
 	// Apply persisted theme immediately on load

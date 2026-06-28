@@ -125,9 +125,13 @@ class Panel extends Component {
 	 */
 	_createHeader() {
 		const header = this.createElement('div', { className: 'panel-header' });
-		
+
+		const left = this.createElement('div', { className: 'panel-header-left' });
+		const brand = this.createElement('span', { className: 'panel-brand' }, "Aeon's Lab");
 		const title = this.createElement('h3', { 'data-i18n': this.titleKey }, I18n.t(this.titleKey));
-		header.appendChild(title);
+		left.appendChild(brand);
+		left.appendChild(title);
+		header.appendChild(left);
 
 		// Pin button to lock the panel open
 		this._pinBtn = this.createElement('button', {
@@ -174,6 +178,9 @@ class Panel extends Component {
 			panelsContainer = document.createElement('div');
 			panelsContainer.id = 'panels-container';
 			document.body.insertBefore(panelsContainer, document.body.firstChild);
+			if (typeof Settings !== 'undefined') {
+				panelsContainer.classList.toggle('aeons-lab', Settings.theme === 'retro');
+			}
 		}
 		return super.mount(panelsContainer);
 	}

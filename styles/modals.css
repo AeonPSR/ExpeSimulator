@@ -35,7 +35,6 @@
 	overflow-y: auto;
 	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 	position: relative;
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	color: #ecf0f1;
 }
 
@@ -123,6 +122,11 @@
 	border-color: #3498db;
 	transform: scale(1.05);
 	box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+[data-expe-sim] .character-option.debug:hover {
+	border-color: #9b59b6;
+	box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
 }
 
 [data-expe-sim] .character-option img {

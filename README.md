@@ -13,3 +13,4 @@ Chromee web extension for simulating planet expeditions with combat mechanics an
 
 - Making a logo for the app ?
 - Style the import from chat button
+- "Credits/Info" kind of text in the settings

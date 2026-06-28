@@ -385,7 +385,7 @@ class ExpeditionSimulatorApp {
 		const player = this._state.getPlayer(playerId);
 		if (!player) return;
 
-		const newHealth = prompt(I18n.t('player.health_prompt'), player.health.toString());
+		const newHealth = prompt('', player.health.toString());
 		if (newHealth !== null) {
 			const value = parseInt(newHealth, 10);
 			if (!isNaN(value) && value >= 0) {

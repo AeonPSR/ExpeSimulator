@@ -5,6 +5,9 @@
    Import this single file in your HTML/manifest to load all styles.
    ========================================================================== */
 
+/* Font configuration - change font here */
+@import url('./fonts.css');
+
 /* Base layout and panel structure */
 @import url('./main.css');
 

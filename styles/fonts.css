@@ -1,0 +1,15 @@
+﻿/* ==========================================================================
+   Font Configuration
+   @font-face is injected via content.js using chrome.runtime.getURL().
+   Change font-family assignments here.
+   ========================================================================== */
+
+/* Font assignments — change font-family values here. */
+
+#panels-container {
+	font-family: 'Days-One';
+}
+
+#panels-container .panel-brand {
+	font-family: 'Days-One';
+}

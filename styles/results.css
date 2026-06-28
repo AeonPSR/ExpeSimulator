@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Results Styles
    Expedition results display, result cards, health counters, legend
    ========================================================================== */
@@ -199,6 +199,7 @@
 	padding: 10px;
 	background: rgba(0, 0, 0, 0.1);
 	border-radius: 6px;
+	letter-spacing: 0.5px;
 	border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -208,7 +209,6 @@
 	color: #bdc3c7;
 	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
 	text-align: center;
 }
 

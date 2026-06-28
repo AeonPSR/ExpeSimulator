@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Table Styles
    Resource tables and events tables for probability display
    ========================================================================== */
@@ -45,7 +45,6 @@
 	color: #3498db;
 	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
 }
 
 .app-panel .fight-stats {
@@ -69,7 +68,12 @@
    Resource Table
    ========================================================================== */
 
-.app-panel .resource-table {
+/* ==========================================================================
+   Shared table styles (resource-table + events-table)
+   ========================================================================== */
+
+.app-panel .resource-table,
+.app-panel .events-table {
 	width: 100%;
 	border-collapse: collapse;
 	margin-top: 10px;
@@ -80,40 +84,70 @@
 }
 
 .app-panel .resource-table th,
-.app-panel .resource-table td {
+.app-panel .resource-table td,
+.app-panel .events-table th,
+.app-panel .events-table td {
 	padding: 8px 12px;
 	text-align: left;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.app-panel .resource-table thead {
+.app-panel .resource-table thead,
+.app-panel .events-table thead {
 	background: linear-gradient(135deg, #34495e, #2c3e50);
 }
 
-.app-panel .resource-table th {
+.app-panel .resource-table th,
+.app-panel .events-table th {
 	font-weight: 600;
-	font-size: 11px;
+	font-size: 9px;
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
+	letter-spacing: 0.25px;
 	color: #bdc3c7;
 	padding: 10px 8px;
 }
 
-.app-panel .resource-table tbody tr {
+.app-panel .resource-table tbody tr,
+.app-panel .events-table tbody tr {
 	transition: background-color 0.2s ease;
 }
 
-.app-panel .resource-table tbody tr:hover {
+.app-panel .resource-table tbody tr:hover,
+.app-panel .events-table tbody tr:hover {
 	background: rgba(255, 255, 255, 0.05);
 }
 
-.app-panel .resource-table tbody tr:last-child td {
+.app-panel .resource-table tbody tr:last-child td,
+.app-panel .events-table tbody tr:last-child td {
 	border-bottom: none;
 }
 
-.app-panel .resource-table td:first-child {
+.app-panel .resource-table td:first-child,
+.app-panel .events-table td:first-child {
 	font-weight: 500;
 	color: #ecf0f1;
+}
+
+.app-panel .resource-table .warning,
+.app-panel .resource-table .neutral,
+.app-panel .resource-table .positive,
+.app-panel .events-table .warning,
+.app-panel .events-table .neutral,
+.app-panel .events-table .positive {
+	font-weight: 600;
+}
+
+.app-panel .resource-table .none-row,
+.app-panel .events-table .none-row {
+	text-align: center;
+	font-style: italic;
+}
+
+/* ==========================================================================
+   Resource table — specific
+   ========================================================================== */
+
+.app-panel .resource-table td:first-child {
 	width: 35%;
 }
 
@@ -122,12 +156,6 @@
 .app-panel .optimist-col {
 	width: 21.66%;
 	text-align: center;
-}
-
-.app-panel .resource-table .warning,
-.app-panel .resource-table .neutral,
-.app-panel .resource-table .positive {
-	font-weight: 600;
 }
 
 /* Special styling for "none" rows */
@@ -141,44 +169,9 @@
 	vertical-align: middle;
 }
 
-.app-panel .resource-table .none-row {
-	text-align: center;
-	font-style: italic;
-}
-
 /* ==========================================================================
-   Events Table
+   Events table — specific
    ========================================================================== */
-
-.app-panel .events-table {
-	width: 100%;
-	border-collapse: collapse;
-	margin-top: 10px;
-	background: rgba(52, 73, 94, 0.3);
-	border-radius: 6px;
-	overflow: hidden;
-	font-size: 13px;
-}
-
-.app-panel .events-table th,
-.app-panel .events-table td {
-	padding: 8px 12px;
-	text-align: left;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.app-panel .events-table thead {
-	background: linear-gradient(135deg, #34495e, #2c3e50);
-}
-
-.app-panel .events-table th {
-	font-weight: 600;
-	font-size: 11px;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	color: #bdc3c7;
-	padding: 10px 8px;
-}
 
 .app-panel .events-table th:first-child {
 	width: 40%;
@@ -191,23 +184,6 @@
 	text-align: center;
 }
 
-.app-panel .events-table tbody tr {
-	transition: background-color 0.2s ease;
-}
-
-.app-panel .events-table tbody tr:hover {
-	background: rgba(255, 255, 255, 0.05);
-}
-
-.app-panel .events-table tbody tr:last-child td {
-	border-bottom: none;
-}
-
-.app-panel .events-table td:first-child {
-	font-weight: 500;
-	color: #ecf0f1;
-}
-
 .app-panel .events-table td:nth-child(2),
 .app-panel .events-table td:nth-child(3),
 .app-panel .events-table td:nth-child(4) {
@@ -215,15 +191,7 @@
 	font-weight: 600;
 }
 
-.app-panel .events-table .warning,
-.app-panel .events-table .neutral,
-.app-panel .events-table .positive {
-	font-weight: 600;
-}
-
 .app-panel .events-table .none-row {
-	text-align: center;
-	font-style: italic;
 	opacity: 0.6;
 }
 

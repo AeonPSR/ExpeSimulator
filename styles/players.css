@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Player Styles
    Player section, profiles, avatars, abilities, items, health/morale slots
    ========================================================================== */
@@ -16,7 +16,6 @@
 	padding-bottom: 8px;
 	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.5px;
 }
 
 /* Players Header */
