@@ -11,7 +11,7 @@ const Translations = {
 	// ─────────────────────────────────────────────────────────────────────────
 	en: {
 		// Panel
-		'panel.title':              'Planetary Analyser',
+		'panel.title':              'Planetary Analyzer',
 		'panel.lang.label':         'Language',
 
 		// Tabs
