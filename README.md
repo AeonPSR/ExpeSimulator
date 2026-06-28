@@ -1,14 +1,16 @@
-# Expedition Simulator
+# Aeon's Lab
 
-Chromee web extension for simulating planet expeditions with combat mechanics and probability calculations.
+A Chrome extension for the game [Mush](https://emush.eternaltwin.org), providing two tools accessible via side panels on the game page:
 
-## Features
+- **Planetary Review** — analyses a planet's sector composition and rates it across resources, danger, and special properties.
+- **Expedition Simulator** — simulates expedition outcomes, calculating damage distributions, survival odds, and loot probabilities across pessimist / average / optimist scenarios.
 
-- Visual sector selection with interactive grid
-- Player management with abilities and equipment
-- Real-time probability calculations for events and combat
-- Resource outcome projections
+## Development
 
-## TODO
+```bash
+npm install   # install test dependencies
+npm test      # run the Jest test suite
+```
 
-- Style the import from chat button
+Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
+
