@@ -120,7 +120,6 @@
     }
   ],
   "action": {
-    "default_popup": "popup.html",
-    "default_title": "Expedition Simulator"
+    "default_title": "Aeon's Lab"
   }
 }
