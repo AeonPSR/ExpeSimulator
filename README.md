@@ -14,3 +14,13 @@ npm test      # run the Jest test suite
 
 Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
+TODO:
+- Modify the clickable pop up in the browser
+- Add the main style to the import button and creditsS
+- Ajouter la version d'eMush a laquelle le script est à jour
+- Ajouter une translation pour le bouton d'export
+- Fix the horizontal scroll in the probabilities in spanish
+
+
+Done:
+- The app can now be closed on mobile through a new button in the header.

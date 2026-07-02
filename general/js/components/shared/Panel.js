@@ -80,21 +80,7 @@ class Panel extends Component {
 			tongue.appendChild(img);
 		}
 
-		this.addEventListener(tongue, 'click', () => {
-			// Unpin if currently pinned
-			if (this._pinned) {
-				this._pinned = false;
-				this.element.classList.remove('pinned');
-				this._pinBtn?.classList.remove('active');
-			}
-			// Clear any import-open that may have survived a pinned import
-			this.element.classList.remove('import-open');
-			// Close immediately, then restore normal hover behaviour
-			this.element.classList.add('force-close');
-			this.element.addEventListener('transitionend', () => {
-				this.element.classList.remove('force-close');
-			}, { once: true });
-		});
+		this.addEventListener(tongue, 'click', () => this._forceCollapse());
 
 		return tongue;
 	}
@@ -138,6 +124,11 @@ class Panel extends Component {
 		left.appendChild(title);
 		header.appendChild(left);
 
+		// Collapse button — always present, prominently visible on small screens
+		const closeBtn = this.createElement('button', { className: 'panel-close-btn' }, '×');
+		this.addEventListener(closeBtn, 'click', () => this._forceCollapse());
+		header.appendChild(closeBtn);
+
 		// Pin button to lock the panel open
 		this._pinBtn = this.createElement('button', {
 			className: 'panel-pin-btn',
@@ -151,6 +142,23 @@ class Panel extends Component {
 		header.appendChild(this._pinBtn);
 
 		return header;
+	}
+
+	/**
+	 * Unpin and force the panel to slide closed.
+	 * @private
+	 */
+	_forceCollapse() {
+		if (this._pinned) {
+			this._pinned = false;
+			this.element.classList.remove('pinned');
+			this._pinBtn?.classList.remove('active');
+		}
+		this.element.classList.remove('import-open');
+		this.element.classList.add('force-close');
+		this.element.addEventListener('transitionend', () => {
+			this.element.classList.remove('force-close');
+		}, { once: true });
 	}
 
 	/**
