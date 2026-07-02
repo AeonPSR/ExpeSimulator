@@ -134,9 +134,10 @@ class ChatObserver {
 
 	/** @private */
 	_addImportButton(message) {
-		const currentPosition = window.getComputedStyle(message).position;
+		const anchor = message.querySelector('.text') || message;
+		const currentPosition = window.getComputedStyle(anchor).position;
 		if (currentPosition === 'static') {
-			message.style.position = 'relative';
+			anchor.style.position = 'relative';
 		}
 
 		const button = document.createElement('button');
@@ -156,7 +157,7 @@ class ChatObserver {
 			}
 		});
 
-		message.appendChild(button);
+		anchor.appendChild(button);
 	}
 
 	/** @private */
