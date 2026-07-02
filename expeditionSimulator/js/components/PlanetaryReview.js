@@ -174,6 +174,12 @@ class PlanetaryReview extends Component {
 				);
 			}
 		});
+		this.addEventListener(document, 'i18n:change', () => {
+			// Only update if not currently showing a success/error state
+			if (!this._exportResetTimer) {
+				this._exportBtn.textContent = I18n.t('planet.export_btn');
+			}
+		});
 		this.element.appendChild(this._exportBtn);
 
 		return this.element;
