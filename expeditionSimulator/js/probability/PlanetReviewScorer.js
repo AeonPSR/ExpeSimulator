@@ -592,6 +592,19 @@ const PlanetReviewScorer = (() => {
 			}
 		}
 
+		// Add fight-reward gains (expected resource quantity won from fights,
+		// computed with player data by ResourceCalculator) on top of the raw
+		// resource scores. Diplomacy already zeroes this upstream. Same units
+		// as the exploration EVs above, so normalization stays consistent.
+		const fightResourceBonus = options.fightResourceBonus || null;
+		if (fightResourceBonus && !useDiplomacy) {
+			for (const [axisKey, value] of Object.entries(fightResourceBonus)) {
+				if (rawScores[axisKey] !== undefined && value > 0) {
+					rawScores[axisKey] += value;
+				}
+			}
+		}
+
 		// Post-process: add flat star bonuses
 		const bonuses = {};
 		for (const sectorName of scoredSectors) {

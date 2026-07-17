@@ -136,8 +136,10 @@ const ExpeditionRunner = {
 			}
 			for (const s of alwaysInclude) fullSectors.push(s);
 			results.planetResources = ResourceCalculator.calculate(fullSectors, planetLoadout, participatingPlayers);
+			results.fightResourceBonus = ResourceCalculator.computeFightResourceBonus(fullSectors, planetLoadout, participatingPlayers);
 		} else {
 			results.planetResources = ResourceCalculator.calculate(sectors, planetLoadout, participatingPlayers);
+			results.fightResourceBonus = ResourceCalculator.computeFightResourceBonus(sectors, planetLoadout, participatingPlayers);
 		}
 
 		return results;

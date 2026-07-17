@@ -387,6 +387,71 @@ describe('PlanetReviewScorer', () => {
 			const cristalArt = withCristal.axes.find(a => a.key === 'artifacts').stars;
 			expect(cristalArt - baseArt).toBeGreaterThanOrEqual(1.5);
 		});
+
+		// ── Fight resource bonus: loot won from fights feeds the stars ──
+		// Regression guard: fight rewards (fruits/steaks/artifacts) computed
+		// from real player power must raise the corresponding resource-axis
+		// stars, on top of the unchanged exploration scoring. Previously the
+		// scorer only mapped FIGHT_* events to lethality and ignored the loot.
+
+		test('fightResourceBonus raises artifact stars on a fight planet', () => {
+			const sectors = ['LANDING', 'MANKAROG'];
+			const base = PlanetReviewScorer.score(sectors);
+			const withBonus = PlanetReviewScorer.score(sectors, {
+				fightResourceBonus: { fruits: 0, steaks: 0, fuel: 0, artifacts: 3 },
+			});
+			const baseArt = base.axes.find(a => a.key === 'artifacts').stars;
+			const bonusArt = withBonus.axes.find(a => a.key === 'artifacts').stars;
+			expect(bonusArt).toBeGreaterThan(baseArt);
+		});
+
+		test('fightResourceBonus can lift an otherwise-absent axis above 0 stars', () => {
+			// LANDING alone has no fruit events, so fruits would be 0 stars.
+			const base = PlanetReviewScorer.score(['LANDING']);
+			const withBonus = PlanetReviewScorer.score(['LANDING'], {
+				fightResourceBonus: { fruits: 2, steaks: 0, fuel: 0, artifacts: 0 },
+			});
+			const baseFruits = base.axes.find(a => a.key === 'fruits').stars;
+			const bonusFruits = withBonus.axes.find(a => a.key === 'fruits').stars;
+			expect(baseFruits).toBe(0);
+			expect(bonusFruits).toBeGreaterThanOrEqual(0.5);
+		});
+
+		test('fightResourceBonus only affects its own resource axes', () => {
+			const sectors = ['LANDING', 'FOREST'];
+			const base = PlanetReviewScorer.score(sectors);
+			const withBonus = PlanetReviewScorer.score(sectors, {
+				fightResourceBonus: { fruits: 0, steaks: 3, fuel: 0, artifacts: 0 },
+			});
+			// steaks should rise, lethality/hazards must be unchanged
+			const baseSteaks = base.axes.find(a => a.key === 'steaks').stars;
+			const bonusSteaks = withBonus.axes.find(a => a.key === 'steaks').stars;
+			expect(bonusSteaks).toBeGreaterThan(baseSteaks);
+			for (const key of ['lethality', 'hazards']) {
+				const b = base.axes.find(a => a.key === key).stars;
+				const w = withBonus.axes.find(a => a.key === key).stars;
+				expect(w).toBe(b);
+			}
+		});
+
+		test('diplomacy ignores the fight resource bonus (no fights, no loot)', () => {
+			const sectors = ['LANDING', 'MANKAROG'];
+			const withDiplomacy = PlanetReviewScorer.score(sectors, {
+				diplomacy: true,
+				fightResourceBonus: { fruits: 0, steaks: 0, fuel: 0, artifacts: 5 },
+			});
+			const plainDiplomacy = PlanetReviewScorer.score(sectors, { diplomacy: true });
+			const bonusArt = withDiplomacy.axes.find(a => a.key === 'artifacts').stars;
+			const plainArt = plainDiplomacy.axes.find(a => a.key === 'artifacts').stars;
+			expect(bonusArt).toBe(plainArt);
+		});
+
+		test('absent fightResourceBonus leaves scoring unchanged', () => {
+			const sectors = ['LANDING', 'FOREST', 'MANKAROG'];
+			const a = PlanetReviewScorer.score(sectors);
+			const b = PlanetReviewScorer.score(sectors, { fightResourceBonus: null });
+			expect(b.axes).toEqual(a.axes);
+		});
 	});
 
 	// =========================================================================

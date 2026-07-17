@@ -391,6 +391,45 @@ const ResourceCalculator = {
 	},
 
 	/**
+	 * Computes the expected resource quantity gained from winning fights,
+	 * broken down per scoring axis. Uses the same player-power → win-probability
+	 * → drop-table math as the resource preview.
+	 *
+	 * Item → axis mapping: FRUIT → fruits, ALIEN_STEAK → steaks,
+	 * ARTEFACT + STARMAP → artifacts. No fight reward yields fuel.
+	 *
+	 * @param {Array<string>} sectors - Array of sector names
+	 * @param {Object} loadout - { abilities: [], items: [], projects: [] }
+	 * @param {Array<Object>} players - Raw player data
+	 * @param {Map} sectorProbabilities - Precomputed sector probabilities (optional)
+	 * @returns {{fruits: number, steaks: number, fuel: number, artifacts: number}}
+	 */
+	computeFightResourceBonus(sectors, loadout = {}, players = [], sectorProbabilities = null) {
+		const bonus = { fruits: 0, steaks: 0, fuel: 0, artifacts: 0 };
+		if (!sectors || sectors.length === 0 || typeof CombatRewardService === 'undefined') {
+			return bonus;
+		}
+
+		const basePower = typeof FightingPowerService !== 'undefined'
+			? FightingPowerService.calculateBaseFightingPower(players) : 0;
+		const grenadeCount = typeof FightingPowerService !== 'undefined'
+			? FightingPowerService.countGrenades(players) : 0;
+
+		for (const sectorName of sectors) {
+			const probs = ExpeditionPipeline.getSectorProbabilities(sectorName, loadout, sectorProbabilities);
+			const contributions = this._getFightRewardContributions(sectorName, probs, basePower, grenadeCount);
+			for (const { itemId, qty, prob } of contributions) {
+				const ev = qty * prob;
+				if (itemId === 'FRUIT') bonus.fruits += ev;
+				else if (itemId === 'ALIEN_STEAK') bonus.steaks += ev;
+				else if (itemId === 'ARTEFACT' || itemId === 'STARMAP') bonus.artifacts += ev;
+			}
+		}
+
+		return bonus;
+	},
+
+	/**
 	 * Counts modifiers from raw player data.
 	 * Uses ABILITY_ALIASES to expand abilities (e.g. Skillful counts as Botanic).
 	 * @private

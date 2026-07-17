@@ -450,7 +450,11 @@ class ExpeditionSimulatorApp {
 		if (!this._planetaryReview) return;
 		const sectors = this._state.getSectors();
 		const diplomacy = this._sectorGrid?.isDiplomacyActive?.() || false;
-		const reviewData = PlanetReviewScorer.score(sectors, { diplomacy, fuelCost: this._currentFuelCost });
+		const reviewData = PlanetReviewScorer.score(sectors, {
+			diplomacy,
+			fuelCost: this._currentFuelCost,
+			fightResourceBonus: this._lastFightResourceBonus || null,
+		});
 		this._lastReviewData = reviewData;
 		this._planetaryReview.update(this._currentPlanetName || null, reviewData);
 	}
@@ -608,8 +612,10 @@ class ExpeditionSimulatorApp {
 			}
 			for (const s of alwaysInclude) fullSectors.push(s);
 			results.planetResources = ResourceCalculator.calculate(fullSectors, planetLoadout, participatingPlayers);
+			results.fightResourceBonus = ResourceCalculator.computeFightResourceBonus(fullSectors, planetLoadout, participatingPlayers);
 		} else {
 			results.planetResources = ResourceCalculator.calculate(sectors, planetLoadout, participatingPlayers);
+			results.fightResourceBonus = ResourceCalculator.computeFightResourceBonus(sectors, planetLoadout, participatingPlayers);
 		}
 
 		return results;
@@ -619,13 +625,17 @@ class ExpeditionSimulatorApp {
 		if (!results) {
 			this._probabilityDisplay.clear();
 			this._lastPlanetResources = null;
+			this._lastFightResourceBonus = null;
 			this._planetaryReview?.updateResources?.(null);
+			this._updatePlanetaryReview();
 			return;
 		}
 		this._probabilityDisplay.update(results);
 		const planetResources = results.planetResources || results.resources || null;
 		this._lastPlanetResources = planetResources;
+		this._lastFightResourceBonus = results.fightResourceBonus || null;
 		this._planetaryReview?.updateResources?.(planetResources);
+		this._updatePlanetaryReview();
 	}
 
 	_updateResultsDisplay(results) {
