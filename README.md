@@ -15,8 +15,9 @@ npm test      # run the Jest test suite
 Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
 Todo:
-- Add the "Code Reader" page
-- Add the "CTRL+W" Page
+- Add the "Crew management" Page
+- Add the "Projects" page
+- Rename the events so it's the proper "Errance" stuff
 
 Done since last update:
 - Fix the bug where the ressources gained from fights aren't taken into account in the star rating

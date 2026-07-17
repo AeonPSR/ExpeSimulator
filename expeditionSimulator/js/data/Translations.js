@@ -200,6 +200,10 @@ const Translations = {
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Crew Manager',
+		'crewmanager.section.crew':          'Crew',
+		'crewmanager.section.title':         'Title',
+		'crewmanager.section.details':       'Details',
+		'crewmanager.reset':                 'Reset this panel',
 
 		// Settings panel
 		'settings.title':                    'Settings',
@@ -413,6 +417,10 @@ const Translations = {
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestion d\'Équipage',
+		'crewmanager.section.crew':          'Équipage',
+		'crewmanager.section.title':         'Titre',
+		'crewmanager.section.details':       'Détails',
+		'crewmanager.reset':                 'Réinitialiser ce panneau',
 
 		// Settings panel
 		'settings.title':                    'Réglages',
@@ -626,6 +634,10 @@ const Translations = {
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestión de Tripulación',
+		'crewmanager.section.crew':          'Tripulación',
+		'crewmanager.section.title':         'Título',
+		'crewmanager.section.details':       'Detalles',
+		'crewmanager.reset':                 'Restablecer este panel',
 
 		// Settings panel
 		'settings.title':                    'Ajustes',
