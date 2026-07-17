@@ -14,3 +14,9 @@ npm test      # run the Jest test suite
 
 Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
+Todo:
+- Add the "Code Reader" page
+- Add the "CTRL+W" Page
+
+Done since last update:
+- Fix the bug where the ressources gained from fights aren't taken into account in the star rating
