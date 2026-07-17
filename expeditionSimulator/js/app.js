@@ -334,6 +334,7 @@ class ExpeditionSimulatorApp {
 			items: CharacterData.getSelectionItems(getResourceURL),
 			selectedId: player.avatar,
 			columns: 6,
+			panelElement: this._panel.element,
 			onSelect: (item) => {
 				this._state.setPlayerAvatar(playerId, item.id);
 				this._playerSection.getPlayerCard(playerId)?.updateAvatar(item.id);
@@ -354,6 +355,7 @@ class ExpeditionSimulatorApp {
 			columns: 4,
 			itemSize: 'large',
 			className: 'ability-selection',
+			panelElement: this._panel.element,
 			onSelect: (item) => {
 				this._state.setPlayerAbility(playerId, slotIndex, item.id);
 				this._playerSection.getPlayerCard(playerId)?.updateAbility(slotIndex, item.id);
@@ -374,6 +376,7 @@ class ExpeditionSimulatorApp {
 			columns: 5,
 			itemSize: 'large',
 			className: 'item-selection',
+			panelElement: this._panel.element,
 			onSelect: (item) => {
 				this._state.setPlayerItem(playerId, slotIndex, item.id);
 				this._playerSection.getPlayerCard(playerId)?.updateItem(slotIndex, item.id);

@@ -23,6 +23,7 @@ class Modal extends Component {
 	 * @param {boolean} [options.showCloseButton=true] - Show the X close button
 	 * @param {Function} [options.onClose] - Callback when modal closes
 	 * @param {Function} [options.onOpen] - Callback when modal opens
+	 * @param {HTMLElement} [options.panelElement] - The .app-panel this modal belongs to; kept open while the modal is visible
 	 */
 	constructor(options = {}) {
 		super(options);
@@ -34,6 +35,7 @@ class Modal extends Component {
 		this.showCloseButton = options.showCloseButton !== false;
 		this.onCloseCallback = options.onClose || null;
 		this.onOpenCallback = options.onOpen || null;
+		this.panelElement = options.panelElement || null;
 
 		// Internal references
 		this._contentContainer = null;
@@ -156,10 +158,9 @@ class Modal extends Component {
 	 * @returns {Modal} this for chaining
 	 */
 	open() {
-		// Keep the panel open while modal is visible
-		const panel = document.getElementById('expedition-simulator');
-		if (panel) {
-			panel.classList.add('modal-open');
+		// Keep the owning panel open while the modal is visible
+		if (this.panelElement) {
+			this.panelElement.classList.add('modal-open');
 		}
 		this.mount(document.body);
 		return this;
@@ -170,11 +171,11 @@ class Modal extends Component {
 	 * @param {*} [result] - Optional result to pass to onClose callback
 	 */
 	close(result = null) {
-		// Keep panel open for 2s after modal closes
-		const panel = document.getElementById('expedition-simulator');
+		// Keep the owning panel open for 2s after modal closes
+		const panel = this.panelElement;
 		if (panel) {
 			setTimeout(() => {
-				// Only remove if no other modal is still open
+				// Only remove if no other modal is still open on this panel
 				if (!document.querySelector('.character-selection-modal')) {
 					panel.classList.remove('modal-open');
 				}

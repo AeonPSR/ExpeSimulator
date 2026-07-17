@@ -59,6 +59,7 @@ class CrewDetailsSection extends Component {
 					columns:    8,
 					itemSize:   'large',
 					className:  'ability-selection crew-skill-modal',
+					panelElement: cardInstance?.element?.closest('.app-panel'),
 					onSelect: (item) => {
 						player.abilities[slotIndex] = item.id;
 						cardInstance?.updateAbility(slotIndex, item.id);
