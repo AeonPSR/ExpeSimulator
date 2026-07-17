@@ -31,6 +31,8 @@ class PlayerCard extends Component {
 		this.onHealthClick = options.onHealthClick || null;
 		this.onRemove = options.onRemove || null;
 		this.showRemove = options.showRemove !== false;
+		this.showItems  = options.showItems  !== false;
+		this.extraSlots = options.extraSlots || [];
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 	}
 
@@ -165,52 +167,71 @@ class PlayerCard extends Component {
 		const bottomRow = this.createElement('div', { className: 'player-bottom-row' });
 
 		// Item slots
-		for (let i = 0; i < 3; i++) {
-			const item = this.player.items[i];
+		if (this.showItems) {
+			for (let i = 0; i < 3; i++) {
+				const item = this.player.items[i];
 
-			const slot = this.createElement('div', {
-				className: 'item-slot',
-				dataset: { 
-					type: 'item', 
-					slot: i.toString(), 
-					playerId: this.player.id.toString() 
-				}
-			});
-
-			if (item) {
-				const img = this.createElement('img', {
-					src: this.getResourceURL(`pictures/gear/${item}`),
-					alt: ''
+				const slot = this.createElement('div', {
+					className: 'item-slot',
+					dataset: { 
+						type: 'item', 
+						slot: i.toString(), 
+						playerId: this.player.id.toString() 
+					}
 				});
-				slot.appendChild(img);
+
+				if (item) {
+					const img = this.createElement('img', {
+						src: this.getResourceURL(`pictures/gear/${item}`),
+						alt: ''
+					});
+					slot.appendChild(img);
+				}
+
+				this.addEventListener(slot, 'click', () => {
+					this.onItemClick?.(this.player.id, i);
+				});
+
+				bottomRow.appendChild(slot);
 			}
-
-			this.addEventListener(slot, 'click', () => {
-				this.onItemClick?.(this.player.id, i);
-			});
-
-			bottomRow.appendChild(slot);
 		}
 
 		// Health slot
 		const healthSlot = this.createElement('div', {
-			className: 'health-slot',
+			className: 'status-slot health-slot',
 			dataset: { type: 'health', playerId: this.player.id.toString() }
 		});
-		healthSlot.textContent = this.player.health;
-
+		const healthValue = this.createElement('span', {}, String(this.player.health));
+		healthSlot.appendChild(healthValue);
 		const hpIcon = this.createElement('img', {
 			src: this.getResourceURL('pictures/ui/hp.png'),
 			alt: '',
 			className: 'hp-icon'
 		});
 		healthSlot.appendChild(hpIcon);
-
 		this.addEventListener(healthSlot, 'click', () => {
 			this.onHealthClick?.(this.player.id);
 		});
-
 		bottomRow.appendChild(healthSlot);
+
+		// Extra status slots (e.g. morale, spore)
+		for (const slotDef of this.extraSlots) {
+			const slot = this.createElement('div', { className: `status-slot ${slotDef.className}` });
+			const valueSpan = this.createElement('span', {}, String(this.player[slotDef.playerKey] ?? 0));
+			slot.appendChild(valueSpan);
+			const icon = this.createElement('img', {
+				src: this.getResourceURL(slotDef.iconPath),
+				alt: '',
+				className: 'hp-icon'
+			});
+			slot.appendChild(icon);
+			if (!this._slotValueSpans) this._slotValueSpans = {};
+			this._slotValueSpans[slotDef.playerKey] = valueSpan;
+			this.addEventListener(slot, 'click', () => {
+				slotDef.onSlotClick?.(this.player.id, slotDef.playerKey);
+			});
+			bottomRow.appendChild(slot);
+		}
 
 		return bottomRow;
 	}
@@ -236,6 +257,18 @@ class PlayerCard extends Component {
 		});
 
 		return removeBtn;
+	}
+
+	/**
+	 * Updates the displayed value for an extra status slot.
+	 * @param {string} playerKey - e.g. 'morale', 'spore'
+	 * @param {number} value
+	 */
+	updateSlotValue(playerKey, value) {
+		this.player[playerKey] = value;
+		if (this._slotValueSpans?.[playerKey]) {
+			this._slotValueSpans[playerKey].textContent = String(value);
+		}
 	}
 
 	/**

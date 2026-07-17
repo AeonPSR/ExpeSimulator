@@ -172,30 +172,28 @@
 }
 
 /* ==========================================================================
-   Health & Morale Slots
+   Status Slots (Health, Morale, Spore)
    ========================================================================== */
 
-.app-panel .health-slot,
-.app-panel .morale-slot {
+.app-panel .status-slot {
 	width: 40px;
 	height: 30px;
-	border: 2px solid #e74c3c;
+	border: 2px solid;
 	border-radius: 4px;
-	background: rgba(231, 76, 60, 0.2);
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	flex-direction: row;
 	font-size: 12px;
 	font-weight: 600;
 	color: #fff;
 	cursor: pointer;
 	transition: all 0.3s ease;
-	flex-direction: row;
 }
 
-.app-panel .morale-slot {
-	border-color: #f39c12;
-	background: rgba(243, 156, 18, 0.2);
+.app-panel .health-slot {
+	border-color: #e74c3c;
+	background: rgba(231, 76, 60, 0.2);
 }
 
 .app-panel .health-slot:hover {
@@ -203,9 +201,29 @@
 	background: rgba(231, 76, 60, 0.3);
 }
 
+.app-panel .morale-slot {
+	border-color: #f39c12;
+	background: rgba(243, 156, 18, 0.2);
+}
+
 .app-panel .morale-slot:hover {
 	border-color: #e67e22;
 	background: rgba(243, 156, 18, 0.3);
+}
+
+.app-panel .spore-slot {
+	border-color: #e91e8c;
+	background: rgba(233, 30, 140, 0.2);
+}
+
+.app-panel .spore-slot:hover {
+	border-color: #c2185b;
+	background: rgba(233, 30, 140, 0.3);
+}
+
+.app-panel .spore-slot:hover {
+	border-color: #c2185b;
+	background: rgba(233, 30, 140, 0.3);
 }
 
 .app-panel .hp-icon {

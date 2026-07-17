@@ -8,6 +8,7 @@ class CrewDetailsSection extends Component {
 	constructor(options = {}) {
 		super(options);
 		this._cardByFilename = {};
+		this._cardInstanceByFilename = {};
 	}
 
 	render() {
@@ -17,21 +18,55 @@ class CrewDetailsSection extends Component {
 
 		characters.forEach((filename, index) => {
 			const player = {
-				id: index + 1,
-				avatar: filename,
+				id:        index + 1,
+				avatar:    filename,
 				abilities: Array(Constants.ABILITY_SLOTS).fill(null),
 				items:     Array(Constants.ITEM_SLOTS).fill(null),
-				health:    Constants.DEFAULT_HEALTH
+				health:    Constants.DEFAULT_HEALTH,
+				morale:    14,
+				spore:     0
+			};
+
+			const onSlotClick = (playerId, playerKey) => {
+				const cardInstance = this._cardInstanceByFilename[filename];
+				const current = player[playerKey];
+				const input = prompt('', current.toString());
+				if (input !== null) {
+					const value = parseInt(input, 10);
+					if (!isNaN(value) && value >= 0) {
+						player[playerKey] = value;
+						cardInstance?.updateSlotValue(playerKey, value);
+					}
+				}
+			};
+
+			const onHealthClick = () => {
+				const cardInstance = this._cardInstanceByFilename[filename];
+				const input = prompt('', player.health.toString());
+				if (input !== null) {
+					const value = parseInt(input, 10);
+					if (!isNaN(value) && value >= 0) {
+						player.health = value;
+						cardInstance?.updateHealth(value);
+					}
+				}
 			};
 
 			const card = new PlayerCard({
 				player:         player,
 				getResourceURL: getResourceURL,
-				showRemove:     false
+				showRemove:     false,
+				showItems:      false,
+				onHealthClick:  onHealthClick,
+				extraSlots: [
+					{ className: 'morale-slot', iconPath: 'pictures/ui/pmo.png',   playerKey: 'morale', onSlotClick },
+					{ className: 'spore-slot',  iconPath: 'pictures/ui/spore.png', playerKey: 'spore',  onSlotClick }
+				]
 			});
 
 			const el = card.render();
 			this._cardByFilename[filename] = el;
+			this._cardInstanceByFilename[filename] = card;
 			this.element.appendChild(el);
 		});
 
