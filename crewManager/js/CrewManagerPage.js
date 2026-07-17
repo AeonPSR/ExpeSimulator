@@ -25,8 +25,11 @@ class CrewManagerPage extends Component {
 		titleSection.appendChild(this._titleRows.render());
 		this.element.appendChild(titleSection);
 
-		// Details section (empty for now)
-		this.element.appendChild(this._renderSection('crewmanager.section.details'));
+		// Details section
+		const detailsSection = this._renderSection('crewmanager.section.details');
+		const details = new CrewDetailsSection();
+		detailsSection.appendChild(details.render());
+		this.element.appendChild(detailsSection);
 
 		this.element.appendChild(this._renderResetButton());
 

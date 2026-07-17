@@ -1,0 +1,322 @@
+/* ==========================================================================
+   Crew Manager Panel
+
+   CONVENTION: All overrides of shared component styles use #crew-manager-panel
+   as the leading selector. An ID has specificity (1,0,0) which always beats
+   the class-based selectors in component files like .app-panel (0,1,0),
+   regardless of source order. No need for !important or duplicated rules.
+   ========================================================================== */
+
+/* ── Page layout ─────────────────────────────────────────────────────────── */
+
+.crew-manager-page {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 12px 4px;
+}
+
+.crew-section {
+	margin: 0;
+}
+
+.crew-section h4 {
+	margin: 0 0 10px 0;
+	font-size: 16px;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 8px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.crew-reset-row {
+	margin-top: auto;
+	padding-top: 10px;
+	display: flex;
+	justify-content: center;
+}
+
+.crew-reset-btn {
+	padding: 8px 20px;
+	background: rgba(231, 76, 60, 0.15);
+	border: 1px solid #e74c3c;
+	border-radius: 4px;
+	color: #e74c3c;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.crew-reset-btn:hover {
+	background: rgba(231, 76, 60, 0.3);
+}
+
+/* ── Crew grid ───────────────────────────────────────────────────────────── */
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option {
+	background: rgba(255, 255, 255, 0.1);
+	border-color: transparent;
+	backdrop-filter: blur(10px);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option:hover {
+	background: rgba(52, 152, 219, 0.3);
+	border-color: #3498db;
+	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* ── Title rows ──────────────────────────────────────────────────────────── */
+
+.crew-title-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.crew-title-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	background: rgba(0, 0, 0, 0.2);
+	border: 2px solid;
+	border-radius: 8px;
+	padding: 10px;
+}
+
+.crew-title-row--commandant { border-color: #9dd3d9; }
+.crew-title-row--comm       { border-color: #f8a9bf; }
+.crew-title-row--admin      { border-color: #d7ce4d; }
+
+.crew-title-role-icon {
+	width: 42px;
+	height: 60px;
+	object-fit: contain;
+	flex-shrink: 0;
+}
+
+/* ── Title slots ─────────────────────────────────────────────────────────── */
+
+.crew-title-slot {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(10px);
+}
+
+/* Slot hover: scale only, no colour change */
+#crew-manager-panel [data-expe-sim] .crew-title-row .crew-title-slot:hover {
+	background-color: inherit;
+	border-color: inherit;
+	box-shadow: none;
+	transform: scale(1.05);
+}
+
+/* Commandant slots */
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot { border: 3px solid #9dd3d9; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(2) { background-color: #b9f8ffBB; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(3) { background-color: #b9f8ff99; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(4) { background-color: #b9f8ff77; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(5) { background-color: #b9f8ff55; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(6) { background-color: #b9f8ff33; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(7) { background-color: #b9f8ff11; }
+
+/* Comm slots */
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot { border: 3px solid #f8a9bf; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(2) { background-color: #ffdbe5BB; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(3) { background-color: #ffdbe599; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(4) { background-color: #ffdbe577; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(5) { background-color: #ffdbe555; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(6) { background-color: #ffdbe533; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(7) { background-color: #ffdbe511; }
+
+/* Admin slots */
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot { border: 3px solid #d7ce4d; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(2) { background-color: #faf170BB; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(3) { background-color: #faf17099; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(4) { background-color: #faf17077; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(5) { background-color: #faf17055; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(6) { background-color: #faf17033; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(7) { background-color: #faf17011; }
+
+/* ── Details section ─────────────────────────────────────────────────────── */
+
+.crew-details-section {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+#crew-manager-panel .crew-details-section .player-profile {
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-avatar {
+	border-color: #3498db;
+}
+
+
+/* ── Page layout ─────────────────────────────────────────────────────────── */
+
+.crew-manager-page {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 12px 4px;
+}
+
+.crew-section {
+	margin: 0;
+}
+
+.app-panel .crew-section h4 {
+	margin: 0 0 10px 0;
+	font-size: 16px;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 8px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.crew-reset-row {
+	margin-top: auto;
+	padding-top: 10px;
+	display: flex;
+	justify-content: center;
+}
+
+.crew-reset-btn {
+	padding: 8px 20px;
+	background: rgba(231, 76, 60, 0.15);
+	border: 1px solid #e74c3c;
+	border-radius: 4px;
+	color: #e74c3c;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.crew-reset-btn:hover {
+	background: rgba(231, 76, 60, 0.3);
+}
+
+/* ── Crew grid ───────────────────────────────────────────────────────────── */
+
+/* Ensure grid layout is applied regardless of layer resolution */
+.crew-section [data-expe-sim] .character-grid {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 10px;
+}
+
+.crew-section [data-expe-sim] .character-option {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.1);
+	border-color: transparent;
+	backdrop-filter: blur(10px);
+}
+
+.crew-section [data-expe-sim] .character-option:hover {
+	background: rgba(52, 152, 219, 0.3);
+	border-color: #3498db;
+	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* ── Title rows ──────────────────────────────────────────────────────────── */
+
+.crew-title-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.crew-title-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	background: rgba(0, 0, 0, 0.2);
+	border: 2px solid;
+	border-radius: 8px;
+	padding: 10px;
+}
+
+.crew-title-row--commandant { border-color: #9dd3d9; }
+.crew-title-row--comm       { border-color: #f8a9bf; }
+.crew-title-row--admin      { border-color: #d7ce4d; }
+
+.crew-title-role-icon {
+	width: 42px;
+	height: 60px;
+	object-fit: contain;
+	flex-shrink: 0;
+}
+
+/* ── Title slots ─────────────────────────────────────────────────────────── */
+
+.crew-title-slot {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(10px);
+}
+
+/* Slot hover: scale only, no colour change */
+[data-expe-sim] .crew-title-row .crew-title-slot:hover {
+	background-color: inherit;
+	border-color: inherit;
+	box-shadow: none;
+	transform: scale(1.05);
+}
+
+/* Commandant slots */
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot { border: 3px solid #9dd3d9; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(2) { background-color: #b9f8ffBB; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(3) { background-color: #b9f8ff99; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(4) { background-color: #b9f8ff77; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(5) { background-color: #b9f8ff55; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(6) { background-color: #b9f8ff33; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(7) { background-color: #b9f8ff11; }
+
+/* Comm slots */
+[data-expe-sim] .crew-title-row--comm .crew-title-slot { border: 3px solid #f8a9bf; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(2) { background-color: #ffdbe5BB; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(3) { background-color: #ffdbe599; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(4) { background-color: #ffdbe577; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(5) { background-color: #ffdbe555; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(6) { background-color: #ffdbe533; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(7) { background-color: #ffdbe511; }
+
+/* Admin slots */
+[data-expe-sim] .crew-title-row--admin .crew-title-slot { border: 3px solid #d7ce4d; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(2) { background-color: #faf170BB; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(3) { background-color: #faf17099; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(4) { background-color: #faf17077; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(5) { background-color: #faf17055; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(6) { background-color: #faf17033; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(7) { background-color: #faf17011; }
+
+/* ── Details section ─────────────────────────────────────────────────────── */
+
+.crew-details-section {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* Ensure player card row layout is applied */
+.crew-details-section .player-profile {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	border-color: #3498db;
+}
+
+.crew-details-section .player-avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-color: #3498db;
+}
