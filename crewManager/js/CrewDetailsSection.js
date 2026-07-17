@@ -51,8 +51,8 @@ class CrewDetailsSection extends Component {
 
 				new SelectionModal({
 					sections: [
-						{ items: ownedItems },
-						{ items: toItems(apprentron) },
+						{ items: ownedItems, backgroundImage: getResourceURL(`pictures/characters/${filename}`) },
+						{ items: toItems(apprentron), backgroundImage: getResourceURL('pictures/ui/apprentron.jpg') },
 						{ items: toItems(other) }
 					],
 					selectedId: player.abilities[slotIndex],

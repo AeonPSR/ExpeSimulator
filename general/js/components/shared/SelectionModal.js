@@ -49,7 +49,7 @@ class SelectionModal extends Modal {
 						this.createElement('hr', { className: 'selection-divider' })
 					);
 				}
-				this._bodyContainer.appendChild(this._createGrid(section.items));
+				this._bodyContainer.appendChild(this._createGrid(section.items, section.backgroundImage));
 			});
 		} else {
 			this._bodyContainer.appendChild(this._createGrid(this.items));
@@ -62,9 +62,10 @@ class SelectionModal extends Modal {
 	 * Creates the selection grid
 	 * @private
 	 * @param {Array<Object>} [items] - items to render (defaults to this.items)
+	 * @param {string} [backgroundImage] - optional centered, faded background image URL for this grid/section
 	 * @returns {HTMLElement}
 	 */
-	_createGrid(items) {
+	_createGrid(items, backgroundImage) {
 		const gridClasses = ['character-grid', this.gridClassName].filter(Boolean).join(' ');
 		const grid = this.createElement('div', { className: gridClasses });
 
@@ -74,7 +75,21 @@ class SelectionModal extends Modal {
 			grid.appendChild(option);
 		});
 
-		return grid;
+		if (!backgroundImage) {
+			return grid;
+		}
+
+		// Wrap the grid so a centered, faded background image can sit behind it
+		// without taking visual space or interfering with the grid's own layout.
+		const wrapper = this.createElement('div', { className: 'character-grid-section' });
+		const bgImg = this.createElement('img', {
+			className: 'character-grid-section-bg',
+			src: backgroundImage,
+			alt: ''
+		});
+		wrapper.appendChild(bgImg);
+		wrapper.appendChild(grid);
+		return wrapper;
 	}
 
 	/**
