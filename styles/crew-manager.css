@@ -139,6 +139,15 @@
 #crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(6) { background-color: #faf17033; }
 #crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(7) { background-color: #faf17011; }
 
+/* ── Skill selection modal ───────────────────────────────────────────────── */
+
+
+[data-expe-sim] .crew-skill-modal .selection-divider {
+	border: none;
+	border-top: 2px solid #3498db;
+	margin: 14px 0;
+}
+
 /* ── Details section ─────────────────────────────────────────────────────── */
 
 .crew-details-section {

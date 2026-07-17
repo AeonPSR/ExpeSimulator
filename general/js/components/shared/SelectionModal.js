@@ -24,6 +24,9 @@ class SelectionModal extends Modal {
 	constructor(options = {}) {
 		super(options);
 		this.items = options.items || [];
+		// Optional grouped rendering: array of { items: [...] } rendered as
+		// separate grids separated by a divider. Falls back to flat `items`.
+		this.sections = options.sections || null;
 		this.selectedId = options.selectedId || null;
 		this.gridClassName = options.gridClassName || '';
 		this.columns = options.columns || 6;
@@ -39,9 +42,18 @@ class SelectionModal extends Modal {
 		// Call parent render first
 		super.render();
 
-		// Create the selection grid
-		const grid = this._createGrid();
-		this._bodyContainer.appendChild(grid);
+		if (this.sections) {
+			this.sections.forEach((section, i) => {
+				if (i > 0) {
+					this._bodyContainer.appendChild(
+						this.createElement('hr', { className: 'selection-divider' })
+					);
+				}
+				this._bodyContainer.appendChild(this._createGrid(section.items));
+			});
+		} else {
+			this._bodyContainer.appendChild(this._createGrid(this.items));
+		}
 
 		return this.element;
 	}
@@ -49,17 +61,15 @@ class SelectionModal extends Modal {
 	/**
 	 * Creates the selection grid
 	 * @private
+	 * @param {Array<Object>} [items] - items to render (defaults to this.items)
 	 * @returns {HTMLElement}
 	 */
-	_createGrid() {
+	_createGrid(items) {
 		const gridClasses = ['character-grid', this.gridClassName].filter(Boolean).join(' ');
 		const grid = this.createElement('div', { className: gridClasses });
 
-		// Apply column count via CSS variable
-		grid.style.gridTemplateColumns = `repeat(${this.columns}, 1fr)`;
-
 		// Create options
-		this.items.forEach(item => {
+		(items || this.items).forEach(item => {
 			const option = this._createOption(item);
 			grid.appendChild(option);
 		});

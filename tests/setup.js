@@ -37,6 +37,7 @@ const sourceFiles = [
   'expeditionSimulator/js/data/SectorData.js',
   'expeditionSimulator/js/data/CharacterData.js',
   'expeditionSimulator/js/data/AbilityData.js',
+  'expeditionSimulator/js/data/SkillOwnershipData.js',
   'expeditionSimulator/js/data/ItemData.js',
   'expeditionSimulator/js/data/WorldData.js',
   'general/js/core/Component.js',
