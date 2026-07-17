@@ -15,7 +15,7 @@ class SettingsApp {
 			panelClass: 'settings-panel',
 			titleKey: 'settings.title',
 			title: I18n.t('settings.title'),
-			tongueIcon: getResourceURL('pictures/abilities/Aeonian creative.png'),
+			tongueIcon: getResourceURL('pictures/abilities/aeon icons/Aeonian creative.png'),
 			tongueAlt: '',
 			getResourceURL: getResourceURL
 		});

@@ -129,7 +129,7 @@ class ResultsRenderer {
 
 		const effectIcons = {
 			'ROPE':             'pictures/gear/rope.jpg',
-			'SURVIVAL':         'pictures/abilities/survival.png',
+			'SURVIVAL':         'pictures/abilities/human/survival.png',
 			'PLASTENITE_ARMOR': 'pictures/gear/plastenite_armor.jpg',
 		};
 

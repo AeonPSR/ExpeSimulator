@@ -71,7 +71,7 @@ class SectorGrid extends Component {
 			this._diplomacyToggle = new ToggleButton({
 				id: 'diplomacy-toggle-btn',
 				className: 'diplomacy-toggle-btn',
-				icon: this.getResourceURL('pictures/abilities/diplomacy.png'),
+				icon: this.getResourceURL('pictures/abilities/human/diplomacy.png'),
 				alt: '',
 				activeColor: 'blue',
 				onToggle: (isActive) => {

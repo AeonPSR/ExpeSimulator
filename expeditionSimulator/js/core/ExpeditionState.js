@@ -28,7 +28,7 @@ class ExpeditionState {
 		this._players.push({
 			id: this._nextPlayerId++,
 			avatar: this._pickRandomAvatar(),
-			abilities: ['pilot.png', ...Array(Constants.ABILITY_SLOTS - 1).fill(null)],
+			abilities: ['human/pilot.png', ...Array(Constants.ABILITY_SLOTS - 1).fill(null)],
 			items: Array(Constants.ITEM_SLOTS).fill(null),
 			health: Constants.DEFAULT_HEALTH
 		});

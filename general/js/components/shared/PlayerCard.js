@@ -114,8 +114,8 @@ class PlayerCard extends Component {
 	 */
 	_getAbilityIcon(abilityFile) {
 		// Easter egg: Terrence + Sprint = sprinter_disabled
-		if (abilityFile === 'sprint.png' && this.player.avatar === 'terrence.png') {
-			return this.getResourceURL('pictures/abilities/sprinter_disabled.png');
+		if (abilityFile === 'human/sprint.png' && this.player.avatar === 'terrence.png') {
+			return this.getResourceURL('pictures/abilities/special/sprinter_disabled.png');
 		}
 		return this.getResourceURL(`pictures/abilities/${abilityFile}`);
 	}

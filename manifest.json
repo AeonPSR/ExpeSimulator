@@ -98,7 +98,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["pictures/abilities/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*", "pictures/consumables/*", "pictures/gear/*", "*.png", "*.jpg", "*.gif", "font/*"],
+      "resources": ["pictures/abilities/*", "pictures/abilities/*/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*", "pictures/consumables/*", "pictures/gear/*", "*.png", "*.jpg", "*.gif", "font/*"],
       "matches": ["<all_urls>"]
     },
     {

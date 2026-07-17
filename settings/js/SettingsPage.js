@@ -126,7 +126,7 @@ class SettingsPage extends Component {
 			className: 'panel-lang-btn' + (Settings.devtools ? ' panel-lang-btn--active' : ''),
 		});
 		const img = this.createElement('img', {
-			src: getResourceURL('pictures/abilities/technician.png'),
+				src: getResourceURL('pictures/abilities/human/technician.png'),
 			alt: ''
 		});
 		btn.appendChild(img);

@@ -97,7 +97,7 @@ class PlayerSection extends Component {
 		this._exploredSectorsValue = this.createElement('span', { id: 'explored-sectors-value' }, '9');
 		this._exploredSectorsBtn.appendChild(this._exploredSectorsValue);
 		const esIcon = this.createElement('img', {
-			src: this.getResourceURL('pictures/abilities/sprint.png'),
+				src: this.getResourceURL('pictures/abilities/human/sprint.png'),
 			alt: '',
 			className: 'explored-sectors-icon'
 		});

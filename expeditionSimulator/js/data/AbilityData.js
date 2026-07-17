@@ -5,9 +5,9 @@
  */
 const AbilityData = {
 	normal: [
-		'survival.png', 'botanic.png', 'pilot.png', 
-		'gunman.png', 'diplomacy.png', 'sprint.png', 'tracker.png',
-		'skillful.png'
+		'human/survival.png', 'human/botanic.png', 'human/pilot.png',
+		'human/gunman.png', 'human/diplomacy.png', 'human/sprint.png', 'human/tracker.png',
+		'human/skillful.png'
 	],
 
 	   /**
@@ -19,7 +19,7 @@ const AbilityData = {
 		   return this.normal.map(ability => ({
 			   id: ability,
 			   image: getResourceURL(`pictures/abilities/${ability}`),
-			   label: ability.replace('.png', '')
+			   label: ability.replace('.png', '').replace('human/', '')
 		   }));
 	   }
 };
