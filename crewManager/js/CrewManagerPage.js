@@ -8,27 +8,30 @@ class CrewManagerPage extends Component {
 	constructor(options = {}) {
 		super(options);
 		this._titleRows = null;
+		this._detailsSection = null;
 	}
 
 	render() {
 		this.element = this.createElement('div', { className: 'crew-manager-page' });
 
+		const onCharacterClick = (filename) => this._detailsSection?.scrollAndHighlight(filename);
+
 		// Crew section
 		const crewSection = this._renderSection('crewmanager.section.crew');
-		const grid = new CrewCharacterGrid();
+		const grid = new CrewCharacterGrid({ onCharacterClick });
 		crewSection.appendChild(grid.render());
 		this.element.appendChild(crewSection);
 
 		// Title section
 		const titleSection = this._renderSection('crewmanager.section.title');
-		this._titleRows = new CrewTitleRows();
+		this._titleRows = new CrewTitleRows({ onCharacterClick });
 		titleSection.appendChild(this._titleRows.render());
 		this.element.appendChild(titleSection);
 
 		// Details section
 		const detailsSection = this._renderSection('crewmanager.section.details');
-		const details = new CrewDetailsSection();
-		detailsSection.appendChild(details.render());
+		this._detailsSection = new CrewDetailsSection();
+		detailsSection.appendChild(this._detailsSection.render());
 		this.element.appendChild(detailsSection);
 
 		this.element.appendChild(this._renderResetButton());
@@ -53,10 +56,6 @@ class CrewManagerPage extends Component {
 		return wrapper;
 	}
 
-	/**
-	 * @param {'commandant'|'comm'|'admin'} roleId
-	 * @param {string[]} characterFiles
-	 */
 	setRoleCharacters(roleId, characterFiles) {
 		this._titleRows?.setRoleCharacters(roleId, characterFiles);
 	}

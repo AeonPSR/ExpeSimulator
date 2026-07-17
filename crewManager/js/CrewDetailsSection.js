@@ -5,6 +5,11 @@
  * Remove buttons are hidden — these cards are read-only crew profiles.
  */
 class CrewDetailsSection extends Component {
+	constructor(options = {}) {
+		super(options);
+		this._cardByFilename = {};
+	}
+
 	render() {
 		this.element = this.createElement('div', { className: 'crew-details-section' });
 
@@ -25,10 +30,29 @@ class CrewDetailsSection extends Component {
 				showRemove:     false
 			});
 
-			this.element.appendChild(card.render());
+			const el = card.render();
+			this._cardByFilename[filename] = el;
+			this.element.appendChild(el);
 		});
 
 		return this.element;
+	}
+
+	/**
+	 * Scrolls to and highlights the card for the given character filename.
+	 * @param {string} filename - e.g. 'andie.png'
+	 */
+	scrollAndHighlight(filename) {
+		const card = this._cardByFilename[filename];
+		if (!card) return;
+
+		card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		card.classList.remove('crew-highlight');
+		void card.offsetWidth; // force reflow so animation replays
+		card.classList.add('crew-highlight');
+		card.addEventListener('animationend', () => {
+			card.classList.remove('crew-highlight');
+		}, { once: true });
 	}
 }
 

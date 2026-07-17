@@ -1,10 +1,15 @@
 /**
  * CrewCharacterGrid Component
  *
- * Displays the full grid of available characters (18 named, Lambda excluded)
- * using the existing character-option / character-grid CSS from the modal system.
+ * Displays the full grid of available characters (18 named, Lambda excluded).
+ * Calls onCharacterClick(filename) when a character is clicked.
  */
 class CrewCharacterGrid extends Component {
+	constructor(options = {}) {
+		super(options);
+		this.onCharacterClick = options.onCharacterClick || null;
+	}
+
 	render() {
 		const wrapper = this.createElement('div');
 		wrapper.setAttribute('data-expe-sim', '');
@@ -21,6 +26,7 @@ class CrewCharacterGrid extends Component {
 				title: name
 			});
 			option.appendChild(img);
+			this.addEventListener(option, 'click', () => this.onCharacterClick?.(filename));
 			grid.appendChild(option);
 		}
 

@@ -12,8 +12,8 @@
 class CrewTitleRows extends Component {
 	constructor(options = {}) {
 		super(options);
-		// role id → array of 6 slot elements
 		this._slots = {};
+		this.onCharacterClick = options.onCharacterClick || null;
 	}
 
 	render() {
@@ -70,6 +70,9 @@ class CrewTitleRows extends Component {
 				img.alt = name;
 				img.title = name;
 				slot.appendChild(img);
+				slot.onclick = () => this.onCharacterClick?.(filename);
+			} else {
+				slot.onclick = null;
 			}
 		});
 	}
