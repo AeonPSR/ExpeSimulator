@@ -198,6 +198,9 @@ const Translations = {
 		'tag.quad_seismic_activity.desc':    '4 Seismic Activity sectors.',
 		'tag.quad_volcanic_activity.desc':   '4 Volcanic Activity sectors.',
 
+		// Crew Manager panel
+		'crewmanager.title':                 'Crew Manager',
+
 		// Settings panel
 		'settings.title':                    'Settings',
 		'settings.section.language':         'Language',
@@ -408,6 +411,9 @@ const Translations = {
 		'tag.quad_seismic_activity.desc':    '4 secteurs Activité sismique.',
 		'tag.quad_volcanic_activity.desc':   '4 secteurs Activité volcanique.',
 
+		// Crew Manager panel
+		'crewmanager.title':                 'Gestion d\'Équipage',
+
 		// Settings panel
 		'settings.title':                    'Réglages',
 		'settings.section.language':         'Langue',
@@ -617,6 +623,9 @@ const Translations = {
 		'tag.quad_strong_wind.desc':         '4 sectores de Vientos Fuertes.',
 		'tag.quad_seismic_activity.desc':    '4 sectores de Actividad Sísmica.',
 		'tag.quad_volcanic_activity.desc':   '4 sectores de Actividad Volcánica.',
+
+		// Crew Manager panel
+		'crewmanager.title':                 'Gestión de Tripulación',
 
 		// Settings panel
 		'settings.title':                    'Ajustes',

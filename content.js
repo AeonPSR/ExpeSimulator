@@ -27,6 +27,10 @@ function initializeApp() {
 
 		// Create the application
 		window.expeditionSimulator = new ExpeditionSimulatorApp();
+		window.crewManagerApp = new CrewManagerApp();
+		// Settings must be created last: Panel.mount() appends to
+		// #panels-container in creation order, and DOM order breaks
+		// z-index ties between tongues. Settings should always be last.
 		window.settingsApp = new SettingsApp();
 		// console.log('Expedition Simulator initialized');
 

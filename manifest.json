@@ -73,6 +73,7 @@
         "expeditionSimulator/js/app.js",
         "settings/js/SettingsPage.js",
         "settings/js/app.js",
+        "crewManager/js/app.js",
         "content.js"
       ],
       "css": [
