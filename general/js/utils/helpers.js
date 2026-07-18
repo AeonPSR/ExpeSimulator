@@ -105,7 +105,7 @@ function generateId(prefix = 'id') {
  * @returns {string} The uppercase identifier
  */
 function filenameToId(filename) {
-	return filename.replace(/\.(png|jpg|gif)$/i, '').toUpperCase();
+	return filename.split('/').pop().replace(/\.(png|jpg|gif)$/i, '').toUpperCase();
 }
 
 // Export for use in other modules

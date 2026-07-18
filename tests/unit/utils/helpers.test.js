@@ -269,5 +269,9 @@ describe('Helpers', () => {
 		test('returns uppercase string without extension', () => {
 			expect(filenameToId('blaster.jpg')).toBe('BLASTER');
 		});
+
+		test('uses basename for nested asset paths', () => {
+			expect(filenameToId('human/survival.png')).toBe('SURVIVAL');
+		});
 	});
 });
