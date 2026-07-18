@@ -11,6 +11,8 @@ class CrewDetailsSection extends Component {
 		this._cardInstanceByFilename = {};
 		this._playerByFilename = {};
 		this._timelineDisplayByFilename = {};
+		this._notesButtonByFilename = {};
+		this._notesAvailabilityObserver = null;
 		this._activeCardsContainer = null;
 		this._deadCardsContainer = null;
 		this._hiddenCardsContainer = null;
@@ -183,7 +185,7 @@ class CrewDetailsSection extends Component {
 				}
 			};
 
-			const onNotesClick = () => {};
+			const onNotesClick = () => this._openCharacterNotes(filename);
 
 			const onToggleClick = (playerId, playerKey, isActive) => {
 				player[playerKey] = isActive;
@@ -279,6 +281,7 @@ class CrewDetailsSection extends Component {
 			});
 			spriteAnchor.appendChild(deadIcon);
 			this._insertTimelineControl(filename, player, el);
+			this._notesButtonByFilename[filename] = el.querySelector('.notes-action-slot');
 			updateSkillAvailability(el);
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;
@@ -289,11 +292,106 @@ class CrewDetailsSection extends Component {
 			}
 		});
 
+		this._refreshNotesAvailability();
+		this._observeNotesAvailability();
+
 		return this.element;
+	}
+
+	onDestroy() {
+		this._notesAvailabilityObserver?.disconnect();
+		this._notesAvailabilityObserver = null;
 	}
 
 	_getCharacterName(filename) {
 		return filename.replace('.png', '').replace(/_/g, ' ');
+	}
+
+	_getCharacterStem(filename) {
+		return filename.split('/').pop().replace(/\.(png|jpg|gif)$/i, '').toLowerCase();
+	}
+
+	_getGameNotesButton() {
+		return document.querySelector('.personal-notes-button');
+	}
+
+	_getGameNotesWindow() {
+		return document.querySelector('.personal-notes-window-wrapper .personal-notes-window');
+	}
+
+	_refreshNotesAvailability() {
+		const isAvailable = Boolean(this._getGameNotesButton());
+		Object.values(this._notesButtonByFilename).forEach(button => {
+			if (!button) return;
+			button.disabled = !isAvailable;
+			button.classList.toggle('notes-action-slot--disabled', !isAvailable);
+		});
+	}
+
+	_observeNotesAvailability() {
+		if (this._notesAvailabilityObserver || !document.body) return;
+		this._notesAvailabilityObserver = new MutationObserver(() => this._refreshNotesAvailability());
+		this._notesAvailabilityObserver.observe(document.body, { childList: true, subtree: true });
+	}
+
+	_waitForElement(selector, timeout = 1000) {
+		const existing = document.querySelector(selector);
+		if (existing) {
+			return Promise.resolve(existing);
+		}
+
+		return new Promise(resolve => {
+			const observer = new MutationObserver(() => {
+				const element = document.querySelector(selector);
+				if (!element) return;
+				observer.disconnect();
+				clearTimeout(timer);
+				resolve(element);
+			});
+			const timer = setTimeout(() => {
+				observer.disconnect();
+				resolve(null);
+			}, timeout);
+			observer.observe(document.body, { childList: true, subtree: true });
+		});
+	}
+
+	_imageMatchesCharacter(img, characterStem) {
+		const src = (img?.getAttribute('src') || '').toLowerCase();
+		return src.includes(`${characterStem}-`) || src.includes(`/${characterStem}.`) || src.includes(`/${characterStem}-`);
+	}
+
+	async _openCharacterNotes(filename) {
+		const notesButton = this._getGameNotesButton();
+		this._refreshNotesAvailability();
+		if (!notesButton) return;
+
+		let notesWindow = this._getGameNotesWindow();
+		if (!notesWindow) {
+			notesButton.click();
+			notesWindow = await this._waitForElement('.personal-notes-window-wrapper .personal-notes-window');
+		}
+		if (!notesWindow) return;
+
+		const characterStem = this._getCharacterStem(filename);
+		const existingTabIcon = Array.from(notesWindow.querySelectorAll('.tabs .tab[draggable="true"] img'))
+			.find(img => this._imageMatchesCharacter(img, characterStem));
+		if (existingTabIcon) {
+			existingTabIcon.closest('.tab')?.click();
+			return;
+		}
+
+		const newTab = Array.from(notesWindow.querySelectorAll('.tabs .tab'))
+			.find(tab => !tab.hasAttribute('draggable'));
+		if (!newTab) return;
+
+		newTab.click();
+		const emotePicker = await this._waitForElement('.emote-picker.popup');
+		if (!emotePicker) return;
+
+		const characterIcon = Array.from(emotePicker.querySelectorAll('.emote-grid .emote-item img'))
+			.find(img => this._imageMatchesCharacter(img, characterStem));
+		characterIcon?.closest('.emote-item')?.click();
 	}
 
 	_updateSkillAvailability(cardElement, player) {

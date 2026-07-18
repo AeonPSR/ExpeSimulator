@@ -513,6 +513,16 @@
 	border-color: #d35400;
 }
 
+#crew-manager-panel .crew-details-section .notes-action-slot:disabled,
+#crew-manager-panel .crew-details-section .notes-action-slot:disabled:hover,
+#crew-manager-panel .crew-details-section .notes-action-slot.notes-action-slot--disabled,
+#crew-manager-panel .crew-details-section .notes-action-slot.notes-action-slot--disabled:hover {
+	background: rgba(149, 165, 166, 0.18);
+	border-color: #7f8c8d;
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
 #crew-manager-panel .crew-details-section .notes-action-slot img {
 	width: 24px;
 	height: 24px;
@@ -642,6 +652,16 @@
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"] {
 	background: #000;
 	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile .notes-action-slot:disabled,
+#crew-manager-panel .crew-details-section .player-profile .notes-action-slot:disabled:hover,
+#crew-manager-panel .crew-details-section .player-profile .notes-action-slot.notes-action-slot--disabled,
+#crew-manager-panel .crew-details-section .player-profile .notes-action-slot.notes-action-slot--disabled:hover {
+	background: rgba(149, 165, 166, 0.18);
+	border-color: #7f8c8d;
+	cursor: not-allowed;
+	opacity: 0.45;
 }
 
 @keyframes crew-highlight {
