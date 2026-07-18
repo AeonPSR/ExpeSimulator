@@ -55,9 +55,36 @@
 /* ── Crew grid ───────────────────────────────────────────────────────────── */
 
 #crew-manager-panel .crew-section [data-expe-sim] .character-option {
+	position: relative;
+	overflow: visible;
 	background: rgba(255, 255, 255, 0.1);
 	border-color: transparent;
 	backdrop-filter: blur(10px);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .crew-character-side-icons {
+	position: absolute;
+	left: -7px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	pointer-events: none;
+	z-index: 2;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .crew-character-title-icons {
+	top: -7px;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .crew-character-activity-icons {
+	bottom: -7px;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .crew-character-side-icons img {
+	width: 16px;
+	height: 16px;
+	object-fit: contain;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75));
 }
 
 #crew-manager-panel .crew-section [data-expe-sim] .character-option:hover {
@@ -71,14 +98,18 @@
 	opacity: 0.45;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing img {
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing {
 	filter: grayscale(1);
 	opacity: 0.45;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing:hover img {
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing:hover {
 	filter: grayscale(1);
 	opacity: 0.65;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing .crew-character-side-icons {
+	display: none;
 }
 
 #crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-mush {
@@ -337,10 +368,12 @@
 .crew-section [data-expe-sim] .character-grid {
 	display: grid;
 	grid-template-columns: repeat(6, 1fr);
-	gap: 10px;
+	gap: 14px;
 }
 
 .crew-section [data-expe-sim] .character-option {
+	position: relative;
+	overflow: visible;
 	display: flex;
 	align-items: center;
 	justify-content: center;

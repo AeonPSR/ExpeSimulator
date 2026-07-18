@@ -9,6 +9,17 @@ class CrewCharacterGrid extends Component {
 		super(options);
 		this.onCharacterClick = options.onCharacterClick || null;
 		this._optionByFilename = {};
+		this._titleIconsByFilename = {};
+		this._activityIconsByFilename = {};
+		this._roleIcons = {
+			commandant: 'pictures/ui/commandant.png',
+			comm:       'pictures/ui/comm.png',
+			admin:      'pictures/ui/admin.png'
+		};
+		this._activityIcons = {
+			inactive:      'pictures/ui/inactive.png',
+			grandInactive: 'pictures/ui/grand inactive.png'
+		};
 	}
 
 	render() {
@@ -22,11 +33,21 @@ class CrewCharacterGrid extends Component {
 			const name = filename.replace('.png', '').replace(/_/g, ' ');
 			const option = this.createElement('div', { className: 'character-option' });
 			this._optionByFilename[filename] = option;
+
+			const titleIcons = this.createElement('div', { className: 'crew-character-side-icons crew-character-title-icons' });
+			this._titleIconsByFilename[filename] = titleIcons;
+			option.appendChild(titleIcons);
+
 			const img = this.createElement('img', {
 				src: getResourceURL(`pictures/characters/${filename}`),
 				alt: name
 			});
 			option.appendChild(img);
+
+			const activityIcons = this.createElement('div', { className: 'crew-character-side-icons crew-character-activity-icons' });
+			this._activityIconsByFilename[filename] = activityIcons;
+			option.appendChild(activityIcons);
+
 			this.addEventListener(option, 'click', () => this.onCharacterClick?.(filename));
 			grid.appendChild(option);
 		}
@@ -46,6 +67,38 @@ class CrewCharacterGrid extends Component {
 
 		option.classList.toggle('crew-character-mush', status === 'mush');
 		option.classList.toggle('crew-character-human', status === 'human');
+	}
+
+	setCharacterTitles(filename, roleIds) {
+		const container = this._titleIconsByFilename[filename];
+		if (!container) return;
+
+		container.innerHTML = '';
+		roleIds.forEach(roleId => {
+			const iconPath = this._roleIcons[roleId];
+			if (!iconPath) return;
+
+			const icon = this.createElement('img', {
+				src: getResourceURL(iconPath),
+				alt: ''
+			});
+			container.appendChild(icon);
+		});
+	}
+
+	setCharacterActivity(filename, activity) {
+		const container = this._activityIconsByFilename[filename];
+		if (!container) return;
+
+		container.innerHTML = '';
+		const iconPath = this._activityIcons[activity];
+		if (!iconPath) return;
+
+		const icon = this.createElement('img', {
+			src: getResourceURL(iconPath),
+			alt: ''
+		});
+		container.appendChild(icon);
 	}
 }
 

@@ -13,6 +13,8 @@ class CrewManagerPage extends Component {
 		this._crewGrid = null;
 		this._roleCharacters = {};
 		this._hiddenCharacters = new Set();
+		this._titleBlockedCharacters = new Set();
+		this._roleOrder = ['commandant', 'comm', 'admin'];
 	}
 
 	render() {
@@ -36,7 +38,9 @@ class CrewManagerPage extends Component {
 		const detailsSection = this._renderSection('crewmanager.section.details', this._renderExpertToggle());
 		this._detailsSection = new CrewDetailsSection({
 			onVisibilityChange: (filename, visible) => this._setCharacterVisible(filename, visible),
-			onStatusChange: (filename, status) => this._crewGrid?.setCharacterStatus(filename, status)
+			onStatusChange: (filename, status) => this._crewGrid?.setCharacterStatus(filename, status),
+			onActivityChange: (filename, activity) => this._crewGrid?.setCharacterActivity(filename, activity),
+			onTitleEligibilityChange: (filename, eligible) => this._setCharacterTitleEligible(filename, eligible)
 		});
 		detailsSection.appendChild(this._detailsSection.render());
 		this.element.appendChild(detailsSection);
@@ -89,6 +93,7 @@ class CrewManagerPage extends Component {
 	setRoleCharacters(roleId, characterFiles) {
 		this._roleCharacters[roleId] = characterFiles;
 		this._renderRoleCharacters(roleId);
+		this._updateCrewGridTitles();
 	}
 
 	_setCharacterVisible(filename, visible) {
@@ -99,12 +104,45 @@ class CrewManagerPage extends Component {
 		}
 		this._crewGrid?.setCharacterVisible(filename, visible);
 		Object.keys(this._roleCharacters).forEach(roleId => this._renderRoleCharacters(roleId));
+		this._updateCrewGridTitles();
+	}
+
+	_setCharacterTitleEligible(filename, eligible) {
+		if (eligible) {
+			this._titleBlockedCharacters.delete(filename);
+		} else {
+			this._titleBlockedCharacters.add(filename);
+		}
+		Object.keys(this._roleCharacters).forEach(roleId => this._renderRoleCharacters(roleId));
+		this._updateCrewGridTitles();
+	}
+
+	_canReceiveTitle(filename) {
+		return !this._hiddenCharacters.has(filename) && !this._titleBlockedCharacters.has(filename);
 	}
 
 	_renderRoleCharacters(roleId) {
 		const visibleCharacters = (this._roleCharacters[roleId] || [])
-			.filter(filename => !this._hiddenCharacters.has(filename));
+			.filter(filename => this._canReceiveTitle(filename));
 		this._titleRows?.setRoleCharacters(roleId, visibleCharacters);
+	}
+
+	_updateCrewGridTitles() {
+		const rolesByCharacter = {};
+		this._roleOrder.forEach(roleId => {
+			const currentHolder = (this._roleCharacters[roleId] || [])
+				.find(filename => this._canReceiveTitle(filename));
+			if (!currentHolder) return;
+
+			if (!rolesByCharacter[currentHolder]) {
+				rolesByCharacter[currentHolder] = [];
+			}
+			rolesByCharacter[currentHolder].push(roleId);
+		});
+
+		CharacterData.available
+			.filter(filename => filename !== Constants.DEFAULT_AVATAR)
+			.forEach(filename => this._crewGrid?.setCharacterTitles(filename, rolesByCharacter[filename] || []));
 	}
 }
 

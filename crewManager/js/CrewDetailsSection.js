@@ -13,6 +13,8 @@ class CrewDetailsSection extends Component {
 		this._hiddenCardsContainer = null;
 		this.onVisibilityChange = options.onVisibilityChange || null;
 		this.onStatusChange = options.onStatusChange || null;
+		this.onActivityChange = options.onActivityChange || null;
+		this.onTitleEligibilityChange = options.onTitleEligibilityChange || null;
 	}
 
 	render() {
@@ -190,6 +192,14 @@ class CrewDetailsSection extends Component {
 				if (playerKey === 'inactive' && !isActive) {
 					player.grandInactive = false;
 					cardInstance?.setToggleState('grandInactive', false);
+				}
+				if (playerKey === 'inactive' || playerKey === 'grandInactive') {
+					const activity = player.grandInactive ? 'grandInactive' : player.inactive ? 'inactive' : null;
+					this.onActivityChange?.(filename, activity);
+				}
+				if (playerKey === 'dead' || playerKey === 'inactive' || playerKey === 'grandInactive') {
+					const canReceiveTitle = !player.dead && !player.inactive && !player.grandInactive;
+					this.onTitleEligibilityChange?.(filename, canReceiveTitle);
 				}
 
 				if (playerKey === 'mush' || playerKey === 'human') {
