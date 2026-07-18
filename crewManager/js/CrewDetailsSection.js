@@ -11,6 +11,7 @@ class CrewDetailsSection extends Component {
 		this._cardInstanceByFilename = {};
 		this._playerByFilename = {};
 		this._activeCardsContainer = null;
+		this._deadCardsContainer = null;
 		this._hiddenCardsContainer = null;
 		this._slotSkillRequirements = {
 			paCore:    ['human/concepteur.png'],
@@ -33,9 +34,12 @@ class CrewDetailsSection extends Component {
 	render() {
 		this.element = this.createElement('div', { className: 'crew-details-section' });
 		this._activeCardsContainer = this.createElement('div', { className: 'crew-details-subsection crew-details-subsection--active' });
+		this._deadCardsContainer = this.createElement('div', { className: 'crew-details-subsection crew-details-subsection--dead' });
 		this._hiddenCardsContainer = this.createElement('div', { className: 'crew-details-subsection crew-details-subsection--hidden' });
+		this._deadCardsContainer.hidden = true;
 		this._hiddenCardsContainer.hidden = true;
 		this.element.appendChild(this._activeCardsContainer);
+		this.element.appendChild(this._deadCardsContainer);
 		this.element.appendChild(this._hiddenCardsContainer);
 
 		const characters = CharacterData.available
@@ -156,6 +160,9 @@ class CrewDetailsSection extends Component {
 						const nextValue = typeof limit === 'number' ? Math.min(value, limit) : value;
 						player[playerKey] = nextValue;
 						cardInstance?.updateSlotValue(playerKey, nextValue);
+						if (playerKey === 'morale') {
+							this._syncDeathState(filename);
+						}
 					}
 				}
 			};
@@ -168,6 +175,7 @@ class CrewDetailsSection extends Component {
 					if (!isNaN(value) && value >= 0) {
 						player.health = value;
 						cardInstance?.updateHealth(value);
+						this._syncDeathState(filename);
 					}
 				}
 			};
@@ -193,12 +201,12 @@ class CrewDetailsSection extends Component {
 					const activity = player.grandInactive ? 'grandInactive' : player.inactive ? 'inactive' : null;
 					this.onActivityChange?.(filename, activity);
 				}
-				if (playerKey === 'dead' || playerKey === 'inactive' || playerKey === 'grandInactive') {
-					const canReceiveTitle = !player.dead && !player.inactive && !player.grandInactive;
+				if (playerKey === 'inactive' || playerKey === 'grandInactive') {
+					const canReceiveTitle = !this._isPlayerDead(player) && !player.inactive && !player.grandInactive;
 					this.onTitleEligibilityChange?.(filename, canReceiveTitle);
 				}
 				if (playerKey === 'dead') {
-					this.onDeadChange?.(filename, isActive);
+					this._syncDeathState(filename);
 				}
 
 				if (playerKey === 'mush' || playerKey === 'human') {
@@ -207,7 +215,7 @@ class CrewDetailsSection extends Component {
 				}
 
 				if (playerKey === 'visible') {
-					this._setCardHidden(filename, !isActive);
+					this._moveCardToCurrentSubsection(filename);
 					this.onVisibilityChange?.(filename, isActive);
 				}
 			};
@@ -293,6 +301,22 @@ class CrewDetailsSection extends Component {
 		});
 	}
 
+	_isPlayerDead(player) {
+		return Boolean(player?.dead || player?.health <= 0 || player?.morale <= 0);
+	}
+
+	_syncDeathState(filename) {
+		const player = this._playerByFilename[filename];
+		const card = this._cardByFilename[filename];
+		if (!player || !card) return;
+
+		const isDead = this._isPlayerDead(player);
+		card.classList.toggle('player-dead-active', isDead);
+		this._moveCardToCurrentSubsection(filename);
+		this.onDeadChange?.(filename, isDead);
+		this.onTitleEligibilityChange?.(filename, !isDead && !player.inactive && !player.grandInactive);
+	}
+
 	reset(options = {}) {
 		const previousRects = this._getCardRects();
 		const hiddenCharacters = new Set(options.hiddenCharacters || []);
@@ -355,6 +379,7 @@ class CrewDetailsSection extends Component {
 			this.onTitleEligibilityChange?.(filename, true);
 		});
 
+		this._deadCardsContainer.hidden = true;
 		this._hiddenCardsContainer.hidden = this._hiddenCardsContainer.children.length === 0;
 		this._animateCardMoves(previousRects);
 	}
@@ -400,17 +425,30 @@ class CrewDetailsSection extends Component {
 		});
 	}
 
-	_setCardHidden(filename, hidden) {
+	_getCardSubsection(filename) {
+		const player = this._playerByFilename[filename];
+		if (!player?.visible) {
+			return this._hiddenCardsContainer;
+		}
+		if (this._isPlayerDead(player)) {
+			return this._deadCardsContainer;
+		}
+		return this._activeCardsContainer;
+	}
+
+	_updateSubsectionVisibility() {
+		this._deadCardsContainer.hidden = this._deadCardsContainer.children.length === 0;
+		this._hiddenCardsContainer.hidden = this._hiddenCardsContainer.children.length === 0;
+	}
+
+	_moveCardToCurrentSubsection(filename) {
 		const card = this._cardByFilename[filename];
 		if (!card) return;
 		const previousRects = this._getCardRects();
 
-		const container = hidden ? this._hiddenCardsContainer : this._activeCardsContainer;
-		if (hidden) {
-			this._hiddenCardsContainer.hidden = false;
-		}
+		const container = this._getCardSubsection(filename);
 		this._appendCardSorted(container, filename, card);
-		this._hiddenCardsContainer.hidden = this._hiddenCardsContainer.children.length === 0;
+		this._updateSubsectionVisibility();
 		this._animateCardMoves(previousRects);
 	}
 

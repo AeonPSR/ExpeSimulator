@@ -529,6 +529,23 @@
 	opacity: 1;
 }
 
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .ability-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .status-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"],
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot),
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot):hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot)[data-active="true"] {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot)::before,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot)::after {
+	background: #111;
+}
+
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active {
 	background: #000;
 	border-color: #ff5599;
@@ -553,6 +570,13 @@
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .visibility-toggle-slot[data-active="true"] {
 	background: #000;
 	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #111;
 }
 
 @keyframes crew-highlight {
