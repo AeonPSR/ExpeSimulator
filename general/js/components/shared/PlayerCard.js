@@ -259,7 +259,7 @@ class PlayerCard extends Component {
 			slot.appendChild(valueSpan);
 			const icon = this.createElement('img', {
 				src: this.getResourceURL(slotDef.iconPath),
-				alt: '',
+				alt: slotDef.title || '',
 				className: 'hp-icon'
 			});
 			slot.appendChild(icon);

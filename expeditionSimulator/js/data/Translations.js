@@ -74,7 +74,7 @@ const Translations = {
 		'prob.negative.header':     'Negative Events',
 		'prob.negative.col':        'Event Type',
 		'event.player_lost':        'Player Lost',
-		'event.unexplored':         'Sector Unexplored',
+		'event.wander':             'Wander',
 		'event.disease':            'Disease',
 		'event.item_lost':          'Item Loss',
 		'event.kill_all':           'Kill All',
@@ -198,8 +198,8 @@ const Translations = {
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Crew Manager',
-		'crewmanager.section.crew':          'Crew',
-		'crewmanager.section.title':         'Title',
+		'crewmanager.section.crew':          'Crew summary',
+		'crewmanager.section.title':         'Titles',
 		'crewmanager.section.details':       'Details',
 		'crewmanager.reset':                 'Reset this panel',
 		'crewmanager.reset.confirm':         'Are you sure ?',
@@ -309,7 +309,7 @@ const Translations = {
 		'prob.negative.header':     'Événements négatifs',
 		'prob.negative.col':        'Type d\'événement',
 		'event.player_lost':        'Joueur perdu',
-		'event.unexplored':         'Secteur non exploré',
+		'event.wander':             'Errance',
 		'event.disease':            'Maladie',
 		'event.item_lost':          'Perte d\'objet',
 		'event.kill_all':           'Mort du groupe',
@@ -432,11 +432,18 @@ const Translations = {
 		'tag.quad_volcanic_activity.desc':   '4 secteurs Activité volcanique.',
 
 		// Crew Manager panel
-		'crewmanager.title':                 'Gestion d\'Équipage',
-		'crewmanager.section.crew':          'Équipage',
-		'crewmanager.section.title':         'Titre',
+		'crewmanager.title':                 'Gestion de l\'Équipage',
+		'crewmanager.section.crew':          'Résumé de l\'équipage',
+		'crewmanager.section.title':         'Titres',
 		'crewmanager.section.details':       'Détails',
-		'crewmanager.reset':                 'Réinitialiser ce panneau',
+		'crewmanager.reset':                 'Réinitialiser cette page',
+		'crewmanager.reset.confirm':         'Êtes-vous sûr ?',
+		'crewmanager.reset.yes':             'Oui',
+		'crewmanager.reset.no':              'Non',
+		'crewmanager.timeline.title':        'Sélectionnez votre chronologie',
+		'crewmanager.timeline.chaola':       'Chaola',
+		'crewmanager.timeline.anderek':      'Anderek',
+		'crewmanager.timeline.neither':      'Ni l\'un ni l\'autre',
 
 		// Settings panel
 		'settings.title':                    'Réglages',
@@ -537,7 +544,7 @@ const Translations = {
 		'prob.negative.header':     'Eventos negativos',
 		'prob.negative.col':        'Tipo de evento',
 		'event.player_lost':        'Jugador perdido',
-		'event.unexplored':         'Sector sin explorar',
+		'event.wander':             'Errático',
 		'event.disease':            'Enfermedad',
 		'event.item_lost':          'Pérdida de objeto',
 		'event.kill_all':           'Matar a todos',
@@ -661,10 +668,17 @@ const Translations = {
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestión de Tripulación',
-		'crewmanager.section.crew':          'Tripulación',
-		'crewmanager.section.title':         'Título',
+		'crewmanager.section.crew':          'Resumen de tripulación',
+		'crewmanager.section.title':         'Títulos',
 		'crewmanager.section.details':       'Detalles',
 		'crewmanager.reset':                 'Restablecer este panel',
+		'crewmanager.reset.confirm':         '¿Estás seguro?',
+		'crewmanager.reset.yes':             'Sí',
+		'crewmanager.reset.no':              'No',
+		'crewmanager.timeline.title':        'Selecciona tu línea temporal',
+		'crewmanager.timeline.chaola':       'Chaola',
+		'crewmanager.timeline.anderek':      'Anderek',
+		'crewmanager.timeline.neither':      'Ninguno',
 
 		// Settings panel
 		'settings.title':                    'Ajustes',

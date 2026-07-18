@@ -15,7 +15,7 @@
  * 
  * Fewer negative events = better (optimist).
  * 
- * Negative events: Disease, Player Lost, Sector Unexplored (Again),
+ * Negative events: Disease, Player Lost, Wander (Again),
  *                  Item Lost, Kill All, Kill One, Mush Trap
  * 
  * @module probability/NegativeEventCalculator

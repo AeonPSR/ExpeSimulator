@@ -17,7 +17,8 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 Todo:
 - Add the "Crew management" Page
 - Add the "Projects" page
-- Rename the events so it's the proper "Errance" stuff
+- Sortir l'option de visibilité de la béta
 
 Done since last update:
+- Rename the events so it's the proper "Errance" stuff
 - Fix the bug where the ressources gained from fights aren't taken into account in the star rating

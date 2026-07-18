@@ -421,7 +421,7 @@ class ProbabilityDisplay extends Component {
 	_renderNegativeEvents(events) {
 		const eventList = [
 			{ name: I18n.t('event.player_lost'), data: events.playerLost },
-			{ name: I18n.t('event.unexplored'),  data: events.again },
+			{ name: I18n.t('event.wander'),      data: events.again },
 			{ name: I18n.t('event.disease'),     data: events.disease },
 			{ name: I18n.t('event.item_lost'),   data: events.itemLost },
 			{ name: I18n.t('event.kill_all'),    data: events.killAll },

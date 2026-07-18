@@ -1,7 +1,7 @@
 /**
  * CrewSkillSelectionService
  *
- * Owns Crew Manager human and Mush skill selection modals.
+ * Ownership Crew Manager human and Mush skill selection modals.
  */
 class CrewSkillSelectionService {
 	openHumanSkillSelection(options = {}) {
@@ -23,7 +23,7 @@ class CrewSkillSelectionService {
 
 		const toItems = (list) => AbilityData.getSelectionItems(getResourceURL, list);
 		const ownedItems = toItems(owned);
-		ownedItems.unshift({ id: null, image: '', label: 'Clear' });
+		ownedItems.unshift({ id: null, image: '' });
 
 		new SelectionModal({
 			sections: [
@@ -43,7 +43,7 @@ class CrewSkillSelectionService {
 	openMushSkillSelection(options = {}) {
 		const { player, slotIndex, cardInstance, onSelect } = options;
 		const items = AbilityData.getSelectionItems(getResourceURL, AbilityData.mushSkills);
-		items.unshift({ id: null, image: '', label: 'Clear' });
+		items.unshift({ id: null, image: '' });
 
 		new SelectionModal({
 			items: items,

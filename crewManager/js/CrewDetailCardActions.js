@@ -156,6 +156,7 @@ class CrewDetailCardActions {
 			paTorture: 2
 		};
 	}
+
 }
 
 if (typeof window !== 'undefined') {
