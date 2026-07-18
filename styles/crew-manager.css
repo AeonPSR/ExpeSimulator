@@ -66,6 +66,17 @@
 	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing,
+#crew-manager-panel .crew-details-section .player-profile:not(.player-visible-active) {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing:hover {
+	filter: grayscale(1);
+	opacity: 0.65;
+}
+
 /* ── Title rows ──────────────────────────────────────────────────────────── */
 
 .crew-title-rows {
@@ -151,9 +162,23 @@
 /* ── Details section ─────────────────────────────────────────────────────── */
 
 .crew-details-section {
+	--crew-card-move-duration: 2s;
+	--crew-card-move-easing: cubic-bezier(0.22, 1, 0.36, 1);
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+}
+
+.crew-details-subsection {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.crew-details-section .player-profile.crew-card-moving {
+	position: relative;
+	z-index: 1;
+	transition: transform var(--crew-card-move-duration) var(--crew-card-move-easing);
 }
 
 #crew-manager-panel .crew-details-section .player-profile {

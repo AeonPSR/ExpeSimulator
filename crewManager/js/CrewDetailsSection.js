@@ -9,12 +9,22 @@ class CrewDetailsSection extends Component {
 		super(options);
 		this._cardByFilename = {};
 		this._cardInstanceByFilename = {};
+		this._activeCardsContainer = null;
+		this._hiddenCardsContainer = null;
+		this.onVisibilityChange = options.onVisibilityChange || null;
 	}
 
 	render() {
 		this.element = this.createElement('div', { className: 'crew-details-section' });
+		this._activeCardsContainer = this.createElement('div', { className: 'crew-details-subsection crew-details-subsection--active' });
+		this._hiddenCardsContainer = this.createElement('div', { className: 'crew-details-subsection crew-details-subsection--hidden' });
+		this._hiddenCardsContainer.hidden = true;
+		this.element.appendChild(this._activeCardsContainer);
+		this.element.appendChild(this._hiddenCardsContainer);
 
-		const characters = CharacterData.available.filter(c => c !== Constants.DEFAULT_AVATAR);
+		const characters = CharacterData.available
+			.filter(c => c !== Constants.DEFAULT_AVATAR)
+			.sort((a, b) => this._getCharacterName(a).localeCompare(this._getCharacterName(b)));
 		const slotLimits = {
 			pm:        12,
 			paCore:    4,
@@ -164,6 +174,10 @@ class CrewDetailsSection extends Component {
 
 			const onToggleClick = (playerId, playerKey, isActive) => {
 				player[playerKey] = isActive;
+				if (playerKey === 'visible') {
+					this._setCardHidden(filename, !isActive);
+					this.onVisibilityChange?.(filename, isActive);
+				}
 			};
 
 			const card = new PlayerCard({
@@ -200,13 +214,73 @@ class CrewDetailsSection extends Component {
 			});
 
 			const el = card.render();
+			el.dataset.filename = filename;
 			updateSkillAvailability(el);
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;
-			this.element.appendChild(el);
+			this._appendCardSorted(this._activeCardsContainer, filename, el);
 		});
 
 		return this.element;
+	}
+
+	_getCharacterName(filename) {
+		return filename.replace('.png', '').replace(/_/g, ' ');
+	}
+
+	_appendCardSorted(container, filename, card) {
+		const cardName = this._getCharacterName(filename);
+		const nextCard = Array.from(container.children).find(child => {
+			return this._getCharacterName(child.dataset.filename).localeCompare(cardName) > 0;
+		});
+		container.insertBefore(card, nextCard || null);
+	}
+
+	_getCardRects() {
+		return new Map(Object.values(this._cardByFilename).map(card => [card, card.getBoundingClientRect()]));
+	}
+
+	_animateCardMoves(previousRects) {
+		Object.values(this._cardByFilename).forEach(card => {
+			const previousRect = previousRects.get(card);
+			if (!previousRect) return;
+
+			const nextRect = card.getBoundingClientRect();
+			const deltaX = previousRect.left - nextRect.left;
+			const deltaY = previousRect.top - nextRect.top;
+			if (deltaX === 0 && deltaY === 0) return;
+
+			card.classList.remove('crew-card-moving');
+			card.style.transition = 'none';
+			card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+		});
+
+		requestAnimationFrame(() => {
+			Object.values(this._cardByFilename).forEach(card => {
+				if (!card.style.transform) return;
+
+				card.classList.add('crew-card-moving');
+				card.style.transition = '';
+				card.style.transform = '';
+				card.addEventListener('transitionend', () => {
+					card.classList.remove('crew-card-moving');
+				}, { once: true });
+			});
+		});
+	}
+
+	_setCardHidden(filename, hidden) {
+		const card = this._cardByFilename[filename];
+		if (!card) return;
+		const previousRects = this._getCardRects();
+
+		const container = hidden ? this._hiddenCardsContainer : this._activeCardsContainer;
+		if (hidden) {
+			this._hiddenCardsContainer.hidden = false;
+		}
+		this._appendCardSorted(container, filename, card);
+		this._hiddenCardsContainer.hidden = this._hiddenCardsContainer.children.length === 0;
+		this._animateCardMoves(previousRects);
 	}
 
 	/**

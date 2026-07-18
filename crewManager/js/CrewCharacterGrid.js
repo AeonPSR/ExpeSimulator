@@ -8,6 +8,7 @@ class CrewCharacterGrid extends Component {
 	constructor(options = {}) {
 		super(options);
 		this.onCharacterClick = options.onCharacterClick || null;
+		this._optionByFilename = {};
 	}
 
 	render() {
@@ -20,6 +21,7 @@ class CrewCharacterGrid extends Component {
 		for (const filename of characters) {
 			const name = filename.replace('.png', '').replace(/_/g, ' ');
 			const option = this.createElement('div', { className: 'character-option' });
+			this._optionByFilename[filename] = option;
 			const img = this.createElement('img', {
 				src: getResourceURL(`pictures/characters/${filename}`),
 				alt: name
@@ -32,6 +34,10 @@ class CrewCharacterGrid extends Component {
 		wrapper.appendChild(grid);
 		this.element = wrapper;
 		return this.element;
+	}
+
+	setCharacterVisible(filename, visible) {
+		this._optionByFilename[filename]?.classList.toggle('crew-character-missing', !visible);
 	}
 }
 

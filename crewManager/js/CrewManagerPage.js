@@ -10,6 +10,9 @@ class CrewManagerPage extends Component {
 		this._titleRows = null;
 		this._detailsSection = null;
 		this._expertToggle = null;
+		this._crewGrid = null;
+		this._roleCharacters = {};
+		this._hiddenCharacters = new Set();
 	}
 
 	render() {
@@ -19,8 +22,8 @@ class CrewManagerPage extends Component {
 
 		// Crew section
 		const crewSection = this._renderSection('crewmanager.section.crew');
-		const grid = new CrewCharacterGrid({ onCharacterClick });
-		crewSection.appendChild(grid.render());
+		this._crewGrid = new CrewCharacterGrid({ onCharacterClick });
+		crewSection.appendChild(this._crewGrid.render());
 		this.element.appendChild(crewSection);
 
 		// Title section
@@ -31,7 +34,9 @@ class CrewManagerPage extends Component {
 
 		// Details section
 		const detailsSection = this._renderSection('crewmanager.section.details', this._renderExpertToggle());
-		this._detailsSection = new CrewDetailsSection();
+		this._detailsSection = new CrewDetailsSection({
+			onVisibilityChange: (filename, visible) => this._setCharacterVisible(filename, visible)
+		});
 		detailsSection.appendChild(this._detailsSection.render());
 		this.element.appendChild(detailsSection);
 
@@ -81,7 +86,24 @@ class CrewManagerPage extends Component {
 	}
 
 	setRoleCharacters(roleId, characterFiles) {
-		this._titleRows?.setRoleCharacters(roleId, characterFiles);
+		this._roleCharacters[roleId] = characterFiles;
+		this._renderRoleCharacters(roleId);
+	}
+
+	_setCharacterVisible(filename, visible) {
+		if (visible) {
+			this._hiddenCharacters.delete(filename);
+		} else {
+			this._hiddenCharacters.add(filename);
+		}
+		this._crewGrid?.setCharacterVisible(filename, visible);
+		Object.keys(this._roleCharacters).forEach(roleId => this._renderRoleCharacters(roleId));
+	}
+
+	_renderRoleCharacters(roleId) {
+		const visibleCharacters = (this._roleCharacters[roleId] || [])
+			.filter(filename => !this._hiddenCharacters.has(filename));
+		this._titleRows?.setRoleCharacters(roleId, visibleCharacters);
 	}
 }
 
