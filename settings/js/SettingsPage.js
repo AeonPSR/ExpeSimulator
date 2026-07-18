@@ -4,6 +4,7 @@
  * Renders the three settings sections inside the Settings panel:
  * - Language: three flag buttons (EN / FR / ES), radio-button behaviour
  * - Theme: drop-down list (Default / Retro)
+ * - Visibility: icon buttons for optional panels
  * - Developer tools: checkbox toggle
  */
 class SettingsPage extends Component {
@@ -17,14 +18,8 @@ class SettingsPage extends Component {
 
 		this.element.appendChild(this._renderSection('settings.section.language', this._renderLanguageControls()));
 		this.element.appendChild(this._renderSection('settings.section.theme', this._renderThemeControls()));
+		this.element.appendChild(this._renderSection('settings.section.visibility', this._renderVisibilityControls()));
 		this.element.appendChild(this._renderSection('settings.section.devtools', this._renderDevtoolsControls(), 'settings-section--devtools'));
-
-		const visibilitySection = this._renderSection('settings.section.visibility', this._renderVisibilityControls(), 'settings-section--devtools');
-		this.element.appendChild(visibilitySection);
-
-		const applyDevtools = (enabled) => { visibilitySection.style.display = enabled ? '' : 'none'; };
-		applyDevtools(Settings.devtools);
-		this.addEventListener(document, 'settings:devtools-change', (e) => applyDevtools(e.detail.devtools));
 
 		this.element.appendChild(this._renderInfoTabs());
 
@@ -140,25 +135,36 @@ class SettingsPage extends Component {
 
 	// Visibility
 	_renderVisibilityControls() {
-		const row = this.createElement('div', { className: 'settings-devtools-row' });
+		const row = this.createElement('div', { className: 'settings-visibility-row' });
+		row.appendChild(this._renderPanelVisibilityButton({
+			panelId: 'expedition-simulator',
+			iconPath: 'pictures/ui/astrophysicist.png'
+		}));
+		row.appendChild(this._renderPanelVisibilityButton({
+			panelId: 'crew-manager-panel',
+			iconPath: 'pictures/abilities/human/psy.png'
+		}));
+		return row;
+	}
 
+	_renderPanelVisibilityButton({ panelId, iconPath }) {
+		const panel = document.getElementById(panelId);
+		const isVisible = !panel?.classList.contains('panel--hidden');
 		const btn = this.createElement('button', {
-			className: 'panel-lang-btn panel-lang-btn--active',
+			className: 'panel-lang-btn' + (isVisible ? ' panel-lang-btn--active' : ''),
 		});
 		const img = this.createElement('img', {
-			src: getResourceURL('pictures/ui/astrophysicist.png'),
+			src: getResourceURL(iconPath),
 			alt: ''
 		});
 		btn.appendChild(img);
 		this.addEventListener(btn, 'click', () => {
 			const visible = btn.classList.toggle('panel-lang-btn--active');
-			const panel = document.getElementById('expedition-simulator');
-			if (panel) panel.classList.toggle('panel--hidden', !visible);
+			const panel = document.getElementById(panelId);
+			panel?.classList.toggle('panel--hidden', !visible);
 			Panel.repositionTongues();
 		});
-
-		row.appendChild(btn);
-		return row;
+		return btn;
 	}
 
 	// Info Tabs

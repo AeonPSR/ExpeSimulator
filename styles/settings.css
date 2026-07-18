@@ -84,6 +84,19 @@
 	gap: 10px;
 }
 
+.settings-visibility-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+#settings-panel .settings-visibility-row .panel-lang-btn {
+	margin-right: 0;
+}
+
 #settings-panel .settings-section--devtools .panel-lang-btn--active {
 	border-color: #9b59b6;
 	background: rgba(155, 89, 182, 0.3);
