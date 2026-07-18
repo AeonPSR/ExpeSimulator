@@ -28,6 +28,7 @@ body:has(#panels-container.aeons-lab) {
 #panels-container.aeons-lab .app-panel .expedition-result-card,
 #panels-container.aeons-lab .app-panel .expedition-result-avatar,
 #panels-container.aeons-lab .app-panel .selected-grid,
+#panels-container.aeons-lab .app-panel .crew-timeline-stepper,
 #panels-container.aeons-lab .app-panel .expe-close-btn,
 #panels-container.aeons-lab .app-panel .prob-content,
 #panels-container.aeons-lab .app-panel .resource-table,
