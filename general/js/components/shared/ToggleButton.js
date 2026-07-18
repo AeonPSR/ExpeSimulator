@@ -3,23 +3,17 @@
  * 
  * A reusable toggle button with active/inactive states.
  * Used for traitor toggle, diplomacy toggle, players toggle, antigrav propeller, etc.
- * 
- * Features:
- * - Visual X overlay when inactive
- * - Customizable active color theme
- * - Icon support
- * - Callback on toggle
  */
 class ToggleButton extends Component {
 	/**
 	 * @param {Object} options
-	 * @param {string} options.id - Unique ID for the button
+	 * @param {string} [options.id] - Element id for the button
 	 * @param {string} [options.icon] - URL for the button icon
-	 * @param {string} [options.alt='Toggle'] - Alt text for icon
-	 * @param {string} [options.className] - Additional CSS class(es)
-	 * @param {string} [options.activeColor='orange'] - Color theme when active: 'orange', 'pink', 'blue'
+	 * @param {string} [options.alt='Toggle'] - Alt text for the icon
+	 * @param {string} [options.className] - CSS class for the button
+	 * @param {string} [options.activeColor='orange'] - Active color theme
 	 * @param {boolean} [options.initialState=false] - Initial active state
-	 * @param {Function} [options.onToggle] - Callback when toggled: (isActive) => void
+	 * @param {Function} [options.onToggle] - Called with (isActive)
 	 */
 	constructor(options = {}) {
 		super(options);
@@ -32,10 +26,6 @@ class ToggleButton extends Component {
 		this.onToggle = options.onToggle || null;
 	}
 
-	/**
-	 * Creates the toggle button element
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('button', {
 			id: this.id,
@@ -51,17 +41,11 @@ class ToggleButton extends Component {
 			this.element.appendChild(img);
 		}
 
-		// Attach click handler
 		this.addEventListener(this.element, 'click', () => this.toggle());
 
 		return this.element;
 	}
 
-	/**
-	 * Gets the full class name based on configuration
-	 * @private
-	 * @returns {string}
-	 */
 	_getClassName() {
 		const classes = [this.className];
 		if (this.activeColor) {
@@ -70,9 +54,6 @@ class ToggleButton extends Component {
 		return classes.join(' ');
 	}
 
-	/**
-	 * Toggles the button state
-	 */
 	toggle() {
 		this.setActive(!this.isActive);
 	}

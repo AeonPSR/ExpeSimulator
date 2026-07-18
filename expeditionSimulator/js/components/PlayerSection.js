@@ -2,23 +2,15 @@
  * PlayerSection Component
  * 
  * Container for player management with header controls and player cards.
- * 
- * Features:
- * - Header with fighting power display
- * - Mode toggle (icarus/patrol)
- * - Antigrav propeller toggle
- * - Base toggle
- * - Add player button
- * - Container for PlayerCard components
  */
 class PlayerSection extends Component {
 	/**
 	 * @param {Object} options
 	 * @param {number} [options.maxPlayers=8] - Maximum players allowed
-	 * @param {Function} [options.onAddPlayer] - Callback: () => void
-	 * @param {Function} [options.onModeToggle] - Callback: (mode) => void ('icarus'|'patrol')
-	 * @param {Function} [options.onAntigravToggle] - Callback: (isActive) => void
-	 * @param {Function} [options.onBaseToggle] - Callback: (isActive) => void
+	 * @param {Function} [options.onAddPlayer] - Called with no arguments
+	 * @param {Function} [options.onModeToggle] - Called with ('icarus'|'patrol')
+	 * @param {Function} [options.onAntigravToggle] - Called with (isActive)
+	 * @param {Function} [options.onBaseToggle] - Called with (isActive)
 	 * @param {Function} [options.getResourceURL] - Resource URL resolver
 	 */
 	constructor(options = {}) {
@@ -30,13 +22,11 @@ class PlayerSection extends Component {
 		this.onBaseToggle = options.onBaseToggle || null;
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 
-		// State
 		this._currentMode = 'icarus';
 		this._fightingPower = 0;
 		this._exploredSectors = 9;
 		this._playerCards = [];
 
-		// Internal references
 		this._playersContainer = null;
 		this._addPlayerBtn = null;
 		this._exploredSectorsBtn = null;
@@ -48,24 +38,17 @@ class PlayerSection extends Component {
 		this._baseToggle = null;
 	}
 
-	/**
-	 * Creates the player section
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('div', { className: 'players-section' });
 
-		// Header
 		const header = this._createHeader();
 		this.element.appendChild(header);
 
-		// Players container
 		this._playersContainer = this.createElement('div', {
 			className: 'players-container',
 			id: 'players-container'
 		});
 
-		// Add player button
 		this._addPlayerBtn = this._createAddButton();
 		this._playersContainer.appendChild(this._addPlayerBtn);
 
@@ -74,22 +57,14 @@ class PlayerSection extends Component {
 		return this.element;
 	}
 
-	/**
-	 * Creates the header with controls
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createHeader() {
 		const header = this.createElement('div', { className: 'players-header' });
 
-		// Title
 		const title = this.createElement('h4', { 'data-i18n': 'players.header' }, I18n.t('players.header'));
 		header.appendChild(title);
 
-		// Controls container
 		const controls = this.createElement('div', { className: 'players-controls' });
 
-		// Explored sectors button (display only)
 		this._exploredSectorsBtn = this.createElement('button', {
 			id: 'explored-sectors-btn',
 			className: 'explored-sectors-btn'
@@ -104,7 +79,6 @@ class PlayerSection extends Component {
 		this._exploredSectorsBtn.appendChild(esIcon);
 		controls.appendChild(this._exploredSectorsBtn);
 
-		// Fighting power button (display only)
 		this._fightingPowerBtn = this.createElement('button', {
 			id: 'fighting-power-btn',
 			className: 'fighting-power-btn'
@@ -119,7 +93,6 @@ class PlayerSection extends Component {
 		this._fightingPowerBtn.appendChild(fpIcon);
 		controls.appendChild(this._fightingPowerBtn);
 
-		// Mode button (icarus/patrol)
 		this._modeBtn = this.createElement('button', {
 			id: 'players-mode-btn',
 			className: 'players-mode-btn',
@@ -133,7 +106,6 @@ class PlayerSection extends Component {
 		this.addEventListener(this._modeBtn, 'click', () => this._toggleMode());
 		controls.appendChild(this._modeBtn);
 
-		// Antigrav propeller toggle
 		this._antigravToggle = new ToggleButton({
 			id: 'antigrav-propeller-btn',
 			className: 'antigrav-propeller-btn',
@@ -145,7 +117,6 @@ class PlayerSection extends Component {
 		this._antigravToggle.render();
 		controls.appendChild(this._antigravToggle.element);
 
-		// Base toggle
 		this._baseToggle = new ToggleButton({
 			id: 'players-toggle-btn',
 			className: 'players-toggle-btn',
@@ -161,11 +132,6 @@ class PlayerSection extends Component {
 		return header;
 	}
 
-	/**
-	 * Creates the add player button
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createAddButton() {
 		const btn = this.createElement('button', {
 			id: 'add-player-btn',
@@ -180,10 +146,6 @@ class PlayerSection extends Component {
 		return btn;
 	}
 
-	/**
-	 * Toggles between icarus and patrol mode
-	 * @private
-	 */
 	_toggleMode() {
 		this._currentMode = this._currentMode === 'icarus' ? 'patrol' : 'icarus';
 		
@@ -232,10 +194,6 @@ class PlayerSection extends Component {
 		this._updateAddButtonVisibility();
 	}
 
-	/**
-	 * Updates add button visibility based on player count
-	 * @private
-	 */
 	_updateAddButtonVisibility() {
 		if (this._addPlayerBtn) {
 			this._addPlayerBtn.style.display = this._playerCards.length >= this.maxPlayers ? 'none' : 'flex';

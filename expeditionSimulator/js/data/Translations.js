@@ -1,14 +1,12 @@
 /**
- * Translations — Full string dictionary for all three supported locales.
+ * Translations for all three supported locales.
  *
  * Keys use dot-notation namespaced by component / concept.
  * Variable placeholders use {varName} syntax, matched by I18n.t(key, vars).
  */
 const Translations = {
 
-	// ─────────────────────────────────────────────────────────────────────────
 	// English (source / fallback)
-	// ─────────────────────────────────────────────────────────────────────────
 	en: {
 		// Panel
 		'panel.title':              'Planetary Analyzer',
@@ -116,7 +114,7 @@ const Translations = {
 		'planet.dir.south':         'South',
 		'planet.dir.west':          'West',
 
-		// Planet tags — labels
+		// Planet tag labels
 		'tag.oxygen.label':                  'Oxygen',
 		'tag.cristal_field.label':           'Crystal Field',
 		'tag.mankarog.label':                'Mankarog',
@@ -157,7 +155,7 @@ const Translations = {
 		'tag.quad_seismic_activity.label':   'Faultline',
 		'tag.quad_volcanic_activity.label':  'A Nice Chill Expedition',
 
-		// Planet tags — descriptions
+		// Planet tag descriptions
 		'tag.oxygen.desc':                   'Contains an Oxygen sector.',
 		'tag.cristal_field.desc':            'Contains a Cristal Field sector.',
 		'tag.mankarog.desc':                 'Contains a Mankarog sector.',
@@ -243,9 +241,7 @@ const Translations = {
 		'patch_notes.v1_0.content':          'Initial release.',
 	},
 
-	// ─────────────────────────────────────────────────────────────────────────
 	// French
-	// ─────────────────────────────────────────────────────────────────────────
 	fr: {
 		// Panel
 		'panel.title':              'Analyseur Planétaire',
@@ -353,7 +349,7 @@ const Translations = {
 		'planet.dir.south':         'Sud',
 		'planet.dir.west':          'Ouest',
 
-		// Planet tags — labels
+		// Planet tag labels
 		'tag.oxygen.label':                  'Oxygène',
 		'tag.cristal_field.label':           'Champ de Cristalite',
 		'tag.mankarog.label':                'Mankarog',
@@ -394,7 +390,7 @@ const Translations = {
 		'tag.quad_seismic_activity.label':   'Déchirée',
 		'tag.quad_volcanic_activity.label':  'Une petite expédition sympa et reposante',
 
-		// Planet tags — descriptions
+		// Planet tag descriptions
 		'tag.oxygen.desc':                   'Contient un secteur Oxygène.',
 		'tag.cristal_field.desc':            'Contient un secteur Cristalite.',
 		'tag.mankarog.desc':                 'Contient un secteur Mankarog.',
@@ -473,9 +469,7 @@ const Translations = {
 		'patch_notes.v1_0.content':          'Version initiale.',
 	},
 
-	// ─────────────────────────────────────────────────────────────────────────
 	// Spanish
-	// ─────────────────────────────────────────────────────────────────────────
 	es: {
 		// Panel
 		'panel.title':              'Analizador Planetario',
@@ -583,7 +577,7 @@ const Translations = {
 		'planet.dir.south':         'Sur',
 		'planet.dir.west':          'Oeste',
 
-		// Planet tags — labels
+		// Planet tag labels
 		'tag.oxygen.label':                  'Oxígeno',
 		'tag.cristal_field.label':           'Campo de Cristal',
 		'tag.mankarog.label':                'Mankarog',
@@ -624,7 +618,7 @@ const Translations = {
 		'tag.quad_seismic_activity.label':   'Línea de Falla',
 		'tag.quad_volcanic_activity.label':  'Una expedición tranquila',
 
-		// Planet tags — descriptions
+		// Planet tag descriptions
 		'tag.oxygen.desc':                   'Contiene un sector de Oxígeno.',
 		'tag.cristal_field.desc':            'Contiene un sector de Campo de Cristal.',
 		'tag.mankarog.desc':                 'Contiene un sector Mankarog.',

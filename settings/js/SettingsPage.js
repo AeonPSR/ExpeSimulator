@@ -36,7 +36,7 @@ class SettingsPage extends Component {
 		return this.element;
 	}
 
-	// ─── Sections ────────────────────────────────────────────────────────────
+	// Sections
 
 	_renderSection(titleKey, controls, extraClass = '') {
 		const section = this.createElement('div', { className: ('settings-section ' + extraClass).trim() });
@@ -46,7 +46,7 @@ class SettingsPage extends Component {
 		return section;
 	}
 
-	// ─── Language ────────────────────────────────────────────────────────────
+	// Language
 
 	_renderLanguageControls() {
 		const row = this.createElement('div', { className: 'settings-lang-row' });
@@ -75,7 +75,7 @@ class SettingsPage extends Component {
 		});
 	}
 
-	// ─── Theme ───────────────────────────────────────────────────────────────
+	// Theme
 
 	_renderThemeControls() {
 		const select = this.createElement('select', { className: 'settings-theme-select' });
@@ -116,7 +116,7 @@ class SettingsPage extends Component {
 		return select;
 	}
 
-	// ─── Developer tools ─────────────────────────────────────────────────────
+	// Developer tools
 
 	_renderDevtoolsControls() {
 		const row = this.createElement('div', { className: 'settings-devtools-row' });
@@ -138,7 +138,7 @@ class SettingsPage extends Component {
 		return row;
 	}
 
-	// ─── Visibility ──────────────────────────────────────────────────────────
+	// Visibility
 	_renderVisibilityControls() {
 		const row = this.createElement('div', { className: 'settings-devtools-row' });
 
@@ -161,7 +161,7 @@ class SettingsPage extends Component {
 		return row;
 	}
 
-	// ─── Info Tabs ────────────────────────────────────────────────────────────
+	// Info Tabs
 
 	_renderInfoTabs() {
 		const tabs = new TabContainer({

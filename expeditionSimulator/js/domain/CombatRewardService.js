@@ -26,8 +26,8 @@ class CombatRewardService {
 	 *   rewardProbability: number,
 	 *   outcomes: Array<{ items: Array<{ id: string, qty: number }>, probability: number }>
 	 * }}
-	 *   rewardProbability — overall probability [0,1] that any reward drops
-	 *   outcomes          — each possible lot with its absolute probability
+	 *   rewardProbability: overall probability [0,1] that any reward drops
+	 *   outcomes: each possible lot with its absolute probability
 	 *                       (already multiplied by rewardProbability)
 	 */
 	static computeRewardOutcomes(fightingPower, fightStrength, sectorName) {

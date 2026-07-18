@@ -3,27 +3,19 @@
  * 
  * Base modal component providing overlay, content container, and close functionality.
  * Extend this class for specific modal types (character selection, ability selection, etc.)
- * 
- * Features:
- * - Backdrop overlay with blur
- * - Close on X button click
- * - Close on backdrop click (optional)
- * - Close on Escape key (optional)
- * - Focus trapping (accessibility)
- * - Callback on close
  */
 class Modal extends Component {
 	/**
 	 * @param {Object} options
-	 * @param {string} [options.title] - Modal title (optional)
-	 * @param {string} [options.subtitle] - Modal subtitle/description (optional)
-	 * @param {string} [options.className] - Additional CSS class for the modal content
+	 * @param {string} [options.title] - Modal title
+	 * @param {string} [options.subtitle] - Modal subtitle
+	 * @param {string} [options.className] - Additional content CSS class
 	 * @param {boolean} [options.closeOnBackdrop=true] - Close when clicking backdrop
-	 * @param {boolean} [options.closeOnEscape=true] - Close on Escape key
-	 * @param {boolean} [options.showCloseButton=true] - Show the X close button
-	 * @param {Function} [options.onClose] - Callback when modal closes
-	 * @param {Function} [options.onOpen] - Callback when modal opens
-	 * @param {HTMLElement} [options.panelElement] - The .app-panel this modal belongs to; kept open while the modal is visible
+	 * @param {boolean} [options.closeOnEscape=true] - Close on Escape
+	 * @param {boolean} [options.showCloseButton=true] - Show the close button
+	 * @param {Function} [options.onClose] - Called when modal closes
+	 * @param {Function} [options.onOpen] - Called when modal opens
+	 * @param {HTMLElement} [options.panelElement] - Panel kept open while the modal is visible
 	 */
 	constructor(options = {}) {
 		super(options);
@@ -37,29 +29,21 @@ class Modal extends Component {
 		this.onOpenCallback = options.onOpen || null;
 		this.panelElement = options.panelElement || null;
 
-		// Internal references
 		this._contentContainer = null;
 		this._escapeHandler = null;
 	}
 
-	/**
-	 * Creates the modal DOM structure
-	 * @returns {HTMLElement}
-	 */
 	render() {
-		// Overlay/backdrop with data attribute for CSS scoping
 		this.element = this.createElement('div', {
 			className: 'character-selection-modal'
 		});
 		this.element.setAttribute('data-expe-sim', '');
 
-		// Content container
 		const contentClasses = ['character-selection-content', this.modalClassName].filter(Boolean).join(' ');
 		this._contentContainer = this.createElement('div', {
 			className: contentClasses
 		});
 
-		// Close button
 		if (this.showCloseButton) {
 			const closeBtn = this.createElement('div', {
 				className: 'expe-close-btn modal-close',
@@ -70,20 +54,17 @@ class Modal extends Component {
 			this._contentContainer.appendChild(closeBtn);
 		}
 
-		// Header (if title provided)
 		if (this.title || this.subtitle) {
 			const header = this._createHeader();
 			this._contentContainer.appendChild(header);
 		}
 
-		// Body - where subclasses add their content
 		const body = this.createElement('div', { className: 'modal-body' });
 		this._contentContainer.appendChild(body);
 		this._bodyContainer = body;
 
 		this.element.appendChild(this._contentContainer);
 
-		// Backdrop click handler
 		if (this.closeOnBackdrop) {
 			this.addEventListener(this.element, 'click', (e) => {
 				if (e.target === this.element) {
@@ -95,11 +76,6 @@ class Modal extends Component {
 		return this.element;
 	}
 
-	/**
-	 * Creates the header section
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createHeader() {
 		const header = this.createElement('div', { className: 'character-selection-header' });
 
@@ -116,11 +92,7 @@ class Modal extends Component {
 		return header;
 	}
 
-	/**
-	 * Lifecycle hook - setup after mounting
-	 */
 	onMount() {
-		// Add escape key handler
 		if (this.closeOnEscape) {
 			this._escapeHandler = (e) => {
 				if (e.key === 'Escape') {
@@ -167,8 +139,7 @@ class Modal extends Component {
 	}
 
 	/**
-	 * Closes the modal
-	 * @param {*} [result] - Optional result to pass to onClose callback
+	 * @param {*} [result] - Optional result passed to onClose
 	 */
 	close(result = null) {
 		// Keep the owning panel open for 2s after modal closes
@@ -188,7 +159,6 @@ class Modal extends Component {
 	}
 
 	/**
-	 * Gets the body container where subclasses should add content
 	 * @returns {HTMLElement}
 	 */
 	getBody() {
@@ -196,8 +166,7 @@ class Modal extends Component {
 	}
 
 	/**
-	 * Sets the body content
-	 * @param {HTMLElement|string} content - Content to set
+	 * @param {HTMLElement|string} content
 	 */
 	setBody(content) {
 		if (!this._bodyContainer) return;
@@ -211,7 +180,6 @@ class Modal extends Component {
 	}
 
 	/**
-	 * Updates the modal title
 	 * @param {string} title
 	 */
 	setTitle(title) {
@@ -223,8 +191,7 @@ class Modal extends Component {
 	}
 
 	/**
-	 * Static helper to create and open a modal in one call
-	 * @param {Object} options - Modal options
+	 * @param {Object} options
 	 * @returns {Modal}
 	 */
 	static show(options) {

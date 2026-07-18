@@ -1,8 +1,7 @@
 /**
  * Crew Manager Panel
  *
- * Entry point for the Crew Manager panel. Empty for now — content will
- * be added later.
+ * Entry point for the Crew Manager panel.
  */
 class CrewManagerApp {
 	constructor() {

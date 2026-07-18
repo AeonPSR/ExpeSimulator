@@ -2,15 +2,15 @@
  * PlanetSummary
  *
  * Pure formatter: builds the chat-ready planet summary string.
- * No DOM, no clipboard — I/O lives in js/io/Clipboard.js.
+ * No DOM or clipboard access; I/O lives in js/io/Clipboard.js.
  *
  * Group order:
- *   1. Resources   — Cristalite · Oxygen · Fuel
- *   2. Danger      — Mankarog · Volcano · Seismic
- *   3. Terrain     — Forest · Mountain · Swamp · Desert · Ocean · Cave · Ruins · Wreck · Orchard
- *   4. Fauna       — Intelligent · Insect · Ruminant · Predator
- *   5. Climate     — Wind · Cold · Hot
- *   6. Remainder   — Unknown + anything not covered above
+ *   1. Resources: Cristalite · Oxygen · Fuel
+ *   2. Danger: Mankarog · Volcano · Seismic
+ *   3. Terrain: Forest · Mountain · Swamp · Desert · Ocean · Cave · Ruins · Wreck · Orchard
+ *   4. Fauna: Intelligent · Insect · Ruminant · Predator
+ *   5. Climate: Wind · Cold · Hot
+ *   6. Remainder: Unknown + anything not covered above
  */
 class PlanetSummary {
 

@@ -6,13 +6,12 @@
 class ExampleWorlds extends Component {
 	/**
 	 * @param {Object} options
-	 * @param {Function} [options.onWorldSelect] - Callback: (worldName) => void
+	 * @param {Function} [options.onWorldSelect] - Called with (worldName)
 	 */
 	constructor(options = {}) {
 		super(options);
 		this.onWorldSelect = options.onWorldSelect || null;
 
-		// Predefined worlds — read from WorldData, displayed in rows of 3
 		const allWorlds = WorldData.getAvailableWorlds();
 		this.worlds = [];
 		for (let i = 0; i < allWorlds.length; i += 3) {
@@ -20,18 +19,12 @@ class ExampleWorlds extends Component {
 		}
 	}
 
-	/**
-	 * Creates the example worlds section
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('div', { className: 'example-worlds' });
 
-		// Header
 		const header = this.createElement('h4', { 'data-i18n': 'worlds.header' }, I18n.t('worlds.header'));
 		this.element.appendChild(header);
 
-		// World button rows
 		this.worlds.forEach((row, rowIndex) => {
 			const rowDiv = this.createElement('div', { className: 'debug-row' });
 

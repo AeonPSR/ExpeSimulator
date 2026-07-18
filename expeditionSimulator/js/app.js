@@ -125,7 +125,7 @@ class ExpeditionSimulatorApp {
 		});
 		this._planetaryReview.mount(reviewPanel);
 
-		// Expedition Simulation tab — existing components
+		// Expedition Simulation tab: existing components
 		this._playerSection = new PlayerSection({
 			maxPlayers: Constants.MAX_PLAYERS,
 			getResourceURL: getResourceURL,
@@ -279,7 +279,7 @@ class ExpeditionSimulatorApp {
 		this._state.setSectors(['LANDING', ...filtered]);
 		this._selectedSectorsComponent.update(this._state.getSectors());
 
-		// Run scroll + highlight animation — deferred until the panel is fully open
+		// Run scroll + highlight animation after the panel is fully open.
 		const runAnimation = () => {
 			const grid = this._selectedSectorsComponent.element?.querySelector('.selected-grid');
 			if (grid) {
@@ -290,7 +290,7 @@ class ExpeditionSimulatorApp {
 				grid.classList.add('import-highlight');
 				grid.addEventListener('animationend', () => {
 					grid.classList.remove('import-highlight');
-					// Always remove import-open — pinned class already keeps the panel
+					// Always remove import-open; pinned class already keeps the panel
 					// open if needed, so leaving import-open causes a stuck-open bug.
 					panel.classList.remove('import-open');
 				}, { once: true });
@@ -680,7 +680,7 @@ class ExpeditionSimulatorApp {
 
 		try {
 			// Content scripts can't create workers via chrome.runtime.getURL() directly
-			// (cross-origin restriction). Use a Blob wrapper — importScripts is not
+			// (cross-origin restriction). Use a Blob wrapper; importScripts is not
 			// subject to same-origin policy, so it can load extension resources.
 			const workerScriptURL = getResourceURL('expeditionSimulator/js/workers/calculation-worker.js');
 			this._baseURL = getResourceURL('');

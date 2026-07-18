@@ -3,7 +3,7 @@
  * 
  * UTILITY: Compares damage events to determine which is "worse" for worst-case calculations.
  * Reads damage data from FightCalculator.FIGHT_DAMAGES and EventDamageCalculator.EVENT_DAMAGES
- * (single sources of truth — no mirrored copies).
+ * (single sources of truth, no mirrored copies).
  * 
  * Key insight: Concentrated damage is worse than spread damage.
  * - 5 damage to ONE player is worse than 10 damage spread across 4 players

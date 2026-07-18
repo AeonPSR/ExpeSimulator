@@ -5,16 +5,16 @@
  * Displays event probabilities, resources, fights, and sector breakdowns.
  */
 class ProbabilityDisplay extends Component {
+	/**
+	 * @param {Object} options
+	 * @param {Function} [options.getResourceURL] - Resource URL resolver
+	 */
 	constructor(options = {}) {
 		super(options);
 		this._contentElement = null;
 		this._getResourceURL = options.getResourceURL || window.getResourceURL;
 	}
 
-	/**
-	 * Creates the probability display section
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('div', { className: 'probability-display' });
 
@@ -31,8 +31,7 @@ class ProbabilityDisplay extends Component {
 	}
 
 	/**
-	 * Updates display with data from backend
-	 * @param {Object} data - Results from EventWeightCalculator.calculate()
+	 * @param {Object|null} data - Calculation result from the expedition pipeline
 	 */
 	update(data) {
 		if (!data || !this._contentElement) {
@@ -51,36 +50,23 @@ class ProbabilityDisplay extends Component {
 		this._contentElement.innerHTML = html;
 	}
 
-	/**
-	 * Clears the display
-	 */
 	clear() {
 		if (this._contentElement) {
 			this._contentElement.textContent = I18n.t('prob.placeholder');
 		}
 	}
 
-	/**
-	 * Shows a loading indicator while the worker calculates
-	 */
 	showLoading() {
 		if (this._contentElement) {
 			this._contentElement.innerHTML = `<div class="loading-spinner">${I18n.t('prob.loading')}</div>`;
 		}
 	}
 
-	/**
-	 * Shows an error message when calculation fails
-	 */
 	showError() {
 		if (this._contentElement) {
 			this._contentElement.innerHTML = `<div class="calculation-error">${I18n.t('prob.error')}</div>`;
 		}
 	}
-
-	// ========================================
-	// Render Methods
-	// ========================================
 
 	_renderResources(resources) {
 		const items = [
@@ -134,12 +120,6 @@ class ProbabilityDisplay extends Component {
 	/**
 	 * Builds HTML rows for damage scenarios, collapsing rows when rounded
 	 * damage values are identical.  Shared by Combat Damage and Event Damage.
-	 *
-	 * @private
-	 * @param {Object} data - Damage object with optimist/average/pessimist/worstCase
-	 *                        and their *Prob counterparts
-	 * @param {string} hpIcon - Pre-rendered HP icon HTML
-	 * @returns {string[]} Array of HTML row strings
 	 */
 	_buildDamageScenarioRows(data, hpIcon) {
 		const optimistDmg = Math.round(data.optimist);
@@ -487,14 +467,10 @@ class ProbabilityDisplay extends Component {
 		`;
 	}
 
-	// ========================================
-	// Helper Methods
-	// ========================================
-
 	/**
-	 * Creates an icon img tag with appropriate class
 	 * @param {string} path - Resource path
-	 * @param {string} [className='resource-icon'] - CSS class name
+	 * @param {string} [className='resource-icon'] - CSS class for the img element
+	 * @returns {string} HTML img tag, or an empty string if no resolver is available
 	 */
 	_icon(path, className = 'resource-icon') {
 		if (this._getResourceURL) {

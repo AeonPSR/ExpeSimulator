@@ -3,11 +3,6 @@
  *
  * Displays the three command-chain rows (Commandant, Comm, Admin).
  * Each row has a role icon on the left and 5 portrait slots.
- *
- * Usage:
- *   const rows = new CrewTitleRows();
- *   rows.render();
- *   rows.setRoleCharacters('commandant', ['andie.png', 'chao.png']);
  */
 class CrewTitleRows extends Component {
 	constructor(options = {}) {
@@ -51,11 +46,6 @@ class CrewTitleRows extends Component {
 		return this.element;
 	}
 
-	/**
-	 * Populates the portrait slots for a given role.
-	 * @param {'commandant'|'comm'|'admin'} roleId
-	 * @param {string[]} characterFiles - Character filenames e.g. ['andie.png', 'chao.png']
-	 */
 	setRoleCharacters(roleId, characterFiles) {
 		const slots = this._slots[roleId];
 		if (!slots) return;

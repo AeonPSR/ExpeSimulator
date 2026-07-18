@@ -22,7 +22,7 @@ const SectorData = {
 	},
 
 	/**
-	 * Sectors that have fight events — derived from PlanetSectorConfigData.
+	 * Sectors that have fight events, derived from PlanetSectorConfigData.
 	 * Falls back to a static list if PlanetSectorConfigData is unavailable.
 	 */
 	get sectorsWithFight() {

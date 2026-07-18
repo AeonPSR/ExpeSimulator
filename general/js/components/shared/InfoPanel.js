@@ -3,35 +3,21 @@
  *
  * A general-purpose styled text-display block with an optional top-level title
  * and one or more content sections, each with their own optional sub-title.
- *
- * Usage:
- *   const panel = new InfoPanel({
- *     title: "Aeon's Lab",
- *     sections: [
- *       { content: '<p>Some text.</p>' },
- *       { title: 'Credits', content: '<p>By aeon_psr.</p>' }
- *     ]
- *   });
- *   panel.mount(someContainer);
- *
- * Legacy single-section shorthand (still supported):
- *   new InfoPanel({ title: 'Title', content: '<p>...</p>' })
  */
 class InfoPanel extends Component {
 	/**
 	 * @param {Object} options
-	 * @param {string} [options.title]     - Optional top-level heading
-	 * @param {string} [options.subtitle]  - Optional subtitle shown below the title, above the separator
-	 * @param {Array}  [options.sections]  - Array of { title?, content } objects
-	 * @param {string} [options.content]   - Shorthand for a single section with no sub-title
-	 * @param {string} [options.className] - Extra CSS class(es) added to the root element
+	 * @param {string} [options.title] - Optional top-level heading
+	 * @param {string} [options.subtitle] - Optional subtitle shown below the title
+	 * @param {Array} [options.sections] - Array of { title?, content } objects
+	 * @param {string} [options.content] - Shorthand for a single section with no sub-title
+	 * @param {string} [options.className] - Extra CSS class added to the root element
 	 */
 	constructor(options = {}) {
 		super(options);
 		this._title      = options.title    || null;
 		this._subtitle   = options.subtitle || null;
 		this._extraClass = options.className || '';
-		// Normalise: accept either sections array or legacy single content string
 		if (options.sections) {
 			this._sections = options.sections;
 		} else {

@@ -37,19 +37,10 @@ class PlanetaryReview extends Component {
 		this._fuelCost  = 0;
 	}
 
-	// ─── Static helpers ──────────────────────────────────────────────────────
+	// Static helpers
 
-	/**
-	 * Returns the resolved URL for the planet image that corresponds to
-	 * the given name.  Falls back to planet_unknown.png when:
-	 *   - no name is provided, or
-	 *   - the hash computation fails for any reason.
-	 *
-	 * @param {string|null} planetName
-	 * @param {Function}    getResourceURL
-	 * @returns {string}
-	 */
 	static getPlanetImage(planetName, getResourceURL) {
+		// Fall back to planet_unknown.png if the name is missing or hashing fails.
 		if (!planetName) {
 			return getResourceURL('pictures/planets/planet_unknown.png');
 		}
@@ -61,7 +52,7 @@ class PlanetaryReview extends Component {
 		}
 	}
 
-	// ─── Component lifecycle ─────────────────────────────────────────────────
+	// Component lifecycle
 
 	render() {
 		this.element = this.createElement('div', { className: 'planetary-review' });
@@ -180,11 +171,8 @@ class PlanetaryReview extends Component {
 	}
 
 	/**
-	 * Updates the displayed planet image, name, and review scores.
-	 * Safe to call before or after mounting.
-	 *
 	 * @param {string|null} planetName
-	 * @param {Object|null} [reviewData] - Star rating data (see StarRating input contract)
+	 * @param {Object|null} [reviewData]
 	 */
 	update(planetName, reviewData = null) {
 		this._planetName = planetName || null;
@@ -223,7 +211,6 @@ this._imgElement.alt  = this._planetName || I18n.t('planet.unknown');
 		this._starRating?.updateResources?.(resources);
 	}
 
-	/** @private */
 	_updateNavElement(direction, fuelCost) {
 		if (!this._navElement) return;
 		this._navElement.innerHTML = '';
@@ -237,7 +224,6 @@ this._imgElement.alt  = this._planetName || I18n.t('planet.unknown');
 		this._navElement.appendChild(icon);
 	}
 
-	/** @private */
 	_formatNav(direction, fuelCost) {
 		const translatedDir = I18n.t('planet.dir.' + direction.toLowerCase());
 		return I18n.t('planet.nav', { direction: translatedDir, fuel: fuelCost });

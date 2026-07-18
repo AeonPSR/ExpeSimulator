@@ -1,17 +1,11 @@
 /**
- * Settings — Application settings singleton.
+ * Settings application settings singleton.
  *
  * Manages persisted user preferences: theme and developer tools toggle.
  *
- * Usage:
- *   Settings.theme                       → current theme ('default' | 'retro')
- *   Settings.setTheme('retro')           → apply theme + persist + fire event
- *   Settings.devtools                    → boolean
- *   Settings.setDevtools(true)           → persist + fire event
- *
  * Events dispatched on document:
- *   'settings:theme-change'   → { detail: { theme } }
- *   'settings:devtools-change' → { detail: { devtools } }
+ *   'settings:theme-change': { detail: { theme } }
+ *   'settings:devtools-change': { detail: { devtools } }
  */
 const Settings = (() => {
 	const THEMES = ['retro', 'default'];

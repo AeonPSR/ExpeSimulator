@@ -23,7 +23,7 @@
 const NegativeEventCalculator = {
 
 	/**
-	 * Event type definitions — maps output keys to the event categories
+	 * Event type definitions mapping output keys to the event categories
 	 * they match via EventClassifier.
 	 * @private
 	 */
@@ -112,10 +112,10 @@ const NegativeEventCalculator = {
 			average += value * prob;
 		}
 
-		// Optimist: conditional expectation of bottom 25% (ascending — fewest events)
+		// Optimist: conditional expectation of bottom 25% (ascending, fewest events)
 		const optimist = this._conditionalExpectation(sorted, 0.25, 'bottom');
 
-		// Pessimist: conditional expectation of top 25% (descending — most events)
+		// Pessimist: conditional expectation of top 25% (descending, most events)
 		const pessimist = this._conditionalExpectation(sorted, 0.25, 'top');
 
 		return { pessimist, average, optimist };

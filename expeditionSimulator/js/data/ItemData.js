@@ -12,7 +12,7 @@ const ItemData = {
 		'white_flag.jpg'
 	],
 
-	/** Debug-only items — visible only when developer tools are enabled. */
+	/** Debug-only items, visible only when developer tools are enabled. */
 	debug: [
 		'derek_face.png'
 	],

@@ -2,7 +2,7 @@
  * CrewDetailsSection Component
  *
  * Renders a PlayerCard for each of the 18 named characters in alphabetical order.
- * Remove buttons are hidden — these cards are read-only crew profiles.
+ * Remove buttons are hidden; these cards are read-only crew profiles.
  */
 class CrewDetailsSection extends Component {
 	constructor(options = {}) {
@@ -10,23 +10,16 @@ class CrewDetailsSection extends Component {
 		this._cardByFilename = {};
 		this._cardInstanceByFilename = {};
 		this._playerByFilename = {};
-		this._timelineDisplayByFilename = {};
+		this._timelineStepperByFilename = {};
 		this._notesButtonByFilename = {};
-		this._notesAvailabilityObserver = null;
+		this._notesService = options.notesService || new GameNotepadService();
+		this._skillSelectionService = options.skillSelectionService || new CrewSkillSelectionService();
+		this._notesAvailabilityUnsubscribe = null;
 		this._activeCardsContainer = null;
 		this._deadCardsContainer = null;
 		this._hiddenCardsContainer = null;
-		this._slotSkillRequirements = {
-			paCore:    ['human/concepteur.png'],
-			paComp:    ['human/informaticien.png', 'human/polymathe.png'],
-			paFood:    ['human/cuistot.png', 'human/beta.png'],
-			paGarden:  ['human/botanic.png', 'human/beta.png'],
-			paHeal:    ['human/infirmier.png'],
-			paPilgred: ['human/physicien.png'],
-			paShoot:   ['human/gunman.png', 'human/beta.png'],
-			paTech:    ['human/technician.png', 'human/beta.png'],
-			paTorture: ['human/bourreau.png']
-		};
+		this._cardActions = null;
+		this._cardOrganizer = null;
 		this.onVisibilityChange = options.onVisibilityChange || null;
 		this.onDeadChange = options.onDeadChange || null;
 		this.onStatusChange = options.onStatusChange || null;
@@ -44,283 +37,67 @@ class CrewDetailsSection extends Component {
 		this.element.appendChild(this._activeCardsContainer);
 		this.element.appendChild(this._deadCardsContainer);
 		this.element.appendChild(this._hiddenCardsContainer);
+		this._cardOrganizer = new CrewDetailCardOrganizer({
+			cardByFilename: this._cardByFilename,
+			playerByFilename: this._playerByFilename,
+			activeCardsContainer: this._activeCardsContainer,
+			deadCardsContainer: this._deadCardsContainer,
+			hiddenCardsContainer: this._hiddenCardsContainer,
+			getCharacterName: filename => this._getCharacterName(filename)
+		});
+		this._cardActions = new CrewDetailCardActions({
+			cardInstanceByFilename: this._cardInstanceByFilename,
+			notesService: this._notesService,
+			skillSelectionService: this._skillSelectionService,
+			onDeathStateChange: filename => this._syncDeathState(filename),
+			onVisibilityToggle: (filename, isActive) => this._syncVisibilityState(filename, isActive),
+			onStatusChange: (filename, status) => this.onStatusChange?.(filename, status),
+			onActivityChange: (filename, activity) => this.onActivityChange?.(filename, activity),
+			onTitleEligibilityChange: (filename, canReceiveTitle) => this.onTitleEligibilityChange?.(filename, canReceiveTitle),
+			onSkillAvailabilityChange: (cardElement, player) => CrewDetailSkillAvailability.update(cardElement, player)
+		});
 
 		const characters = CharacterData.available
 			.filter(c => c !== Constants.DEFAULT_AVATAR)
 			.sort((a, b) => this._getCharacterName(a).localeCompare(this._getCharacterName(b)));
-		const slotLimits = {
-			pm:        12,
-			paCore:    4,
-			paComp:    6,
-			paFood:    8,
-			paGarden:  4,
-			paHeal:    4,
-			paPilgred: 2,
-			paShoot:   6,
-			paTech:    2,
-			paTorture: 2
-		};
 		characters.forEach((filename, index) => {
-			const startsHuman = filename === 'chun.png';
-			const player = {
-				id:        index + 1,
-				avatar:    filename,
-				abilities: Array(Constants.ABILITY_SLOTS).fill(null),
-				mushAbilities: Array(5).fill(null),
-				items:     Array(Constants.ITEM_SLOTS).fill(null),
-				health:    Constants.DEFAULT_HEALTH,
-				morale:    14,
-				spore:     0,
-				pa:        0,
-				pm:        0,
-				paCore:    0,
-				paComp:    0,
-				paFood:    0,
-				paGarden:  0,
-				paHeal:    0,
-				paPilgred: 0,
-				paShoot:   0,
-				paTech:    0,
-				paTorture: 0,
-				dead:      false,
-				mush:      false,
-				human:     startsHuman,
-				inactive:  false,
-				grandInactive: false,
-				visible:   true,
-				day:       1,
-				cycle:     1
-			};
+			const startsHuman = CrewCharacterState.startsHuman(filename);
+			const player = CrewCharacterState.create(filename, index);
+			const handlers = this._cardActions.createHandlers(filename, player);
 
-			const updateSkillAvailability = (cardElement) => this._updateSkillAvailability(cardElement, player);
-
-			const onAbilityClick = (playerId, slotIndex) => {
-				const cardInstance = this._cardInstanceByFilename[filename];
-
-				// Partition skills into owned / apprentron / other for this character
-				const owned = [];
-				const apprentron = [];
-				const other = [];
-				for (const skill of AbilityData.humanSkills) {
-					const owners = SkillOwnershipData[skill];
-					if (Array.isArray(owners) && owners.includes(filename)) {
-						owned.push(skill);
-					} else if (Array.isArray(owners) && owners.includes('apprentron')) {
-						apprentron.push(skill);
-					} else {
-						other.push(skill);
-					}
-				}
-
-				const toItems = (list) => AbilityData.getSelectionItems(getResourceURL, list);
-				const ownedItems = toItems(owned);
-				ownedItems.unshift({ id: null, image: '', label: 'Clear' });
-
-				new SelectionModal({
-					sections: [
-						{ items: ownedItems, backgroundImage: getResourceURL(`pictures/characters/${filename}`) },
-						{ items: toItems(apprentron), backgroundImage: getResourceURL('pictures/ui/apprentron.jpg') },
-						{ items: toItems(other) }
-					],
-					selectedId: player.abilities[slotIndex],
-					columns:    8,
-					itemSize:   'large',
-					className:  'ability-selection crew-skill-modal',
-					panelElement: cardInstance?.element?.closest('.app-panel'),
-					onSelect: (item) => {
-						player.abilities[slotIndex] = item.id;
-						cardInstance?.updateAbility(slotIndex, item.id);
-						updateSkillAvailability(cardInstance?.element);
-					}
-				}).open();
-			};
-
-			const onMushAbilityClick = (playerId, slotIndex) => {
-				const cardInstance = this._cardInstanceByFilename[filename];
-				const items = AbilityData.getSelectionItems(getResourceURL, AbilityData.mushSkills);
-				items.unshift({ id: null, image: '', label: 'Clear' });
-
-				new SelectionModal({
-					items: items,
-					selectedId: player.mushAbilities[slotIndex],
-					columns: 5,
-					itemSize: 'large',
-					className: 'ability-selection item-selection crew-mush-skill-modal',
-					panelElement: cardInstance?.element?.closest('.app-panel'),
-					onSelect: (item) => {
-						player.mushAbilities[slotIndex] = item.id;
-						cardInstance?.updateMushAbility(slotIndex, item.id);
-					}
-				}).open();
-			};
-
-			const onSlotClick = (playerId, playerKey) => {
-				const cardInstance = this._cardInstanceByFilename[filename];
-				const current = player[playerKey];
-				const input = prompt('', current.toString());
-				if (input !== null) {
-					const value = parseInt(input, 10);
-					if (!isNaN(value) && value >= 0) {
-						const limit = slotLimits[playerKey];
-						const nextValue = typeof limit === 'number' ? Math.min(value, limit) : value;
-						player[playerKey] = nextValue;
-						cardInstance?.updateSlotValue(playerKey, nextValue);
-						if (playerKey === 'morale') {
-							this._syncDeathState(filename);
-						}
-					}
-				}
-			};
-
-			const onHealthClick = () => {
-				const cardInstance = this._cardInstanceByFilename[filename];
-				const input = prompt('', player.health.toString());
-				if (input !== null) {
-					const value = parseInt(input, 10);
-					if (!isNaN(value) && value >= 0) {
-						player.health = value;
-						cardInstance?.updateHealth(value);
-						this._syncDeathState(filename);
-					}
-				}
-			};
-
-			const onNotesClick = () => this._openCharacterNotes(filename);
-
-			const onToggleClick = (playerId, playerKey, isActive) => {
-				player[playerKey] = isActive;
-				const cardInstance = this._cardInstanceByFilename[filename];
-
-				if (playerKey === 'mush' && isActive) {
-					player.human = false;
-					cardInstance?.setToggleState('human', false);
-				} else if (playerKey === 'human' && isActive) {
-					player.mush = false;
-					cardInstance?.setToggleState('mush', false);
-				}
-				if (playerKey === 'inactive' && !isActive) {
-					player.grandInactive = false;
-					cardInstance?.setToggleState('grandInactive', false);
-				}
-				if (playerKey === 'inactive' || playerKey === 'grandInactive') {
-					const activity = player.grandInactive ? 'grandInactive' : player.inactive ? 'inactive' : null;
-					this.onActivityChange?.(filename, activity);
-				}
-				if (playerKey === 'inactive' || playerKey === 'grandInactive') {
-					const canReceiveTitle = !this._isPlayerDead(player) && !player.inactive && !player.grandInactive;
-					this.onTitleEligibilityChange?.(filename, canReceiveTitle);
-				}
-				if (playerKey === 'dead') {
-					this._syncDeathState(filename);
-				}
-
-				if (playerKey === 'mush' || playerKey === 'human') {
-					const status = player.mush ? 'mush' : player.human ? 'human' : null;
-					this.onStatusChange?.(filename, status);
-				}
-
-				if (playerKey === 'visible') {
-					this._moveCardToCurrentSubsection(filename);
-					this.onVisibilityChange?.(filename, isActive);
-				}
-			};
-
-			const card = new PlayerCard({
-				player:          player,
-				getResourceURL:  getResourceURL,
-				showRemove:      false,
-				showItems:       false,
-				onAbilityClick:  onAbilityClick,
-				onMushAbilityClick: onMushAbilityClick,
-				onHealthClick:   onHealthClick,
-				extraSlots: [
-					{ className: 'morale-slot',  iconPath: 'pictures/ui/pmo.png',        playerKey: 'morale',    onSlotClick },
-					{ className: 'spore-slot',   iconPath: 'pictures/ui/spore.png',      playerKey: 'spore',     onSlotClick },
-					{ className: 'expert-slot pa-slot',       iconPath: 'pictures/ui/pa.png',         playerKey: 'pa',        onSlotClick },
-					{ className: 'expert-slot pm-slot',       iconPath: 'pictures/ui/pm.png',         playerKey: 'pm',        onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_core.png',    playerKey: 'paCore',    onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_torture.png', playerKey: 'paTorture', onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_heal.png',    playerKey: 'paHeal',    onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_pilgred.png', playerKey: 'paPilgred', onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_tech.png',    playerKey: 'paTech',    onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_food.png',    playerKey: 'paFood',    onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_garden.png',  playerKey: 'paGarden',  onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_shoot.png',   playerKey: 'paShoot',   onSlotClick },
-					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_comp.png',    playerKey: 'paComp',    onSlotClick }
-				],
-				toggleSlots: [
-					{ className: 'dead-toggle-slot',           iconPath: 'pictures/ui/dead.png',           playerKey: 'dead',          onToggle: onToggleClick },
-					{ className: 'mush-toggle-slot',           iconPath: 'pictures/ui/mush.png',           playerKey: 'mush',          onToggle: onToggleClick },
-					{ className: 'human-toggle-slot',          iconPath: 'pictures/ui/human.png',          playerKey: 'human',         onToggle: onToggleClick },
-					{ className: 'inactive-toggle-slot',       iconPath: 'pictures/ui/inactive.png',       playerKey: 'inactive',      onToggle: onToggleClick },
-					{ className: 'grand-inactive-toggle-slot', iconPath: 'pictures/ui/grand inactive.png', playerKey: 'grandInactive', onToggle: onToggleClick }
-				],
-				abilityActionSlots: [
-					{ className: 'notes-action-slot', iconPath: 'pictures/ui/notepade.png', playerKey: 'notes', onClick: onNotesClick }
-				],
-				overlayToggleSlots: [
-					{ className: 'visibility-toggle-slot', iconPath: 'pictures/ui/visibility.png', playerKey: 'visible', onToggle: onToggleClick }
-				]
+			const { card, element: el } = CrewDetailCardFactory.create({
+				player,
+				filename,
+				...handlers
 			});
-
-			const el = card.render();
-			el.dataset.filename = filename;
-			const avatar = el.querySelector('.player-avatar');
-			const avatarImg = avatar?.querySelector('img');
-			const spriteAnchor = this.createElement('div', { className: 'crew-sprite-anchor' });
-			if (avatar && avatarImg) {
-				avatarImg.classList.add('crew-character-sprite');
-				avatar.removeChild(avatarImg);
-				spriteAnchor.appendChild(avatarImg);
-				avatar.appendChild(spriteAnchor);
-			}
-			const deadIcon = this.createElement('img', {
-				className: 'crew-dead-icon crew-dead-icon--detail',
-				src: getResourceURL('pictures/ui/dead.png'),
-				alt: ''
-			});
-			spriteAnchor.appendChild(deadIcon);
-			this._insertTimelineControl(filename, player, el);
+			this._insertTimelineStepper(filename, player, el);
 			this._notesButtonByFilename[filename] = el.querySelector('.notes-action-slot');
-			updateSkillAvailability(el);
+			CrewDetailSkillAvailability.update(el, player);
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;
 			this._playerByFilename[filename] = player;
-			this._appendCardSorted(this._activeCardsContainer, filename, el);
+			this._cardOrganizer.appendSorted(this._activeCardsContainer, filename, el);
 			if (startsHuman) {
 				this.onStatusChange?.(filename, 'human');
 			}
 		});
 
-		this._refreshNotesAvailability();
 		this._observeNotesAvailability();
 
 		return this.element;
 	}
 
 	onDestroy() {
-		this._notesAvailabilityObserver?.disconnect();
-		this._notesAvailabilityObserver = null;
+		this._notesAvailabilityUnsubscribe?.();
+		this._notesAvailabilityUnsubscribe = null;
+		this._notesService.disconnect();
 	}
 
 	_getCharacterName(filename) {
 		return filename.replace('.png', '').replace(/_/g, ' ');
 	}
 
-	_getCharacterStem(filename) {
-		return filename.split('/').pop().replace(/\.(png|jpg|gif)$/i, '').toLowerCase();
-	}
-
-	_getGameNotesButton() {
-		return document.querySelector('.personal-notes-button');
-	}
-
-	_getGameNotesWindow() {
-		return document.querySelector('.personal-notes-window-wrapper .personal-notes-window');
-	}
-
-	_refreshNotesAvailability() {
-		const isAvailable = Boolean(this._getGameNotesButton());
+	_setNotesAvailability(isAvailable) {
 		Object.values(this._notesButtonByFilename).forEach(button => {
 			if (!button) return;
 			button.disabled = !isAvailable;
@@ -329,82 +106,10 @@ class CrewDetailsSection extends Component {
 	}
 
 	_observeNotesAvailability() {
-		if (this._notesAvailabilityObserver || !document.body) return;
-		this._notesAvailabilityObserver = new MutationObserver(() => this._refreshNotesAvailability());
-		this._notesAvailabilityObserver.observe(document.body, { childList: true, subtree: true });
-	}
-
-	_waitForElement(selector, timeout = 1000) {
-		const existing = document.querySelector(selector);
-		if (existing) {
-			return Promise.resolve(existing);
-		}
-
-		return new Promise(resolve => {
-			const observer = new MutationObserver(() => {
-				const element = document.querySelector(selector);
-				if (!element) return;
-				observer.disconnect();
-				clearTimeout(timer);
-				resolve(element);
-			});
-			const timer = setTimeout(() => {
-				observer.disconnect();
-				resolve(null);
-			}, timeout);
-			observer.observe(document.body, { childList: true, subtree: true });
-		});
-	}
-
-	_imageMatchesCharacter(img, characterStem) {
-		const src = (img?.getAttribute('src') || '').toLowerCase();
-		return src.includes(`${characterStem}-`) || src.includes(`/${characterStem}.`) || src.includes(`/${characterStem}-`);
-	}
-
-	async _openCharacterNotes(filename) {
-		const notesButton = this._getGameNotesButton();
-		this._refreshNotesAvailability();
-		if (!notesButton) return;
-
-		let notesWindow = this._getGameNotesWindow();
-		if (!notesWindow) {
-			notesButton.click();
-			notesWindow = await this._waitForElement('.personal-notes-window-wrapper .personal-notes-window');
-		}
-		if (!notesWindow) return;
-
-		const characterStem = this._getCharacterStem(filename);
-		const existingTabIcon = Array.from(notesWindow.querySelectorAll('.tabs .tab[draggable="true"] img'))
-			.find(img => this._imageMatchesCharacter(img, characterStem));
-		if (existingTabIcon) {
-			existingTabIcon.closest('.tab')?.click();
-			return;
-		}
-
-		const newTab = Array.from(notesWindow.querySelectorAll('.tabs .tab'))
-			.find(tab => !tab.hasAttribute('draggable'));
-		if (!newTab) return;
-
-		newTab.click();
-		const emotePicker = await this._waitForElement('.emote-picker.popup');
-		if (!emotePicker) return;
-
-		const characterIcon = Array.from(emotePicker.querySelectorAll('.emote-grid .emote-item img'))
-			.find(img => this._imageMatchesCharacter(img, characterStem));
-		characterIcon?.closest('.emote-item')?.click();
-	}
-
-	_updateSkillAvailability(cardElement, player) {
-		if (!cardElement || !player) return;
-		Object.entries(this._slotSkillRequirements).forEach(([playerKey, skills]) => {
-			const hasRequiredSkill = skills.some(skill => player.abilities.includes(skill));
-			const slot = cardElement.querySelector(`[data-player-key="${playerKey}"]`);
-			slot?.classList.toggle('skill-locked', !hasRequiredSkill);
-		});
-	}
-
-	_isPlayerDead(player) {
-		return Boolean(player?.dead || player?.health <= 0 || player?.morale <= 0);
+		if (this._notesAvailabilityUnsubscribe) return;
+		this._notesAvailabilityUnsubscribe = this._notesService.observeAvailability(
+			isAvailable => this._setNotesAvailability(isAvailable)
+		);
 	}
 
 	_syncDeathState(filename) {
@@ -412,239 +117,48 @@ class CrewDetailsSection extends Component {
 		const card = this._cardByFilename[filename];
 		if (!player || !card) return;
 
-		const isDead = this._isPlayerDead(player);
+		const isDead = CrewCharacterState.isDead(player);
 		card.classList.toggle('player-dead-active', isDead);
-		this._moveCardToCurrentSubsection(filename);
+		this._cardOrganizer.moveCardToCurrentSubsection(filename);
 		this.onDeadChange?.(filename, isDead);
 		this.onTitleEligibilityChange?.(filename, !isDead && !player.inactive && !player.grandInactive);
 	}
 
-	_formatTimeline(player) {
-		return `D${player.day}-C${player.cycle}`;
+	_syncVisibilityState(filename, isVisible) {
+		this._cardOrganizer.moveCardToCurrentSubsection(filename);
+		this.onVisibilityChange?.(filename, isVisible);
 	}
 
-	_updateTimelineDisplay(filename) {
-		const player = this._playerByFilename[filename];
-		const display = this._timelineDisplayByFilename[filename];
-		if (player && display) {
-			display.textContent = this._formatTimeline(player);
-		}
-	}
-
-	_setTimeline(filename, day, cycle) {
-		const player = this._playerByFilename[filename];
-		if (!player) return;
-		player.day = Math.max(1, day);
-		player.cycle = Math.min(8, Math.max(1, cycle));
-		this._updateTimelineDisplay(filename);
-	}
-
-	_stepTimeline(filename, direction) {
-		const player = this._playerByFilename[filename];
-		if (!player) return;
-
-		let nextDay = player.day;
-		let nextCycle = player.cycle + direction;
-		if (nextCycle > 8) {
-			nextDay += 1;
-			nextCycle = 1;
-		} else if (nextCycle < 1) {
-			if (nextDay === 1) {
-				nextCycle = 1;
-			} else {
-				nextDay -= 1;
-				nextCycle = 8;
-			}
-		}
-
-		this._setTimeline(filename, nextDay, nextCycle);
-	}
-
-	_promptTimeline(filename) {
-		const player = this._playerByFilename[filename];
-		if (!player) return;
-		const input = prompt('', this._formatTimeline(player));
-		if (input === null) return;
-
-		const match = input.trim().match(/^D?(\d+)\s*[- ]\s*C?(\d+)$/i);
-		if (!match) return;
-		this._setTimeline(filename, parseInt(match[1], 10), parseInt(match[2], 10));
-	}
-
-	_insertTimelineControl(filename, player, cardElement) {
+	_insertTimelineStepper(filename, player, cardElement) {
 		const abilityRow = cardElement.querySelector('.player-abilities:not(.player-mush-abilities)');
 		const notesButton = abilityRow?.querySelector('.notes-action-slot');
 		if (!abilityRow || !notesButton) return;
 
-		const control = this.createElement('div', { className: 'crew-timeline-stepper' });
-		const decrement = this.createElement('button', { className: 'crew-timeline-stepper-btn' }, '-');
-		const display = this.createElement('button', { className: 'crew-timeline-stepper-display' }, this._formatTimeline(player));
-		const increment = this.createElement('button', { className: 'crew-timeline-stepper-btn' }, '+');
-
-		this.addEventListener(decrement, 'click', () => this._stepTimeline(filename, -1));
-		this.addEventListener(display, 'click', () => this._promptTimeline(filename));
-		this.addEventListener(increment, 'click', () => this._stepTimeline(filename, 1));
-
-		control.appendChild(decrement);
-		control.appendChild(display);
-		control.appendChild(increment);
-		abilityRow.insertBefore(control, notesButton);
-		this._timelineDisplayByFilename[filename] = display;
+		const stepper = new CrewTimelineStepper({ player });
+		abilityRow.insertBefore(stepper.render(), notesButton);
+		this._timelineStepperByFilename[filename] = stepper;
 	}
 
 	reset(options = {}) {
-		const previousRects = this._getCardRects();
-		const hiddenCharacters = new Set(options.hiddenCharacters || []);
-		const extraSlotDefaults = {
-			morale:    14,
-			spore:     0,
-			pa:        0,
-			pm:        0,
-			paCore:    0,
-			paComp:    0,
-			paFood:    0,
-			paGarden:  0,
-			paHeal:    0,
-			paPilgred: 0,
-			paShoot:   0,
-			paTech:    0,
-			paTorture: 0
-		};
-
-		Object.keys(this._cardByFilename).forEach(filename => {
-			const player = this._playerByFilename[filename];
-			const card = this._cardByFilename[filename];
-			const cardInstance = this._cardInstanceByFilename[filename];
-			if (!player || !cardInstance || !card) return;
-
-			const startsHuman = filename === 'chun.png';
-			player.abilities = Array(Constants.ABILITY_SLOTS).fill(null);
-			player.mushAbilities = Array(5).fill(null);
-			player.items = Array(Constants.ITEM_SLOTS).fill(null);
-			player.health = Constants.DEFAULT_HEALTH;
-			player.day = 1;
-			player.cycle = 1;
-			this._updateTimelineDisplay(filename);
-			Object.entries(extraSlotDefaults).forEach(([playerKey, value]) => {
-				player[playerKey] = value;
-				cardInstance.updateSlotValue(playerKey, value);
-			});
-
-			for (let index = 0; index < Constants.ABILITY_SLOTS; index++) {
-				cardInstance.updateAbility(index, null);
-			}
-			for (let index = 0; index < 5; index++) {
-				cardInstance.updateMushAbility(index, null);
-			}
-			cardInstance.updateHealth(Constants.DEFAULT_HEALTH);
-
-			['dead', 'mush', 'inactive', 'grandInactive'].forEach(playerKey => {
-				player[playerKey] = false;
-				cardInstance.setToggleState(playerKey, false);
-			});
-			player.human = startsHuman;
-			cardInstance.setToggleState('human', startsHuman);
-			const isVisible = !hiddenCharacters.has(filename);
-			player.visible = isVisible;
-			cardInstance.setToggleState('visible', isVisible);
-
-			this._updateSkillAvailability(card, player);
-			this._appendCardSorted(isVisible ? this._activeCardsContainer : this._hiddenCardsContainer, filename, card);
-			this.onVisibilityChange?.(filename, isVisible);
-			this.onDeadChange?.(filename, false);
-			this.onStatusChange?.(filename, startsHuman ? 'human' : null);
-			this.onActivityChange?.(filename, null);
-			this.onTitleEligibilityChange?.(filename, true);
-		});
-
-		this._deadCardsContainer.hidden = true;
-		this._hiddenCardsContainer.hidden = this._hiddenCardsContainer.children.length === 0;
-		this._animateCardMoves(previousRects);
-	}
-
-	_appendCardSorted(container, filename, card) {
-		const cardName = this._getCharacterName(filename);
-		const nextCard = Array.from(container.children).find(child => {
-			return this._getCharacterName(child.dataset.filename).localeCompare(cardName) > 0;
-		});
-		container.insertBefore(card, nextCard || null);
-	}
-
-	_getCardRects() {
-		return new Map(Object.values(this._cardByFilename).map(card => [card, card.getBoundingClientRect()]));
-	}
-
-	_animateCardMoves(previousRects) {
-		Object.values(this._cardByFilename).forEach(card => {
-			const previousRect = previousRects.get(card);
-			if (!previousRect) return;
-
-			const nextRect = card.getBoundingClientRect();
-			const deltaX = previousRect.left - nextRect.left;
-			const deltaY = previousRect.top - nextRect.top;
-			if (deltaX === 0 && deltaY === 0) return;
-
-			card.classList.remove('crew-card-moving');
-			card.style.transition = 'none';
-			card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-		});
-
-		requestAnimationFrame(() => {
-			Object.values(this._cardByFilename).forEach(card => {
-				if (!card.style.transform) return;
-
-				card.classList.add('crew-card-moving');
-				card.style.transition = '';
-				card.style.transform = '';
-				card.addEventListener('transitionend', () => {
-					card.classList.remove('crew-card-moving');
-				}, { once: true });
-			});
+		CrewDetailsResetService.reset({
+			cardByFilename: this._cardByFilename,
+			cardInstanceByFilename: this._cardInstanceByFilename,
+			playerByFilename: this._playerByFilename,
+			timelineStepperByFilename: this._timelineStepperByFilename,
+			hiddenCharacters: options.hiddenCharacters,
+			activeCardsContainer: this._activeCardsContainer,
+			hiddenCardsContainer: this._hiddenCardsContainer,
+			organizer: this._cardOrganizer,
+			onVisibilityChange: (filename, isVisible) => this.onVisibilityChange?.(filename, isVisible),
+			onDeadChange: (filename, isDead) => this.onDeadChange?.(filename, isDead),
+			onStatusChange: (filename, status) => this.onStatusChange?.(filename, status),
+			onActivityChange: (filename, activity) => this.onActivityChange?.(filename, activity),
+			onTitleEligibilityChange: (filename, canReceiveTitle) => this.onTitleEligibilityChange?.(filename, canReceiveTitle)
 		});
 	}
 
-	_getCardSubsection(filename) {
-		const player = this._playerByFilename[filename];
-		if (!player?.visible) {
-			return this._hiddenCardsContainer;
-		}
-		if (this._isPlayerDead(player)) {
-			return this._deadCardsContainer;
-		}
-		return this._activeCardsContainer;
-	}
-
-	_updateSubsectionVisibility() {
-		this._deadCardsContainer.hidden = this._deadCardsContainer.children.length === 0;
-		this._hiddenCardsContainer.hidden = this._hiddenCardsContainer.children.length === 0;
-	}
-
-	_moveCardToCurrentSubsection(filename) {
-		const card = this._cardByFilename[filename];
-		if (!card) return;
-		const previousRects = this._getCardRects();
-
-		const container = this._getCardSubsection(filename);
-		this._appendCardSorted(container, filename, card);
-		this._updateSubsectionVisibility();
-		this._animateCardMoves(previousRects);
-	}
-
-	/**
-	 * Scrolls to and highlights the card for the given character filename.
-	 * @param {string} filename - e.g. 'andie.png'
-	 */
 	scrollAndHighlight(filename) {
-		const card = this._cardByFilename[filename];
-		if (!card) return;
-
-		card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-		card.classList.remove('crew-highlight');
-		void card.offsetWidth; // force reflow so animation replays
-		card.classList.add('crew-highlight');
-		card.addEventListener('animationend', () => {
-			card.classList.remove('crew-highlight');
-		}, { once: true });
+		this._cardOrganizer.scrollAndHighlight(filename);
 	}
 }
 

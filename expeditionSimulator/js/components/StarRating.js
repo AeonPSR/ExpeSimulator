@@ -1,23 +1,7 @@
 /**
  * StarRating Component
  *
- * Pure display component: receives a review data object and renders
- * a 5-star rating system with an overall score and per-axis breakdown.
- *
- * Input contract (single argument to update()):
- * {
- *   overall: number,          // 0–5
- *   axes: [
- *     { key: string, label: string, stars: number },  // stars: 0–5
- *     ...
- *   ],
- *   booleans: [
- *     { key: string, label: string, present: boolean },
- *     ...
- *   ]
- * }
- *
- * This component contains ZERO scoring logic. It only renders what it receives.
+ * Displays the overall score, axis stars, and boolean review badges.
  */
 class StarRating extends Component {
 	constructor(options = {}) {
@@ -29,32 +13,27 @@ class StarRating extends Component {
 		this._lastResources = null;
 	}
 
-	// ─── Rendering ───────────────────────────────────────────────────────────
+	// Rendering
 
 	render() {
 		this.element = this.createElement('div', { className: 'star-rating' });
 
-		// Overall score section
 		this._overallContainer = this.createElement('div', { className: 'star-rating-overall' });
 		this.element.appendChild(this._overallContainer);
 
-		// Per-axis breakdown
 		this._axesContainer = this.createElement('div', { className: 'star-rating-axes' });
 		this.element.appendChild(this._axesContainer);
 
-		// Boolean indicators
 		this._booleansContainer = this.createElement('div', { className: 'star-rating-boolean-list' });
 		this.element.appendChild(this._booleansContainer);
 
-		// Render empty state
 		this._renderEmpty();
 
 		return this.element;
 	}
 
 	/**
-	 * Updates the display with new review data.
-	 * @param {Object|null} data - The review data object, or null to clear.
+	 * @param {Object|null} data - PlanetReviewScorer output, or null to clear
 	 */
 	update(data) {
 		if (!this.element) return;
@@ -71,10 +50,7 @@ class StarRating extends Component {
 	}
 
 	/**
-	 * Updates the resource quartile data shown next to axis labels.
-	 * Expects ResourceCalculator output (with .fruits/.steaks/.fuel/.artefacts,
-	 * each having .pessimist and .optimist). Pass null to clear.
-	 * @param {Object|null} resources
+	 * @param {Object|null} resources - ResourceCalculator output
 	 */
 	updateResources(resources) {
 		this._lastResources = resources || null;
@@ -83,7 +59,7 @@ class StarRating extends Component {
 		}
 	}
 
-	// ─── Private renderers ───────────────────────────────────────────────────
+	// Private renderers
 
 	_renderEmpty() {
 		this._renderOverall(0);
@@ -104,9 +80,6 @@ class StarRating extends Component {
 		];
 	}
 
-	/**
-	 * @param {number} score - 0 to 5
-	 */
 	_renderOverall(score) {
 		this._overallContainer.innerHTML = '';
 
@@ -121,9 +94,6 @@ class StarRating extends Component {
 		this._overallContainer.appendChild(numericEl);
 	}
 
-	/**
-	 * @param {Array<{key: string, label: string, stars: number}>} axes
-	 */
 	_renderAxes(axes) {
 		this._axesContainer.innerHTML = '';
 
@@ -144,14 +114,9 @@ class StarRating extends Component {
 		}
 	}
 
-	/**
-	 * Returns " (Q1~Q3)" for resource axes (fruits/steaks/fuel/artifacts),
-	 * or an empty string for non-resource axes or when no data is loaded.
-	 * @private
-	 */
 	_formatAxisQuartiles(axisKey) {
 		if (!this._lastResources) return '';
-		// Map axis key → one or more resources field names to sum together
+		// Multiple resource buckets can feed one displayed axis.
 		const RESOURCE_KEY_MAP = {
 			fruits:    ['fruits'],
 			steaks:    ['steaks'],
@@ -181,9 +146,6 @@ class StarRating extends Component {
 		return value.toFixed(1);
 	}
 
-	/**
-	 * @param {Array<{key: string, label: string, present: boolean, color?: string, description?: string}>} booleans
-	 */
 	_renderBooleans(booleans) {
 		this._booleansContainer.innerHTML = '';
 
@@ -211,16 +173,8 @@ class StarRating extends Component {
 		}
 	}
 
-	// ─── Static helpers ──────────────────────────────────────────────────────
+	// Static helpers
 
-	/**
-	 * Creates a star bar element for a 0–6 score.
-	 * Always renders 6 stars. The 6th is hidden when score ≤ 5,
-	 * so it overflows to the right (not the left) when it appears.
-	 *
-	 * @param {number} score - Value from 0 to 6
-	 * @returns {HTMLElement}
-	 */
 	static _createStarsElement(score) {
 		const clamped = Math.max(0, Math.min(6, score));
 
@@ -230,6 +184,7 @@ class StarRating extends Component {
 		for (let i = 1; i <= 6; i++) {
 			const star = document.createElement('span');
 			const isSixth = (i === 6);
+			// Keep the sixth star on the right when scores exceed the normal cap.
 			const hidden = isSixth && clamped <= 5;
 
 			let cls = 'star';

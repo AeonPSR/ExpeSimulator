@@ -3,23 +3,17 @@
  * 
  * A modal that displays a grid of selectable options (characters, abilities, items).
  * Extends the base Modal with selection-specific functionality.
- * 
- * Features:
- * - Grid display of options
- * - Single selection with visual highlight
- * - Current selection indicator
- * - Returns selected value on close
  */
 class SelectionModal extends Modal {
 	/**
 	 * @param {Object} options
-	 * @param {Array<Object>} options.items - Array of selectable items
-	 *   Each item: { id: string, image: string, label?: string }
-	 * @param {string} [options.selectedId] - Currently selected item ID
-	 * @param {string} [options.gridClassName] - Additional class for the grid
+	 * @param {Array<Object>} options.items - Selectable items with { id, image, label? }
+	 * @param {Array<Object>} [options.sections] - Optional grouped sections with { items, backgroundImage? }
+	 * @param {string} [options.selectedId] - Currently selected item id
+	 * @param {string} [options.gridClassName] - Extra CSS class for the grid
 	 * @param {number} [options.columns=6] - Number of grid columns
-	 * @param {Function} [options.onSelect] - Callback when item selected: (item) => void
-	 * @param {string} [options.itemSize='normal'] - Item size: 'normal', 'large'
+	 * @param {Function} [options.onSelect] - Called with (item)
+	 * @param {string} [options.itemSize='normal'] - Item size variant
 	 */
 	constructor(options = {}) {
 		super(options);
@@ -34,12 +28,7 @@ class SelectionModal extends Modal {
 		this.itemSize = options.itemSize || 'normal';
 	}
 
-	/**
-	 * Creates the modal with selection grid
-	 * @returns {HTMLElement}
-	 */
 	render() {
-		// Call parent render first
 		super.render();
 
 		if (this.sections) {
@@ -58,18 +47,10 @@ class SelectionModal extends Modal {
 		return this.element;
 	}
 
-	/**
-	 * Creates the selection grid
-	 * @private
-	 * @param {Array<Object>} [items] - items to render (defaults to this.items)
-	 * @param {string} [backgroundImage] - optional centered, faded background image URL for this grid/section
-	 * @returns {HTMLElement}
-	 */
 	_createGrid(items, backgroundImage) {
 		const gridClasses = ['character-grid', this.gridClassName].filter(Boolean).join(' ');
 		const grid = this.createElement('div', { className: gridClasses });
 
-		// Create options
 		(items || this.items).forEach(item => {
 			const option = this._createOption(item);
 			grid.appendChild(option);
@@ -92,12 +73,6 @@ class SelectionModal extends Modal {
 		return wrapper;
 	}
 
-	/**
-	 * Creates a single selectable option
-	 * @private
-	 * @param {Object} item - Item data
-	 * @returns {HTMLElement}
-	 */
 	_createOption(item) {
 		const isSelected = item.id === this.selectedId;
 		const sizeClass = this.itemSize === 'large' ? 'character-option--large' : '';
@@ -109,7 +84,6 @@ class SelectionModal extends Modal {
 			dataset: { id: item.id }
 		});
 
-		// Image
 		if (item.image) {
 			const img = this.createElement('img', {
 				src: item.image,
@@ -118,19 +92,12 @@ class SelectionModal extends Modal {
 			option.appendChild(img);
 		}
 
-		// Click handler
 		this.addEventListener(option, 'click', () => this._handleSelect(item));
 
 		return option;
 	}
 
-	/**
-	 * Handles item selection
-	 * @private
-	 * @param {Object} item - Selected item
-	 */
 	_handleSelect(item) {
-		// Update visual selection
 		const previousSelected = this.element.querySelector('.character-option.selected');
 		if (previousSelected) {
 			previousSelected.classList.remove('selected');

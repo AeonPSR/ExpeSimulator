@@ -5,9 +5,9 @@
  * Keyed by sector name (must match sectorName values in config.js).
  *
  * Structure:
- *   tables[SECTOR_NAME].lots  — array of possible reward lots
- *   lot.weight                — relative probability weight
- *   lot.items                 — array of { id, qty } reward items
+ *   tables[SECTOR_NAME].lots: array of possible reward lots
+ *   lot.weight: relative probability weight
+ *   lot.items: array of { id, qty } reward items
  *
  * Item IDs reference consumable assets in pictures/consumables/.
  */
@@ -26,7 +26,7 @@ const CombatRewardData = {
 
 	tables: {
 
-		// 3, 4 or 5 steaks — equal probability
+		// 3, 4 or 5 steaks, equal probability
 		RUMINANT: {
 			lots: [
 				{ weight: 1, items: [{ id: 'ALIEN_STEAK', qty: 3 }] },

@@ -3,24 +3,15 @@
  * 
  * Displays the grid of available sectors that can be added to an expedition.
  * Includes header with toggle button for diplomacy mode.
- * 
- * Features:
- * - 5-column grid of sector icons
- * - Fight icon overlay for combat sectors
- * - Disabled state for unavailable sectors
- * - Diplomacy toggle button
  */
 class SectorGrid extends Component {
 	/**
 	 * @param {Object} options
-	 * @param {Array<Object>} options.sectors - Array of sector configs
-	 *   Each: { sectorName: string, ... }
-	 * @param {Function} [options.onSectorClick] - Callback: (sectorName) => void
-	* @param {Function} [options.onDiplomacyToggle] - Callback: (isActive) => void
-	 * @param {Function} [options.onDiplomacyToggle] - Callback: (isActive) => void
+	 * @param {Array<Object>} options.sectors - Sector configs, each with at least { sectorName }
+	 * @param {Function} [options.onSectorClick] - Called with (sectorName)
+	 * @param {Function} [options.onDiplomacyToggle] - Called with (isActive)
 	 * @param {Function} [options.getResourceURL] - Resource URL resolver
 	 * @param {Function} [options.getSectorAvailability] - Returns { shouldDisable, tooltipText }
-	 * @param {Array<string>} [options.sectorsWithFight] - Sectors that have fight events
 	 */
 	constructor(options = {}) {
 		super(options);
@@ -34,39 +25,25 @@ class SectorGrid extends Component {
 		this._gridElement = null;
 	}
 
-	/**
-	 * Creates the sector grid section
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('div', { className: 'section-selector' });
 
-		// Header with title and toggle buttons
 		const header = this._createHeader();
 		this.element.appendChild(header);
 
-		// Sector grid
 		this._gridElement = this._createGrid();
 		this.element.appendChild(this._gridElement);
 
 		return this.element;
 	}
-	/** 
-	 * Creates the header with title and diplomacy toggle button
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createHeader() {
 		const header = this.createElement('div', { className: 'sectors-header' });
 
-		// Title
 		const title = this.createElement('h4', { 'data-i18n': 'sectors.available' }, I18n.t('sectors.available'));
 		header.appendChild(title);
 
-		// Buttons container
 		const buttonsContainer = this.createElement('div', { className: 'sectors-buttons' });
 
-		// Instantiate the diplomacy toggle if not already
 		if (!this._diplomacyToggle) {
 			this._diplomacyToggle = new ToggleButton({
 				id: 'diplomacy-toggle-btn',
@@ -91,18 +68,12 @@ class SectorGrid extends Component {
 		return header;
 	}
 
-	/**
-	 * Creates the sector grid
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createGrid() {
 		const grid = this.createElement('div', {
 			className: 'sector-grid',
 			id: 'sector-grid'
 		});
 
-		// Get unique sector names
 		const uniqueSectors = [...new Set(this.sectors.map(s => s.sectorName))];
 
 		uniqueSectors.forEach(sectorName => {
@@ -113,19 +84,12 @@ class SectorGrid extends Component {
 		return grid;
 	}
 
-	/**
-	 * Creates a single sector item
-	 * @private
-	 * @param {string} sectorName
-	 * @returns {HTMLElement}
-	 */
 	_createSectorItem(sectorName) {
 		const sectorDiv = this.createElement('div', {
 			className: 'sector-item',
 			dataset: { sector: sectorName }
 		});
 
-		// Main sector image
 		const img = this.createElement('img', {
 			src: this.getResourceURL(`pictures/sectors/${sectorName.toLowerCase()}.png`),
 			alt: sectorName,

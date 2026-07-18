@@ -8,7 +8,7 @@
  * It consumes the sampled damage paths produced by FightCalculator. Each path
  * is a concrete list of the fights faced in that scenario, so grenades can be
  * spent per fight (up to the amount needed to defeat each one) and the win
- * chance — and therefore the expected drop — can be evaluated fight by fight.
+ * chance and expected drop can be evaluated fight by fight.
  *
  * Reward items are returned as expected values, matching how resource yields
  * are reported elsewhere.

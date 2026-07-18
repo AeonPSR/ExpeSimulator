@@ -2,25 +2,23 @@
  * PlayerCard Component
  * 
  * Displays a single player profile with avatar, abilities, items, and health.
- * 
- * Features:
- * - Clickable avatar for character selection
- * - 4 regular ability slots
- * - 3 item slots
- * - Health display
- * - Remove button
  */
 class PlayerCard extends Component {
 	/**
 	 * @param {Object} options
-	 * @param {Object} options.player - Player data object
-	 *   { id, avatar, abilities: [5], items: [3], health }
-	 * @param {Function} [options.onAvatarClick] - Callback: (playerId) => void
-	 * @param {Function} [options.onAbilityClick] - Callback: (playerId, slotIndex) => void
-	 * @param {Function} [options.onMushAbilityClick] - Callback: (playerId, slotIndex) => void
-	 * @param {Function} [options.onItemClick] - Callback: (playerId, slotIndex) => void
-	 * @param {Function} [options.onHealthClick] - Callback: (playerId) => void
-	 * @param {Function} [options.onRemove] - Callback: (playerId) => void
+	 * @param {Object} options.player - Player state: { id, avatar, abilities, mushAbilities?, items, health }
+	 * @param {Function} [options.onAvatarClick] - Called with (playerId)
+	 * @param {Function} [options.onAbilityClick] - Called with (playerId, slotIndex)
+	 * @param {Function} [options.onMushAbilityClick] - Called with (playerId, slotIndex)
+	 * @param {Function} [options.onItemClick] - Called with (playerId, slotIndex)
+	 * @param {Function} [options.onHealthClick] - Called with (playerId)
+	 * @param {Function} [options.onRemove] - Called with (playerId)
+	 * @param {boolean} [options.showRemove=true] - Whether to show the remove button
+	 * @param {boolean} [options.showItems=true] - Whether to show item slots
+	 * @param {Array<Object>} [options.extraSlots] - Extra status slots with { playerKey, iconPath, className, onSlotClick }
+	 * @param {Array<Object>} [options.toggleSlots] - Inline toggle slots with { playerKey, iconPath, className, onToggle }
+	 * @param {Array<Object>} [options.abilityActionSlots] - Extra ability-row action buttons
+	 * @param {Array<Object>} [options.overlayToggleSlots] - Toggle buttons positioned over the card chrome
 	 * @param {Function} [options.getResourceURL] - Resource URL resolver
 	 */
 	constructor(options = {}) {
@@ -42,10 +40,6 @@ class PlayerCard extends Component {
 		this._toggleButtons = {};
 	}
 
-	/**
-	 * Creates the player card element
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('div', {
 			className: 'player-profile',
@@ -58,15 +52,12 @@ class PlayerCard extends Component {
 			this.element.classList.toggle(`player-${slotDef.playerKey}-active`, Boolean(this.player[slotDef.playerKey]));
 		});
 
-		// Avatar
 		const avatar = this._createAvatar();
 		this.element.appendChild(avatar);
 
-		// Details (abilities + bottom row)
 		const details = this._createDetails();
 		this.element.appendChild(details);
 
-		// Remove button
 		if (this.showRemove) {
 			const removeBtn = this._createRemoveButton();
 			this.element.appendChild(removeBtn);
@@ -77,11 +68,6 @@ class PlayerCard extends Component {
 		return this.element;
 	}
 
-	/**
-	 * Creates the avatar element
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createAvatar() {
 		const avatar = this.createElement('div', {
 			className: 'player-avatar',
@@ -101,26 +87,18 @@ class PlayerCard extends Component {
 		return avatar;
 	}
 
-	/**
-	 * Creates the details section (abilities + items + health)
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createDetails() {
 		const details = this.createElement('div', { className: 'player-details' });
 
-		// Abilities row
 		const abilities = this._createAbilitiesRow();
 		details.appendChild(abilities);
 
 		const mushAbilities = this._createMushAbilitiesRow();
 		details.appendChild(mushAbilities);
 
-		// Bottom row (items + health)
 		const bottomRow = this._createBottomRow();
 		details.appendChild(bottomRow);
 
-		// Toggle row (dead, mush, human, etc.)
 		const toggleRow = this._createToggleRow();
 		if (toggleRow) {
 			details.appendChild(toggleRow);
@@ -129,12 +107,6 @@ class PlayerCard extends Component {
 		return details;
 	}
 
-	/**
-	 * Gets the display icon for an ability, applying easter eggs
-	 * @private
-	 * @param {string} abilityFile - The ability filename (e.g. 'sprint.png')
-	 * @returns {string} The icon path to use
-	 */
 	_getAbilityIcon(abilityFile) {
 		// Easter egg: Terrence + Sprint = sprinter_disabled
 		if (abilityFile === 'human/sprint.png' && this.player.avatar === 'terrence.png') {
@@ -143,11 +115,6 @@ class PlayerCard extends Component {
 		return this.getResourceURL(`pictures/abilities/${abilityFile}`);
 	}
 
-	/**
-	 * Creates the abilities row
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createAbilitiesRow() {
 		const abilitiesDiv = this.createElement('div', { className: 'player-abilities' });
 
@@ -199,11 +166,6 @@ class PlayerCard extends Component {
 		return abilitiesDiv;
 	}
 
-	/**
-	 * Creates the Mush abilities row
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createMushAbilitiesRow() {
 		const abilitiesDiv = this.createElement('div', { className: 'player-abilities player-mush-abilities' });
 		const mushAbilities = this.player.mushAbilities || Array(5).fill(null);
@@ -238,15 +200,9 @@ class PlayerCard extends Component {
 		return abilitiesDiv;
 	}
 
-	/**
-	 * Creates the bottom row (items + health)
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createBottomRow() {
 		const bottomRow = this.createElement('div', { className: 'player-bottom-row' });
 
-		// Item slots
 		if (this.showItems) {
 			for (let i = 0; i < 3; i++) {
 				const item = this.player.items[i];
@@ -276,7 +232,6 @@ class PlayerCard extends Component {
 			}
 		}
 
-		// Health slot
 		const healthSlot = this.createElement('div', {
 			className: 'status-slot health-slot',
 			dataset: { type: 'health', playerId: this.player.id.toString() }
@@ -319,11 +274,6 @@ class PlayerCard extends Component {
 		return bottomRow;
 	}
 
-	/**
-	 * Creates the icon-only toggle row (dead, mush, human, etc.)
-	 * @private
-	 * @returns {HTMLElement|null}
-	 */
 	_createToggleRow() {
 		if (!this.toggleSlots.length) {
 			return null;
@@ -356,10 +306,6 @@ class PlayerCard extends Component {
 		return toggleRow;
 	}
 
-	/**
-	 * Adds icon-only toggle slots positioned over the card chrome.
-	 * @private
-	 */
 	_appendOverlayToggleSlots() {
 		this.overlayToggleSlots.forEach(slotDef => {
 			const isActive = Boolean(this.player[slotDef.playerKey]);
@@ -385,17 +331,16 @@ class PlayerCard extends Component {
 		});
 	}
 
+	/**
+	 * @param {string} playerKey
+	 * @param {boolean} isActive
+	 */
 	setToggleState(playerKey, isActive) {
 		this.player[playerKey] = isActive;
 		this._toggleButtons[playerKey]?.setAttribute('data-active', isActive.toString());
 		this.element?.classList.toggle(`player-${playerKey}-active`, isActive);
 	}
 
-	/**
-	 * Creates the remove button
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createRemoveButton() {
 		const removeBtn = this.createElement('div', {
 			className: 'expe-close-btn',
@@ -415,8 +360,7 @@ class PlayerCard extends Component {
 	}
 
 	/**
-	 * Updates the displayed value for an extra status slot.
-	 * @param {string} playerKey - e.g. 'morale', 'spore'
+	 * @param {string} playerKey
 	 * @param {number} value
 	 */
 	updateSlotValue(playerKey, value) {
@@ -427,7 +371,6 @@ class PlayerCard extends Component {
 	}
 
 	/**
-	 * Updates the avatar display
 	 * @param {string} avatarFile
 	 */
 	updateAvatar(avatarFile) {
@@ -449,7 +392,6 @@ class PlayerCard extends Component {
 	}
 
 	/**
-	 * Updates an ability slot
 	 * @param {number} slotIndex
 	 * @param {string|null} abilityFile
 	 */
@@ -469,7 +411,6 @@ class PlayerCard extends Component {
 	}
 
 	/**
-	 * Updates a Mush ability slot
 	 * @param {number} slotIndex
 	 * @param {string|null} abilityFile
 	 */
@@ -492,7 +433,6 @@ class PlayerCard extends Component {
 	}
 
 	/**
-	 * Updates an item slot
 	 * @param {number} slotIndex
 	 * @param {string|null} itemFile
 	 */
@@ -512,7 +452,6 @@ class PlayerCard extends Component {
 	}
 
 	/**
-	 * Updates health display
 	 * @param {number} health
 	 */
 	updateHealth(health) {
