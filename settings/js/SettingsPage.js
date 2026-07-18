@@ -26,7 +26,7 @@ class SettingsPage extends Component {
 		applyDevtools(Settings.devtools);
 		this.addEventListener(document, 'settings:devtools-change', (e) => applyDevtools(e.detail.devtools));
 
-		this.element.appendChild(this._renderCredits());
+		this.element.appendChild(this._renderInfoTabs());
 
 		// Keep language buttons in sync when locale changes from any source
 		this.addEventListener(document, 'i18n:change', (e) => {
@@ -162,16 +162,33 @@ class SettingsPage extends Component {
 		return row;
 	}
 
-	// ─── Credits ─────────────────────────────────────────────────────────────
+	// ─── Info Tabs ────────────────────────────────────────────────────────────
 
-	_renderCredits() {
-		const wrapper = this.createElement('div');
+	_renderInfoTabs() {
+		const tabs = new TabContainer({
+			tabs: [
+				{ id: 'informations', label: I18n.t('settings.tab.informations'), i18nKey: 'settings.tab.informations' },
+				{ id: 'patch_notes',  label: I18n.t('settings.tab.patch_notes'),  i18nKey: 'settings.tab.patch_notes'  }
+			]
+		});
+		tabs.render();
 
+		const infoPanel = tabs.getTabPanel('informations');
+		this._appendCredits(infoPanel);
+
+		const patchPanel = tabs.getTabPanel('patch_notes');
+		this._appendPatchNotes(patchPanel);
+
+		return tabs.element;
+	}
+
+	_appendCredits(container) {
 		const rebuild = () => {
 			const url   = I18n.t('credits.wiki.url');
 			const label = I18n.t('credits.wiki.label');
 			const credits = new InfoPanel({
-				title: 'Aeon\'s Lab - Version 1.0',
+				title:    'Aeon\'s Lab - Version 1.1',
+				subtitle: I18n.t('credits.subtitle'),
 				sections: [
 					{
 						content: `<p>${I18n.t('credits.warning')} <a href="${url}" target="_blank">${label}</a></p>`
@@ -182,13 +199,32 @@ class SettingsPage extends Component {
 					}
 				]
 			});
-			wrapper.innerHTML = '';
-			wrapper.appendChild(credits.render());
+			container.innerHTML = '';
+			container.appendChild(credits.render());
 		};
-
 		rebuild();
 		this.addEventListener(document, 'i18n:change', rebuild);
-		return wrapper;
+	}
+
+	_appendPatchNotes(container) {
+		const rebuild = () => {
+			const notes = new InfoPanel({
+				sections: [
+					{
+						title:   'Version 1.1',
+						content: `<p>- ${I18n.t('patch_notes.v1_1.line1')}</p><p>- ${I18n.t('patch_notes.v1_1.line2')}</p><p>- ${I18n.t('patch_notes.v1_1.line3')}</p>`
+					},
+					{
+						title:   'Version 1.0',
+						content: `<p>${I18n.t('patch_notes.v1_0.content')}</p>`
+					}
+				]
+			});
+			container.innerHTML = '';
+			container.appendChild(notes.render());
+		};
+		rebuild();
+		this.addEventListener(document, 'i18n:change', rebuild);
 	}
 }
 

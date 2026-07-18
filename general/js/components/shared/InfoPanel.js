@@ -21,13 +21,15 @@ class InfoPanel extends Component {
 	/**
 	 * @param {Object} options
 	 * @param {string} [options.title]     - Optional top-level heading
+	 * @param {string} [options.subtitle]  - Optional subtitle shown below the title, above the separator
 	 * @param {Array}  [options.sections]  - Array of { title?, content } objects
 	 * @param {string} [options.content]   - Shorthand for a single section with no sub-title
 	 * @param {string} [options.className] - Extra CSS class(es) added to the root element
 	 */
 	constructor(options = {}) {
 		super(options);
-		this._title      = options.title     || null;
+		this._title      = options.title    || null;
+		this._subtitle   = options.subtitle || null;
 		this._extraClass = options.className || '';
 		// Normalise: accept either sections array or legacy single content string
 		if (options.sections) {
@@ -46,6 +48,11 @@ class InfoPanel extends Component {
 			header.appendChild(
 				this.createElement('span', { className: 'info-panel-title' }, this._title)
 			);
+			if (this._subtitle) {
+				header.appendChild(
+					this.createElement('span', { className: 'info-panel-subtitle' }, this._subtitle)
+				);
+			}
 			this.element.appendChild(header);
 		}
 

@@ -75,6 +75,8 @@
 .app-panel .resource-table,
 .app-panel .events-table {
 	width: 100%;
+	max-width: 100%;
+	table-layout: fixed;
 	border-collapse: collapse;
 	margin-top: 10px;
 	background: rgba(52, 73, 94, 0.3);

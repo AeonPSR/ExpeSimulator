@@ -41,7 +41,9 @@ body:has(#panels-container.aeons-lab) [data-expe-sim] .expe-close-btn,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .ability-selection,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .modal-close,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .character-option,
-body:has(#panels-container.aeons-lab) [data-expe-sim] .modal-container {
+body:has(#panels-container.aeons-lab) [data-expe-sim] .modal-container,
+body:has(#panels-container.aeons-lab) .expe-import-btn,
+#panels-container.aeons-lab .app-panel .info-panel {
 	border-radius: var(--chamfer-size);
 	corner-shape: bevel;
 }
@@ -58,6 +60,10 @@ body:has(#panels-container.aeons-lab) [data-expe-sim] .modal-container {
 /* Modal elements (mounted on body, scoped via [data-expe-sim]) */
 body:has(#panels-container.aeons-lab) [data-expe-sim] .character-option,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .ability-selection {
+	border-radius: 10px;
+}
+
+#panels-container.aeons-lab .app-panel .info-panel {
 	border-radius: 10px;
 }
 

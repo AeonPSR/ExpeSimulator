@@ -221,6 +221,19 @@ const Translations = {
 		'credits.wiki.label':                'community wiki.',
 		'credits.author.title':              'A script created by aeon_psr',
 		'credits.contact':                   'Questions? Suggestions? Bugs? Send me a message on Discord!',
+
+		// Settings tabs
+		'settings.tab.informations':         'Informations',
+		'settings.tab.patch_notes':          'Patch Notes',
+
+		// Credits subtitle
+		'credits.subtitle':                  'Up to date with eMush V0.31',
+
+		// Patch notes
+		'patch_notes.v1_1.line1':            'Added this section.',
+		'patch_notes.v1_1.line2':            'Fixed various formatting issues.',
+		'patch_notes.v1_1.line3':            'Added a button on mobile to close the extension.',
+		'patch_notes.v1_0.content':          'Initial release.',
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -438,6 +451,19 @@ const Translations = {
 		'credits.wiki.label':                'wiki de la communauté.',
 		'credits.author.title':              'Un script créé par aeon_psr',
 		'credits.contact':                   'Questions ? Suggestions ? Bugs ? Envoyez moi un message sur Discord !',
+
+		// Settings tabs
+		'settings.tab.informations':         'Informations',
+		'settings.tab.patch_notes':          'Notes de mise à jour',
+
+		// Credits subtitle
+		'credits.subtitle':                  'À jour avec eMush V0.31',
+
+		// Patch notes
+		'patch_notes.v1_1.line1':            'Ajout de cette section.',
+		'patch_notes.v1_1.line2':            'Corrections de divers problèmes de mise en forme.',
+		'patch_notes.v1_1.line3':            "Ajout d'un bouton sur mobile pour pouvoir fermer l'extension.",
+		'patch_notes.v1_0.content':          'Version initiale.',
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -655,6 +681,19 @@ const Translations = {
 		'credits.wiki.label':                'wiki de la comunidad.',
 		'credits.author.title':              'Un script creado por aeon_psr',
 		'credits.contact':                   '¿Preguntas? ¿Sugerencias? ¿Bugs? ¡Envíame un mensaje en Discord!',
+
+		// Settings tabs
+		'settings.tab.informations':         'Informaciones',
+		'settings.tab.patch_notes':          'Notas de actualización',
+
+		// Credits subtitle
+		'credits.subtitle':                  'Actualizado con eMush V0.31',
+
+		// Patch notes
+		'patch_notes.v1_1.line1':            'Añadida esta sección.',
+		'patch_notes.v1_1.line2':            'Correcciones de varios problemas de formato.',
+		'patch_notes.v1_1.line3':            'Añadido un botón en móvil para cerrar la extensión.',
+		'patch_notes.v1_0.content':          'Lanzamiento inicial.',
 	},
 };
 
