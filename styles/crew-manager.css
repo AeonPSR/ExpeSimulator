@@ -62,6 +62,25 @@
 	backdrop-filter: blur(10px);
 }
 
+#crew-manager-panel .crew-sprite-anchor {
+	--crew-dead-icon-left: 50%;
+	--crew-dead-icon-top: -2px;
+	--crew-dead-icon-size: 18px;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 42px;
+	height: 60px;
+	overflow: visible;
+}
+
+#crew-manager-panel .crew-sprite-anchor .crew-character-sprite {
+	width: auto;
+	height: 100%;
+	object-fit: cover;
+}
+
 #crew-manager-panel .crew-section [data-expe-sim] .crew-character-side-icons {
 	position: absolute;
 	left: -7px;
@@ -112,6 +131,38 @@
 	display: none;
 }
 
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead {
+	background: #000;
+	border-color: #111;
+	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead:hover {
+	background: #050505;
+	border-color: #111;
+	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-side-icons {
+	display: none;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-sprite {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead::after {
+	content: none;
+}
+
+
+/* PERSONALIZATION STUFF IF I WANNA TRY HARD THAT THING BUT IT LOOKS GOOD LIKE THAT */
+#crew-manager-panel [data-filename="chun.png"] .crew-sprite-anchor {
+	--crew-dead-icon-left: 50%;
+	--crew-dead-icon-top: -2px;
+}
+
 #crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-mush {
 	border-color: #ff5599;
 	box-shadow: 0 0 0 2px rgba(255, 85, 153, 0.65), 0 5px 15px rgba(255, 85, 153, 0.25);
@@ -120,6 +171,27 @@
 #crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-human {
 	border-color: #3498db;
 	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.65), 0 5px 15px rgba(52, 152, 219, 0.25);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead {
+	background: #000;
+	border-color: #111;
+	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-sprite {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead.crew-character-mush {
+	border-color: #ff5599;
+	box-shadow: 0 0 0 2px rgba(255, 85, 153, 0.65), 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead.crew-character-human {
+	border-color: #3498db;
+	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.65), 0 5px 15px rgba(0, 0, 0, 0.35);
 }
 
 /* ── Title rows ──────────────────────────────────────────────────────────── */
@@ -248,6 +320,19 @@
 	border-color: #ff5599;
 }
 
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #111;
+}
+
 #crew-manager-panel .crew-details-section .player-profile.player-mush-active .player-avatar {
 	border-color: #ff5599;
 }
@@ -295,6 +380,79 @@
 #crew-manager-panel .crew-details-section .player-profile.player-human-active .visibility-toggle-slot:hover,
 #crew-manager-panel .crew-details-section .player-profile.player-human-active .visibility-toggle-slot[data-active="true"] {
 	background: rgb(35, 78, 107);
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar .crew-character-sprite {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar {
+	position: relative;
+	overflow: visible;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar::after {
+	content: none;
+}
+
+#crew-manager-panel .crew-dead-icon {
+	display: none;
+	position: absolute;
+	left: var(--crew-dead-icon-left);
+	top: var(--crew-dead-icon-top);
+	width: var(--crew-dead-icon-size);
+	height: var(--crew-dead-icon-size);
+	object-fit: contain;
+	transform: translateX(-50%);
+	pointer-events: none;
+	z-index: 3;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-sprite-anchor > .crew-dead-icon,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-sprite-anchor > .crew-dead-icon {
+	display: block;
+	filter: none;
+	opacity: 1;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active {
+	background: #000;
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active .player-avatar,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active {
+	background: #000;
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .player-avatar,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
 	border-color: #3498db;
 }
 

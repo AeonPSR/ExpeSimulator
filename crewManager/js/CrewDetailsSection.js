@@ -12,6 +12,7 @@ class CrewDetailsSection extends Component {
 		this._activeCardsContainer = null;
 		this._hiddenCardsContainer = null;
 		this.onVisibilityChange = options.onVisibilityChange || null;
+		this.onDeadChange = options.onDeadChange || null;
 		this.onStatusChange = options.onStatusChange || null;
 		this.onActivityChange = options.onActivityChange || null;
 		this.onTitleEligibilityChange = options.onTitleEligibilityChange || null;
@@ -201,6 +202,9 @@ class CrewDetailsSection extends Component {
 					const canReceiveTitle = !player.dead && !player.inactive && !player.grandInactive;
 					this.onTitleEligibilityChange?.(filename, canReceiveTitle);
 				}
+				if (playerKey === 'dead') {
+					this.onDeadChange?.(filename, isActive);
+				}
 
 				if (playerKey === 'mush' || playerKey === 'human') {
 					const status = player.mush ? 'mush' : player.human ? 'human' : null;
@@ -250,6 +254,21 @@ class CrewDetailsSection extends Component {
 
 			const el = card.render();
 			el.dataset.filename = filename;
+			const avatar = el.querySelector('.player-avatar');
+			const avatarImg = avatar?.querySelector('img');
+			const spriteAnchor = this.createElement('div', { className: 'crew-sprite-anchor' });
+			if (avatar && avatarImg) {
+				avatarImg.classList.add('crew-character-sprite');
+				avatar.removeChild(avatarImg);
+				spriteAnchor.appendChild(avatarImg);
+				avatar.appendChild(spriteAnchor);
+			}
+			const deadIcon = this.createElement('img', {
+				className: 'crew-dead-icon crew-dead-icon--detail',
+				src: getResourceURL('pictures/ui/dead.png'),
+				alt: ''
+			});
+			spriteAnchor.appendChild(deadIcon);
 			updateSkillAvailability(el);
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;

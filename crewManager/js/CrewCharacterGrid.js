@@ -32,17 +32,27 @@ class CrewCharacterGrid extends Component {
 		for (const filename of characters) {
 			const name = filename.replace('.png', '').replace(/_/g, ' ');
 			const option = this.createElement('div', { className: 'character-option' });
+			option.dataset.filename = filename;
 			this._optionByFilename[filename] = option;
 
 			const titleIcons = this.createElement('div', { className: 'crew-character-side-icons crew-character-title-icons' });
 			this._titleIconsByFilename[filename] = titleIcons;
 			option.appendChild(titleIcons);
 
+			const spriteAnchor = this.createElement('div', { className: 'crew-sprite-anchor' });
 			const img = this.createElement('img', {
+				className: 'crew-character-sprite',
 				src: getResourceURL(`pictures/characters/${filename}`),
 				alt: name
 			});
-			option.appendChild(img);
+			spriteAnchor.appendChild(img);
+			const deadIcon = this.createElement('img', {
+				className: 'crew-dead-icon crew-dead-icon--summary',
+				src: getResourceURL('pictures/ui/dead.png'),
+				alt: ''
+			});
+			spriteAnchor.appendChild(deadIcon);
+			option.appendChild(spriteAnchor);
 
 			const activityIcons = this.createElement('div', { className: 'crew-character-side-icons crew-character-activity-icons' });
 			this._activityIconsByFilename[filename] = activityIcons;
@@ -59,6 +69,10 @@ class CrewCharacterGrid extends Component {
 
 	setCharacterVisible(filename, visible) {
 		this._optionByFilename[filename]?.classList.toggle('crew-character-missing', !visible);
+	}
+
+	setCharacterDead(filename, dead) {
+		this._optionByFilename[filename]?.classList.toggle('crew-character-dead', dead);
 	}
 
 	setCharacterStatus(filename, status) {
