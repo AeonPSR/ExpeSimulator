@@ -447,8 +447,54 @@
 	border-color: #e74c3c;
 }
 
-#crew-manager-panel .crew-details-section .notes-action-slot {
+#crew-manager-panel .crew-details-section .crew-timeline-stepper {
 	margin-left: auto;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	height: 30px;
+	border: 2px solid #e67e22;
+	border-radius: 4px;
+	background: rgba(230, 126, 34, 0.18);
+	overflow: hidden;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-btn,
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-display {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	height: 100%;
+	border: 0;
+	background: transparent;
+	color: #ecf0f1;
+	cursor: pointer;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-btn {
+	width: 22px;
+	font-size: 14px;
+	font-weight: 700;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-display {
+	min-width: 52px;
+	padding: 0 6px;
+	border-left: 1px solid rgba(230, 126, 34, 0.55);
+	border-right: 1px solid rgba(230, 126, 34, 0.55);
+	font-family: Consolas, 'Liberation Mono', monospace;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-btn:hover,
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-display:hover {
+	background: rgba(230, 126, 34, 0.22);
+}
+
+#crew-manager-panel .crew-details-section .notes-action-slot {
 	padding: 0;
 	background: rgba(230, 126, 34, 0.3);
 	border-color: #e67e22;
@@ -530,6 +576,7 @@
 }
 
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active .ability-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-timeline-stepper,
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active .status-slot,
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
@@ -539,6 +586,16 @@
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot)[data-active="true"] {
 	background: #000;
 	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-timeline-stepper-btn,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-timeline-stepper-display {
+	background: #000;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-timeline-stepper-display {
+	border-left-color: #111;
+	border-right-color: #111;
 }
 
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot)::before,

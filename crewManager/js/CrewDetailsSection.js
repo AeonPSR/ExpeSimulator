@@ -10,6 +10,7 @@ class CrewDetailsSection extends Component {
 		this._cardByFilename = {};
 		this._cardInstanceByFilename = {};
 		this._playerByFilename = {};
+		this._timelineDisplayByFilename = {};
 		this._activeCardsContainer = null;
 		this._deadCardsContainer = null;
 		this._hiddenCardsContainer = null;
@@ -84,7 +85,9 @@ class CrewDetailsSection extends Component {
 				human:     startsHuman,
 				inactive:  false,
 				grandInactive: false,
-				visible:   true
+				visible:   true,
+				day:       1,
+				cycle:     1
 			};
 
 			const updateSkillAvailability = (cardElement) => this._updateSkillAvailability(cardElement, player);
@@ -275,6 +278,7 @@ class CrewDetailsSection extends Component {
 				alt: ''
 			});
 			spriteAnchor.appendChild(deadIcon);
+			this._insertTimelineControl(filename, player, el);
 			updateSkillAvailability(el);
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;
@@ -317,6 +321,79 @@ class CrewDetailsSection extends Component {
 		this.onTitleEligibilityChange?.(filename, !isDead && !player.inactive && !player.grandInactive);
 	}
 
+	_formatTimeline(player) {
+		return `D${player.day}-C${player.cycle}`;
+	}
+
+	_updateTimelineDisplay(filename) {
+		const player = this._playerByFilename[filename];
+		const display = this._timelineDisplayByFilename[filename];
+		if (player && display) {
+			display.textContent = this._formatTimeline(player);
+		}
+	}
+
+	_setTimeline(filename, day, cycle) {
+		const player = this._playerByFilename[filename];
+		if (!player) return;
+		player.day = Math.max(1, day);
+		player.cycle = Math.min(8, Math.max(1, cycle));
+		this._updateTimelineDisplay(filename);
+	}
+
+	_stepTimeline(filename, direction) {
+		const player = this._playerByFilename[filename];
+		if (!player) return;
+
+		let nextDay = player.day;
+		let nextCycle = player.cycle + direction;
+		if (nextCycle > 8) {
+			nextDay += 1;
+			nextCycle = 1;
+		} else if (nextCycle < 1) {
+			if (nextDay === 1) {
+				nextCycle = 1;
+			} else {
+				nextDay -= 1;
+				nextCycle = 8;
+			}
+		}
+
+		this._setTimeline(filename, nextDay, nextCycle);
+	}
+
+	_promptTimeline(filename) {
+		const player = this._playerByFilename[filename];
+		if (!player) return;
+		const input = prompt('', this._formatTimeline(player));
+		if (input === null) return;
+
+		const match = input.trim().match(/^D?(\d+)\s*[- ]\s*C?(\d+)$/i);
+		if (!match) return;
+		this._setTimeline(filename, parseInt(match[1], 10), parseInt(match[2], 10));
+	}
+
+	_insertTimelineControl(filename, player, cardElement) {
+		const abilityRow = cardElement.querySelector('.player-abilities:not(.player-mush-abilities)');
+		const notesButton = abilityRow?.querySelector('.notes-action-slot');
+		if (!abilityRow || !notesButton) return;
+
+		const control = this.createElement('div', { className: 'crew-timeline-stepper' });
+		const decrement = this.createElement('button', { className: 'crew-timeline-stepper-btn' }, '-');
+		const display = this.createElement('button', { className: 'crew-timeline-stepper-display' }, this._formatTimeline(player));
+		const increment = this.createElement('button', { className: 'crew-timeline-stepper-btn' }, '+');
+
+		this.addEventListener(decrement, 'click', () => this._stepTimeline(filename, -1));
+		this.addEventListener(display, 'click', () => this._promptTimeline(filename));
+		this.addEventListener(increment, 'click', () => this._stepTimeline(filename, 1));
+
+		control.appendChild(decrement);
+		control.appendChild(display);
+		control.appendChild(increment);
+		abilityRow.insertBefore(control, notesButton);
+		this._timelineDisplayByFilename[filename] = display;
+	}
+
 	reset(options = {}) {
 		const previousRects = this._getCardRects();
 		const hiddenCharacters = new Set(options.hiddenCharacters || []);
@@ -347,6 +424,9 @@ class CrewDetailsSection extends Component {
 			player.mushAbilities = Array(5).fill(null);
 			player.items = Array(Constants.ITEM_SLOTS).fill(null);
 			player.health = Constants.DEFAULT_HEALTH;
+			player.day = 1;
+			player.cycle = 1;
+			this._updateTimelineDisplay(filename);
 			Object.entries(extraSlotDefaults).forEach(([playerKey, value]) => {
 				player[playerKey] = value;
 				cardInstance.updateSlotValue(playerKey, value);
