@@ -207,3 +207,51 @@
 	height: 60px;
 }
 
+/* ========================================================================== 
+   Confirmation Modal Variant
+   ========================================================================== */
+
+[data-expe-sim] .confirmation-modal {
+	min-width: 260px;
+	text-align: center;
+}
+
+[data-expe-sim] .confirmation-message {
+	margin: 0 0 16px 0;
+	color: #ecf0f1;
+	font-size: 14px;
+}
+
+[data-expe-sim] .confirmation-actions {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+}
+
+[data-expe-sim] .confirmation-btn {
+	min-width: 72px;
+	padding: 8px 14px;
+	border: 2px solid #3498db;
+	border-radius: 4px;
+	background: rgba(52, 152, 219, 0.18);
+	color: #ecf0f1;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+[data-expe-sim] .confirmation-btn:hover {
+	background: rgba(52, 152, 219, 0.32);
+	transform: translateY(-1px);
+}
+
+[data-expe-sim] .confirmation-btn--confirm {
+	border-color: #e74c3c;
+	background: rgba(231, 76, 60, 0.18);
+}
+
+[data-expe-sim] .confirmation-btn--confirm:hover {
+	background: rgba(231, 76, 60, 0.32);
+}
+

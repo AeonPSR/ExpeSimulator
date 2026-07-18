@@ -9,8 +9,20 @@ class CrewDetailsSection extends Component {
 		super(options);
 		this._cardByFilename = {};
 		this._cardInstanceByFilename = {};
+		this._playerByFilename = {};
 		this._activeCardsContainer = null;
 		this._hiddenCardsContainer = null;
+		this._slotSkillRequirements = {
+			paCore:    ['human/concepteur.png'],
+			paComp:    ['human/informaticien.png', 'human/polymathe.png'],
+			paFood:    ['human/cuistot.png', 'human/beta.png'],
+			paGarden:  ['human/botanic.png', 'human/beta.png'],
+			paHeal:    ['human/infirmier.png'],
+			paPilgred: ['human/physicien.png'],
+			paShoot:   ['human/gunman.png', 'human/beta.png'],
+			paTech:    ['human/technician.png', 'human/beta.png'],
+			paTorture: ['human/bourreau.png']
+		};
 		this.onVisibilityChange = options.onVisibilityChange || null;
 		this.onDeadChange = options.onDeadChange || null;
 		this.onStatusChange = options.onStatusChange || null;
@@ -41,18 +53,6 @@ class CrewDetailsSection extends Component {
 			paTech:    2,
 			paTorture: 2
 		};
-		const slotSkillRequirements = {
-			paCore:    ['human/concepteur.png'],
-			paComp:    ['human/informaticien.png', 'human/polymathe.png'],
-			paFood:    ['human/cuistot.png', 'human/beta.png'],
-			paGarden:  ['human/botanic.png', 'human/beta.png'],
-			paHeal:    ['human/infirmier.png'],
-			paPilgred: ['human/physicien.png'],
-			paShoot:   ['human/gunman.png', 'human/beta.png'],
-			paTech:    ['human/technician.png', 'human/beta.png'],
-			paTorture: ['human/bourreau.png']
-		};
-
 		characters.forEach((filename, index) => {
 			const startsHuman = filename === 'chun.png';
 			const player = {
@@ -83,14 +83,7 @@ class CrewDetailsSection extends Component {
 				visible:   true
 			};
 
-			const updateSkillAvailability = (cardElement) => {
-				if (!cardElement) return;
-				Object.entries(slotSkillRequirements).forEach(([playerKey, skills]) => {
-					const hasRequiredSkill = skills.some(skill => player.abilities.includes(skill));
-					const slot = cardElement.querySelector(`[data-player-key="${playerKey}"]`);
-					slot?.classList.toggle('skill-locked', !hasRequiredSkill);
-				});
-			};
+			const updateSkillAvailability = (cardElement) => this._updateSkillAvailability(cardElement, player);
 
 			const onAbilityClick = (playerId, slotIndex) => {
 				const cardInstance = this._cardInstanceByFilename[filename];
@@ -272,6 +265,7 @@ class CrewDetailsSection extends Component {
 			updateSkillAvailability(el);
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;
+			this._playerByFilename[filename] = player;
 			this._appendCardSorted(this._activeCardsContainer, filename, el);
 			if (startsHuman) {
 				this.onStatusChange?.(filename, 'human');
@@ -283,6 +277,81 @@ class CrewDetailsSection extends Component {
 
 	_getCharacterName(filename) {
 		return filename.replace('.png', '').replace(/_/g, ' ');
+	}
+
+	_updateSkillAvailability(cardElement, player) {
+		if (!cardElement || !player) return;
+		Object.entries(this._slotSkillRequirements).forEach(([playerKey, skills]) => {
+			const hasRequiredSkill = skills.some(skill => player.abilities.includes(skill));
+			const slot = cardElement.querySelector(`[data-player-key="${playerKey}"]`);
+			slot?.classList.toggle('skill-locked', !hasRequiredSkill);
+		});
+	}
+
+	reset(options = {}) {
+		const previousRects = this._getCardRects();
+		const hiddenCharacters = new Set(options.hiddenCharacters || []);
+		const extraSlotDefaults = {
+			morale:    14,
+			spore:     0,
+			pa:        0,
+			pm:        0,
+			paCore:    0,
+			paComp:    0,
+			paFood:    0,
+			paGarden:  0,
+			paHeal:    0,
+			paPilgred: 0,
+			paShoot:   0,
+			paTech:    0,
+			paTorture: 0
+		};
+
+		Object.keys(this._cardByFilename).forEach(filename => {
+			const player = this._playerByFilename[filename];
+			const card = this._cardByFilename[filename];
+			const cardInstance = this._cardInstanceByFilename[filename];
+			if (!player || !cardInstance || !card) return;
+
+			const startsHuman = filename === 'chun.png';
+			player.abilities = Array(Constants.ABILITY_SLOTS).fill(null);
+			player.mushAbilities = Array(5).fill(null);
+			player.items = Array(Constants.ITEM_SLOTS).fill(null);
+			player.health = Constants.DEFAULT_HEALTH;
+			Object.entries(extraSlotDefaults).forEach(([playerKey, value]) => {
+				player[playerKey] = value;
+				cardInstance.updateSlotValue(playerKey, value);
+			});
+
+			for (let index = 0; index < Constants.ABILITY_SLOTS; index++) {
+				cardInstance.updateAbility(index, null);
+			}
+			for (let index = 0; index < 5; index++) {
+				cardInstance.updateMushAbility(index, null);
+			}
+			cardInstance.updateHealth(Constants.DEFAULT_HEALTH);
+
+			['dead', 'mush', 'inactive', 'grandInactive'].forEach(playerKey => {
+				player[playerKey] = false;
+				cardInstance.setToggleState(playerKey, false);
+			});
+			player.human = startsHuman;
+			cardInstance.setToggleState('human', startsHuman);
+			const isVisible = !hiddenCharacters.has(filename);
+			player.visible = isVisible;
+			cardInstance.setToggleState('visible', isVisible);
+
+			this._updateSkillAvailability(card, player);
+			this._appendCardSorted(isVisible ? this._activeCardsContainer : this._hiddenCardsContainer, filename, card);
+			this.onVisibilityChange?.(filename, isVisible);
+			this.onDeadChange?.(filename, false);
+			this.onStatusChange?.(filename, startsHuman ? 'human' : null);
+			this.onActivityChange?.(filename, null);
+			this.onTitleEligibilityChange?.(filename, true);
+		});
+
+		this._hiddenCardsContainer.hidden = this._hiddenCardsContainer.children.length === 0;
+		this._animateCardMoves(previousRects);
 	}
 
 	_appendCardSorted(container, filename, card) {

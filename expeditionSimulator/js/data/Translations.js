@@ -204,6 +204,13 @@ const Translations = {
 		'crewmanager.section.title':         'Title',
 		'crewmanager.section.details':       'Details',
 		'crewmanager.reset':                 'Reset this panel',
+		'crewmanager.reset.confirm':         'Are you sure ?',
+		'crewmanager.reset.yes':             'Yes',
+		'crewmanager.reset.no':              'No',
+		'crewmanager.timeline.title':        'Select your timeline',
+		'crewmanager.timeline.chaola':       'Chaola',
+		'crewmanager.timeline.anderek':      'Anderek',
+		'crewmanager.timeline.neither':      'Neither',
 
 		// Settings panel
 		'settings.title':                    'Settings',

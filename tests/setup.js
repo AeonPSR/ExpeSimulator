@@ -44,6 +44,7 @@ const sourceFiles = [
   'expeditionSimulator/js/core/ExpeditionState.js',
   'general/js/components/shared/ToggleButton.js',
   'general/js/components/shared/Modal.js',
+  'general/js/components/shared/ConfirmationModal.js',
   'general/js/components/shared/SelectionModal.js',
   'general/js/components/shared/Panel.js',
   'general/js/components/shared/TabContainer.js',

@@ -87,8 +87,34 @@ class CrewManagerPage extends Component {
 			className: 'crew-reset-btn',
 			'data-i18n': 'crewmanager.reset'
 		}, I18n.t('crewmanager.reset'));
+		this.addEventListener(btn, 'click', () => {
+			new ConfirmationModal({
+				title: I18n.t('crewmanager.reset.confirm'),
+				confirmLabel: I18n.t('crewmanager.reset.yes'),
+				cancelLabel: I18n.t('crewmanager.reset.no'),
+				panelElement: this.element?.closest('.app-panel'),
+				onConfirm: () => this._openTimelineResetModal()
+			}).open();
+		});
 		wrapper.appendChild(btn);
 		return wrapper;
+	}
+
+	_openTimelineResetModal() {
+		new CrewTimelineModal({
+			title: I18n.t('crewmanager.timeline.title'),
+			panelElement: this.element?.closest('.app-panel'),
+			onSelect: (timeline) => this._resetForTimeline(timeline)
+		}).open();
+	}
+
+	_resetForTimeline(timeline) {
+		const hiddenByTimeline = {
+			chaola:  ['andie.png', 'derek.png'],
+			anderek: ['chao.png', 'finola.png'],
+			neither: []
+		};
+		this._detailsSection?.reset({ hiddenCharacters: hiddenByTimeline[timeline] || [] });
 	}
 
 	setRoleCharacters(roleId, characterFiles) {
