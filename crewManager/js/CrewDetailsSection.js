@@ -44,6 +44,7 @@ class CrewDetailsSection extends Component {
 				id:        index + 1,
 				avatar:    filename,
 				abilities: Array(Constants.ABILITY_SLOTS).fill(null),
+				mushAbilities: Array(5).fill(null),
 				items:     Array(Constants.ITEM_SLOTS).fill(null),
 				health:    Constants.DEFAULT_HEALTH,
 				morale:    14,
@@ -58,7 +59,11 @@ class CrewDetailsSection extends Component {
 				paPilgred: 0,
 				paShoot:   0,
 				paTech:    0,
-				paTorture: 0
+				paTorture: 0,
+				dead:      false,
+				mush:      false,
+				human:     false,
+				visible:   true
 			};
 
 			const updateSkillAvailability = (cardElement) => {
@@ -111,6 +116,25 @@ class CrewDetailsSection extends Component {
 				}).open();
 			};
 
+			const onMushAbilityClick = (playerId, slotIndex) => {
+				const cardInstance = this._cardInstanceByFilename[filename];
+				const items = AbilityData.getSelectionItems(getResourceURL, AbilityData.mushSkills);
+				items.unshift({ id: null, image: '', label: 'Clear' });
+
+				new SelectionModal({
+					items: items,
+					selectedId: player.mushAbilities[slotIndex],
+					columns: 5,
+					itemSize: 'large',
+					className: 'ability-selection item-selection crew-mush-skill-modal',
+					panelElement: cardInstance?.element?.closest('.app-panel'),
+					onSelect: (item) => {
+						player.mushAbilities[slotIndex] = item.id;
+						cardInstance?.updateMushAbility(slotIndex, item.id);
+					}
+				}).open();
+			};
+
 			const onSlotClick = (playerId, playerKey) => {
 				const cardInstance = this._cardInstanceByFilename[filename];
 				const current = player[playerKey];
@@ -138,12 +162,17 @@ class CrewDetailsSection extends Component {
 				}
 			};
 
+			const onToggleClick = (playerId, playerKey, isActive) => {
+				player[playerKey] = isActive;
+			};
+
 			const card = new PlayerCard({
 				player:          player,
 				getResourceURL:  getResourceURL,
 				showRemove:      false,
 				showItems:       false,
 				onAbilityClick:  onAbilityClick,
+				onMushAbilityClick: onMushAbilityClick,
 				onHealthClick:   onHealthClick,
 				extraSlots: [
 					{ className: 'morale-slot',  iconPath: 'pictures/ui/pmo.png',        playerKey: 'morale',    onSlotClick },
@@ -159,6 +188,14 @@ class CrewDetailsSection extends Component {
 					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_garden.png',  playerKey: 'paGarden',  onSlotClick },
 					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_shoot.png',   playerKey: 'paShoot',   onSlotClick },
 					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_comp.png',    playerKey: 'paComp',    onSlotClick }
+				],
+				toggleSlots: [
+					{ className: 'dead-toggle-slot',  iconPath: 'pictures/ui/dead.png',                         playerKey: 'dead',  onToggle: onToggleClick },
+					{ className: 'mush-toggle-slot',  iconPath: 'pictures/abilities/mush/esprit-mycelium.png', playerKey: 'mush',  onToggle: onToggleClick },
+					{ className: 'human-toggle-slot', iconPath: 'pictures/ui/human.png',                       playerKey: 'human', onToggle: onToggleClick }
+				],
+				overlayToggleSlots: [
+					{ className: 'visibility-toggle-slot', iconPath: 'pictures/ui/visibility.png', playerKey: 'visible', onToggle: onToggleClick }
 				]
 			});
 

@@ -118,11 +118,6 @@ class SelectionModal extends Modal {
 			option.appendChild(img);
 		}
 
-		// Label (optional, usually shown as tooltip)
-		if (item.label) {
-			option.title = item.label;
-		}
-
 		// Click handler
 		this.addEventListener(option, 'click', () => this._handleSelect(item));
 

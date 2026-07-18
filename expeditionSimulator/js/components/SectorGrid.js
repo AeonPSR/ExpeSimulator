@@ -129,7 +129,6 @@ class SectorGrid extends Component {
 		const img = this.createElement('img', {
 			src: this.getResourceURL(`pictures/sectors/${sectorName.toLowerCase()}.png`),
 			alt: sectorName,
-			title: formatSectorName(sectorName),
 			className: 'sector-main-img'
 		});
 		sectorDiv.appendChild(img);
@@ -170,11 +169,6 @@ class SectorGrid extends Component {
 				sectorDiv.style.pointerEvents = 'auto';
 			}
 
-			// Update tooltip
-			const img = sectorDiv.querySelector('.sector-main-img');
-			if (img && tooltipText) {
-				img.title = tooltipText;
-			}
 		});
 	}
 

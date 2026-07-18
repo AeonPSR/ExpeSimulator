@@ -22,8 +22,7 @@ class CrewCharacterGrid extends Component {
 			const option = this.createElement('div', { className: 'character-option' });
 			const img = this.createElement('img', {
 				src: getResourceURL(`pictures/characters/${filename}`),
-				alt: name,
-				title: name
+				alt: name
 			});
 			option.appendChild(img);
 			this.addEventListener(option, 'click', () => this.onCharacterClick?.(filename));

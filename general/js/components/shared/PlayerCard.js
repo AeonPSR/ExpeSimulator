@@ -17,6 +17,7 @@ class PlayerCard extends Component {
 	 *   { id, avatar, abilities: [5], items: [3], health }
 	 * @param {Function} [options.onAvatarClick] - Callback: (playerId) => void
 	 * @param {Function} [options.onAbilityClick] - Callback: (playerId, slotIndex) => void
+	 * @param {Function} [options.onMushAbilityClick] - Callback: (playerId, slotIndex) => void
 	 * @param {Function} [options.onItemClick] - Callback: (playerId, slotIndex) => void
 	 * @param {Function} [options.onHealthClick] - Callback: (playerId) => void
 	 * @param {Function} [options.onRemove] - Callback: (playerId) => void
@@ -27,12 +28,15 @@ class PlayerCard extends Component {
 		this.player = options.player || { id: 0, avatar: Constants.DEFAULT_AVATAR, abilities: Array(Constants.ABILITY_SLOTS).fill(null), items: Array(Constants.ITEM_SLOTS).fill(null), health: Constants.DEFAULT_HEALTH };
 		this.onAvatarClick = options.onAvatarClick || null;
 		this.onAbilityClick = options.onAbilityClick || null;
+		this.onMushAbilityClick = options.onMushAbilityClick || null;
 		this.onItemClick = options.onItemClick || null;
 		this.onHealthClick = options.onHealthClick || null;
 		this.onRemove = options.onRemove || null;
 		this.showRemove = options.showRemove !== false;
 		this.showItems  = options.showItems  !== false;
 		this.extraSlots = options.extraSlots || [];
+		this.toggleSlots = options.toggleSlots || [];
+		this.overlayToggleSlots = options.overlayToggleSlots || [];
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 	}
 
@@ -44,6 +48,12 @@ class PlayerCard extends Component {
 		this.element = this.createElement('div', {
 			className: 'player-profile',
 			dataset: { playerId: this.player.id.toString() }
+		});
+		this.toggleSlots.forEach(slotDef => {
+			this.element.classList.toggle(`player-${slotDef.playerKey}-active`, Boolean(this.player[slotDef.playerKey]));
+		});
+		this.overlayToggleSlots.forEach(slotDef => {
+			this.element.classList.toggle(`player-${slotDef.playerKey}-active`, Boolean(this.player[slotDef.playerKey]));
 		});
 
 		// Avatar
@@ -59,6 +69,8 @@ class PlayerCard extends Component {
 			const removeBtn = this._createRemoveButton();
 			this.element.appendChild(removeBtn);
 		}
+
+		this._appendOverlayToggleSlots();
 
 		return this.element;
 	}
@@ -99,9 +111,18 @@ class PlayerCard extends Component {
 		const abilities = this._createAbilitiesRow();
 		details.appendChild(abilities);
 
+		const mushAbilities = this._createMushAbilitiesRow();
+		details.appendChild(mushAbilities);
+
 		// Bottom row (items + health)
 		const bottomRow = this._createBottomRow();
 		details.appendChild(bottomRow);
+
+		// Toggle row (dead, mush, human, etc.)
+		const toggleRow = this._createToggleRow();
+		if (toggleRow) {
+			details.appendChild(toggleRow);
+		}
 
 		return details;
 	}
@@ -150,6 +171,45 @@ class PlayerCard extends Component {
 
 			this.addEventListener(slot, 'click', () => {
 				this.onAbilityClick?.(this.player.id, i);
+			});
+
+			abilitiesDiv.appendChild(slot);
+		}
+
+		return abilitiesDiv;
+	}
+
+	/**
+	 * Creates the Mush abilities row
+	 * @private
+	 * @returns {HTMLElement}
+	 */
+	_createMushAbilitiesRow() {
+		const abilitiesDiv = this.createElement('div', { className: 'player-abilities player-mush-abilities' });
+		const mushAbilities = this.player.mushAbilities || Array(5).fill(null);
+
+		for (let i = 0; i < 5; i++) {
+			const ability = mushAbilities[i];
+
+			const slot = this.createElement('div', {
+				className: 'ability-slot mush-ability-slot',
+				dataset: {
+					type: 'mush-ability',
+					slot: i.toString(),
+					playerId: this.player.id.toString()
+				}
+			});
+
+			if (ability) {
+				const img = this.createElement('img', {
+					src: this._getAbilityIcon(ability),
+					alt: ''
+				});
+				slot.appendChild(img);
+			}
+
+			this.addEventListener(slot, 'click', () => {
+				this.onMushAbilityClick?.(this.player.id, i);
 			});
 
 			abilitiesDiv.appendChild(slot);
@@ -240,6 +300,75 @@ class PlayerCard extends Component {
 	}
 
 	/**
+	 * Creates the icon-only toggle row (dead, mush, human, etc.)
+	 * @private
+	 * @returns {HTMLElement|null}
+	 */
+	_createToggleRow() {
+		if (!this.toggleSlots.length) {
+			return null;
+		}
+
+		const toggleRow = this.createElement('div', { className: 'player-toggle-row' });
+
+		for (const slotDef of this.toggleSlots) {
+			const isActive = Boolean(this.player[slotDef.playerKey]);
+			const slot = this.createElement('button', {
+				className: `player-toggle-slot ${slotDef.className || ''}`.trim(),
+				dataset: {
+					playerKey: slotDef.playerKey,
+					active: isActive.toString()
+				}
+			});
+			const icon = this.createElement('img', {
+				src: this.getResourceURL(slotDef.iconPath),
+				alt: slotDef.title || ''
+			});
+			slot.appendChild(icon);
+			this.addEventListener(slot, 'click', () => {
+				const nextActive = slot.dataset.active !== 'true';
+				this.player[slotDef.playerKey] = nextActive;
+				slot.dataset.active = nextActive.toString();
+				this.element?.classList.toggle(`player-${slotDef.playerKey}-active`, nextActive);
+				slotDef.onToggle?.(this.player.id, slotDef.playerKey, nextActive);
+			});
+			toggleRow.appendChild(slot);
+		}
+
+		return toggleRow;
+	}
+
+	/**
+	 * Adds icon-only toggle slots positioned over the card chrome.
+	 * @private
+	 */
+	_appendOverlayToggleSlots() {
+		this.overlayToggleSlots.forEach(slotDef => {
+			const isActive = Boolean(this.player[slotDef.playerKey]);
+			const slot = this.createElement('button', {
+				className: `player-toggle-slot player-toggle-slot--overlay ${slotDef.className || ''}`.trim(),
+				dataset: {
+					playerKey: slotDef.playerKey,
+					active: isActive.toString()
+				}
+			});
+			const icon = this.createElement('img', {
+				src: this.getResourceURL(slotDef.iconPath),
+				alt: slotDef.alt || ''
+			});
+			slot.appendChild(icon);
+			this.addEventListener(slot, 'click', () => {
+				const nextActive = slot.dataset.active !== 'true';
+				this.player[slotDef.playerKey] = nextActive;
+				slot.dataset.active = nextActive.toString();
+				this.element?.classList.toggle(`player-${slotDef.playerKey}-active`, nextActive);
+				slotDef.onToggle?.(this.player.id, slotDef.playerKey, nextActive);
+			});
+			this.element.appendChild(slot);
+		});
+	}
+
+	/**
 	 * Creates the remove button
 	 * @private
 	 * @returns {HTMLElement}
@@ -304,6 +433,29 @@ class PlayerCard extends Component {
 	updateAbility(slotIndex, abilityFile) {
 		this.player.abilities[slotIndex] = abilityFile;
 		const slot = this.element?.querySelector(`[data-type="ability"][data-slot="${slotIndex}"]`);
+		if (slot) {
+			slot.innerHTML = '';
+			if (abilityFile) {
+				const img = this.createElement('img', {
+					src: this._getAbilityIcon(abilityFile),
+					alt: 'Ability'
+				});
+				slot.appendChild(img);
+			}
+		}
+	}
+
+	/**
+	 * Updates a Mush ability slot
+	 * @param {number} slotIndex
+	 * @param {string|null} abilityFile
+	 */
+	updateMushAbility(slotIndex, abilityFile) {
+		if (!this.player.mushAbilities) {
+			this.player.mushAbilities = Array(5).fill(null);
+		}
+		this.player.mushAbilities[slotIndex] = abilityFile;
+		const slot = this.element?.querySelector(`[data-type="mush-ability"][data-slot="${slotIndex}"]`);
 		if (slot) {
 			slot.innerHTML = '';
 			if (abilityFile) {

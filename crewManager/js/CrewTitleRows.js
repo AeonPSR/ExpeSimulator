@@ -68,7 +68,6 @@ class CrewTitleRows extends Component {
 				const img = document.createElement('img');
 				img.src = getResourceURL(`pictures/characters/${filename}`);
 				img.alt = name;
-				img.title = name;
 				slot.appendChild(img);
 				slot.onclick = () => this.onCharacterClick?.(filename);
 			} else {

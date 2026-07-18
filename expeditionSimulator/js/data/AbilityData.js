@@ -35,6 +35,18 @@ const AbilityData = {
 		'human/tracker.png'
 	],
 
+	mushSkills: [
+		'mush/anonymush.png', 'mush/bacterophilie.png', 'mush/beta-mush.png',
+		'mush/cauchemardesque.png', 'mush/conspirateur.png', 'mush/contact-deprimant.png',
+		'mush/cuisine-fongique.png', 'mush/depression-neron.png', 'mush/dialoguiste.png',
+		'mush/doigt-fee.png', 'mush/dur-a-cuir.png', 'mush/esprit-mycelium.png',
+		'mush/fertile.png', 'mush/gelee-verte.png', 'mush/infecteur.png',
+		'mush/moisification-masse.png', 'mush/ninja.png', 'mush/phagocytose.png',
+		'mush/piege-moisi.png', 'mush/piegeur.png', 'mush/piratage-radio.png',
+		'mush/portier.png', 'mush/pyromane.png', 'mush/resistance-eau.png',
+		'mush/saboteur.png', 'mush/traitre.png', 'mush/transfert.png'
+	],
+
 	/**
 	 * Gets selection items for a given skill list
 	 * @param {Function} getResourceURL

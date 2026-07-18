@@ -54,8 +54,7 @@ class SettingsPage extends Component {
 		I18n.supported.forEach(locale => {
 			const btn = this.createElement('button', {
 				className: 'panel-lang-btn' +
-					(I18n.locale === locale ? ' panel-lang-btn--active' : ''),
-				title: locale.toUpperCase()
+					(I18n.locale === locale ? ' panel-lang-btn--active' : '')
 			});
 			const img = this.createElement('img', {
 				src: getResourceURL(`pictures/ui/${locale}.png`),
