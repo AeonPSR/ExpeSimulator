@@ -9,6 +9,7 @@ class CrewManagerPage extends Component {
 		super(options);
 		this._titleRows = null;
 		this._detailsSection = null;
+		this._expertToggle = null;
 	}
 
 	render() {
@@ -29,7 +30,7 @@ class CrewManagerPage extends Component {
 		this.element.appendChild(titleSection);
 
 		// Details section
-		const detailsSection = this._renderSection('crewmanager.section.details');
+		const detailsSection = this._renderSection('crewmanager.section.details', this._renderExpertToggle());
 		this._detailsSection = new CrewDetailsSection();
 		detailsSection.appendChild(this._detailsSection.render());
 		this.element.appendChild(detailsSection);
@@ -39,11 +40,34 @@ class CrewManagerPage extends Component {
 		return this.element;
 	}
 
-	_renderSection(titleKey) {
+	_renderSection(titleKey, headerButton = null) {
 		const section = this.createElement('div', { className: 'crew-section' });
+		const header = this.createElement('div', { className: 'sectors-header' });
 		const title = this.createElement('h4', { 'data-i18n': titleKey }, I18n.t(titleKey));
-		section.appendChild(title);
+		header.appendChild(title);
+		if (headerButton) {
+			const buttonsContainer = this.createElement('div', { className: 'sectors-buttons' });
+			buttonsContainer.appendChild(headerButton);
+			header.appendChild(buttonsContainer);
+		}
+		section.appendChild(header);
 		return section;
+	}
+
+	_renderExpertToggle() {
+		if (!this._expertToggle) {
+			this._expertToggle = new ToggleButton({
+				id: 'crew-expert-toggle-btn',
+				className: 'diplomacy-toggle-btn',
+				icon: getResourceURL('pictures/abilities/human/expert.png'),
+				alt: '',
+				activeColor: 'blue',
+				onToggle: (isActive) => {
+					this.element?.classList.toggle('crew-expert-active', isActive);
+				}
+			});
+		}
+		return this._expertToggle.render();
 	}
 
 	_renderResetButton() {

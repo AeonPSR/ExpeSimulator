@@ -142,6 +142,7 @@
 .app-panel .player-bottom-row {
 	display: flex;
 	flex-direction: row;
+	flex-wrap: wrap;
 	gap: 4px;
 	align-items: center;
 }
@@ -221,9 +222,42 @@
 	background: rgba(233, 30, 140, 0.3);
 }
 
-.app-panel .spore-slot:hover {
-	border-color: #c2185b;
-	background: rgba(233, 30, 140, 0.3);
+.app-panel .crew-manager-page:not(.crew-expert-active) .expert-slot {
+	display: none;
+}
+
+.app-panel .crew-manager-page.crew-expert-active .expert-slot.skill-locked {
+	display: none;
+}
+
+.app-panel .pa-slot {
+	border-color: #ff5599;
+	background: rgba(255, 85, 153, 0.2);
+}
+
+.app-panel .pa-slot:hover {
+	border-color: #ff77ad;
+	background: rgba(255, 85, 153, 0.3);
+}
+
+.app-panel .pm-slot {
+	border-color: #00ffe4;
+	background: rgba(0, 255, 228, 0.16);
+}
+
+.app-panel .pm-slot:hover {
+	border-color: #66fff0;
+	background: rgba(0, 255, 228, 0.24);
+}
+
+.app-panel .pa-other-slot {
+	border-color: #95a5a6;
+	background: rgba(149, 165, 166, 0.2);
+}
+
+.app-panel .pa-other-slot:hover {
+	border-color: #bdc3c7;
+	background: rgba(149, 165, 166, 0.3);
 }
 
 .app-panel .hp-icon {

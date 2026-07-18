@@ -15,6 +15,29 @@ class CrewDetailsSection extends Component {
 		this.element = this.createElement('div', { className: 'crew-details-section' });
 
 		const characters = CharacterData.available.filter(c => c !== Constants.DEFAULT_AVATAR);
+		const slotLimits = {
+			pm:        12,
+			paCore:    4,
+			paComp:    6,
+			paFood:    8,
+			paGarden:  4,
+			paHeal:    4,
+			paPilgred: 2,
+			paShoot:   6,
+			paTech:    2,
+			paTorture: 2
+		};
+		const slotSkillRequirements = {
+			paCore:    ['human/concepteur.png'],
+			paComp:    ['human/informaticien.png', 'human/polymathe.png'],
+			paFood:    ['human/cuistot.png', 'human/beta.png'],
+			paGarden:  ['human/botanic.png', 'human/beta.png'],
+			paHeal:    ['human/infirmier.png'],
+			paPilgred: ['human/physicien.png'],
+			paShoot:   ['human/gunman.png', 'human/beta.png'],
+			paTech:    ['human/technician.png', 'human/beta.png'],
+			paTorture: ['human/bourreau.png']
+		};
 
 		characters.forEach((filename, index) => {
 			const player = {
@@ -24,7 +47,27 @@ class CrewDetailsSection extends Component {
 				items:     Array(Constants.ITEM_SLOTS).fill(null),
 				health:    Constants.DEFAULT_HEALTH,
 				morale:    14,
-				spore:     0
+				spore:     0,
+				pa:        0,
+				pm:        0,
+				paCore:    0,
+				paComp:    0,
+				paFood:    0,
+				paGarden:  0,
+				paHeal:    0,
+				paPilgred: 0,
+				paShoot:   0,
+				paTech:    0,
+				paTorture: 0
+			};
+
+			const updateSkillAvailability = (cardElement) => {
+				if (!cardElement) return;
+				Object.entries(slotSkillRequirements).forEach(([playerKey, skills]) => {
+					const hasRequiredSkill = skills.some(skill => player.abilities.includes(skill));
+					const slot = cardElement.querySelector(`[data-player-key="${playerKey}"]`);
+					slot?.classList.toggle('skill-locked', !hasRequiredSkill);
+				});
 			};
 
 			const onAbilityClick = (playerId, slotIndex) => {
@@ -63,6 +106,7 @@ class CrewDetailsSection extends Component {
 					onSelect: (item) => {
 						player.abilities[slotIndex] = item.id;
 						cardInstance?.updateAbility(slotIndex, item.id);
+						updateSkillAvailability(cardInstance?.element);
 					}
 				}).open();
 			};
@@ -74,8 +118,10 @@ class CrewDetailsSection extends Component {
 				if (input !== null) {
 					const value = parseInt(input, 10);
 					if (!isNaN(value) && value >= 0) {
-						player[playerKey] = value;
-						cardInstance?.updateSlotValue(playerKey, value);
+						const limit = slotLimits[playerKey];
+						const nextValue = typeof limit === 'number' ? Math.min(value, limit) : value;
+						player[playerKey] = nextValue;
+						cardInstance?.updateSlotValue(playerKey, nextValue);
 					}
 				}
 			};
@@ -100,12 +146,24 @@ class CrewDetailsSection extends Component {
 				onAbilityClick:  onAbilityClick,
 				onHealthClick:   onHealthClick,
 				extraSlots: [
-					{ className: 'morale-slot', iconPath: 'pictures/ui/pmo.png',   playerKey: 'morale', onSlotClick },
-					{ className: 'spore-slot',  iconPath: 'pictures/ui/spore.png', playerKey: 'spore',  onSlotClick }
+					{ className: 'morale-slot',  iconPath: 'pictures/ui/pmo.png',        playerKey: 'morale',    onSlotClick },
+					{ className: 'spore-slot',   iconPath: 'pictures/ui/spore.png',      playerKey: 'spore',     onSlotClick },
+					{ className: 'expert-slot pa-slot',       iconPath: 'pictures/ui/pa.png',         playerKey: 'pa',        onSlotClick },
+					{ className: 'expert-slot pm-slot',       iconPath: 'pictures/ui/pm.png',         playerKey: 'pm',        onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_core.png',    playerKey: 'paCore',    onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_torture.png', playerKey: 'paTorture', onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_heal.png',    playerKey: 'paHeal',    onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_pilgred.png', playerKey: 'paPilgred', onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_tech.png',    playerKey: 'paTech',    onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_food.png',    playerKey: 'paFood',    onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_garden.png',  playerKey: 'paGarden',  onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_shoot.png',   playerKey: 'paShoot',   onSlotClick },
+					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_comp.png',    playerKey: 'paComp',    onSlotClick }
 				]
 			});
 
 			const el = card.render();
+			updateSkillAvailability(el);
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;
 			this.element.appendChild(el);

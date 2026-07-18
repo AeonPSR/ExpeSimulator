@@ -216,7 +216,10 @@ class PlayerCard extends Component {
 
 		// Extra status slots (e.g. morale, spore)
 		for (const slotDef of this.extraSlots) {
-			const slot = this.createElement('div', { className: `status-slot ${slotDef.className}` });
+			const slot = this.createElement('div', {
+				className: `status-slot ${slotDef.className}`,
+				dataset: { playerKey: slotDef.playerKey }
+			});
 			const valueSpan = this.createElement('span', {}, String(this.player[slotDef.playerKey] ?? 0));
 			slot.appendChild(valueSpan);
 			const icon = this.createElement('img', {
