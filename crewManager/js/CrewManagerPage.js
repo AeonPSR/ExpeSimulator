@@ -10,6 +10,7 @@ class CrewManagerPage extends Component {
 		this._titleRows = null;
 		this._detailsSection = null;
 		this._expertToggle = null;
+		this._cycleToggle = null;
 		this._crewGrid = null;
 		this._roleCharacters = {};
 		this._hiddenCharacters = new Set();
@@ -35,7 +36,7 @@ class CrewManagerPage extends Component {
 		this.element.appendChild(titleSection);
 
 		// Details section
-		const detailsSection = this._renderSection('crewmanager.section.details', this._renderExpertToggle());
+		const detailsSection = this._renderSection('crewmanager.section.details', [this._renderExpertToggle(), this._renderCycleToggle()]);
 		this._detailsSection = new CrewDetailsSection({
 			onVisibilityChange: (filename, visible) => this._setCharacterVisible(filename, visible),
 			onDeadChange: (filename, dead) => this._crewGrid?.setCharacterDead(filename, dead),
@@ -51,14 +52,16 @@ class CrewManagerPage extends Component {
 		return this.element;
 	}
 
-	_renderSection(titleKey, headerButton = null) {
+	_renderSection(titleKey, headerButtons = null) {
 		const section = this.createElement('div', { className: 'crew-section' });
 		const header = this.createElement('div', { className: 'sectors-header' });
 		const title = this.createElement('h4', { 'data-i18n': titleKey }, I18n.t(titleKey));
 		header.appendChild(title);
-		if (headerButton) {
+		if (headerButtons) {
 			const buttonsContainer = this.createElement('div', { className: 'sectors-buttons' });
-			buttonsContainer.appendChild(headerButton);
+			(Array.isArray(headerButtons) ? headerButtons : [headerButtons]).forEach(button => {
+				buttonsContainer.appendChild(button);
+			});
 			header.appendChild(buttonsContainer);
 		}
 		section.appendChild(header);
@@ -79,6 +82,22 @@ class CrewManagerPage extends Component {
 			});
 		}
 		return this._expertToggle.render();
+	}
+
+	_renderCycleToggle() {
+		if (!this._cycleToggle) {
+			this._cycleToggle = new ToggleButton({
+				id: 'crew-cycle-toggle-btn',
+				className: 'diplomacy-toggle-btn',
+				icon: getResourceURL('pictures/ui/clock.png'),
+				alt: '',
+				activeColor: 'orange',
+				onToggle: (isActive) => {
+					this.element?.classList.toggle('crew-cycle-active', isActive);
+				}
+			});
+		}
+		return this._cycleToggle.render();
 	}
 
 	_renderResetButton() {

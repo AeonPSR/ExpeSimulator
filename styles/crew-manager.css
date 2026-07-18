@@ -460,6 +460,14 @@
 	overflow: hidden;
 }
 
+#crew-manager-panel .crew-manager-page:not(.crew-cycle-active) .crew-timeline-stepper {
+	display: none;
+}
+
+#crew-manager-panel .crew-manager-page:not(.crew-cycle-active) .notes-action-slot {
+	margin-left: auto;
+}
+
 #crew-manager-panel .crew-details-section .crew-timeline-stepper-btn,
 #crew-manager-panel .crew-details-section .crew-timeline-stepper-display {
 	display: flex;
