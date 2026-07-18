@@ -35,7 +35,8 @@ class CrewManagerPage extends Component {
 		// Details section
 		const detailsSection = this._renderSection('crewmanager.section.details', this._renderExpertToggle());
 		this._detailsSection = new CrewDetailsSection({
-			onVisibilityChange: (filename, visible) => this._setCharacterVisible(filename, visible)
+			onVisibilityChange: (filename, visible) => this._setCharacterVisible(filename, visible),
+			onStatusChange: (filename, status) => this._crewGrid?.setCharacterStatus(filename, status)
 		});
 		detailsSection.appendChild(this._detailsSection.render());
 		this.element.appendChild(detailsSection);

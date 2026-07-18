@@ -39,6 +39,14 @@ class CrewCharacterGrid extends Component {
 	setCharacterVisible(filename, visible) {
 		this._optionByFilename[filename]?.classList.toggle('crew-character-missing', !visible);
 	}
+
+	setCharacterStatus(filename, status) {
+		const option = this._optionByFilename[filename];
+		if (!option) return;
+
+		option.classList.toggle('crew-character-mush', status === 'mush');
+		option.classList.toggle('crew-character-human', status === 'human');
+	}
 }
 
 var _global = typeof window !== 'undefined' ? window : self;

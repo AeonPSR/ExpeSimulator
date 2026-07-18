@@ -12,6 +12,7 @@ class CrewDetailsSection extends Component {
 		this._activeCardsContainer = null;
 		this._hiddenCardsContainer = null;
 		this.onVisibilityChange = options.onVisibilityChange || null;
+		this.onStatusChange = options.onStatusChange || null;
 	}
 
 	render() {
@@ -50,6 +51,7 @@ class CrewDetailsSection extends Component {
 		};
 
 		characters.forEach((filename, index) => {
+			const startsHuman = filename === 'chun.png';
 			const player = {
 				id:        index + 1,
 				avatar:    filename,
@@ -72,7 +74,9 @@ class CrewDetailsSection extends Component {
 				paTorture: 0,
 				dead:      false,
 				mush:      false,
-				human:     false,
+				human:     startsHuman,
+				inactive:  false,
+				grandInactive: false,
 				visible:   true
 			};
 
@@ -174,6 +178,25 @@ class CrewDetailsSection extends Component {
 
 			const onToggleClick = (playerId, playerKey, isActive) => {
 				player[playerKey] = isActive;
+				const cardInstance = this._cardInstanceByFilename[filename];
+
+				if (playerKey === 'mush' && isActive) {
+					player.human = false;
+					cardInstance?.setToggleState('human', false);
+				} else if (playerKey === 'human' && isActive) {
+					player.mush = false;
+					cardInstance?.setToggleState('mush', false);
+				}
+				if (playerKey === 'inactive' && !isActive) {
+					player.grandInactive = false;
+					cardInstance?.setToggleState('grandInactive', false);
+				}
+
+				if (playerKey === 'mush' || playerKey === 'human') {
+					const status = player.mush ? 'mush' : player.human ? 'human' : null;
+					this.onStatusChange?.(filename, status);
+				}
+
 				if (playerKey === 'visible') {
 					this._setCardHidden(filename, !isActive);
 					this.onVisibilityChange?.(filename, isActive);
@@ -204,9 +227,11 @@ class CrewDetailsSection extends Component {
 					{ className: 'expert-slot pa-other-slot', iconPath: 'pictures/ui/pa_comp.png',    playerKey: 'paComp',    onSlotClick }
 				],
 				toggleSlots: [
-					{ className: 'dead-toggle-slot',  iconPath: 'pictures/ui/dead.png',                         playerKey: 'dead',  onToggle: onToggleClick },
-					{ className: 'mush-toggle-slot',  iconPath: 'pictures/abilities/mush/esprit-mycelium.png', playerKey: 'mush',  onToggle: onToggleClick },
-					{ className: 'human-toggle-slot', iconPath: 'pictures/ui/human.png',                       playerKey: 'human', onToggle: onToggleClick }
+					{ className: 'dead-toggle-slot',           iconPath: 'pictures/ui/dead.png',           playerKey: 'dead',          onToggle: onToggleClick },
+					{ className: 'mush-toggle-slot',           iconPath: 'pictures/ui/mush.png',           playerKey: 'mush',          onToggle: onToggleClick },
+					{ className: 'human-toggle-slot',          iconPath: 'pictures/ui/human.png',          playerKey: 'human',         onToggle: onToggleClick },
+					{ className: 'inactive-toggle-slot',       iconPath: 'pictures/ui/inactive.png',       playerKey: 'inactive',      onToggle: onToggleClick },
+					{ className: 'grand-inactive-toggle-slot', iconPath: 'pictures/ui/grand inactive.png', playerKey: 'grandInactive', onToggle: onToggleClick }
 				],
 				overlayToggleSlots: [
 					{ className: 'visibility-toggle-slot', iconPath: 'pictures/ui/visibility.png', playerKey: 'visible', onToggle: onToggleClick }
@@ -219,6 +244,9 @@ class CrewDetailsSection extends Component {
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;
 			this._appendCardSorted(this._activeCardsContainer, filename, el);
+			if (startsHuman) {
+				this.onStatusChange?.(filename, 'human');
+			}
 		});
 
 		return this.element;

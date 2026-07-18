@@ -38,6 +38,7 @@ class PlayerCard extends Component {
 		this.toggleSlots = options.toggleSlots || [];
 		this.overlayToggleSlots = options.overlayToggleSlots || [];
 		this.getResourceURL = options.getResourceURL || ((path) => path);
+		this._toggleButtons = {};
 	}
 
 	/**
@@ -325,11 +326,10 @@ class PlayerCard extends Component {
 				alt: slotDef.title || ''
 			});
 			slot.appendChild(icon);
+			this._toggleButtons[slotDef.playerKey] = slot;
 			this.addEventListener(slot, 'click', () => {
 				const nextActive = slot.dataset.active !== 'true';
-				this.player[slotDef.playerKey] = nextActive;
-				slot.dataset.active = nextActive.toString();
-				this.element?.classList.toggle(`player-${slotDef.playerKey}-active`, nextActive);
+				this.setToggleState(slotDef.playerKey, nextActive);
 				slotDef.onToggle?.(this.player.id, slotDef.playerKey, nextActive);
 			});
 			toggleRow.appendChild(slot);
@@ -357,15 +357,20 @@ class PlayerCard extends Component {
 				alt: slotDef.alt || ''
 			});
 			slot.appendChild(icon);
+			this._toggleButtons[slotDef.playerKey] = slot;
 			this.addEventListener(slot, 'click', () => {
 				const nextActive = slot.dataset.active !== 'true';
-				this.player[slotDef.playerKey] = nextActive;
-				slot.dataset.active = nextActive.toString();
-				this.element?.classList.toggle(`player-${slotDef.playerKey}-active`, nextActive);
+				this.setToggleState(slotDef.playerKey, nextActive);
 				slotDef.onToggle?.(this.player.id, slotDef.playerKey, nextActive);
 			});
 			this.element.appendChild(slot);
 		});
+	}
+
+	setToggleState(playerKey, isActive) {
+		this.player[playerKey] = isActive;
+		this._toggleButtons[playerKey]?.setAttribute('data-active', isActive.toString());
+		this.element?.classList.toggle(`player-${playerKey}-active`, isActive);
 	}
 
 	/**

@@ -66,15 +66,29 @@
 	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing,
 #crew-manager-panel .crew-details-section .player-profile:not(.player-visible-active) {
 	filter: grayscale(1);
 	opacity: 0.45;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing:hover {
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing img {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing:hover img {
 	filter: grayscale(1);
 	opacity: 0.65;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-mush {
+	border-color: #ff5599;
+	box-shadow: 0 0 0 2px rgba(255, 85, 153, 0.65), 0 5px 15px rgba(255, 85, 153, 0.25);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-human {
+	border-color: #3498db;
+	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.65), 0 5px 15px rgba(52, 152, 219, 0.25);
 }
 
 /* ── Title rows ──────────────────────────────────────────────────────────── */
@@ -182,10 +196,74 @@
 }
 
 #crew-manager-panel .crew-details-section .player-profile {
-	border-color: #3498db;
+	background: rgb(44, 62, 80);
+	border-color: #8b949e;
 }
 
 #crew-manager-panel .crew-details-section .player-avatar {
+	border-color: #8b949e;
+}
+
+#crew-manager-panel .crew-details-section .player-profile .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile .visibility-toggle-slot[data-active="true"] {
+	background: rgb(44, 62, 80);
+	border-color: #8b949e;
+	transition: none;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active {
+	background: rgba(255, 85, 153, 0.18);
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active .player-avatar {
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active .visibility-toggle-slot[data-active="true"] {
+	background: rgb(92, 29, 60);
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .mush-toggle-slot[data-active="true"] {
+	background: rgba(255, 85, 153, 0.25);
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .inactive-toggle-slot[data-active="true"] {
+	background: rgba(250, 241, 112, 0.28);
+	border-color: #faf170;
+}
+
+#crew-manager-panel .crew-details-section .grand-inactive-toggle-slot {
+	display: none;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-inactive-active .grand-inactive-toggle-slot {
+	display: flex;
+}
+
+#crew-manager-panel .crew-details-section .grand-inactive-toggle-slot[data-active="true"] {
+	background: rgba(231, 76, 60, 0.28);
+	border-color: #e74c3c;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-human-active {
+	background: rgba(52, 152, 219, 0.18);
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-human-active .player-avatar {
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-human-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-human-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-human-active .visibility-toggle-slot[data-active="true"] {
+	background: rgb(35, 78, 107);
 	border-color: #3498db;
 }
 
@@ -363,12 +441,13 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	border-color: #3498db;
+	background: rgb(44, 62, 80);
+	border-color: #8b949e;
 }
 
 .crew-details-section .player-avatar {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-color: #3498db;
+	border-color: #8b949e;
 }
