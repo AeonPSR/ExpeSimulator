@@ -172,6 +172,8 @@ class CrewDetailsSection extends Component {
 				}
 			};
 
+			const onNotesClick = () => {};
+
 			const onToggleClick = (playerId, playerKey, isActive) => {
 				player[playerKey] = isActive;
 				const cardInstance = this._cardInstanceByFilename[filename];
@@ -239,6 +241,9 @@ class CrewDetailsSection extends Component {
 					{ className: 'human-toggle-slot',          iconPath: 'pictures/ui/human.png',          playerKey: 'human',         onToggle: onToggleClick },
 					{ className: 'inactive-toggle-slot',       iconPath: 'pictures/ui/inactive.png',       playerKey: 'inactive',      onToggle: onToggleClick },
 					{ className: 'grand-inactive-toggle-slot', iconPath: 'pictures/ui/grand inactive.png', playerKey: 'grandInactive', onToggle: onToggleClick }
+				],
+				abilityActionSlots: [
+					{ className: 'notes-action-slot', iconPath: 'pictures/ui/notepade.png', playerKey: 'notes', onClick: onNotesClick }
 				],
 				overlayToggleSlots: [
 					{ className: 'visibility-toggle-slot', iconPath: 'pictures/ui/visibility.png', playerKey: 'visible', onToggle: onToggleClick }

@@ -36,6 +36,7 @@ class PlayerCard extends Component {
 		this.showItems  = options.showItems  !== false;
 		this.extraSlots = options.extraSlots || [];
 		this.toggleSlots = options.toggleSlots || [];
+		this.abilityActionSlots = options.abilityActionSlots || [];
 		this.overlayToggleSlots = options.overlayToggleSlots || [];
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 		this._toggleButtons = {};
@@ -174,6 +175,24 @@ class PlayerCard extends Component {
 				this.onAbilityClick?.(this.player.id, i);
 			});
 
+			abilitiesDiv.appendChild(slot);
+		}
+
+		for (const slotDef of this.abilityActionSlots) {
+			const slot = this.createElement('button', {
+				className: `ability-slot ability-action-slot ${slotDef.className || ''}`.trim(),
+				dataset: {
+					playerKey: slotDef.playerKey
+				}
+			});
+			const icon = this.createElement('img', {
+				src: this.getResourceURL(slotDef.iconPath),
+				alt: slotDef.title || ''
+			});
+			slot.appendChild(icon);
+			this.addEventListener(slot, 'click', () => {
+				slotDef.onClick?.(this.player.id, slotDef.playerKey);
+			});
 			abilitiesDiv.appendChild(slot);
 		}
 
@@ -334,7 +353,6 @@ class PlayerCard extends Component {
 			});
 			toggleRow.appendChild(slot);
 		}
-
 		return toggleRow;
 	}
 

@@ -447,6 +447,25 @@
 	border-color: #e74c3c;
 }
 
+#crew-manager-panel .crew-details-section .notes-action-slot {
+	margin-left: auto;
+	padding: 0;
+	background: rgba(230, 126, 34, 0.3);
+	border-color: #e67e22;
+}
+
+#crew-manager-panel .crew-details-section .notes-action-slot:hover {
+	background: rgba(230, 126, 34, 0.5);
+	border-color: #d35400;
+}
+
+#crew-manager-panel .crew-details-section .notes-action-slot img {
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+	opacity: 1;
+}
+
 #crew-manager-panel .crew-details-section .player-profile.player-human-active {
 	background: rgba(52, 152, 219, 0.18);
 	border-color: #3498db;
