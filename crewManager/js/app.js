@@ -6,6 +6,7 @@
 class CrewManagerApp {
 	constructor() {
 		this._panel = null;
+		this._skillCardInjector = null;
 		this._init();
 	}
 
@@ -39,6 +40,11 @@ class CrewManagerApp {
 			'hua.png', 'derek.png', 'jin_su.png', 'kuan_ti.png', 'gioele.png', 'chun.png',
 			'ian.png', 'finola.png', 'terrence.png', 'frieda.png', 'chao.png', 'raluca.png'
 		]);
+
+		this._skillCardInjector = new CrewSkillCardInjector({
+			onImport: (filename, abilities) => this.importAvatarAbilities(filename, abilities)
+		});
+		this._skillCardInjector.start();
 	}
 
 	getAvatarGroups() {
@@ -47,6 +53,25 @@ class CrewManagerApp {
 
 	getAvatarAbilities(filename) {
 		return this._page?.getAvatarAbilities?.(filename) || [];
+	}
+
+	importAvatarAbilities(filename, abilities) {
+		this._page?.importAvatarAbilities?.(filename, abilities);
+		const panel = this._panel.element;
+		const wasAlreadyOpen = panel.getBoundingClientRect().left >= 0;
+		panel.classList.add('import-open');
+		document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('panel-on-top'));
+		panel.classList.add('panel-on-top');
+
+		const runAnimation = () => {
+			this._page?.scrollAndHighlight?.(filename);
+			setTimeout(() => panel.classList.remove('import-open'), 1600);
+		};
+		if (wasAlreadyOpen) {
+			runAnimation();
+		} else {
+			setTimeout(runAnimation, 350);
+		}
 	}
 }
 

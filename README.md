@@ -17,7 +17,7 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 Todo:
 - Add the "Crew management" Page
 - Add the "Projects" page
-
+- Added an export button on the other characters to get their skills
 
 Done since last update:
 - The expedition simulator now feed itself from the crew manager

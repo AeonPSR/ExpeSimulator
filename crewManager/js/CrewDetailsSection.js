@@ -227,6 +227,18 @@ class CrewDetailsSection extends Component {
 	getAvatarAbilities(filename) {
 		return [...(this._playerByFilename[filename]?.abilities || [])];
 	}
+
+	importAvatarAbilities(filename, abilities) {
+		const player = this._playerByFilename[filename];
+		const card = this._cardByFilename[filename];
+		const cardInstance = this._cardInstanceByFilename[filename];
+		if (!player || !cardInstance || !card) return;
+
+		const nextAbilities = Array.from({ length: Constants.ABILITY_SLOTS }, (_, index) => abilities[index] || null);
+		nextAbilities.forEach((ability, index) => cardInstance.updateAbility(index, ability));
+		CrewDetailSkillAvailability.update(card, player);
+		this._notifyPlayerChange();
+	}
 }
 
 var _global = typeof window !== 'undefined' ? window : self;

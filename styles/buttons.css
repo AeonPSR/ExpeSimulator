@@ -760,6 +760,36 @@
 	z-index: 10;
 }
 
+.crew-skill-import-btn {
+	margin-left: auto;
+	flex: 0 0 auto;
+}
+
+.crew-skill-import-icon {
+	display: block;
+	position: relative;
+	width: 24px;
+	height: 24px;
+}
+
+.crew-skill-import-btn img {
+	position: absolute;
+	display: block;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+.crew-skill-import-character {
+	left: 0px;
+	top: 5px;
+}
+
+.crew-skill-import-overlay {
+	left: 1px;
+	top: 6px;
+}
+
 /* ==========================================================================
    Compass Button (direction picker)
    ========================================================================== */

@@ -85,6 +85,7 @@
         "crewManager/js/CrewTitleRows.js",
         "crewManager/js/CrewTimelineModal.js",
         "crewManager/js/CrewTimelineStepper.js",
+        "crewManager/js/CrewSkillCardInjector.js",
         "crewManager/js/services/CrewManagerStorage.js",
         "crewManager/js/services/CrewSkillSelectionService.js",
         "crewManager/js/services/GameNotepadService.js",
