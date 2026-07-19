@@ -15,7 +15,7 @@ class CrewManagerApp {
 			panelClass: 'crew-manager-panel',
 			titleKey: 'crewmanager.title',
 			title: I18n.t('crewmanager.title'),
-			tongueIcon: getResourceURL('pictures/abilities/human/psy.png'),
+			tongueIcon: getResourceURL('pictures/abilities/aeon icons/Aeonian shrink.png'),
 			tongueAlt: '',
 			getResourceURL: getResourceURL
 		});

@@ -16,6 +16,7 @@ class CrewManagerPage extends Component {
 		this._hiddenCharacters = new Set();
 		this._titleBlockedCharacters = new Set();
 		this._roleOrder = ['commandant', 'comm', 'admin'];
+		this._savedState = CrewManagerStorage.load();
 	}
 
 	render() {
@@ -38,16 +39,19 @@ class CrewManagerPage extends Component {
 		// Details section
 		const detailsSection = this._renderSection('crewmanager.section.details', [this._renderExpertToggle(), this._renderCycleToggle()]);
 		this._detailsSection = new CrewDetailsSection({
+			savedPlayers: this._savedState.players,
 			onVisibilityChange: (filename, visible) => this._setCharacterVisible(filename, visible),
 			onDeadChange: (filename, dead) => this._crewGrid?.setCharacterDead(filename, dead),
 			onStatusChange: (filename, status) => this._crewGrid?.setCharacterStatus(filename, status),
 			onActivityChange: (filename, activity) => this._crewGrid?.setCharacterActivity(filename, activity),
-			onTitleEligibilityChange: (filename, eligible) => this._setCharacterTitleEligible(filename, eligible)
+			onTitleEligibilityChange: (filename, eligible) => this._setCharacterTitleEligible(filename, eligible),
+			onPlayerChange: (players) => CrewManagerStorage.savePlayers(players)
 		});
 		detailsSection.appendChild(this._detailsSection.render());
 		this.element.appendChild(detailsSection);
 
 		this.element.appendChild(this._renderResetButton());
+		this._applySavedOptions();
 
 		return this.element;
 	}
@@ -76,8 +80,10 @@ class CrewManagerPage extends Component {
 				icon: getResourceURL('pictures/abilities/human/expert.png'),
 				alt: '',
 				activeColor: 'blue',
+				initialState: Boolean(this._savedState.options.expert),
 				onToggle: (isActive) => {
 					this.element?.classList.toggle('crew-expert-active', isActive);
+					CrewManagerStorage.saveOptions({ expert: isActive });
 				}
 			});
 		}
@@ -92,12 +98,19 @@ class CrewManagerPage extends Component {
 				icon: getResourceURL('pictures/ui/clock.png'),
 				alt: '',
 				activeColor: 'orange',
+				initialState: Boolean(this._savedState.options.cycle),
 				onToggle: (isActive) => {
 					this.element?.classList.toggle('crew-cycle-active', isActive);
+					CrewManagerStorage.saveOptions({ cycle: isActive });
 				}
 			});
 		}
 		return this._cycleToggle.render();
+	}
+
+	_applySavedOptions() {
+		this.element?.classList.toggle('crew-expert-active', Boolean(this._savedState.options.expert));
+		this.element?.classList.toggle('crew-cycle-active', Boolean(this._savedState.options.cycle));
 	}
 
 	_renderResetButton() {

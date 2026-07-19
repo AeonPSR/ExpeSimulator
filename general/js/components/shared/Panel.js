@@ -156,7 +156,12 @@ class Panel extends Component {
 				panelsContainer.classList.toggle('aeons-lab', Settings.theme === 'retro');
 			}
 		}
-		return super.mount(panelsContainer);
+		const mounted = super.mount(panelsContainer);
+		if (typeof Settings !== 'undefined') {
+			this.element.classList.toggle('panel--hidden', !Settings.isPanelVisible(this.element.id));
+		}
+		Panel.repositionTongues();
+		return mounted;
 	}
 
 	onMount() {

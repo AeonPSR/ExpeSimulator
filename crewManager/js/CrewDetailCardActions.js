@@ -14,6 +14,7 @@ class CrewDetailCardActions {
 		this._onActivityChange = options.onActivityChange;
 		this._onTitleEligibilityChange = options.onTitleEligibilityChange;
 		this._onSkillAvailabilityChange = options.onSkillAvailabilityChange;
+		this._onPlayerChange = options.onPlayerChange;
 	}
 
 	createHandlers(filename, player) {
@@ -38,6 +39,7 @@ class CrewDetailCardActions {
 				player.abilities[slotIndex] = item.id;
 				cardInstance?.updateAbility(slotIndex, item.id);
 				this._onSkillAvailabilityChange?.(cardInstance?.element, player);
+				this._onPlayerChange?.(filename);
 			}
 		});
 	}
@@ -51,6 +53,7 @@ class CrewDetailCardActions {
 			onSelect: (item) => {
 				player.mushAbilities[slotIndex] = item.id;
 				cardInstance?.updateMushAbility(slotIndex, item.id);
+				this._onPlayerChange?.(filename);
 			}
 		});
 	}
@@ -68,6 +71,7 @@ class CrewDetailCardActions {
 		const nextValue = typeof limit === 'number' ? Math.min(value, limit) : value;
 		player[playerKey] = nextValue;
 		cardInstance?.updateSlotValue(playerKey, nextValue);
+		this._onPlayerChange?.(filename);
 		if (playerKey === 'morale') {
 			this._onDeathStateChange?.(filename);
 		}
@@ -83,6 +87,7 @@ class CrewDetailCardActions {
 
 		player.health = value;
 		cardInstance?.updateHealth(value);
+		this._onPlayerChange?.(filename);
 		this._onDeathStateChange?.(filename);
 	}
 
@@ -107,6 +112,7 @@ class CrewDetailCardActions {
 		this._notifyDeathChange(filename, playerKey);
 		this._notifyStatusChange(filename, player, playerKey);
 		this._notifyVisibilityChange(filename, playerKey, isActive);
+		this._onPlayerChange?.(filename);
 	}
 
 	_notifyActivityChange(filename, player, playerKey) {

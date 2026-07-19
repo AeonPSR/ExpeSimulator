@@ -25,6 +25,8 @@ class CrewDetailsSection extends Component {
 		this.onStatusChange = options.onStatusChange || null;
 		this.onActivityChange = options.onActivityChange || null;
 		this.onTitleEligibilityChange = options.onTitleEligibilityChange || null;
+		this.onPlayerChange = options.onPlayerChange || null;
+		this._savedPlayers = options.savedPlayers || {};
 	}
 
 	render() {
@@ -54,7 +56,8 @@ class CrewDetailsSection extends Component {
 			onStatusChange: (filename, status) => this.onStatusChange?.(filename, status),
 			onActivityChange: (filename, activity) => this.onActivityChange?.(filename, activity),
 			onTitleEligibilityChange: (filename, canReceiveTitle) => this.onTitleEligibilityChange?.(filename, canReceiveTitle),
-			onSkillAvailabilityChange: (cardElement, player) => CrewDetailSkillAvailability.update(cardElement, player)
+				onSkillAvailabilityChange: (cardElement, player) => CrewDetailSkillAvailability.update(cardElement, player),
+				onPlayerChange: () => this._notifyPlayerChange()
 		});
 
 		const characters = CharacterData.available
@@ -62,7 +65,7 @@ class CrewDetailsSection extends Component {
 			.sort((a, b) => this._getCharacterName(a).localeCompare(this._getCharacterName(b)));
 		characters.forEach((filename, index) => {
 			const startsHuman = CrewCharacterState.startsHuman(filename);
-			const player = CrewCharacterState.create(filename, index);
+			const player = this._restorePlayer(filename, CrewCharacterState.create(filename, index));
 			const handlers = this._cardActions.createHandlers(filename, player);
 
 			const { card, element: el } = CrewDetailCardFactory.create({
@@ -76,15 +79,51 @@ class CrewDetailsSection extends Component {
 			this._cardByFilename[filename] = el;
 			this._cardInstanceByFilename[filename] = card;
 			this._playerByFilename[filename] = player;
-			this._cardOrganizer.appendSorted(this._activeCardsContainer, filename, el);
-			if (startsHuman) {
-				this.onStatusChange?.(filename, 'human');
-			}
+			this._cardOrganizer.appendSorted(this._cardOrganizer.getCardSubsection(filename), filename, el);
+			this._syncRestoredState(filename, player, el);
 		});
+		this._cardOrganizer.updateSubsectionVisibility();
 
 		this._observeNotesAvailability();
 
 		return this.element;
+	}
+
+	_restorePlayer(filename, player) {
+		const saved = this._savedPlayers[filename];
+		if (!saved || typeof saved !== 'object') return player;
+		return Object.assign(player, saved, {
+			id: player.id,
+			avatar: filename,
+			abilities: this._restoreArray(saved.abilities, Constants.ABILITY_SLOTS),
+			mushAbilities: this._restoreArray(saved.mushAbilities, 5),
+			items: Array(Constants.ITEM_SLOTS).fill(null),
+			visible: saved.visible !== false
+		});
+	}
+
+	_restoreArray(value, length) {
+		return Array.from({ length }, (_, index) => Array.isArray(value) ? value[index] || null : null);
+	}
+
+	_syncRestoredState(filename, player, cardElement) {
+		const isDead = CrewCharacterState.isDead(player);
+		cardElement.classList.toggle('player-dead-active', isDead);
+		this.onVisibilityChange?.(filename, player.visible);
+		this.onDeadChange?.(filename, isDead);
+		this.onStatusChange?.(filename, player.mush ? 'mush' : player.human ? 'human' : null);
+		this.onActivityChange?.(filename, player.grandInactive ? 'grandInactive' : player.inactive ? 'inactive' : null);
+		this.onTitleEligibilityChange?.(filename, !isDead && !player.inactive && !player.grandInactive);
+	}
+
+	_notifyPlayerChange() {
+		this.onPlayerChange?.(this.getPlayerState());
+	}
+
+	getPlayerState() {
+		return Object.fromEntries(
+			Object.entries(this._playerByFilename).map(([filename, player]) => [filename, { ...player }])
+		);
 	}
 
 	onDestroy() {
@@ -134,7 +173,10 @@ class CrewDetailsSection extends Component {
 		const notesButton = abilityRow?.querySelector('.notes-action-slot');
 		if (!abilityRow || !notesButton) return;
 
-		const stepper = new CrewTimelineStepper({ player });
+		const stepper = new CrewTimelineStepper({
+			player,
+			onChange: () => this._notifyPlayerChange()
+		});
 		abilityRow.insertBefore(stepper.render(), notesButton);
 		this._timelineStepperByFilename[filename] = stepper;
 	}
@@ -155,6 +197,7 @@ class CrewDetailsSection extends Component {
 			onActivityChange: (filename, activity) => this.onActivityChange?.(filename, activity),
 			onTitleEligibilityChange: (filename, canReceiveTitle) => this.onTitleEligibilityChange?.(filename, canReceiveTitle)
 		});
+		this._notifyPlayerChange();
 	}
 
 	scrollAndHighlight(filename) {

@@ -209,6 +209,8 @@ const Translations = {
 		'crewmanager.timeline.chaola':       'Chaola',
 		'crewmanager.timeline.anderek':      'Anderek',
 		'crewmanager.timeline.neither':      'Neither',
+		'crewmanager.timeline.day_short':    'D',
+		'crewmanager.timeline.cycle_short':  'C',
 
 		// Settings panel
 		'settings.title':                    'Settings',
@@ -444,6 +446,8 @@ const Translations = {
 		'crewmanager.timeline.chaola':       'Chaola',
 		'crewmanager.timeline.anderek':      'Anderek',
 		'crewmanager.timeline.neither':      'Ni l\'un ni l\'autre',
+		'crewmanager.timeline.day_short':    'J',
+		'crewmanager.timeline.cycle_short':  'C',
 
 		// Settings panel
 		'settings.title':                    'Réglages',
@@ -679,6 +683,8 @@ const Translations = {
 		'crewmanager.timeline.chaola':       'Chaola',
 		'crewmanager.timeline.anderek':      'Anderek',
 		'crewmanager.timeline.neither':      'Ninguno',
+		'crewmanager.timeline.day_short':    'D',
+		'crewmanager.timeline.cycle_short':  'C',
 
 		// Settings panel
 		'settings.title':                    'Ajustes',

@@ -7,7 +7,9 @@ class CrewTimelineStepper extends Component {
 	constructor(options = {}) {
 		super(options);
 		this.player = options.player;
+		this.onChange = options.onChange || null;
 		this._display = null;
+		this._localeUnsubscribe = null;
 	}
 
 	render() {
@@ -19,6 +21,7 @@ class CrewTimelineStepper extends Component {
 		this.addEventListener(decrement, 'click', () => this._step(-1));
 		this.addEventListener(this._display, 'click', () => this._prompt());
 		this.addEventListener(increment, 'click', () => this._step(1));
+		this.addEventListener(document, 'i18n:change', () => this._updateDisplay());
 
 		this.element.appendChild(decrement);
 		this.element.appendChild(this._display);
@@ -31,7 +34,7 @@ class CrewTimelineStepper extends Component {
 	}
 
 	_format() {
-		return `D${this.player.day}-C${this.player.cycle}`;
+		return `${I18n.t('crewmanager.timeline.day_short')}${this.player.day}-${I18n.t('crewmanager.timeline.cycle_short')}${this.player.cycle}`;
 	}
 
 	_updateDisplay() {
@@ -44,6 +47,7 @@ class CrewTimelineStepper extends Component {
 		this.player.day = Math.max(1, day);
 		this.player.cycle = Math.min(8, Math.max(1, cycle));
 		this._updateDisplay();
+		this.onChange?.();
 	}
 
 	_step(direction) {
@@ -68,7 +72,7 @@ class CrewTimelineStepper extends Component {
 		const input = prompt('', this._format());
 		if (input === null) return;
 
-		const match = input.trim().match(/^D?(\d+)\s*[- ]\s*C?(\d+)$/i);
+		const match = input.trim().match(/^\D*(\d+)\s*[- ]\s*\D*(\d+)$/i);
 		if (!match) return;
 		this._setTimeline(parseInt(match[1], 10), parseInt(match[2], 10));
 	}

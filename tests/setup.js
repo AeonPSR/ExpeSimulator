@@ -85,7 +85,9 @@ const sourceFiles = [
   'expeditionSimulator/js/probability/CombatRewardCalculator.js',
   'expeditionSimulator/js/probability/EventDamageCalculator.js',
   'expeditionSimulator/js/io/Clipboard.js',
-  'expeditionSimulator/js/io/ChatObserver.js'
+  'expeditionSimulator/js/io/ChatObserver.js',
+  'crewManager/js/CrewCharacterState.js',
+  'crewManager/js/services/CrewManagerStorage.js'
   // 'expeditionSimulator/js/app.js' - excluded: initializes UI
   // 'content.js' - excluded: entry point
 ];

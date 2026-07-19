@@ -142,14 +142,14 @@ class SettingsPage extends Component {
 		}));
 		row.appendChild(this._renderPanelVisibilityButton({
 			panelId: 'crew-manager-panel',
-			iconPath: 'pictures/abilities/human/psy.png'
+			iconPath: 'pictures/abilities/aeon icons/Aeonian shrink.png'
 		}));
 		return row;
 	}
 
 	_renderPanelVisibilityButton({ panelId, iconPath }) {
 		const panel = document.getElementById(panelId);
-		const isVisible = !panel?.classList.contains('panel--hidden');
+		const isVisible = Settings.isPanelVisible(panelId) && !panel?.classList.contains('panel--hidden');
 		const btn = this.createElement('button', {
 			className: 'panel-lang-btn' + (isVisible ? ' panel-lang-btn--active' : ''),
 		});
@@ -160,6 +160,7 @@ class SettingsPage extends Component {
 		btn.appendChild(img);
 		this.addEventListener(btn, 'click', () => {
 			const visible = btn.classList.toggle('panel-lang-btn--active');
+			Settings.setPanelVisible(panelId, visible);
 			const panel = document.getElementById(panelId);
 			panel?.classList.toggle('panel--hidden', !visible);
 			Panel.repositionTongues();
