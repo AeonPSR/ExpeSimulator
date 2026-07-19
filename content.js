@@ -25,9 +25,10 @@ function initializeApp() {
 			return;
 		}
 
-		// Create the application
-		window.expeditionSimulator = new ExpeditionSimulatorApp();
+		// Create the applications. Crew Manager is first so expedition player
+		// randomization can read crew availability during initial state setup.
 		window.crewManagerApp = new CrewManagerApp();
+		window.expeditionSimulator = new ExpeditionSimulatorApp();
 		// Settings must be created last: Panel.mount() appends to
 		// #panels-container in creation order, and DOM order breaks
 		// z-index ties between tongues. Settings should always be last.

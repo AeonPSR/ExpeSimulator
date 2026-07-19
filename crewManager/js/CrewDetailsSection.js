@@ -160,6 +160,30 @@ class CrewDetailsSection extends Component {
 	scrollAndHighlight(filename) {
 		this._cardOrganizer.scrollAndHighlight(filename);
 	}
+
+	getAvatarGroups() {
+		const groups = {
+			available: [],
+			dead: [],
+			missing: []
+		};
+
+		Object.entries(this._playerByFilename).forEach(([filename, player]) => {
+			if (!player.visible) {
+				groups.missing.push(filename);
+			} else if (CrewCharacterState.isDead(player)) {
+				groups.dead.push(filename);
+			} else {
+				groups.available.push(filename);
+			}
+		});
+
+		return groups;
+	}
+
+	getAvatarAbilities(filename) {
+		return [...(this._playerByFilename[filename]?.abilities || [])];
+	}
 }
 
 var _global = typeof window !== 'undefined' ? window : self;

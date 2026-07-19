@@ -8,10 +8,14 @@ describe('ExpeditionState', () => {
 
 	// Store originals
 	let originalConstants;
+	let originalCrewManagerApp;
+	let originalMathRandom;
 
 	beforeAll(() => {
 		// Save original
 		originalConstants = global.Constants;
+		originalCrewManagerApp = global.window?.crewManagerApp;
+		originalMathRandom = Math.random;
 
 		// Mock Constants
 		global.Constants = {
@@ -24,6 +28,17 @@ describe('ExpeditionState', () => {
 
 	afterAll(() => {
 		global.Constants = originalConstants;
+		if (global.window) {
+			global.window.crewManagerApp = originalCrewManagerApp;
+		}
+		Math.random = originalMathRandom;
+	});
+
+	beforeEach(() => {
+		if (global.window) {
+			global.window.crewManagerApp = null;
+		}
+		Math.random = originalMathRandom;
 	});
 
 	// ========================================
@@ -42,10 +57,10 @@ describe('ExpeditionState', () => {
 			expect(state.getPlayerCount()).toBe(4);
 		});
 
-		test('first player has Pilot ability', () => {
+		test('first player has Pilot ability without Crew Manager state', () => {
 			const state = new ExpeditionState();
 			const players = state.getPlayers();
-			expect(players[0].abilities[0]).toBe('pilot.png');
+			expect(players[0].abilities[0]).toBe('human/pilot.png');
 		});
 
 		test('other players have no abilities', () => {
@@ -58,6 +73,44 @@ describe('ExpeditionState', () => {
 			const state = new ExpeditionState();
 			const players = state.getPlayers();
 			expect(players[0].health).toBe(14);
+		});
+
+		test('preselects expedition skills from Crew Manager for random players', () => {
+			Math.random = jest.fn(() => 0);
+			global.window.crewManagerApp = {
+				getAvatarGroups: () => ({
+					available: ['frieda.png', 'janice.png', 'raluca.png', 'chun.png', 'hua.png'],
+					dead: [],
+					missing: []
+				}),
+				getAvatarAbilities: (avatar) => avatar === 'frieda.png'
+					? ['human/pilot.png', 'human/survival.png', 'human/informaticien.png']
+					: []
+			};
+
+			const state = new ExpeditionState();
+			const [player] = state.getPlayers();
+
+			expect(player.avatar).toBe('frieda.png');
+			expect(player.abilities).toEqual(['human/pilot.png', 'human/survival.png', null, null]);
+		});
+
+		test('first player falls back to Pilot owner and selects Pilot', () => {
+			Math.random = jest.fn(() => 0);
+			global.window.crewManagerApp = {
+				getAvatarGroups: () => ({
+					available: ['raluca.png', 'hua.png', 'janice.png', 'chun.png'],
+					dead: [],
+					missing: []
+				}),
+				getAvatarAbilities: () => []
+			};
+
+			const state = new ExpeditionState();
+			const [player] = state.getPlayers();
+
+			expect(player.avatar).toBe('hua.png');
+			expect(player.abilities).toEqual(['human/pilot.png', null, null, null]);
 		});
 	});
 
@@ -135,6 +188,25 @@ describe('ExpeditionState', () => {
 			const initial = state.getPlayerCount();
 			state.addPlayer();
 			expect(state.getPlayerCount()).toBe(initial + 1);
+		});
+
+		test('addPlayer uses Pilot preference when expedition list is empty', () => {
+			Math.random = jest.fn(() => 0);
+			global.window.crewManagerApp = {
+				getAvatarGroups: () => ({
+					available: ['janice.png', 'frieda.png', 'raluca.png'],
+					dead: [],
+					missing: []
+				}),
+				getAvatarAbilities: (avatar) => avatar === 'frieda.png' ? ['human/pilot.png'] : []
+			};
+
+			const state = new ExpeditionState();
+			state.getPlayers().forEach(player => state.removePlayer(player.id));
+			const player = state.addPlayer();
+
+			expect(player.avatar).toBe('frieda.png');
+			expect(player.abilities).toEqual(['human/pilot.png', null, null, null]);
 		});
 
 		test('removePlayer removes by ID', () => {

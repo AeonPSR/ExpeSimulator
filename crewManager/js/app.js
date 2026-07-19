@@ -40,6 +40,14 @@ class CrewManagerApp {
 			'ian.png', 'finola.png', 'terrence.png', 'frieda.png', 'chao.png', 'raluca.png'
 		]);
 	}
+
+	getAvatarGroups() {
+		return this._page?.getAvatarGroups?.() || null;
+	}
+
+	getAvatarAbilities(filename) {
+		return this._page?.getAvatarAbilities?.(filename) || [];
+	}
 }
 
 var _global = typeof window !== 'undefined' ? window : self;

@@ -17,8 +17,10 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 Todo:
 - Add the "Crew management" Page
 - Add the "Projects" page
-- Sortir l'option de visibilité de la béta
+
 
 Done since last update:
+- The expedition simulator now feed itself from the crew manager
+- Sortir l'option de visibilité de la béta
 - Rename the events so it's the proper "Errance" stuff
 - Fix the bug where the ressources gained from fights aren't taken into account in the star rating

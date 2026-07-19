@@ -190,6 +190,14 @@ class CrewManagerPage extends Component {
 			.filter(filename => filename !== Constants.DEFAULT_AVATAR)
 			.forEach(filename => this._crewGrid?.setCharacterTitles(filename, rolesByCharacter[filename] || []));
 	}
+
+	getAvatarGroups() {
+		return this._detailsSection?.getAvatarGroups?.() || null;
+	}
+
+	getAvatarAbilities(filename) {
+		return this._detailsSection?.getAvatarAbilities?.(filename) || [];
+	}
 }
 
 var _global = typeof window !== 'undefined' ? window : self;
