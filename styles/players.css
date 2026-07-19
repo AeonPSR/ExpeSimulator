@@ -128,6 +128,20 @@
 	background: rgba(52, 152, 219, 0.2);
 }
 
+.app-panel .player-profile:not(.player-mush-active) .player-mush-abilities {
+	display: none;
+}
+
+.app-panel .mush-ability-slot {
+	border-color: #e91e8c;
+	background: rgba(233, 30, 140, 0.16);
+}
+
+.app-panel .mush-ability-slot:hover {
+	border-color: #ff5599;
+	background: rgba(233, 30, 140, 0.28);
+}
+
 
 .app-panel .ability-slot img {
 	width: 100%;
@@ -142,6 +156,15 @@
 .app-panel .player-bottom-row {
 	display: flex;
 	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 4px;
+	align-items: center;
+}
+
+.app-panel .player-toggle-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
 	gap: 4px;
 	align-items: center;
 }
@@ -172,30 +195,28 @@
 }
 
 /* ==========================================================================
-   Health & Morale Slots
+   Status Slots (Health, Morale, Spore)
    ========================================================================== */
 
-.app-panel .health-slot,
-.app-panel .morale-slot {
+.app-panel .status-slot {
 	width: 40px;
 	height: 30px;
-	border: 2px solid #e74c3c;
+	border: 2px solid;
 	border-radius: 4px;
-	background: rgba(231, 76, 60, 0.2);
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	flex-direction: row;
 	font-size: 12px;
 	font-weight: 600;
 	color: #fff;
 	cursor: pointer;
 	transition: all 0.3s ease;
-	flex-direction: row;
 }
 
-.app-panel .morale-slot {
-	border-color: #f39c12;
-	background: rgba(243, 156, 18, 0.2);
+.app-panel .health-slot {
+	border-color: #e74c3c;
+	background: rgba(231, 76, 60, 0.2);
 }
 
 .app-panel .health-slot:hover {
@@ -203,14 +224,153 @@
 	background: rgba(231, 76, 60, 0.3);
 }
 
+.app-panel .morale-slot {
+	border-color: #f39c12;
+	background: rgba(243, 156, 18, 0.2);
+}
+
 .app-panel .morale-slot:hover {
 	border-color: #e67e22;
 	background: rgba(243, 156, 18, 0.3);
+}
+
+.app-panel .spore-slot {
+	border-color: #e91e8c;
+	background: rgba(233, 30, 140, 0.2);
+}
+
+.app-panel .spore-slot:hover {
+	border-color: #c2185b;
+	background: rgba(233, 30, 140, 0.3);
+}
+
+.app-panel .crew-manager-page:not(.crew-expert-active) .expert-slot {
+	display: none;
+}
+
+.app-panel .crew-manager-page.crew-expert-active .expert-slot.skill-locked {
+	display: none;
+}
+
+.app-panel .pa-slot {
+	border-color: #ff5599;
+	background: rgba(255, 85, 153, 0.2);
+}
+
+.app-panel .pa-slot:hover {
+	border-color: #ff77ad;
+	background: rgba(255, 85, 153, 0.3);
+}
+
+.app-panel .pm-slot {
+	border-color: #00ffe4;
+	background: rgba(0, 255, 228, 0.16);
+}
+
+.app-panel .pm-slot:hover {
+	border-color: #66fff0;
+	background: rgba(0, 255, 228, 0.24);
+}
+
+.app-panel .pa-other-slot {
+	border-color: #95a5a6;
+	background: rgba(149, 165, 166, 0.2);
+}
+
+.app-panel .pa-other-slot:hover {
+	border-color: #bdc3c7;
+	background: rgba(149, 165, 166, 0.3);
 }
 
 .app-panel .hp-icon {
 	width: 14px;
 	height: 14px;
 	margin-left: 2px;
+}
+
+.app-panel .player-toggle-slot {
+	width: 30px;
+	height: 30px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.2);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	padding: 0;
+	transition: all 0.3s ease;
+}
+
+.app-panel .player-toggle-slot img {
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+	opacity: 0.4;
+	transition: opacity 0.3s ease;
+}
+
+.app-panel .player-toggle-slot::before,
+.app-panel .player-toggle-slot::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	opacity: 1;
+	transition: opacity 0.3s ease;
+}
+
+.app-panel .player-toggle-slot::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.app-panel .player-toggle-slot::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.app-panel .player-toggle-slot:hover {
+	border-color: #7f8c8d;
+	background: rgba(149, 165, 166, 0.3);
+}
+
+.app-panel .player-toggle-slot[data-active="true"] {
+	border-color: #3498db;
+	background: rgba(52, 152, 219, 0.25);
+}
+
+.app-panel .player-toggle-slot[data-active="true"] img {
+	opacity: 1;
+}
+
+.app-panel .player-toggle-slot[data-active="true"]::before,
+.app-panel .player-toggle-slot[data-active="true"]::after {
+	opacity: 0;
+}
+
+.app-panel .player-toggle-slot--overlay {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	width: 24px;
+	height: 24px;
+	background: #2c3e50;
+	z-index: 10;
+}
+
+.app-panel .player-toggle-slot--overlay:hover {
+	background: #34495e;
+}
+
+.app-panel .player-toggle-slot--overlay[data-active="true"] {
+	background: #2c3e50;
+}
+
+.app-panel .player-toggle-slot--overlay img {
+	width: 14px;
+	height: 14px;
 }
 

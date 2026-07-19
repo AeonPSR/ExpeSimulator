@@ -1,0 +1,852 @@
+/* ==========================================================================
+   Crew Manager Panel
+
+   CONVENTION: All overrides of shared component styles use #crew-manager-panel
+   as the leading selector. An ID has specificity (1,0,0) which always beats
+   the class-based selectors in component files like .app-panel (0,1,0),
+   regardless of source order. No need for !important or duplicated rules.
+   ========================================================================== */
+
+/* ── Page layout ─────────────────────────────────────────────────────────── */
+
+.crew-manager-page {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 12px 4px;
+}
+
+.crew-section {
+	margin: 0;
+}
+
+.crew-section h4 {
+	margin: 0 0 10px 0;
+	font-size: 16px;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 8px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.crew-reset-row {
+	margin-top: auto;
+	padding-top: 10px;
+	display: flex;
+	justify-content: center;
+}
+
+.crew-reset-btn {
+	padding: 8px 20px;
+	background: rgba(231, 76, 60, 0.15);
+	border: 1px solid #e74c3c;
+	border-radius: 4px;
+	color: #e74c3c;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.crew-reset-btn:hover {
+	background: rgba(231, 76, 60, 0.3);
+}
+
+/* ── Crew grid ───────────────────────────────────────────────────────────── */
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option {
+	position: relative;
+	overflow: visible;
+	background: rgba(255, 255, 255, 0.1);
+	border-color: transparent;
+	backdrop-filter: blur(10px);
+}
+
+#crew-manager-panel .crew-sprite-anchor {
+	--crew-dead-icon-left: 50%;
+	--crew-dead-icon-top: -2px;
+	--crew-dead-icon-size: 18px;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 42px;
+	height: 60px;
+	overflow: visible;
+}
+
+#crew-manager-panel .crew-sprite-anchor .crew-character-sprite {
+	width: auto;
+	height: 100%;
+	object-fit: cover;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .crew-character-side-icons {
+	position: absolute;
+	left: -7px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	pointer-events: none;
+	z-index: 2;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .crew-character-title-icons {
+	top: -7px;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .crew-character-activity-icons {
+	bottom: -7px;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .crew-character-side-icons img {
+	width: 16px;
+	height: 16px;
+	object-fit: contain;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75));
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option:hover {
+	background: rgba(52, 152, 219, 0.3);
+	border-color: #3498db;
+	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+#crew-manager-panel .crew-details-section .player-profile:not(.player-visible-active) {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing:hover {
+	filter: grayscale(1);
+	opacity: 0.65;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing .crew-character-side-icons {
+	display: none;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead {
+	background: #000;
+	border-color: #111;
+	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead:hover {
+	background: #050505;
+	border-color: #111;
+	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-side-icons {
+	display: none;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-sprite {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead::after {
+	content: none;
+}
+
+
+/* PERSONALIZATION STUFF IF I WANNA TRY HARD THAT THING BUT IT LOOKS GOOD LIKE THAT */
+#crew-manager-panel [data-filename="chun.png"] .crew-sprite-anchor {
+	--crew-dead-icon-left: 50%;
+	--crew-dead-icon-top: -2px;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-mush {
+	border-color: #ff5599;
+	box-shadow: 0 0 0 2px rgba(255, 85, 153, 0.65), 0 5px 15px rgba(255, 85, 153, 0.25);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-human {
+	border-color: #3498db;
+	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.65), 0 5px 15px rgba(52, 152, 219, 0.25);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead {
+	background: #000;
+	border-color: #111;
+	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-sprite {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead.crew-character-mush {
+	border-color: #ff5599;
+	box-shadow: 0 0 0 2px rgba(255, 85, 153, 0.65), 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead.crew-character-human {
+	border-color: #3498db;
+	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.65), 0 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Title rows ──────────────────────────────────────────────────────────── */
+
+.crew-title-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.crew-title-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	background: rgba(0, 0, 0, 0.2);
+	border: 2px solid;
+	border-radius: 8px;
+	padding: 10px;
+}
+
+.crew-title-row--commandant { border-color: #9dd3d9; }
+.crew-title-row--comm       { border-color: #f8a9bf; }
+.crew-title-row--admin      { border-color: #d7ce4d; }
+
+.crew-title-role-icon {
+	width: 42px;
+	height: 60px;
+	object-fit: contain;
+	flex-shrink: 0;
+}
+
+/* ── Title slots ─────────────────────────────────────────────────────────── */
+
+.crew-title-slot {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(10px);
+}
+
+/* Slot hover: scale only, no colour change */
+#crew-manager-panel [data-expe-sim] .crew-title-row .crew-title-slot:hover {
+	background-color: inherit;
+	border-color: inherit;
+	box-shadow: none;
+	transform: scale(1.05);
+}
+
+/* Commandant slots */
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot { border: 3px solid #9dd3d9; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(2) { background-color: #b9f8ffBB; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(3) { background-color: #b9f8ff99; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(4) { background-color: #b9f8ff77; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(5) { background-color: #b9f8ff55; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(6) { background-color: #b9f8ff33; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(7) { background-color: #b9f8ff11; }
+
+/* Comm slots */
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot { border: 3px solid #f8a9bf; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(2) { background-color: #ffdbe5BB; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(3) { background-color: #ffdbe599; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(4) { background-color: #ffdbe577; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(5) { background-color: #ffdbe555; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(6) { background-color: #ffdbe533; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(7) { background-color: #ffdbe511; }
+
+/* Admin slots */
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot { border: 3px solid #d7ce4d; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(2) { background-color: #faf170BB; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(3) { background-color: #faf17099; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(4) { background-color: #faf17077; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(5) { background-color: #faf17055; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(6) { background-color: #faf17033; }
+#crew-manager-panel [data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(7) { background-color: #faf17011; }
+
+/* ── Skill selection modal ───────────────────────────────────────────────── */
+
+
+[data-expe-sim] .crew-skill-modal .selection-divider {
+	border: none;
+	border-top: 2px solid #3498db;
+	margin: 14px 0;
+}
+
+[data-expe-sim] .crew-timeline-modal {
+	min-width: 388px;
+}
+
+[data-expe-sim] .crew-timeline-options {
+	display: flex;
+	flex-direction: row;
+	gap: 12px;
+	justify-content: center;
+}
+
+[data-expe-sim] .crew-timeline-option {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 112px;
+	height: 112px;
+	border: 3px solid #8b949e;
+	border-radius: 6px;
+	background: rgba(139, 148, 158, 0.22);
+	color: #ecf0f1;
+	font-size: 14px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+[data-expe-sim] .crew-timeline-option:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+[data-expe-sim] .crew-timeline-option--chaola {
+	border-color: #3498db;
+	background: rgba(52, 152, 219, 0.24);
+}
+
+[data-expe-sim] .crew-timeline-option--chaola:hover {
+	background: rgba(52, 152, 219, 0.38);
+}
+
+[data-expe-sim] .crew-timeline-option--anderek {
+	border-color: #ff5599;
+	background: rgba(255, 85, 153, 0.24);
+}
+
+[data-expe-sim] .crew-timeline-option--anderek:hover {
+	background: rgba(255, 85, 153, 0.38);
+}
+
+[data-expe-sim] .crew-timeline-option--neither {
+	border-color: #8b949e;
+	background: rgba(139, 148, 158, 0.24);
+}
+
+[data-expe-sim] .crew-timeline-option--neither:hover {
+	background: rgba(139, 148, 158, 0.38);
+}
+
+[data-expe-sim] .crew-timeline-sprites {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	justify-content: center;
+	gap: 2px;
+	height: 62px;
+}
+
+[data-expe-sim] .crew-timeline-sprites img {
+	width: auto;
+	height: 60px;
+	object-fit: contain;
+}
+
+[data-expe-sim] .crew-timeline-label {
+	line-height: 1;
+}
+
+/* ── Details section ─────────────────────────────────────────────────────── */
+
+.crew-details-section {
+	--crew-card-move-duration: 2s;
+	--crew-card-move-easing: cubic-bezier(0.22, 1, 0.36, 1);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.crew-details-subsection {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.crew-details-section .player-profile.crew-card-moving {
+	position: relative;
+	z-index: 1;
+	transition: transform var(--crew-card-move-duration) var(--crew-card-move-easing);
+}
+
+#crew-manager-panel .crew-details-section .player-profile {
+	background: rgb(44, 62, 80);
+	border-color: #8b949e;
+}
+
+#crew-manager-panel .crew-details-section .player-avatar {
+	border-color: #8b949e;
+}
+
+#crew-manager-panel .crew-details-section .player-profile .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile .visibility-toggle-slot[data-active="true"] {
+	background: rgb(44, 62, 80);
+	border-color: #8b949e;
+	transition: none;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active {
+	background: rgba(255, 85, 153, 0.18);
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active .player-avatar {
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-mush-active .visibility-toggle-slot[data-active="true"] {
+	background: rgb(92, 29, 60);
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .mush-toggle-slot[data-active="true"] {
+	background: rgba(255, 85, 153, 0.25);
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .inactive-toggle-slot[data-active="true"] {
+	background: rgba(250, 241, 112, 0.28);
+	border-color: #faf170;
+}
+
+#crew-manager-panel .crew-details-section .grand-inactive-toggle-slot {
+	display: none;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-inactive-active .grand-inactive-toggle-slot {
+	display: flex;
+}
+
+#crew-manager-panel .crew-details-section .grand-inactive-toggle-slot[data-active="true"] {
+	background: rgba(231, 76, 60, 0.28);
+	border-color: #e74c3c;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper {
+	margin-left: auto;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	height: 30px;
+	border: 2px solid #e67e22;
+	border-radius: 4px;
+	background: rgba(230, 126, 34, 0.18);
+	overflow: hidden;
+}
+
+#crew-manager-panel .crew-manager-page:not(.crew-cycle-active) .crew-timeline-stepper {
+	display: none;
+}
+
+#crew-manager-panel .crew-manager-page:not(.crew-cycle-active) .notes-action-slot {
+	margin-left: auto;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-btn,
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-display {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	height: 100%;
+	border: 0;
+	background: transparent;
+	color: #ecf0f1;
+	cursor: pointer;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-btn {
+	width: 22px;
+	font-size: 14px;
+	font-weight: 700;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-display {
+	min-width: 52px;
+	padding: 0 6px;
+	border-left: 1px solid rgba(230, 126, 34, 0.55);
+	border-right: 1px solid rgba(230, 126, 34, 0.55);
+	font-family: Consolas, 'Liberation Mono', monospace;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-btn:hover,
+#crew-manager-panel .crew-details-section .crew-timeline-stepper-display:hover {
+	background: rgba(230, 126, 34, 0.22);
+}
+
+#crew-manager-panel .crew-details-section .notes-action-slot {
+	padding: 0;
+	background: rgba(230, 126, 34, 0.3);
+	border-color: #e67e22;
+}
+
+#crew-manager-panel .crew-details-section .notes-action-slot:hover {
+	background: rgba(230, 126, 34, 0.5);
+	border-color: #d35400;
+}
+
+#crew-manager-panel .crew-details-section .notes-action-slot:disabled,
+#crew-manager-panel .crew-details-section .notes-action-slot:disabled:hover,
+#crew-manager-panel .crew-details-section .notes-action-slot.notes-action-slot--disabled,
+#crew-manager-panel .crew-details-section .notes-action-slot.notes-action-slot--disabled:hover {
+	background: rgba(149, 165, 166, 0.18);
+	border-color: #7f8c8d;
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-details-section .notes-action-slot img {
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+	opacity: 1;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-human-active {
+	background: rgba(52, 152, 219, 0.18);
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-human-active .player-avatar {
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-human-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-human-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-human-active .visibility-toggle-slot[data-active="true"] {
+	background: rgb(35, 78, 107);
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar .crew-character-sprite {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar {
+	position: relative;
+	overflow: visible;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-avatar::after {
+	content: none;
+}
+
+#crew-manager-panel .crew-dead-icon {
+	display: none;
+	position: absolute;
+	left: var(--crew-dead-icon-left);
+	top: var(--crew-dead-icon-top);
+	width: var(--crew-dead-icon-size);
+	height: var(--crew-dead-icon-size);
+	object-fit: contain;
+	transform: translateX(-50%);
+	pointer-events: none;
+	z-index: 3;
+}
+
+#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-sprite-anchor > .crew-dead-icon,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-sprite-anchor > .crew-dead-icon {
+	display: block;
+	filter: none;
+	opacity: 1;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .ability-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-timeline-stepper,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .status-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"],
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot),
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot):hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot)[data-active="true"] {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-timeline-stepper-btn,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-timeline-stepper-display {
+	background: #000;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-timeline-stepper-display {
+	border-left-color: #111;
+	border-right-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot)::before,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .player-toggle-slot:not(.dead-toggle-slot):not(.mush-toggle-slot):not(.human-toggle-slot)::after {
+	background: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active {
+	background: #000;
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active .player-avatar,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-mush-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #ff5599;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active {
+	background: #000;
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .player-avatar,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active.player-human-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot:hover,
+#crew-manager-panel .crew-details-section .player-profile.player-dead-active .visibility-toggle-slot[data-active="true"] {
+	background: #000;
+	border-color: #111;
+}
+
+#crew-manager-panel .crew-details-section .player-profile .notes-action-slot:disabled,
+#crew-manager-panel .crew-details-section .player-profile .notes-action-slot:disabled:hover,
+#crew-manager-panel .crew-details-section .player-profile .notes-action-slot.notes-action-slot--disabled,
+#crew-manager-panel .crew-details-section .player-profile .notes-action-slot.notes-action-slot--disabled:hover {
+	background: rgba(149, 165, 166, 0.18);
+	border-color: #7f8c8d;
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+@keyframes crew-highlight {
+	0%   { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+	10%  { box-shadow: 0 0 30px 8px rgba(52, 152, 219, 0.6); }
+	20%  { box-shadow: 0 0 5px 2px rgba(52, 152, 219, 0.2); }
+	30%  { box-shadow: 0 0 30px 8px rgba(52, 152, 219, 0.6); }
+	40%  { box-shadow: 0 0 5px 2px rgba(52, 152, 219, 0.2); }
+	50%  { box-shadow: 0 0 30px 8px rgba(52, 152, 219, 0.6); }
+	60%  { box-shadow: 0 0 5px 2px rgba(52, 152, 219, 0.2); }
+	70%  { box-shadow: 0 0 30px 8px rgba(52, 152, 219, 0.6); }
+	80%  { box-shadow: 0 0 5px 2px rgba(52, 152, 219, 0.2); }
+	90%  { box-shadow: 0 0 30px 8px rgba(52, 152, 219, 0.6); }
+	100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+}
+
+.crew-details-section .player-profile.crew-highlight {
+	animation: crew-highlight 2.5s ease-in-out;
+}
+
+
+/* ── Page layout ─────────────────────────────────────────────────────────── */
+
+.crew-manager-page {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 12px 4px;
+}
+
+.crew-section {
+	margin: 0;
+}
+
+.app-panel .crew-section h4 {
+	margin: 0 0 10px 0;
+	font-size: 16px;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 8px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.crew-reset-row {
+	margin-top: auto;
+	padding-top: 10px;
+	display: flex;
+	justify-content: center;
+}
+
+.crew-reset-btn {
+	padding: 8px 20px;
+	background: rgba(231, 76, 60, 0.15);
+	border: 1px solid #e74c3c;
+	border-radius: 4px;
+	color: #e74c3c;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.crew-reset-btn:hover {
+	background: rgba(231, 76, 60, 0.3);
+}
+
+/* ── Crew grid ───────────────────────────────────────────────────────────── */
+
+/* Ensure grid layout is applied regardless of layer resolution */
+.crew-section [data-expe-sim] .character-grid {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 14px;
+}
+
+.crew-section [data-expe-sim] .character-option {
+	position: relative;
+	overflow: visible;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.1);
+	border-color: transparent;
+	backdrop-filter: blur(10px);
+}
+
+.crew-section [data-expe-sim] .character-option:hover {
+	background: rgba(52, 152, 219, 0.3);
+	border-color: #3498db;
+	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* ── Title rows ──────────────────────────────────────────────────────────── */
+
+.crew-title-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.crew-title-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	background: rgba(0, 0, 0, 0.2);
+	border: 2px solid;
+	border-radius: 8px;
+	padding: 10px;
+}
+
+.crew-title-row--commandant { border-color: #9dd3d9; }
+.crew-title-row--comm       { border-color: #f8a9bf; }
+.crew-title-row--admin      { border-color: #d7ce4d; }
+
+.crew-title-role-icon {
+	width: 42px;
+	height: 60px;
+	object-fit: contain;
+	flex-shrink: 0;
+}
+
+/* ── Title slots ─────────────────────────────────────────────────────────── */
+
+.crew-title-slot {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(10px);
+}
+
+/* Slot hover: scale only, no colour change */
+[data-expe-sim] .crew-title-row .crew-title-slot:hover {
+	background-color: inherit;
+	border-color: inherit;
+	box-shadow: none;
+	transform: scale(1.05);
+}
+
+/* Commandant slots */
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot { border: 3px solid #9dd3d9; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(2) { background-color: #b9f8ffBB; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(3) { background-color: #b9f8ff99; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(4) { background-color: #b9f8ff77; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(5) { background-color: #b9f8ff55; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(6) { background-color: #b9f8ff33; }
+[data-expe-sim] .crew-title-row--commandant .crew-title-slot:nth-child(7) { background-color: #b9f8ff11; }
+
+/* Comm slots */
+[data-expe-sim] .crew-title-row--comm .crew-title-slot { border: 3px solid #f8a9bf; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(2) { background-color: #ffdbe5BB; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(3) { background-color: #ffdbe599; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(4) { background-color: #ffdbe577; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(5) { background-color: #ffdbe555; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(6) { background-color: #ffdbe533; }
+[data-expe-sim] .crew-title-row--comm .crew-title-slot:nth-child(7) { background-color: #ffdbe511; }
+
+/* Admin slots */
+[data-expe-sim] .crew-title-row--admin .crew-title-slot { border: 3px solid #d7ce4d; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(2) { background-color: #faf170BB; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(3) { background-color: #faf17099; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(4) { background-color: #faf17077; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(5) { background-color: #faf17055; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(6) { background-color: #faf17033; }
+[data-expe-sim] .crew-title-row--admin .crew-title-slot:nth-child(7) { background-color: #faf17011; }
+
+/* ── Details section ─────────────────────────────────────────────────────── */
+
+.crew-details-section {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* Ensure player card row layout is applied */
+.crew-details-section .player-profile {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	background: rgb(44, 62, 80);
+	border-color: #8b949e;
+}
+
+.crew-details-section .player-avatar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-color: #8b949e;
+}

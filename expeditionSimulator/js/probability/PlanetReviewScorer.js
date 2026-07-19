@@ -10,7 +10,7 @@
  */
 const PlanetReviewScorer = (() => {
 
-	// ─── Constants ───────────────────────────────────────────────────────────
+	// Constants
 
 	const FIVE_STAR_RATIO = 0.50;
 	const MAX_REGULAR_SECTORS = 20;
@@ -65,7 +65,7 @@ const PlanetReviewScorer = (() => {
 	 * config, so any sector with maxPerPlanet >= 4 automatically gets one.
 	 */
 	const BOOLEAN_TAGS = [
-		// ── Specific sector presence ─────────────────────────────────────
+		// Specific sector presence
 		// Has at least one Oxygen sector
 		{
 			key:         'oxygen',
@@ -91,7 +91,7 @@ const PlanetReviewScorer = (() => {
 			condition: (sectors) => sectors.some(s => s === 'MANKAROG'),
 		},
 
-		// ── Axis tags: triggered when an axis exceeds 4 stars ────────────
+		// Axis tags: triggered when an axis exceeds 4 stars
 		// Lots of fruit harvests
 		{
 			key:         'fruits_high',
@@ -141,7 +141,7 @@ const PlanetReviewScorer = (() => {
 			condition: (_sectors, axes) => (axes.find(a => a.key === 'hazards')?.stars ?? 0) > 4,
 		},
 
-		// ── Composition tags ─────────────────────────────────────────────
+		// Composition tags
 		// Mineral-heavy: HC + Mountain + Cristal + Cave + Seismic + Volcano > 7
 		{
 			key:         'mineral_rich',
@@ -154,7 +154,7 @@ const PlanetReviewScorer = (() => {
 			]) > 7,
 		},
 		// Plant-heavy: Forest + Swamp + Fruit Trees + Hot > 7
-		// (Note: Swamp listed once — duplicate in the request was likely a typo)
+		// (Note: Swamp listed once; duplicate in the request was likely a typo)
 		{
 			key:         'jungle',
 			label:       () => I18n.t('tag.jungle.label'),
@@ -197,8 +197,8 @@ const PlanetReviewScorer = (() => {
 			]) > 7,
 		},
 
-		// ── Unknown tags ─────────────────────────────────────────────────
-		// Some unknowns: 5–8 (mysterious)
+		// Unknown tags
+		// Some unknowns: 5-8 (mysterious)
 		{
 			key:         'terra_incognita',
 			label:       () => I18n.t('tag.terra_incognita.label'),
@@ -218,7 +218,7 @@ const PlanetReviewScorer = (() => {
 			condition: (sectors) => sectors.filter(s => s === 'UNKNOWN').length > 8,
 		},
 
-		// ── Size tags (LANDING excluded from the count) ──────────────────
+		// Size tags (LANDING excluded from the count)
 		// Tiny planet: fewer than 6 sectors
 		{
 			key:         'tiny',
@@ -235,7 +235,7 @@ const PlanetReviewScorer = (() => {
 			description: () => I18n.t('tag.huge.desc'),
 			condition: (sectors) => sectors.filter(s => s !== 'LANDING').length > 16,
 		},
-		// ── Overall score tags ───────────────────────────────────────────────
+		// Overall score tags
 		// Terrible planet: overall score below 2 (guard against empty planet)
 		{
 			key:         'score_terrible',
@@ -260,42 +260,42 @@ const PlanetReviewScorer = (() => {
 			description: () => I18n.t('tag.score_exceptional.desc'),
 			condition: (_s, _a, overall) => overall > 5,
 		},
-		// ── Per-sector "x4" tags: triggered when 4 of that sector are present ──
-		// Forest x4 — endless canopy of trees
+		// Per-sector "x4" tags: triggered when 4 of that sector are present
+		// Forest x4: endless canopy of trees
 		{ key: 'quad_forest',             label: () => I18n.t('tag.quad_forest.label'),             color: '#15803d', description: () => I18n.t('tag.quad_forest.desc'),             condition: (s) => quad(s, 'FOREST') },
-		// Mountain x4 — towering ranges
+		// Mountain x4: towering ranges
 		{ key: 'quad_mountain',           label: () => I18n.t('tag.quad_mountain.label'),           color: '#78716c', description: () => I18n.t('tag.quad_mountain.desc'),           condition: (s) => quad(s, 'MOUNTAIN') },
-		// Swamp x4 — endless wetlands
+		// Swamp x4: endless wetlands
 		{ key: 'quad_swamp',              label: () => I18n.t('tag.quad_swamp.label'),              color: '#365314', description: () => I18n.t('tag.quad_swamp.desc'),              condition: (s) => quad(s, 'SWAMP') },
-		// Desert x4 — vast dunes
+		// Desert x4: vast dunes
 		{ key: 'quad_desert',             label: () => I18n.t('tag.quad_desert.label'),             color: '#eab308', description: () => I18n.t('tag.quad_desert.desc'),             condition: (s) => quad(s, 'DESERT') },
-		// Ocean x4 — water world
+		// Ocean x4: water world
 		{ key: 'quad_ocean',              label: () => I18n.t('tag.quad_ocean.label'),              color: '#0ea5e9', description: () => I18n.t('tag.quad_ocean.desc'),              condition: (s) => quad(s, 'OCEAN') },
-		// Cave x4 — vast cave network
+		// Cave x4: vast cave network
 		{ key: 'quad_cave',               label: () => I18n.t('tag.quad_cave.label'),               color: '#000000', description: () => I18n.t('tag.quad_cave.desc'),               condition: (s) => quad(s, 'CAVE') },
-		// Ruins x4 — ancient civilization remnants
+		// Ruins x4: ancient civilization remnants
 		{ key: 'quad_ruins',              label: () => I18n.t('tag.quad_ruins.label'),              color: '#a16207', description: () => I18n.t('tag.quad_ruins.desc'),              condition: (s) => quad(s, 'RUINS') },
-		// Wreck x4 — ship graveyard
+		// Wreck x4: ship graveyard
 		{ key: 'quad_wreck',              label: () => I18n.t('tag.quad_wreck.label'),              color: '#52525b', description: () => I18n.t('tag.quad_wreck.desc'),              condition: (s) => quad(s, 'WRECK') },
-		// Fruit trees x4 — orchard planet
+		// Fruit trees x4: orchard planet
 		{ key: 'quad_fruit_trees',        label: () => I18n.t('tag.quad_fruit_trees.label'),        color: '#84cc16', description: () => I18n.t('tag.quad_fruit_trees.desc'),        condition: (s) => quad(s, 'FRUIT_TREES') },
-		// Ruminant x4 — herds everywhere
+		// Ruminant x4: herds everywhere
 		{ key: 'quad_ruminant',           label: () => I18n.t('tag.quad_ruminant.label'),           color: '#a3a3a3', description: () => I18n.t('tag.quad_ruminant.desc'),           condition: (s) => quad(s, 'RUMINANT') },
-		// Predator x4 — apex predators
+		// Predator x4: apex predators
 		{ key: 'quad_predator',           label: () => I18n.t('tag.quad_predator.label'),           color: '#991b1b', description: () => I18n.t('tag.quad_predator.desc'),           condition: (s) => quad(s, 'PREDATOR') },
-		// Intelligent x4 — civilized natives
+		// Intelligent x4: civilized natives
 		{ key: 'quad_intelligent',        label: () => I18n.t('tag.quad_intelligent.label'),        color: '#7c3aed', description: () => I18n.t('tag.quad_intelligent.desc'),        condition: (s) => quad(s, 'INTELLIGENT') },
-		// Insect x4 — swarms
+		// Insect x4: swarms
 		{ key: 'quad_insect',             label: () => I18n.t('tag.quad_insect.label'),             color: '#65a30d', description: () => I18n.t('tag.quad_insect.desc'),             condition: (s) => quad(s, 'INSECT') },
-		// Cold x4 — frozen wasteland
+		// Cold x4: frozen wasteland
 		{ key: 'quad_cold',               label: () => I18n.t('tag.quad_cold.label'),               color: '#ffffff', description: () => I18n.t('tag.quad_cold.desc'),               condition: (s) => quad(s, 'COLD') },
-		// Hot x4 — scorching wasteland
+		// Hot x4: scorching wasteland
 		{ key: 'quad_hot',                label: () => I18n.t('tag.quad_hot.label'),                color: '#f97316', description: () => I18n.t('tag.quad_hot.desc'),                condition: (s) => quad(s, 'HOT') },
-		// Strong wind x4 — perpetual storms
+		// Strong wind x4: perpetual storms
 		{ key: 'quad_strong_wind',        label: () => I18n.t('tag.quad_strong_wind.label'),        color: '#0891b2', description: () => I18n.t('tag.quad_strong_wind.desc'),        condition: (s) => quad(s, 'STRONG_WIND') },
-		// Seismic x4 — never-ending tremors
+		// Seismic x4: never-ending tremors
 		{ key: 'quad_seismic_activity',   label: () => I18n.t('tag.quad_seismic_activity.label'),   color: '#a8a29e', description: () => I18n.t('tag.quad_seismic_activity.desc'),   condition: (s) => quad(s, 'SEISMIC_ACTIVITY') },
-		// Volcanic x4 — molten hellscape
+		// Volcanic x4: molten hellscape
 		{ key: 'quad_volcanic_activity',  label: () => I18n.t('tag.quad_volcanic_activity.label'),  color: '#dc2626', description: () => I18n.t('tag.quad_volcanic_activity.desc'),  condition: (s) => quad(s, 'VOLCANIC_ACTIVITY') },
 	];
 
@@ -329,7 +329,7 @@ const PlanetReviewScorer = (() => {
 		{ type: 'sector', sector: 'CRISTAL_FIELD', axis: 'artifacts', stars: 1.5 },
 	];
 
-	// ─── Event → Axis mapping tables ────────────────────────────────────
+	// Event to axis mapping tables
 
 	/** Exact event name → axis key */
 	const EVENT_AXIS = {
@@ -376,7 +376,7 @@ const PlanetReviewScorer = (() => {
 	/** Boolean bonuses toward overall score */
 	const BOOLEAN_BONUSES = { oxygen: 0.5, cristal_field: 0.5 };
 
-	// ─── Event magnitude parser ─────────────────────────────────────────────
+	// Event magnitude parser
 
 	/**
 	 * Extracts the numeric magnitude from an event name.
@@ -421,7 +421,7 @@ const PlanetReviewScorer = (() => {
 		return sum / numbers.length;
 	}
 
-	// ─── Event-to-axis mapping ──────────────────────────────────────────────
+	// Event-to-axis mapping
 
 	/**
 	 * Returns the axis key for a given event name, or null if it doesn't
@@ -442,7 +442,7 @@ const PlanetReviewScorer = (() => {
 		return null;
 	}
 
-	// ─── Per-sector expected value ──────────────────────────────────────────
+	// Per-sector expected value
 
 	/**
 	 * Computes the expected value contribution of a single sector config
@@ -475,7 +475,7 @@ const PlanetReviewScorer = (() => {
 		return evs;
 	}
 
-	// ─── 5-star ceiling computation ─────────────────────────────────────────
+	// 5-star ceiling computation
 
 	/**
 	 * Computes the theoretical maximum raw score for each axis by greedily
@@ -538,7 +538,7 @@ const PlanetReviewScorer = (() => {
 		return _cachedCeilings;
 	}
 
-	// ─── Planet scoring ─────────────────────────────────────────────────────
+	// Planet scoring
 
 	/**
 	 * Looks up the sector config from PlanetSectorConfigData by sector name.
@@ -638,7 +638,7 @@ const PlanetReviewScorer = (() => {
 			};
 		});
 
-		// Booleans — driven entirely by BOOLEAN_TAGS, no changes needed here.
+		// Booleans are driven entirely by BOOLEAN_TAGS; no changes needed here.
 		// Two-pass: first pass (overall=0) feeds computeOverall for BOOLEAN_BONUSES;
 		// second pass re-evaluates with the real overall so score-based tags work.
 		const booleansPass1 = BOOLEAN_TAGS.map(tag => ({
@@ -662,7 +662,7 @@ const PlanetReviewScorer = (() => {
 		return { overall, axes, booleans };
 	}
 
-	// ─── Overall score (tier / bucket system) ───────────────────────────────
+	// Overall score (tier / bucket system)
 
 	/**
 	 * Computes the overall planet score using a rule-based tier system.
@@ -732,7 +732,7 @@ const PlanetReviewScorer = (() => {
 		return overall;
 	}
 
-	// ─── Public API ─────────────────────────────────────────────────────────
+	// Public API
 
 	return {
 		score,

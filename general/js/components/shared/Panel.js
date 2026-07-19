@@ -3,12 +3,6 @@
  * 
  * The main container for the Expedition Simulator.
  * Creates the sliding panel with tongue (tab) and content area.
- * 
- * Structure:
- * - panel-tongue: Clickable tab to expand/collapse
- * - panel-main: Main panel body
- *   - panel-header: Title bar
- *   - panel-content: Scrollable content area (child components go here)
  */
 class Panel extends Component {
 	/**
@@ -16,9 +10,10 @@ class Panel extends Component {
 	 * @param {string} [options.id='expedition-simulator'] - Element id for the panel
 	 * @param {string} [options.panelClass='app-panel'] - CSS class for the panel
 	 * @param {string} [options.title='Expedition Simulator'] - Panel header title
+	 * @param {string} [options.titleKey='panel.title'] - I18n key for the title
 	 * @param {string} [options.tongueIcon] - URL for the tongue icon image
 	 * @param {string} [options.tongueAlt='Panel'] - Alt text for the tongue icon
-	 * @param {Function} [options.getResourceURL] - Function to resolve resource URLs
+	 * @param {Function} [options.getResourceURL] - Resource URL resolver
 	 */
 	constructor(options = {}) {
 		super(options);
@@ -30,19 +25,13 @@ class Panel extends Component {
 		this.tongueAlt = options.tongueAlt || 'Panel';
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 		
-		// References to key internal elements
 		this._contentArea = null;
 		this._tongue = null;
 		this._pinBtn = null;
 		this._pinned = false;
 	}
 
-	/**
-	 * Creates the panel DOM structure
-	 * @returns {HTMLElement}
-	 */
 	render() {
-		// Main panel container
 		this.element = this.createElement('div', {
 			id: this.panelId,
 			className: 'app-panel ' + this.panelClass
@@ -53,22 +42,16 @@ class Panel extends Component {
 			this.element.classList.add('test-mode');
 		}
 
-		// Tongue is a child of the panel — CSS :hover cascade opens the panel
+		// Tongue is a child of the panel; CSS :hover cascade opens the panel.
 		this._tongue = this._createTongue();
 		this.element.appendChild(this._tongue);
 
-		// Main panel body
 		const panelMain = this._createPanelMain();
 		this.element.appendChild(panelMain);
 
 		return this.element;
 	}
 
-	/**
-	 * Creates the tongue (tab) element
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createTongue() {
 		const tongue = this.createElement('div', { className: 'panel-tongue' });
 
@@ -80,49 +63,23 @@ class Panel extends Component {
 			tongue.appendChild(img);
 		}
 
-		this.addEventListener(tongue, 'click', () => {
-			// Unpin if currently pinned
-			if (this._pinned) {
-				this._pinned = false;
-				this.element.classList.remove('pinned');
-				this._pinBtn?.classList.remove('active');
-			}
-			// Clear any import-open that may have survived a pinned import
-			this.element.classList.remove('import-open');
-			// Close immediately, then restore normal hover behaviour
-			this.element.classList.add('force-close');
-			this.element.addEventListener('transitionend', () => {
-				this.element.classList.remove('force-close');
-			}, { once: true });
-		});
+		this.addEventListener(tongue, 'click', () => this._forceCollapse());
 
 		return tongue;
 	}
 
-	/**
-	 * Creates the main panel body
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createPanelMain() {
 		const panelMain = this.createElement('div', { className: 'panel-main' });
 
-		// Header
 		const header = this._createHeader();
 		panelMain.appendChild(header);
 
-		// Content area
 		this._contentArea = this.createElement('div', { className: 'panel-content' });
 		panelMain.appendChild(this._contentArea);
 
 		return panelMain;
 	}
 
-	/**
-	 * Creates the header element
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createHeader() {
 		const header = this.createElement('div', { className: 'panel-header' });
 
@@ -137,6 +94,11 @@ class Panel extends Component {
 		left.appendChild(brand);
 		left.appendChild(title);
 		header.appendChild(left);
+
+		// Collapse button, always present and prominently visible on small screens.
+		const closeBtn = this.createElement('button', { className: 'panel-close-btn' }, '×');
+		this.addEventListener(closeBtn, 'click', () => this._forceCollapse());
+		header.appendChild(closeBtn);
 
 		// Pin button to lock the panel open
 		this._pinBtn = this.createElement('button', {
@@ -153,11 +115,19 @@ class Panel extends Component {
 		return header;
 	}
 
-	/**
-	 * Toggles the pinned state of the panel
-	 * @private
-	 * @param {HTMLElement} pinBtn
-	 */
+	_forceCollapse() {
+		if (this._pinned) {
+			this._pinned = false;
+			this.element.classList.remove('pinned');
+			this._pinBtn?.classList.remove('active');
+		}
+		this.element.classList.remove('import-open');
+		this.element.classList.add('force-close');
+		this.element.addEventListener('transitionend', () => {
+			this.element.classList.remove('force-close');
+		}, { once: true });
+	}
+
 	_togglePin(pinBtn) {
 		this._pinned = !this._pinned;
 		if (this._pinned) {
@@ -166,14 +136,13 @@ class Panel extends Component {
 		} else {
 			this.element.classList.remove('pinned');
 			pinBtn.classList.remove('active');
-			// Normal hover behaviour takes over immediately — if the mouse is
+			// Normal hover behaviour takes over immediately; if the mouse is
 			// still over the panel it stays open; if not it slides away on its own.
 		}
 	}
 
 	/**
-	 * Overrides Component.mount() to place panels into a shared #panels-container.
-	 * nth-child CSS then handles tongue stacking automatically.
+	 * Mounts panels into a shared #panels-container so tongue stacking stays centralized.
 	 * @param {HTMLElement} [container]
 	 * @returns {HTMLElement}
 	 */
@@ -187,12 +156,14 @@ class Panel extends Component {
 				panelsContainer.classList.toggle('aeons-lab', Settings.theme === 'retro');
 			}
 		}
-		return super.mount(panelsContainer);
+		const mounted = super.mount(panelsContainer);
+		if (typeof Settings !== 'undefined') {
+			this.element.classList.toggle('panel--hidden', !Settings.isPanelVisible(this.element.id));
+		}
+		Panel.repositionTongues();
+		return mounted;
 	}
 
-	/**
-	 * Lifecycle hook - setup after mounting
-	 */
 	onMount() {
 		// Prevent click propagation to underlying page elements
 		this._setupClickPrevention();
@@ -204,12 +175,6 @@ class Panel extends Component {
 		Panel.repositionTongues();
 	}
 
-	/**
-	 * Recalculates and sets the vertical position of every panel tongue.
-	 * Visible panels are stacked and centered; hidden panels are ignored.
-	 * Call this whenever a panel is added or its visibility changes.
-	 * @static
-	 */
 	static repositionTongues() {
 		const TONGUE_HEIGHT = 60;
 		const GAP = 8;
@@ -229,10 +194,6 @@ class Panel extends Component {
 		});
 	}
 
-	/**
-	 * Prevents clicks from propagating to underlying page
-	 * @private
-	 */
 	_setupClickPrevention() {
 		const stopPropagation = (event) => event.stopPropagation();
 		
@@ -242,15 +203,13 @@ class Panel extends Component {
 	}
 
 	/**
-	 * Gets the content area element where child components should be mounted
-	 * @returns {HTMLElement}
+	 * @returns {HTMLElement|null}
 	 */
 	getContentArea() {
 		return this._contentArea;
 	}
 
 	/**
-	 * Adds a section to the panel content
 	 * @param {HTMLElement|Component} content - Element or component to add
 	 */
 	addContent(content) {
@@ -266,7 +225,7 @@ class Panel extends Component {
 	}
 
 	/**
-	 * Clears all content from the panel
+	 * Removes all mounted content from the panel content area.
 	 */
 	clearContent() {
 		if (this._contentArea) {
@@ -275,7 +234,6 @@ class Panel extends Component {
 	}
 
 	/**
-	 * Sets the panel title
 	 * @param {string} title
 	 */
 	setTitle(title) {
@@ -287,32 +245,26 @@ class Panel extends Component {
 	}
 
 	/**
-	 * Programmatically collapse the panel
+	 * Marks the panel as collapsed.
 	 */
 	collapse() {
 		this.element?.classList.add('collapsed');
 	}
 
 	/**
-	 * Programmatically expand the panel
+	 * Marks the panel as expanded.
 	 */
 	expand() {
 		this.element?.classList.remove('collapsed');
 	}
 
 	/**
-	 * Check if panel is collapsed
 	 * @returns {boolean}
 	 */
 	isCollapsed() {
 		return this.element?.classList.contains('collapsed') || false;
 	}
 
-	/**
-	 * Checks if we're running in test mode (test.html page)
-	 * @private
-	 * @returns {boolean}
-	 */
 	_isTestMode() {
 		// Check if we're in test.html or if document title contains "Test Page"
 		return window.location.pathname.includes('test.html') || 

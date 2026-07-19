@@ -63,7 +63,7 @@ self.onmessage = function(event) {
 	}
 };
 
-// Legacy shim — kept so any caller that used runCalculation() directly still works.
+// Legacy shim kept so any caller that used runCalculation() directly still works.
 // New code should call ExpeditionRunner.run() instead.
 function runCalculation(params) {
 	return ExpeditionRunner.run(params);

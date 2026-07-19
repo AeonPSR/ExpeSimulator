@@ -194,7 +194,7 @@ const ResourceCalculator = {
 				}
 			}
 
-			// Fight reward ARTEFACT items — same 8/9 split applies
+			// Fight reward ARTEFACT items use the same 8/9 split.
 			if (typeof CombatRewardService !== 'undefined') {
 				const contributions = this._getFightRewardContributions(sectorName, probs, basePower, grenadeCount);
 				for (const { itemId, qty, prob } of contributions) {
@@ -318,10 +318,10 @@ const ResourceCalculator = {
 			average += value * prob;
 		}
 
-		// Pessimist: conditional expectation of bottom 25% (ascending — fewest resources)
+		// Pessimist: conditional expectation of bottom 25% (ascending, fewest resources)
 		const pessimist = this._conditionalExpectation(sorted, 0.25, 'bottom');
 
-		// Optimist: conditional expectation of top 25% (descending — most resources)
+		// Optimist: conditional expectation of top 25% (descending, most resources)
 		const optimist = this._conditionalExpectation(sorted, 0.25, 'top');
 
 		return { pessimist, average, optimist };

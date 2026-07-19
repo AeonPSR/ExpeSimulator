@@ -1,5 +1,5 @@
 /**
- * EventClassifier — Shared event classification utility
+ * EventClassifier shared event classification utility.
  * 
  * Single source of truth for categorizing event names into
  * semantic categories and CSS color classes.

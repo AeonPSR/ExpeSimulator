@@ -22,13 +22,13 @@ body:has(#panels-container.aeons-lab) {
 #panels-container.aeons-lab .app-panel .player-avatar,
 #panels-container.aeons-lab .app-panel .ability-slot,
 #panels-container.aeons-lab .app-panel .item-slot,
-#panels-container.aeons-lab .app-panel .health-slot,
-#panels-container.aeons-lab .app-panel .morale-slot,
+#panels-container.aeons-lab .app-panel .status-slot,
 #panels-container.aeons-lab .app-panel .sector-item,
 #panels-container.aeons-lab .app-panel .selected-sector-item,
 #panels-container.aeons-lab .app-panel .expedition-result-card,
 #panels-container.aeons-lab .app-panel .expedition-result-avatar,
 #panels-container.aeons-lab .app-panel .selected-grid,
+#panels-container.aeons-lab .app-panel .crew-timeline-stepper,
 #panels-container.aeons-lab .app-panel .expe-close-btn,
 #panels-container.aeons-lab .app-panel .prob-content,
 #panels-container.aeons-lab .app-panel .resource-table,
@@ -42,7 +42,9 @@ body:has(#panels-container.aeons-lab) [data-expe-sim] .expe-close-btn,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .ability-selection,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .modal-close,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .character-option,
-body:has(#panels-container.aeons-lab) [data-expe-sim] .modal-container {
+body:has(#panels-container.aeons-lab) [data-expe-sim] .modal-container,
+body:has(#panels-container.aeons-lab) .expe-import-btn,
+#panels-container.aeons-lab .app-panel .info-panel {
 	border-radius: var(--chamfer-size);
 	corner-shape: bevel;
 }
@@ -60,6 +62,15 @@ body:has(#panels-container.aeons-lab) [data-expe-sim] .modal-container {
 body:has(#panels-container.aeons-lab) [data-expe-sim] .character-option,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .ability-selection {
 	border-radius: 10px;
+}
+
+#panels-container.aeons-lab .app-panel .info-panel {
+	border-radius: 10px;
+}
+
+#panels-container.aeons-lab .app-panel .crew-title-row {
+	border-radius: 10px;
+	corner-shape: bevel;
 }
 
 #panels-container.aeons-lab .app-panel .tab-bar button {

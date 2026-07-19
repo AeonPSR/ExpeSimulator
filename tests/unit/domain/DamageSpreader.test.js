@@ -22,7 +22,7 @@ describe('DamageSpreader', () => {
 		// Mock filenameToId
 		global.filenameToId = jest.fn((filename) => {
 			if (!filename) return '';
-			return filename.replace(/\.(jpg|png)$/, '').toUpperCase();
+			return filename.split('/').pop().replace(/\.(jpg|png)$/, '').toUpperCase();
 		});
 
 		// Mock Constants
@@ -383,7 +383,7 @@ describe('DamageSpreader', () => {
 	describe('applySurvivalReduction', () => {
 
 		test('reduces damage for player with Survival ability', () => {
-			const players = [{ abilities: ['survival.jpg'] }];
+			const players = [{ abilities: ['human/survival.png'] }];
 			const damageBreakdown = [[
 				{ type: 'FIGHT_6', source: 'A', damage: 3 }
 			]];

@@ -1,18 +1,11 @@
 /**
- * I18n — Lightweight internationalisation singleton.
+ * I18n lightweight internationalisation singleton.
  *
- * Usage:
- *   I18n.t('key')                       → translated string in current locale
- *   I18n.t('key', { count: 5 })         → with variable interpolation
- *   I18n.setLocale('fr')                → switch language; fires 'i18n:change'
- *   I18n.locale                         → current locale string ('en'|'fr'|'es')
- *
- * Fallback chain: requested locale → 'en' → raw key (so missing translations
+ * Fallback chain: requested locale, 'en', raw key (so missing translations
  * are visible but never break the UI).
  *
  * Variable interpolation uses {varName} placeholders:
  *   Translations.en['sectors.header'] = 'Selected Expedition ({regular}/{max})'
- *   I18n.t('sectors.header', { regular: 3, max: 20 }) → 'Selected Expedition (3/20)'
  */
 const I18n = (() => {
 	const SUPPORTED = ['fr', 'en', 'es'];
@@ -71,9 +64,9 @@ const I18n = (() => {
 	};
 })();
 
-// ─── DOM attribute refresh ───────────────────────────────────────────────────
+// DOM attribute refresh
 // Any element with data-i18n="key" will have its textContent updated
-// automatically on every locale change — no component-level listener needed
+// automatically on every locale change; no component-level listener needed
 // for static labels.
 document.addEventListener('i18n:change', () => {
 	document.querySelectorAll('[data-i18n]').forEach(el => {

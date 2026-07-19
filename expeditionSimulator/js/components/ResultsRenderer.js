@@ -1,7 +1,7 @@
 /**
  * ResultsRenderer
  *
- * Pure HTML builder for expedition result cards. No state, no DOM mutations —
+ * Pure HTML builder for expedition result cards. No state, no DOM mutations;
  * it receives data and returns HTML strings. Extracted from App so that
  * the orchestrator stays data-only.
  *
@@ -14,9 +14,9 @@ class ResultsRenderer {
 	 * Builds the full HTML block for one expedition result card per player.
 	 *
 	 * @param {Array}  players             - Array of player objects ({ avatar, health, … })
-	 * @param {Object} healthByScenario    - { optimist, average, pessimist, worstCase } — each an array indexed by participating player
+	 * @param {Object} healthByScenario    - { optimist, average, pessimist, worstCase }, each an array indexed by participating player
 	 * @param {Array}  participationStatus - One entry per player: { canParticipate: boolean }
-	 * @param {Object} effectsByScenario   - { optimist, average, pessimist, worstCase } — arrays of effect arrays
+	 * @param {Object} effectsByScenario   - { optimist, average, pessimist, worstCase }, arrays of effect arrays
 	 * @param {Function} getURL            - chrome.runtime.getURL equivalent
 	 * @returns {string}
 	 */
@@ -129,7 +129,7 @@ class ResultsRenderer {
 
 		const effectIcons = {
 			'ROPE':             'pictures/gear/rope.jpg',
-			'SURVIVAL':         'pictures/abilities/survival.png',
+			'SURVIVAL':         'pictures/abilities/human/survival.png',
 			'PLASTENITE_ARMOR': 'pictures/gear/plastenite_armor.jpg',
 		};
 
@@ -149,8 +149,6 @@ class ResultsRenderer {
 	}
 
 	/**
-	 * Returns the CSS class name for a health value.
-	 *
 	 * @param {number} health
 	 * @returns {string}
 	 */

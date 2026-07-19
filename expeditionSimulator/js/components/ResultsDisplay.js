@@ -14,18 +14,12 @@ class ResultsDisplay extends Component {
 		this._legendContainer = null;
 	}
 
-	/**
-	 * Creates the results display section
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('div', { className: 'expedition-results' });
 
-		// Header
 		const header = this.createElement('h4', { 'data-i18n': 'results.header' }, I18n.t('results.header'));
 		this.element.appendChild(header);
 
-		// Content area
 		this._contentElement = this.createElement('div', {
 			className: 'results-content',
 			id: 'results-content'
@@ -33,7 +27,6 @@ class ResultsDisplay extends Component {
 
 		this.element.appendChild(this._contentElement);
 
-		// Legend container
 		this._legendContainer = this.createElement('div', {
 			id: 'expedition-legend-container'
 		});
@@ -43,7 +36,6 @@ class ResultsDisplay extends Component {
 	}
 
 	/**
-	 * Sets the results content (HTML string)
 	 * @param {string} htmlContent
 	 */
 	setContent(htmlContent) {
@@ -53,7 +45,6 @@ class ResultsDisplay extends Component {
 	}
 
 	/**
-	 * Sets the legend content (HTML string)
 	 * @param {string} htmlContent
 	 */
 	setLegend(htmlContent) {
@@ -63,7 +54,6 @@ class ResultsDisplay extends Component {
 	}
 
 	/**
-	 * Sets placeholder message
 	 * @param {string} message
 	 */
 	setPlaceholder(message) {
@@ -75,16 +65,10 @@ class ResultsDisplay extends Component {
 		}
 	}
 
-	/**
-	 * Clears the content
-	 */
 	clear() {
 		this.setPlaceholder(I18n.t('results.placeholder'));
 	}
 
-	/**
-	 * Creates and shows the default legend
-	 */
 	showDefaultLegend() {
 		const legendHTML = `
 			<div class="expedition-legend">

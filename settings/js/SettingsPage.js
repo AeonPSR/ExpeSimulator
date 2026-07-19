@@ -4,6 +4,7 @@
  * Renders the three settings sections inside the Settings panel:
  * - Language: three flag buttons (EN / FR / ES), radio-button behaviour
  * - Theme: drop-down list (Default / Retro)
+ * - Visibility: icon buttons for optional panels
  * - Developer tools: checkbox toggle
  */
 class SettingsPage extends Component {
@@ -17,16 +18,10 @@ class SettingsPage extends Component {
 
 		this.element.appendChild(this._renderSection('settings.section.language', this._renderLanguageControls()));
 		this.element.appendChild(this._renderSection('settings.section.theme', this._renderThemeControls()));
+		this.element.appendChild(this._renderSection('settings.section.visibility', this._renderVisibilityControls()));
 		this.element.appendChild(this._renderSection('settings.section.devtools', this._renderDevtoolsControls(), 'settings-section--devtools'));
 
-		const visibilitySection = this._renderSection('settings.section.visibility', this._renderVisibilityControls(), 'settings-section--devtools');
-		this.element.appendChild(visibilitySection);
-
-		const applyDevtools = (enabled) => { visibilitySection.style.display = enabled ? '' : 'none'; };
-		applyDevtools(Settings.devtools);
-		this.addEventListener(document, 'settings:devtools-change', (e) => applyDevtools(e.detail.devtools));
-
-		this.element.appendChild(this._renderCredits());
+		this.element.appendChild(this._renderInfoTabs());
 
 		// Keep language buttons in sync when locale changes from any source
 		this.addEventListener(document, 'i18n:change', (e) => {
@@ -36,7 +31,7 @@ class SettingsPage extends Component {
 		return this.element;
 	}
 
-	// ─── Sections ────────────────────────────────────────────────────────────
+	// Sections
 
 	_renderSection(titleKey, controls, extraClass = '') {
 		const section = this.createElement('div', { className: ('settings-section ' + extraClass).trim() });
@@ -46,7 +41,7 @@ class SettingsPage extends Component {
 		return section;
 	}
 
-	// ─── Language ────────────────────────────────────────────────────────────
+	// Language
 
 	_renderLanguageControls() {
 		const row = this.createElement('div', { className: 'settings-lang-row' });
@@ -54,8 +49,7 @@ class SettingsPage extends Component {
 		I18n.supported.forEach(locale => {
 			const btn = this.createElement('button', {
 				className: 'panel-lang-btn' +
-					(I18n.locale === locale ? ' panel-lang-btn--active' : ''),
-				title: locale.toUpperCase()
+					(I18n.locale === locale ? ' panel-lang-btn--active' : '')
 			});
 			const img = this.createElement('img', {
 				src: getResourceURL(`pictures/ui/${locale}.png`),
@@ -76,7 +70,7 @@ class SettingsPage extends Component {
 		});
 	}
 
-	// ─── Theme ───────────────────────────────────────────────────────────────
+	// Theme
 
 	_renderThemeControls() {
 		const select = this.createElement('select', { className: 'settings-theme-select' });
@@ -117,7 +111,7 @@ class SettingsPage extends Component {
 		return select;
 	}
 
-	// ─── Developer tools ─────────────────────────────────────────────────────
+	// Developer tools
 
 	_renderDevtoolsControls() {
 		const row = this.createElement('div', { className: 'settings-devtools-row' });
@@ -126,7 +120,7 @@ class SettingsPage extends Component {
 			className: 'panel-lang-btn' + (Settings.devtools ? ' panel-lang-btn--active' : ''),
 		});
 		const img = this.createElement('img', {
-			src: getResourceURL('pictures/abilities/technician.png'),
+				src: getResourceURL('pictures/abilities/human/technician.png'),
 			alt: ''
 		});
 		btn.appendChild(img);
@@ -139,39 +133,68 @@ class SettingsPage extends Component {
 		return row;
 	}
 
-	// ─── Visibility ──────────────────────────────────────────────────────────
+	// Visibility
 	_renderVisibilityControls() {
-		const row = this.createElement('div', { className: 'settings-devtools-row' });
+		const row = this.createElement('div', { className: 'settings-visibility-row' });
+		row.appendChild(this._renderPanelVisibilityButton({
+			panelId: 'expedition-simulator',
+			iconPath: 'pictures/ui/astrophysicist.png'
+		}));
+		row.appendChild(this._renderPanelVisibilityButton({
+			panelId: 'crew-manager-panel',
+			iconPath: 'pictures/abilities/aeon icons/Aeonian shrink.png'
+		}));
+		return row;
+	}
 
+	_renderPanelVisibilityButton({ panelId, iconPath }) {
+		const panel = document.getElementById(panelId);
+		const isVisible = Settings.isPanelVisible(panelId) && !panel?.classList.contains('panel--hidden');
 		const btn = this.createElement('button', {
-			className: 'panel-lang-btn panel-lang-btn--active',
+			className: 'panel-lang-btn' + (isVisible ? ' panel-lang-btn--active' : ''),
 		});
 		const img = this.createElement('img', {
-			src: getResourceURL('pictures/ui/astrophysicist.png'),
+			src: getResourceURL(iconPath),
 			alt: ''
 		});
 		btn.appendChild(img);
 		this.addEventListener(btn, 'click', () => {
 			const visible = btn.classList.toggle('panel-lang-btn--active');
-			const panel = document.getElementById('expedition-simulator');
-			if (panel) panel.classList.toggle('panel--hidden', !visible);
+			Settings.setPanelVisible(panelId, visible);
+			const panel = document.getElementById(panelId);
+			panel?.classList.toggle('panel--hidden', !visible);
 			Panel.repositionTongues();
 		});
-
-		row.appendChild(btn);
-		return row;
+		return btn;
 	}
 
-	// ─── Credits ─────────────────────────────────────────────────────────────
+	// Info Tabs
 
-	_renderCredits() {
-		const wrapper = this.createElement('div');
+	_renderInfoTabs() {
+		const tabs = new TabContainer({
+			tabs: [
+				{ id: 'informations', label: I18n.t('settings.tab.informations'), i18nKey: 'settings.tab.informations' },
+				{ id: 'patch_notes',  label: I18n.t('settings.tab.patch_notes'),  i18nKey: 'settings.tab.patch_notes'  }
+			]
+		});
+		tabs.render();
 
+		const infoPanel = tabs.getTabPanel('informations');
+		this._appendCredits(infoPanel);
+
+		const patchPanel = tabs.getTabPanel('patch_notes');
+		this._appendPatchNotes(patchPanel);
+
+		return tabs.element;
+	}
+
+	_appendCredits(container) {
 		const rebuild = () => {
 			const url   = I18n.t('credits.wiki.url');
 			const label = I18n.t('credits.wiki.label');
 			const credits = new InfoPanel({
-				title: 'Aeon\'s Lab - Version 1.0',
+				title:    'Aeon\'s Lab - Version 1.1',
+				subtitle: I18n.t('credits.subtitle'),
 				sections: [
 					{
 						content: `<p>${I18n.t('credits.warning')} <a href="${url}" target="_blank">${label}</a></p>`
@@ -182,13 +205,32 @@ class SettingsPage extends Component {
 					}
 				]
 			});
-			wrapper.innerHTML = '';
-			wrapper.appendChild(credits.render());
+			container.innerHTML = '';
+			container.appendChild(credits.render());
 		};
-
 		rebuild();
 		this.addEventListener(document, 'i18n:change', rebuild);
-		return wrapper;
+	}
+
+	_appendPatchNotes(container) {
+		const rebuild = () => {
+			const notes = new InfoPanel({
+				sections: [
+					{
+						title:   'Version 1.1',
+						content: `<p>- ${I18n.t('patch_notes.v1_1.line1')}</p><p>- ${I18n.t('patch_notes.v1_1.line2')}</p><p>- ${I18n.t('patch_notes.v1_1.line3')}</p>`
+					},
+					{
+						title:   'Version 1.0',
+						content: `<p>${I18n.t('patch_notes.v1_0.content')}</p>`
+					}
+				]
+			});
+			container.innerHTML = '';
+			container.appendChild(notes.render());
+		};
+		rebuild();
+		this.addEventListener(document, 'i18n:change', rebuild);
 	}
 }
 

@@ -1,7 +1,7 @@
 ﻿{
   "manifest_version": 3,
   "name": "Aeon's Lab",
-  "version": "1.0",
+  "version": "1.1",
   "description": "An ensemble of tools designed to simplify and simulate several aspects of eMush's mecanics.",
   "permissions": [
     "activeTab"
@@ -23,6 +23,7 @@
         "expeditionSimulator/js/data/SectorData.js",
         "expeditionSimulator/js/data/CharacterData.js",
         "expeditionSimulator/js/data/AbilityData.js",
+        "expeditionSimulator/js/data/SkillOwnershipData.js",
         "expeditionSimulator/js/data/ItemData.js",
         "expeditionSimulator/js/data/CombatRewardData.js",
         "expeditionSimulator/js/data/WorldData.js",
@@ -30,13 +31,14 @@
         "expeditionSimulator/js/core/ExpeditionState.js",
         "general/js/components/shared/ToggleButton.js",
         "general/js/components/shared/Modal.js",
+        "general/js/components/shared/ConfirmationModal.js",
         "general/js/components/shared/SelectionModal.js",
         "general/js/components/shared/Panel.js",
         "general/js/components/shared/TabContainer.js",
         "general/js/components/shared/InfoPanel.js",
+        "general/js/components/shared/PlayerCard.js",
         "expeditionSimulator/js/components/SectorGrid.js",
         "expeditionSimulator/js/components/SelectedSectors.js",
-        "expeditionSimulator/js/components/PlayerCard.js",
         "expeditionSimulator/js/components/PlayerSection.js",
         "expeditionSimulator/js/components/ProbabilityDisplay.js",
         "expeditionSimulator/js/components/ResultsDisplay.js",
@@ -73,12 +75,30 @@
         "expeditionSimulator/js/app.js",
         "settings/js/SettingsPage.js",
         "settings/js/app.js",
+        "crewManager/js/CrewCharacterGrid.js",
+        "crewManager/js/CrewDetailCardFactory.js",
+        "crewManager/js/CrewDetailSkillAvailability.js",
+        "crewManager/js/CrewDetailCardActions.js",
+        "crewManager/js/CrewDetailCardOrganizer.js",
+        "crewManager/js/CrewDetailsResetService.js",
+        "crewManager/js/CrewCharacterState.js",
+        "crewManager/js/CrewTitleRows.js",
+        "crewManager/js/CrewTimelineModal.js",
+        "crewManager/js/CrewTimelineStepper.js",
+        "crewManager/js/CrewSkillCardInjector.js",
+        "crewManager/js/services/CrewManagerStorage.js",
+        "crewManager/js/services/CrewSkillSelectionService.js",
+        "crewManager/js/services/GameNotepadService.js",
+        "crewManager/js/CrewDetailsSection.js",
+        "crewManager/js/CrewManagerPage.js",
+        "crewManager/js/app.js",
         "content.js"
       ],
       "css": [
         "styles/fonts.css",
         "styles/main.css",
         "styles/settings.css",
+        "styles/crew-manager.css",
         "styles/utilities.css", 
         "styles/buttons.css",
         "styles/sectors.css",
@@ -92,7 +112,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["pictures/abilities/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*", "pictures/consumables/*", "pictures/gear/*", "*.png", "*.jpg", "*.gif", "font/*"],
+      "resources": ["pictures/abilities/*", "pictures/abilities/*/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*", "pictures/consumables/*", "pictures/gear/*", "*.png", "*.jpg", "*.gif", "font/*"],
       "matches": ["<all_urls>"]
     },
     {
@@ -111,6 +131,6 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Expedition Simulator"
+    "default_title": "Aeon's Lab"
   }
 }

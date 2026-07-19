@@ -176,7 +176,7 @@ class ChatObserver {
 			if (node.nodeType === Node.TEXT_NODE) {
 				const nav = ChatParser.parseNavText(node.textContent);
 				if (nav) return nav;
-				// Non-empty text that didn't match — stop searching
+				// Non-empty text that didn't match; stop searching.
 				if (node.textContent.trim()) break;
 			}
 			node = node.previousSibling;

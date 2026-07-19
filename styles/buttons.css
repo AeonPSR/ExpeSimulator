@@ -742,8 +742,7 @@
 	border: none;
 	border-radius: 1px;
 	box-shadow: 0 0 0 1px #0c120d;
-	background: #0074df;
-	background: linear-gradient(0deg, #003bc3 2%, #0074df 6% 46%, #008ee5 54% 94%, #499ae5 96%);
+	background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 	cursor: pointer;
 }
 
@@ -756,9 +755,39 @@
 
 .expe-import-btn--overlay {
 	position: absolute;
-	top: 4px;
-	right: 4px;
+	top: 0px;
+	right: 0px;
 	z-index: 10;
+}
+
+.crew-skill-import-btn {
+	margin-left: auto;
+	flex: 0 0 auto;
+}
+
+.crew-skill-import-icon {
+	display: block;
+	position: relative;
+	width: 24px;
+	height: 24px;
+}
+
+.crew-skill-import-btn img {
+	position: absolute;
+	display: block;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+.crew-skill-import-character {
+	left: 0px;
+	top: 5px;
+}
+
+.crew-skill-import-overlay {
+	left: 1px;
+	top: 6px;
 }
 
 /* ==========================================================================

@@ -37,19 +37,21 @@ const sourceFiles = [
   'expeditionSimulator/js/data/SectorData.js',
   'expeditionSimulator/js/data/CharacterData.js',
   'expeditionSimulator/js/data/AbilityData.js',
+  'expeditionSimulator/js/data/SkillOwnershipData.js',
   'expeditionSimulator/js/data/ItemData.js',
   'expeditionSimulator/js/data/WorldData.js',
   'general/js/core/Component.js',
   'expeditionSimulator/js/core/ExpeditionState.js',
   'general/js/components/shared/ToggleButton.js',
   'general/js/components/shared/Modal.js',
+  'general/js/components/shared/ConfirmationModal.js',
   'general/js/components/shared/SelectionModal.js',
   'general/js/components/shared/Panel.js',
   'general/js/components/shared/TabContainer.js',
   'general/js/components/shared/InfoPanel.js',
+  'general/js/components/shared/PlayerCard.js',
   'expeditionSimulator/js/components/SectorGrid.js',
   'expeditionSimulator/js/components/SelectedSectors.js',
-  'expeditionSimulator/js/components/PlayerCard.js',
   'expeditionSimulator/js/components/PlayerSection.js',
   'expeditionSimulator/js/components/ProbabilityDisplay.js',
   'expeditionSimulator/js/components/ResultsDisplay.js',
@@ -83,7 +85,10 @@ const sourceFiles = [
   'expeditionSimulator/js/probability/CombatRewardCalculator.js',
   'expeditionSimulator/js/probability/EventDamageCalculator.js',
   'expeditionSimulator/js/io/Clipboard.js',
-  'expeditionSimulator/js/io/ChatObserver.js'
+  'expeditionSimulator/js/io/ChatObserver.js',
+  'crewManager/js/CrewCharacterState.js',
+  'crewManager/js/CrewSkillCardInjector.js',
+  'crewManager/js/services/CrewManagerStorage.js'
   // 'expeditionSimulator/js/app.js' - excluded: initializes UI
   // 'content.js' - excluded: entry point
 ];

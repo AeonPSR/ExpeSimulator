@@ -2,24 +2,16 @@
  * PlayerCard Component
  * 
  * Displays a single player profile with avatar, abilities, items, and health.
- * 
- * Features:
- * - Clickable avatar for character selection
- * - 4 regular ability slots
- * - 3 item slots
- * - Health display
- * - Remove button
  */
 class PlayerCard extends Component {
 	/**
 	 * @param {Object} options
-	 * @param {Object} options.player - Player data object
-	 *   { id, avatar, abilities: [5], items: [3], health }
-	 * @param {Function} [options.onAvatarClick] - Callback: (playerId) => void
-	 * @param {Function} [options.onAbilityClick] - Callback: (playerId, slotIndex) => void
-	 * @param {Function} [options.onItemClick] - Callback: (playerId, slotIndex) => void
-	 * @param {Function} [options.onHealthClick] - Callback: (playerId) => void
-	 * @param {Function} [options.onRemove] - Callback: (playerId) => void
+	 * @param {Object} options.player - Player state: { id, avatar, abilities, items, health }
+	 * @param {Function} [options.onAvatarClick] - Called with (playerId)
+	 * @param {Function} [options.onAbilityClick] - Called with (playerId, slotIndex)
+	 * @param {Function} [options.onItemClick] - Called with (playerId, slotIndex)
+	 * @param {Function} [options.onHealthClick] - Called with (playerId)
+	 * @param {Function} [options.onRemove] - Called with (playerId)
 	 * @param {Function} [options.getResourceURL] - Resource URL resolver
 	 */
 	constructor(options = {}) {
@@ -30,39 +22,30 @@ class PlayerCard extends Component {
 		this.onItemClick = options.onItemClick || null;
 		this.onHealthClick = options.onHealthClick || null;
 		this.onRemove = options.onRemove || null;
+		this.showRemove = options.showRemove !== false;
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 	}
 
-	/**
-	 * Creates the player card element
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('div', {
 			className: 'player-profile',
 			dataset: { playerId: this.player.id.toString() }
 		});
 
-		// Avatar
 		const avatar = this._createAvatar();
 		this.element.appendChild(avatar);
 
-		// Details (abilities + bottom row)
 		const details = this._createDetails();
 		this.element.appendChild(details);
 
-		// Remove button
-		const removeBtn = this._createRemoveButton();
-		this.element.appendChild(removeBtn);
+		if (this.showRemove) {
+			const removeBtn = this._createRemoveButton();
+			this.element.appendChild(removeBtn);
+		}
 
 		return this.element;
 	}
 
-	/**
-	 * Creates the avatar element
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createAvatar() {
 		const avatar = this.createElement('div', {
 			className: 'player-avatar',
@@ -82,31 +65,18 @@ class PlayerCard extends Component {
 		return avatar;
 	}
 
-	/**
-	 * Creates the details section (abilities + items + health)
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createDetails() {
 		const details = this.createElement('div', { className: 'player-details' });
 
-		// Abilities row
 		const abilities = this._createAbilitiesRow();
 		details.appendChild(abilities);
 
-		// Bottom row (items + health)
 		const bottomRow = this._createBottomRow();
 		details.appendChild(bottomRow);
 
 		return details;
 	}
 
-	/**
-	 * Gets the display icon for an ability, applying easter eggs
-	 * @private
-	 * @param {string} abilityFile - The ability filename (e.g. 'sprint.png')
-	 * @returns {string} The icon path to use
-	 */
 	_getAbilityIcon(abilityFile) {
 		// Easter egg: Terrence + Sprint = sprinter_disabled
 		if (abilityFile === 'sprint.png' && this.player.avatar === 'terrence.png') {
@@ -115,11 +85,6 @@ class PlayerCard extends Component {
 		return this.getResourceURL(`pictures/abilities/${abilityFile}`);
 	}
 
-	/**
-	 * Creates the abilities row
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createAbilitiesRow() {
 		const abilitiesDiv = this.createElement('div', { className: 'player-abilities' });
 
@@ -153,15 +118,9 @@ class PlayerCard extends Component {
 		return abilitiesDiv;
 	}
 
-	/**
-	 * Creates the bottom row (items + health)
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createBottomRow() {
 		const bottomRow = this.createElement('div', { className: 'player-bottom-row' });
 
-		// Item slots
 		for (let i = 0; i < 3; i++) {
 			const item = this.player.items[i];
 
@@ -189,7 +148,6 @@ class PlayerCard extends Component {
 			bottomRow.appendChild(slot);
 		}
 
-		// Health slot
 		const healthSlot = this.createElement('div', {
 			className: 'health-slot',
 			dataset: { type: 'health', playerId: this.player.id.toString() }
@@ -212,11 +170,6 @@ class PlayerCard extends Component {
 		return bottomRow;
 	}
 
-	/**
-	 * Creates the remove button
-	 * @private
-	 * @returns {HTMLElement}
-	 */
 	_createRemoveButton() {
 		const removeBtn = this.createElement('div', {
 			className: 'expe-close-btn',
@@ -236,7 +189,6 @@ class PlayerCard extends Component {
 	}
 
 	/**
-	 * Updates the avatar display
 	 * @param {string} avatarFile
 	 */
 	updateAvatar(avatarFile) {
@@ -258,7 +210,6 @@ class PlayerCard extends Component {
 	}
 
 	/**
-	 * Updates an ability slot
 	 * @param {number} slotIndex
 	 * @param {string|null} abilityFile
 	 */
@@ -282,6 +233,10 @@ class PlayerCard extends Component {
 	 * @param {number} slotIndex
 	 * @param {string|null} itemFile
 	 */
+	/**
+	 * @param {number} slotIndex
+	 * @param {string|null} itemFile
+	 */
 	updateItem(slotIndex, itemFile) {
 		this.player.items[slotIndex] = itemFile;
 		const slot = this.element?.querySelector(`[data-type="item"][data-slot="${slotIndex}"]`);
@@ -301,6 +256,9 @@ class PlayerCard extends Component {
 	 * Updates health display
 	 * @param {number} health
 	 */
+	/**
+	 * @param {number} health
+	 */
 	updateHealth(health) {
 		this.player.health = health;
 		const healthSlot = this.element?.querySelector('[data-type="health"]');
@@ -317,6 +275,9 @@ class PlayerCard extends Component {
 	/**
 	 * Gets the player data
 	 * @returns {Object}
+	 */
+	/**
+	 * @returns {Object} Copy of the player state.
 	 */
 	getPlayer() {
 		return { ...this.player };

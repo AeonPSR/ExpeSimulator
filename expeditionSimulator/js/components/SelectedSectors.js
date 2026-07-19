@@ -3,22 +3,14 @@
  * 
  * Displays the currently selected sectors for the expedition.
  * Includes a clear all button.
- * 
- * Features:
- * - Grid display of selected sectors
- * - Click to remove individual sectors
- * - Counter showing current/max sectors
- * - Clear all button
- * - Fight and negative level icons
  */
 class SelectedSectors extends Component {
 	/**
 	 * @param {Object} options
-	 * @param {number} [options.maxSectors=20] - Maximum sectors allowed
-	 * @param {Function} [options.onSectorRemove] - Callback: (index) => void
-	 * @param {Function} [options.onClearAll] - Callback: () => void
+	 * @param {number} [options.maxSectors=20] - Maximum regular sectors allowed
+	 * @param {Function} [options.onSectorRemove] - Called with (index)
+	 * @param {Function} [options.onClearAll] - Called with no arguments
 	 * @param {Function} [options.getResourceURL] - Resource URL resolver
-	 * @param {Array<string>} [options.sectorsWithFight] - Sectors with fight events
 	 */
 	constructor(options = {}) {
 		super(options);
@@ -27,33 +19,25 @@ class SelectedSectors extends Component {
 		this.onClearAll = options.onClearAll || null;
 		this.getResourceURL = options.getResourceURL || ((path) => path);
 
-		// Current selected sectors
 		this._selectedSectors = [];
 		this._headerElement = null;
 		this._gridElement = null;
 	}
 
-	/**
-	 * Creates the selected sectors section
-	 * @returns {HTMLElement}
-	 */
 	render() {
 		this.element = this.createElement('div', { className: 'selected-sectors' });
 
-		// Header with counter
 		this._headerElement = this.createElement('h4', {
 			id: 'selected-header'
 		}, this._getHeaderText());
 		this.element.appendChild(this._headerElement);
 
-		// Selected sectors grid
 		this._gridElement = this.createElement('div', {
 			className: 'selected-grid',
 			id: 'selected-grid'
 		});
 		this.element.appendChild(this._gridElement);
 
-		// Clear all button
 		const clearBtn = this.createElement('button', {
 			id: 'clear-all',
 			className: 'clear-btn',
@@ -65,11 +49,6 @@ class SelectedSectors extends Component {
 		return this.element;
 	}
 
-	/**
-	 * Gets the header text with counter
-	 * @private
-	 * @returns {string}
-	 */
 	_getHeaderText() {
 		// Count only regular sectors (excluding LANDING and LOST) for the X/20 limit
 		const regularCount = this._selectedSectors.filter(sectorName => 
@@ -77,7 +56,6 @@ class SelectedSectors extends Component {
 		).length;
 		const totalCount = this._selectedSectors.length;
 		
-		// Show format like original: "Selected Expedition (5/20)" or "Selected Expedition (5/20 + 2 special)"
 		const baseText = I18n.t('sectors.header', { regular: regularCount, max: this.maxSectors });
 		const specialCount = totalCount - regularCount;
 		
@@ -87,18 +65,15 @@ class SelectedSectors extends Component {
 	}
 
 	/**
-	 * Updates the display with new selected sectors
-	 * @param {Array<string>} sectors - Array of sector names
+	 * @param {Array<string>} sectors
 	 */
 	update(sectors) {
 		this._selectedSectors = sectors || [];
 
-		// Update header
 		if (this._headerElement) {
 			this._headerElement.textContent = this._getHeaderText();
 		}
 
-		// Update grid
 		if (this._gridElement) {
 			this._gridElement.innerHTML = '';
 
@@ -109,20 +84,12 @@ class SelectedSectors extends Component {
 		}
 	}
 
-	/**
-	 * Creates a selected sector item
-	 * @private
-	 * @param {string} sectorName
-	 * @param {number} index
-	 * @returns {HTMLElement}
-	 */
 	_createSelectedItem(sectorName, index) {
 		const sectorDiv = this.createElement('div', {
 			className: 'selected-sector-item',
 			dataset: { index: index.toString() },
 		});
 
-		// Main image
 		const img = this.createElement('img', {
 			src: this.getResourceURL(`pictures/sectors/${sectorName.toLowerCase()}.png`),
 			alt: sectorName
@@ -140,7 +107,6 @@ class SelectedSectors extends Component {
 		}
 
 
-		// Click to remove
 		this.addEventListener(sectorDiv, 'click', () => {
 			this.onSectorRemove?.(index);
 		});
@@ -149,15 +115,13 @@ class SelectedSectors extends Component {
 	}
 
 	/**
-	 * Gets the current selected sectors
-	 * @returns {Array<string>}
+	 * @returns {Array<string>} Copy of the selected sectors.
 	 */
 	getSelectedSectors() {
 		return [...this._selectedSectors];
 	}
 
 	/**
-	 * Gets the count of selected sectors
 	 * @returns {number}
 	 */
 	getCount() {
@@ -165,7 +129,6 @@ class SelectedSectors extends Component {
 	}
 
 	/**
-	 * Checks if at max capacity
 	 * @returns {boolean}
 	 */
 	isFull() {

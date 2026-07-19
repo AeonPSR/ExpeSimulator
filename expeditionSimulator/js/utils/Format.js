@@ -19,7 +19,7 @@ const Format = {
 	},
 
 	/**
-	 * Formats a probability (0–1) as a percentage string with parentheses.
+	 * Formats a probability (0-1) as a percentage string with parentheses.
 	 * Shows '(<0.1%)' for very small non-zero values.
 	 *
 	 * @param {number|undefined} prob

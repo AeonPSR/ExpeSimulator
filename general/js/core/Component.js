@@ -21,19 +21,15 @@ class Component {
 	}
 
 	/**
-	 * Creates the component's DOM element
-	 * Override this in subclasses to define the component's HTML structure
-	 * @abstract
-	 * @returns {HTMLElement} The created element
+	 * @returns {HTMLElement}
 	 */
 	render() {
 		throw new Error('Component.render() must be implemented by subclass');
 	}
 
 	/**
-	 * Mounts the component to the DOM
 	 * @param {HTMLElement} [container] - Optional container override
-	 * @returns {HTMLElement} The mounted element
+	 * @returns {HTMLElement}
 	 */
 	mount(container = null) {
 		if (container) {
@@ -44,40 +40,27 @@ class Component {
 			throw new Error('Component requires a container to mount into');
 		}
 
-		// Render if not already rendered
 		if (!this.element) {
 			this.element = this.render();
 		}
 
-		// Append to container
 		this.container.appendChild(this.element);
 		this._mounted = true;
 
-		// Call lifecycle hook
 		this.onMount();
 
 		return this.element;
 	}
 
-	/**
-	 * Lifecycle hook called after mounting
-	 * Override to add post-mount logic (e.g., focus, animations)
-	 */
 	onMount() {
 		// Override in subclass
 	}
 
-	/**
-	 * Removes the component from the DOM and cleans up
-	 */
 	destroy() {
-		// Call lifecycle hook before removal
 		this.onDestroy();
 
-		// Remove all tracked event listeners
 		this._removeAllEventListeners();
 
-		// Remove from DOM
 		if (this.element && this.element.parentNode) {
 			this.element.parentNode.removeChild(this.element);
 		}
@@ -86,19 +69,14 @@ class Component {
 		this._mounted = false;
 	}
 
-	/**
-	 * Lifecycle hook called before destruction
-	 * Override to add cleanup logic
-	 */
 	onDestroy() {
 		// Override in subclass
 	}
 
 	/**
-	 * Adds an event listener and tracks it for cleanup
 	 * @param {HTMLElement} element - Element to attach listener to
-	 * @param {string} event - Event type (e.g., 'click')
-	 * @param {Function} handler - Event handler function
+	 * @param {string} event - Event type
+	 * @param {Function} handler - Event handler
 	 * @param {Object} [options] - addEventListener options
 	 */
 	addEventListener(element, event, handler, options = {}) {
@@ -106,10 +84,6 @@ class Component {
 		this._eventListeners.push({ element, event, handler, options });
 	}
 
-	/**
-	 * Removes all tracked event listeners
-	 * @private
-	 */
 	_removeAllEventListeners() {
 		this._eventListeners.forEach(({ element, event, handler, options }) => {
 			element.removeEventListener(event, handler, options);
@@ -118,16 +92,14 @@ class Component {
 	}
 
 	/**
-	 * Creates an HTML element with attributes and children
 	 * @param {string} tag - HTML tag name
-	 * @param {Object} [attrs] - Attributes to set (class, id, data-*, etc.)
+	 * @param {Object} [attrs] - Attributes to set
 	 * @param {Array|string|HTMLElement} [children] - Child content
 	 * @returns {HTMLElement}
 	 */
 	createElement(tag, attrs = {}, children = null) {
 		const element = document.createElement(tag);
 
-		// Set attributes
 		Object.entries(attrs).forEach(([key, value]) => {
 			if (key === 'className') {
 				element.className = value;
@@ -144,7 +116,6 @@ class Component {
 			}
 		});
 
-		// Add children
 		if (children !== null) {
 			if (Array.isArray(children)) {
 				children.forEach(child => {

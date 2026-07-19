@@ -1,14 +1,12 @@
 /**
- * Translations — Full string dictionary for all three supported locales.
+ * Translations for all three supported locales.
  *
  * Keys use dot-notation namespaced by component / concept.
  * Variable placeholders use {varName} syntax, matched by I18n.t(key, vars).
  */
 const Translations = {
 
-	// ─────────────────────────────────────────────────────────────────────────
 	// English (source / fallback)
-	// ─────────────────────────────────────────────────────────────────────────
 	en: {
 		// Panel
 		'panel.title':              'Planetary Analyzer',
@@ -76,7 +74,7 @@ const Translations = {
 		'prob.negative.header':     'Negative Events',
 		'prob.negative.col':        'Event Type',
 		'event.player_lost':        'Player Lost',
-		'event.unexplored':         'Sector Unexplored',
+		'event.wander':             'Wander',
 		'event.disease':            'Disease',
 		'event.item_lost':          'Item Loss',
 		'event.kill_all':           'Kill All',
@@ -116,7 +114,7 @@ const Translations = {
 		'planet.dir.south':         'South',
 		'planet.dir.west':          'West',
 
-		// Planet tags — labels
+		// Planet tag labels
 		'tag.oxygen.label':                  'Oxygen',
 		'tag.cristal_field.label':           'Crystal Field',
 		'tag.mankarog.label':                'Mankarog',
@@ -157,7 +155,7 @@ const Translations = {
 		'tag.quad_seismic_activity.label':   'Faultline',
 		'tag.quad_volcanic_activity.label':  'A Nice Chill Expedition',
 
-		// Planet tags — descriptions
+		// Planet tag descriptions
 		'tag.oxygen.desc':                   'Contains an Oxygen sector.',
 		'tag.cristal_field.desc':            'Contains a Cristal Field sector.',
 		'tag.mankarog.desc':                 'Contains a Mankarog sector.',
@@ -198,12 +196,28 @@ const Translations = {
 		'tag.quad_seismic_activity.desc':    '4 Seismic Activity sectors.',
 		'tag.quad_volcanic_activity.desc':   '4 Volcanic Activity sectors.',
 
+		// Crew Manager panel
+		'crewmanager.title':                 'Crew Manager',
+		'crewmanager.section.crew':          'Crew summary',
+		'crewmanager.section.title':         'Titles',
+		'crewmanager.section.details':       'Details',
+		'crewmanager.reset':                 'Reset this panel',
+		'crewmanager.reset.confirm':         'Are you sure ?',
+		'crewmanager.reset.yes':             'Yes',
+		'crewmanager.reset.no':              'No',
+		'crewmanager.timeline.title':        'Select your timeline',
+		'crewmanager.timeline.chaola':       'Chaola',
+		'crewmanager.timeline.anderek':      'Anderek',
+		'crewmanager.timeline.neither':      'Neither',
+		'crewmanager.timeline.day_short':    'D',
+		'crewmanager.timeline.cycle_short':  'C',
+
 		// Settings panel
 		'settings.title':                    'Settings',
 		'settings.section.language':         'Language',
 		'settings.section.theme':            'Theme',
 		'settings.section.devtools':         'Developer tools',
-		'settings.section.visibility':       'Visibility',
+		'settings.section.visibility':       'Module visibility',
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
 		'settings.theme.unavailable_firefox': 'Unavailable on Firefox',
@@ -214,11 +228,22 @@ const Translations = {
 		'credits.wiki.label':                'community wiki.',
 		'credits.author.title':              'A script created by aeon_psr',
 		'credits.contact':                   'Questions? Suggestions? Bugs? Send me a message on Discord!',
+
+		// Settings tabs
+		'settings.tab.informations':         'Informations',
+		'settings.tab.patch_notes':          'Patch Notes',
+
+		// Credits subtitle
+		'credits.subtitle':                  'Up to date with eMush V0.31',
+
+		// Patch notes
+		'patch_notes.v1_1.line1':            'Added this section.',
+		'patch_notes.v1_1.line2':            'Fixed various formatting issues.',
+		'patch_notes.v1_1.line3':            'Added a button on mobile to close the extension.',
+		'patch_notes.v1_0.content':          'Initial release.',
 	},
 
-	// ─────────────────────────────────────────────────────────────────────────
 	// French
-	// ─────────────────────────────────────────────────────────────────────────
 	fr: {
 		// Panel
 		'panel.title':              'Analyseur Planétaire',
@@ -286,7 +311,7 @@ const Translations = {
 		'prob.negative.header':     'Événements négatifs',
 		'prob.negative.col':        'Type d\'événement',
 		'event.player_lost':        'Joueur perdu',
-		'event.unexplored':         'Secteur non exploré',
+		'event.wander':             'Errance',
 		'event.disease':            'Maladie',
 		'event.item_lost':          'Perte d\'objet',
 		'event.kill_all':           'Mort du groupe',
@@ -326,7 +351,7 @@ const Translations = {
 		'planet.dir.south':         'Sud',
 		'planet.dir.west':          'Ouest',
 
-		// Planet tags — labels
+		// Planet tag labels
 		'tag.oxygen.label':                  'Oxygène',
 		'tag.cristal_field.label':           'Champ de Cristalite',
 		'tag.mankarog.label':                'Mankarog',
@@ -367,7 +392,7 @@ const Translations = {
 		'tag.quad_seismic_activity.label':   'Déchirée',
 		'tag.quad_volcanic_activity.label':  'Une petite expédition sympa et reposante',
 
-		// Planet tags — descriptions
+		// Planet tag descriptions
 		'tag.oxygen.desc':                   'Contient un secteur Oxygène.',
 		'tag.cristal_field.desc':            'Contient un secteur Cristalite.',
 		'tag.mankarog.desc':                 'Contient un secteur Mankarog.',
@@ -408,12 +433,28 @@ const Translations = {
 		'tag.quad_seismic_activity.desc':    '4 secteurs Activité sismique.',
 		'tag.quad_volcanic_activity.desc':   '4 secteurs Activité volcanique.',
 
+		// Crew Manager panel
+		'crewmanager.title':                 'Gestion de l\'Équipage',
+		'crewmanager.section.crew':          'Résumé de l\'équipage',
+		'crewmanager.section.title':         'Titres',
+		'crewmanager.section.details':       'Détails',
+		'crewmanager.reset':                 'Réinitialiser cette page',
+		'crewmanager.reset.confirm':         'Êtes-vous sûr ?',
+		'crewmanager.reset.yes':             'Oui',
+		'crewmanager.reset.no':              'Non',
+		'crewmanager.timeline.title':        'Sélectionnez votre chronologie',
+		'crewmanager.timeline.chaola':       'Chaola',
+		'crewmanager.timeline.anderek':      'Anderek',
+		'crewmanager.timeline.neither':      'Ni l\'un ni l\'autre',
+		'crewmanager.timeline.day_short':    'J',
+		'crewmanager.timeline.cycle_short':  'C',
+
 		// Settings panel
 		'settings.title':                    'Réglages',
 		'settings.section.language':         'Langue',
 		'settings.section.theme':            'Thème',
 		'settings.section.devtools':         'Outils développeur',
-		'settings.section.visibility':       'Visibilité',
+		'settings.section.visibility':       'Visibilité des modules',
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
 		'settings.theme.unavailable_firefox': 'Indisponible sur Firefox',
@@ -424,11 +465,22 @@ const Translations = {
 		'credits.wiki.label':                'wiki de la communauté.',
 		'credits.author.title':              'Un script créé par aeon_psr',
 		'credits.contact':                   'Questions ? Suggestions ? Bugs ? Envoyez moi un message sur Discord !',
+
+		// Settings tabs
+		'settings.tab.informations':         'Informations',
+		'settings.tab.patch_notes':          'Notes de mise à jour',
+
+		// Credits subtitle
+		'credits.subtitle':                  'À jour avec eMush V0.31',
+
+		// Patch notes
+		'patch_notes.v1_1.line1':            'Ajout de cette section.',
+		'patch_notes.v1_1.line2':            'Corrections de divers problèmes de mise en forme.',
+		'patch_notes.v1_1.line3':            "Ajout d'un bouton sur mobile pour pouvoir fermer l'extension.",
+		'patch_notes.v1_0.content':          'Version initiale.',
 	},
 
-	// ─────────────────────────────────────────────────────────────────────────
 	// Spanish
-	// ─────────────────────────────────────────────────────────────────────────
 	es: {
 		// Panel
 		'panel.title':              'Analizador Planetario',
@@ -496,7 +548,7 @@ const Translations = {
 		'prob.negative.header':     'Eventos negativos',
 		'prob.negative.col':        'Tipo de evento',
 		'event.player_lost':        'Jugador perdido',
-		'event.unexplored':         'Sector sin explorar',
+		'event.wander':             'Errático',
 		'event.disease':            'Enfermedad',
 		'event.item_lost':          'Pérdida de objeto',
 		'event.kill_all':           'Matar a todos',
@@ -536,7 +588,7 @@ const Translations = {
 		'planet.dir.south':         'Sur',
 		'planet.dir.west':          'Oeste',
 
-		// Planet tags — labels
+		// Planet tag labels
 		'tag.oxygen.label':                  'Oxígeno',
 		'tag.cristal_field.label':           'Campo de Cristal',
 		'tag.mankarog.label':                'Mankarog',
@@ -577,7 +629,7 @@ const Translations = {
 		'tag.quad_seismic_activity.label':   'Línea de Falla',
 		'tag.quad_volcanic_activity.label':  'Una expedición tranquila',
 
-		// Planet tags — descriptions
+		// Planet tag descriptions
 		'tag.oxygen.desc':                   'Contiene un sector de Oxígeno.',
 		'tag.cristal_field.desc':            'Contiene un sector de Campo de Cristal.',
 		'tag.mankarog.desc':                 'Contiene un sector Mankarog.',
@@ -618,12 +670,28 @@ const Translations = {
 		'tag.quad_seismic_activity.desc':    '4 sectores de Actividad Sísmica.',
 		'tag.quad_volcanic_activity.desc':   '4 sectores de Actividad Volcánica.',
 
+		// Crew Manager panel
+		'crewmanager.title':                 'Gestión de Tripulación',
+		'crewmanager.section.crew':          'Resumen de tripulación',
+		'crewmanager.section.title':         'Títulos',
+		'crewmanager.section.details':       'Detalles',
+		'crewmanager.reset':                 'Restablecer este panel',
+		'crewmanager.reset.confirm':         '¿Estás seguro?',
+		'crewmanager.reset.yes':             'Sí',
+		'crewmanager.reset.no':              'No',
+		'crewmanager.timeline.title':        'Selecciona tu línea temporal',
+		'crewmanager.timeline.chaola':       'Chaola',
+		'crewmanager.timeline.anderek':      'Anderek',
+		'crewmanager.timeline.neither':      'Ninguno',
+		'crewmanager.timeline.day_short':    'D',
+		'crewmanager.timeline.cycle_short':  'C',
+
 		// Settings panel
 		'settings.title':                    'Ajustes',
 		'settings.section.language':         'Idioma',
 		'settings.section.theme':            'Tema',
 		'settings.section.devtools':         'Herramientas de desarrollador',
-		'settings.section.visibility':       'Visibilidad',
+		'settings.section.visibility':       'Visibilidad de módulos',
 		'settings.theme.default':            'Beta',
 		'settings.theme.retro':              'Aeon\'s Lab',
 		'settings.theme.unavailable_firefox': 'No disponible en Firefox',
@@ -634,6 +702,19 @@ const Translations = {
 		'credits.wiki.label':                'wiki de la comunidad.',
 		'credits.author.title':              'Un script creado por aeon_psr',
 		'credits.contact':                   '¿Preguntas? ¿Sugerencias? ¿Bugs? ¡Envíame un mensaje en Discord!',
+
+		// Settings tabs
+		'settings.tab.informations':         'Informaciones',
+		'settings.tab.patch_notes':          'Notas de actualización',
+
+		// Credits subtitle
+		'credits.subtitle':                  'Actualizado con eMush V0.31',
+
+		// Patch notes
+		'patch_notes.v1_1.line1':            'Añadida esta sección.',
+		'patch_notes.v1_1.line2':            'Correcciones de varios problemas de formato.',
+		'patch_notes.v1_1.line3':            'Añadido un botón en móvil para cerrar la extensión.',
+		'patch_notes.v1_0.content':          'Lanzamiento inicial.',
 	},
 };
 

@@ -30,7 +30,8 @@
 	border: 3px solid #3498db;
 	border-radius: 12px;
 	padding: 20px;
-	max-width: 500px;
+	width: fit-content;
+	max-width: 90vw;
 	max-height: 80vh;
 	overflow-y: auto;
 	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -95,9 +96,57 @@
    ========================================================================== */
 
 [data-expe-sim] .character-grid {
-	display: grid;
-	grid-template-columns: repeat(6, 1fr);
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
 	gap: 10px;
+	margin: 0 auto;
+	/* Definite width so flex-wrap knows where to break rows.
+	   Character selection: 6 columns of 42px + 5 gaps of 10px (+buffer). */
+	width: 306px;
+}
+
+/* Ability modal: 4 columns of 60px + 3 gaps */
+[data-expe-sim] .ability-selection .character-grid {
+	width: 274px;
+}
+
+/* Item modal: 5 columns of 60px + 4 gaps */
+[data-expe-sim] .item-selection .character-grid {
+	width: 344px;
+}
+
+/* Crew skill modal: 8 columns of 60px + 7 gaps. Declared after the
+   .ability-selection rule (crew cards carry both classes) so it wins. */
+[data-expe-sim] .crew-skill-modal .character-grid {
+	width: 556px;
+}
+
+/* ==========================================================================
+   Character Grid Section Background (decorative, per-section image)
+   ========================================================================== */
+
+[data-expe-sim] .character-grid-section {
+	position: relative;
+}
+
+[data-expe-sim] .character-grid-section .character-grid {
+	position: relative;
+	z-index: 1;
+}
+
+[data-expe-sim] .character-grid-section-bg {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 55%;
+	max-height: 85%;
+	object-fit: contain;
+	opacity: 0.7;
+	pointer-events: none;
+	z-index: 0;
 }
 
 /* ==========================================================================
@@ -156,5 +205,53 @@
 [data-expe-sim] .item-selection .character-option {
 	width: 60px;
 	height: 60px;
+}
+
+/* ========================================================================== 
+   Confirmation Modal Variant
+   ========================================================================== */
+
+[data-expe-sim] .confirmation-modal {
+	min-width: 260px;
+	text-align: center;
+}
+
+[data-expe-sim] .confirmation-message {
+	margin: 0 0 16px 0;
+	color: #ecf0f1;
+	font-size: 14px;
+}
+
+[data-expe-sim] .confirmation-actions {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+}
+
+[data-expe-sim] .confirmation-btn {
+	min-width: 72px;
+	padding: 8px 14px;
+	border: 2px solid #3498db;
+	border-radius: 4px;
+	background: rgba(52, 152, 219, 0.18);
+	color: #ecf0f1;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+[data-expe-sim] .confirmation-btn:hover {
+	background: rgba(52, 152, 219, 0.32);
+	transform: translateY(-1px);
+}
+
+[data-expe-sim] .confirmation-btn--confirm {
+	border-color: #e74c3c;
+	background: rgba(231, 76, 60, 0.18);
+}
+
+[data-expe-sim] .confirmation-btn--confirm:hover {
+	background: rgba(231, 76, 60, 0.32);
 }
 

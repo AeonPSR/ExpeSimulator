@@ -156,7 +156,7 @@ const FightCalculator = {
 	 * (i.e., grenades are always used when they would reduce damage).
 	 * 
 	 * Since we don't know exactly which fights occur, we apply a simplified model:
-	 * shift damage values down by (grenadeCount Ã— 3), with minimum 0.
+	 * shift damage values down by (grenadeCount x 3), with minimum 0.
 	 * 
 	 * @param {Map<number, number>} distribution - Original damage distribution
 	 * @param {number} grenadeCount - Number of grenades available
