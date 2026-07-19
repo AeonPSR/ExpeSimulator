@@ -142,7 +142,7 @@ class SettingsPage extends Component {
 		}));
 		row.appendChild(this._renderPanelVisibilityButton({
 			panelId: 'crew-manager-panel',
-			iconPath: 'pictures/abilities/aeon icons/Aeonian shrink.png'
+			iconPath: 'pictures/abilities/human/psy.png'
 		}));
 		return row;
 	}
@@ -193,7 +193,7 @@ class SettingsPage extends Component {
 			const url   = I18n.t('credits.wiki.url');
 			const label = I18n.t('credits.wiki.label');
 			const credits = new InfoPanel({
-				title:    'Aeon\'s Lab - Version 1.1',
+				title:    'Aeon\'s Lab - Version 1.2',
 				subtitle: I18n.t('credits.subtitle'),
 				sections: [
 					{
@@ -216,6 +216,10 @@ class SettingsPage extends Component {
 		const rebuild = () => {
 			const notes = new InfoPanel({
 				sections: [
+					{
+						title:   'Version 1.2',
+						content: `<p>- ${I18n.t('patch_notes.v1_2.line1')}</p><p>- ${I18n.t('patch_notes.v1_2.line2')}</p><p>- ${I18n.t('patch_notes.v1_2.line3')}</p>`
+					},
 					{
 						title:   'Version 1.1',
 						content: `<p>- ${I18n.t('patch_notes.v1_1.line1')}</p><p>- ${I18n.t('patch_notes.v1_1.line2')}</p><p>- ${I18n.t('patch_notes.v1_1.line3')}</p>`

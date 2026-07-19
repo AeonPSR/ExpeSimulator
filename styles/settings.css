@@ -95,6 +95,36 @@
 
 #settings-panel .settings-visibility-row .panel-lang-btn {
 	margin-right: 0;
+	position: relative;
+}
+
+#settings-panel .settings-visibility-row .panel-lang-btn:not(.panel-lang-btn--active) img {
+	opacity: 0.5;
+}
+
+#settings-panel .settings-visibility-row .panel-lang-btn:not(.panel-lang-btn--active)::before,
+#settings-panel .settings-visibility-row .panel-lang-btn:not(.panel-lang-btn--active)::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 120%;
+	height: 2px;
+	background: #95a5a6;
+	transition: background 0.3s ease;
+}
+
+#settings-panel .settings-visibility-row .panel-lang-btn:not(.panel-lang-btn--active)::before {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+#settings-panel .settings-visibility-row .panel-lang-btn:not(.panel-lang-btn--active)::after {
+	transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+#settings-panel .settings-visibility-row .panel-lang-btn:not(.panel-lang-btn--active):hover::before,
+#settings-panel .settings-visibility-row .panel-lang-btn:not(.panel-lang-btn--active):hover::after {
+	background: #7f8c8d;
 }
 
 #settings-panel .settings-section--devtools .panel-lang-btn--active {

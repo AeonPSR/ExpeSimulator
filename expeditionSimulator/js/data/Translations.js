@@ -237,6 +237,9 @@ const Translations = {
 		'credits.subtitle':                  'Up to date with eMush V0.31',
 
 		// Patch notes
+		'patch_notes.v1_2.line1':            'Added the Crew Manager page.',
+		'patch_notes.v1_2.line2':            'The expedition simulation uses Crew Manager information when possible.',
+		'patch_notes.v1_2.line3':            'Fixed missing translations.',
 		'patch_notes.v1_1.line1':            'Added this section.',
 		'patch_notes.v1_1.line2':            'Fixed various formatting issues.',
 		'patch_notes.v1_1.line3':            'Added a button on mobile to close the extension.',
@@ -474,6 +477,9 @@ const Translations = {
 		'credits.subtitle':                  'À jour avec eMush V0.31',
 
 		// Patch notes
+		'patch_notes.v1_2.line1':            'Ajout de la page Gestion de l\'équipage.',
+		'patch_notes.v1_2.line2':            'La simulation d\'expedition utilise les informations de la gestion d\'équipage, si possible.',
+		'patch_notes.v1_2.line3':            'Correction de traductions manquantes.',
 		'patch_notes.v1_1.line1':            'Ajout de cette section.',
 		'patch_notes.v1_1.line2':            'Corrections de divers problèmes de mise en forme.',
 		'patch_notes.v1_1.line3':            "Ajout d'un bouton sur mobile pour pouvoir fermer l'extension.",
@@ -711,6 +717,9 @@ const Translations = {
 		'credits.subtitle':                  'Actualizado con eMush V0.31',
 
 		// Patch notes
+		'patch_notes.v1_2.line1':            'Añadida la página de Gestión de tripulación.',
+		'patch_notes.v1_2.line2':            'La simulación de expedición usa la información de la Gestión de tripulación cuando es posible.',
+		'patch_notes.v1_2.line3':            'Corrección de traducciones faltantes.',
 		'patch_notes.v1_1.line1':            'Añadida esta sección.',
 		'patch_notes.v1_1.line2':            'Correcciones de varios problemas de formato.',
 		'patch_notes.v1_1.line3':            'Añadido un botón en móvil para cerrar la extensión.',
