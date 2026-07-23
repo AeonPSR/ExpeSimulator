@@ -10,6 +10,7 @@ class CrewManagerPage extends Component {
 		this._titleRows = null;
 		this._titleSection = null;
 		this._titleVisibilityToggle = null;
+		this._statusBadgeToggle = null;
 		this._detailsSection = null;
 		this._expertToggle = null;
 		this._cycleToggle = null;
@@ -27,7 +28,7 @@ class CrewManagerPage extends Component {
 		const onCharacterClick = (filename) => this._detailsSection?.scrollAndHighlight(filename);
 
 		// Crew section
-		const crewSection = this._renderSection('crewmanager.section.crew');
+		const crewSection = this._renderSection('crewmanager.section.crew', this._renderStatusBadgeToggle());
 		this._crewGrid = new CrewCharacterGrid({ onCharacterClick });
 		crewSection.appendChild(this._crewGrid.render());
 		this.element.appendChild(crewSection);
@@ -74,6 +75,24 @@ class CrewManagerPage extends Component {
 		return section;
 	}
 
+	_renderStatusBadgeToggle() {
+		if (!this._statusBadgeToggle) {
+			this._statusBadgeToggle = new ToggleButton({
+				id: 'crew-status-badge-toggle-btn',
+				className: 'diplomacy-toggle-btn',
+				icon: getResourceURL('pictures/ui/badges_group.png'),
+				alt: '',
+				activeColor: 'blue',
+				initialState: Boolean(this._savedState.options.statusBadges),
+				onToggle: (isActive) => {
+					this.element?.classList.toggle('crew-status-badges-active', isActive);
+					CrewManagerStorage.saveOptions({ statusBadges: isActive });
+				}
+			});
+		}
+		return this._statusBadgeToggle.render();
+	}
+
 	_renderTitleVisibilityToggle() {
 		if (!this._titleVisibilityToggle) {
 			this._titleVisibilityToggle = new ToggleButton({
@@ -82,9 +101,10 @@ class CrewManagerPage extends Component {
 				icon: getResourceURL('pictures/ui/visibility.png'),
 				alt: '',
 				activeColor: 'blue',
-				initialState: true,
+				initialState: Boolean(this._savedState.options.titleVisible),
 				onToggle: (isVisible) => {
 					this._titleSection?.classList.toggle('crew-section--collapsed', !isVisible);
+					CrewManagerStorage.saveOptions({ titleVisible: isVisible });
 				}
 			});
 		}
@@ -128,8 +148,10 @@ class CrewManagerPage extends Component {
 	}
 
 	_applySavedOptions() {
-		this.element?.classList.toggle('crew-expert-active', Boolean(this._savedState.options.expert));
-		this.element?.classList.toggle('crew-cycle-active', Boolean(this._savedState.options.cycle));
+		this.element?.classList.toggle('crew-expert-active',        Boolean(this._savedState.options.expert));
+		this.element?.classList.toggle('crew-cycle-active',         Boolean(this._savedState.options.cycle));
+		this.element?.classList.toggle('crew-status-badges-active', Boolean(this._savedState.options.statusBadges));
+		this._titleSection?.classList.toggle('crew-section--collapsed', !Boolean(this._savedState.options.titleVisible));
 	}
 
 	_renderResetButton() {

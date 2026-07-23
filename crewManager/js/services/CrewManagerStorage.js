@@ -9,7 +9,9 @@ const CrewManagerStorage = (() => {
 		version: 1,
 		options: {
 			expert: false,
-			cycle: false
+			cycle: false,
+			titleVisible: true,
+			statusBadges: false
 		},
 		players: {}
 	};

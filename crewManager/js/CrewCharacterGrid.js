@@ -52,6 +52,21 @@ class CrewCharacterGrid extends Component {
 				alt: ''
 			});
 			spriteAnchor.appendChild(deadIcon);
+
+			const mushBadge = this.createElement('img', {
+				className: 'crew-status-badge crew-mush-badge',
+				src: getResourceURL('pictures/ui/mush.png'),
+				alt: ''
+			});
+			spriteAnchor.appendChild(mushBadge);
+
+			const humanBadge = this.createElement('img', {
+				className: 'crew-status-badge crew-human-badge',
+				src: getResourceURL('pictures/ui/human.png'),
+				alt: ''
+			});
+			spriteAnchor.appendChild(humanBadge);
+
 			option.appendChild(spriteAnchor);
 
 			const activityIcons = this.createElement('div', { className: 'crew-character-side-icons crew-character-activity-icons' });

@@ -18,10 +18,10 @@ Todo:
 - Add the "Projects" page
 - Add forced click mode for menus
 - Saving the planet and expe staff
-- Make the group appartenance (mush/human) colorblind accessible
-- Boutton to reduce the section for the titles
 
 Done since last update:
+- Make the group appartenance (mush/human) colorblind accessible
+- Boutton to reduce the section for the titles
 - Fix the stars stuff
 - Fixed the skills not being imported correctly.
 - Fixed the expe simulator that wasn't pulling data from the manager when manually changing character.
