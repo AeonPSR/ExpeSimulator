@@ -16,12 +16,20 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
 Todo:
 - Add the "Projects" page
-- Saving the planet and expe staff
 
 Done since last update:
-- Add forced click mode for menus
-- Make the group appartenance (mush/human) colorblind accessible
-- Boutton to reduce the section for the titles
-- Fix the stars stuff
+
+-> Crew manager
+- Made the group appartenance (mush/human) colorblind accessible.
+- Added a button to reduce the section for the titles.
 - Fixed the skills not being imported correctly.
+- Added upper bounds to the values of health, moral, spores, AP and days.
+
+-> Planetary analyzer:
+- The planetary analyzer pannel now saves its content.
+- Fixed the planetary review that was incorectly calculating the effect of Diplomacy to calculate the stars.
 - Fixed the expe simulator that wasn't pulling data from the manager when manually changing character.
+- The expedition simulation now import health values from the crew manager.
+
+-> Settings
+- Added click mode to navigate the app by clicking on pannels instead of hovering them.

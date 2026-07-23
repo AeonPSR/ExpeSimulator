@@ -55,6 +55,10 @@ class CrewManagerApp {
 		return this._page?.getAvatarAbilities?.(filename) || [];
 	}
 
+	getAvatarHealth(filename) {
+		return this._page?.getAvatarHealth?.(filename) ?? null;
+	}
+
 	importAvatarAbilities(filename, abilities) {
 		this._page?.importAvatarAbilities?.(filename, abilities);
 		const panel = this._panel.element;

@@ -7,16 +7,21 @@
  * @module core/ExpeditionState
  */
 class ExpeditionState {
-	constructor() {
-		this._sectors = ['LANDING'];
+	constructor(options = {}) {
+		this._sectors = Array.isArray(options.initialSectors) && options.initialSectors.length > 0
+			? [...options.initialSectors]
+			: ['LANDING'];
 		this._players = [];
 		this._nextPlayerId = 1;
-		this._centauriActive = false;
-		this._antigravActive = false;
+		this._centauriActive = Boolean(options.initialCentauri);
+		this._antigravActive = Boolean(options.initialAntigrav);
 		this._onChange = null;
 
-		// Initialize with 4 default players, first one with Pilot ability
-		this._initializeDefaultPlayers();
+		if (Array.isArray(options.initialPlayers) && options.initialPlayers.length > 0) {
+			this._loadPlayers(options.initialPlayers);
+		} else {
+			this._initializeDefaultPlayers();
+		}
 	}
 
 	/**
@@ -32,6 +37,20 @@ class ExpeditionState {
 		}
 	}
 
+	_loadPlayers(players) {
+		const itemSlots = (typeof Constants !== 'undefined' ? Constants.ITEM_SLOTS : 3);
+		this._players = players.map(p => ({
+			id:        p.id,
+			avatar:    p.avatar,
+			abilities: this._getInitialAbilities(p.avatar),
+			items:     Array.isArray(p.items)
+				? [...p.items.slice(0, itemSlots), ...Array(itemSlots).fill(null)].slice(0, itemSlots)
+				: Array(itemSlots).fill(null),
+			health:    this._getCrewAvatarHealth(p.avatar)
+		}));
+		this._nextPlayerId = Math.max(...players.map(p => p.id), 0) + 1;
+	}
+
 	_createPlayer(options = {}) {
 		const selection = options.preferPilot ? this._pickInitialPilotAvatar() : { avatar: this._pickRandomAvatar() };
 		return {
@@ -39,8 +58,13 @@ class ExpeditionState {
 			avatar: selection.avatar,
 			abilities: this._getInitialAbilities(selection.avatar, selection.fallbackAbilities),
 			items: Array(Constants.ITEM_SLOTS).fill(null),
-			health: Constants.DEFAULT_HEALTH
+			health: this._getCrewAvatarHealth(selection.avatar)
 		};
+	}
+
+	_getCrewAvatarHealth(avatar) {
+		const fromCrew = (typeof window !== 'undefined') ? window.crewManagerApp?.getAvatarHealth?.(avatar) : null;
+		return fromCrew ?? Constants.DEFAULT_HEALTH;
 	}
 
 	_getInitialAbilities(avatar, fallbackAbilities = []) {
@@ -230,9 +254,9 @@ class ExpeditionState {
 		const player = this._players.find(p => p.id === playerId);
 		if (player) {
 			player.avatar = avatar;
-			// Re-pull abilities from the crew manager for the newly selected
-			// character, same as when a player is first created.
+			// Re-pull abilities and health from the crew manager for the newly selected character.
 			player.abilities = this._getInitialAbilities(avatar);
+			player.health    = this._getCrewAvatarHealth(avatar);
 			this._notifyChange();
 		}
 	}

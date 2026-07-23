@@ -85,8 +85,8 @@ class CrewDetailCardActions {
 		const value = parseInt(input, 10);
 		if (isNaN(value) || value < 0) return;
 
-		player.health = value;
-		cardInstance?.updateHealth(value);
+		player.health = Math.min(value, 20);
+		cardInstance?.updateHealth(player.health);
 		this._onPlayerChange?.(filename);
 		this._onDeathStateChange?.(filename);
 	}
@@ -150,7 +150,10 @@ class CrewDetailCardActions {
 
 	_getSlotLimits() {
 		return {
-			pm:        12,
+			morale:    20,
+			spore:     20,
+			pa:        50,
+			pm:        50,
 			paCore:    4,
 			paComp:    6,
 			paFood:    8,

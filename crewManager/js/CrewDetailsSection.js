@@ -228,6 +228,10 @@ class CrewDetailsSection extends Component {
 		return [...(this._playerByFilename[filename]?.abilities || [])];
 	}
 
+	getAvatarHealth(filename) {
+		return this._playerByFilename[filename]?.health ?? null;
+	}
+
 	importAvatarAbilities(filename, abilities) {
 		const player = this._playerByFilename[filename];
 		const card = this._cardByFilename[filename];

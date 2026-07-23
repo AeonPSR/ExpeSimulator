@@ -44,7 +44,7 @@ class CrewTimelineStepper extends Component {
 	}
 
 	_setTimeline(day, cycle) {
-		this.player.day = Math.max(1, day);
+		this.player.day = Math.min(500, Math.max(1, day));
 		this.player.cycle = Math.min(8, Math.max(1, cycle));
 		this._updateDisplay();
 		this.onChange?.();

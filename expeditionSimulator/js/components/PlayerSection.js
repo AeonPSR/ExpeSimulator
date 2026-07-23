@@ -161,6 +161,26 @@ class PlayerSection extends Component {
 		this.onModeToggle?.(this._currentMode);
 	}
 
+	/** Silently restores mode without firing onModeToggle */
+	setMode(mode) {
+		if (!this._modeBtn || mode === this._currentMode) return;
+		this._currentMode = mode;
+		this._modeBtn.dataset.mode = mode;
+		const img = this._modeBtn.querySelector('img');
+		if (img) {
+			const iconName = mode === 'icarus' ? 'icarus_access.png' : 'patrol_ship.png';
+			img.src = this.getResourceURL(`pictures/projects/${iconName}`);
+		}
+	}
+
+	setAntigravActive(active) {
+		this._antigravToggle?.setActive(active, true);
+	}
+
+	setBaseActive(active) {
+		this._baseToggle?.setActive(active, true);
+	}
+
 	/**
 	 * Adds a player card to the section
 	 * @param {PlayerCard} playerCard

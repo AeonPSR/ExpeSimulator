@@ -7,7 +7,15 @@
  */
 class ExpeditionSimulatorApp {
 	constructor() {
-		this._state = new ExpeditionState();
+		const saved = ExpeditionStorage.load();
+		this._savedExpedition = saved;
+
+		this._state = new ExpeditionState({
+			initialSectors:  saved.sectors,
+			initialPlayers:  saved.players,
+			initialAntigrav: saved.options.antigrav,
+			initialCentauri: saved.options.base
+		});
 		this._updateDebounceTimer = null;
 		this._state.setOnChange(() => this._scheduleUpdate());
 
@@ -116,10 +124,12 @@ class ExpeditionSimulatorApp {
 			onExportClick: () => this._onExportPlanetToClipboard(),
 			onDirectionChange: (direction) => {
 				this._currentDirection = direction;
+				this._saveExpedition();
 				this._updatePlanetaryReview();
 			},
 			onFuelChange: (fuel) => {
 				this._currentFuelCost = fuel;
+				this._saveExpedition();
 				this._updatePlanetaryReview();
 			},
 		});
@@ -130,7 +140,7 @@ class ExpeditionSimulatorApp {
 			maxPlayers: Constants.MAX_PLAYERS,
 			getResourceURL: getResourceURL,
 			onAddPlayer: () => this._onAddPlayer(),
-			onModeToggle: (mode) => this._updateDisplays(),
+			onModeToggle: (mode) => { this._saveExpedition(); this._updateDisplays(); },
 			onAntigravToggle: (active) => this._state.setAntigravActive(active),
 			onBaseToggle: (active) => this._state.setCentauriActive(active)
 		});
@@ -146,8 +156,45 @@ class ExpeditionSimulatorApp {
 		
 		// Render initial players from state
 		this._renderInitialPlayers();
-		
+
+		this._applyStoredOptions();
 		this._updateDisplays();
+	}
+
+	_applyStoredOptions() {
+		const opts   = this._savedExpedition.options;
+		const planet = this._savedExpedition.planet;
+		// Apply silently — _updateDisplays() will be called once afterwards by _createSections()
+		if (opts.diplomacy) {
+			document.body.classList.add('diplomacy-active');
+			this._sectorGrid?.setDiplomacyActive?.(true);
+			this._planetaryReview?.setDiplomacyActive?.(true);
+		}
+		if (opts.mode === 'patrol') this._playerSection?.setMode('patrol');
+		if (opts.antigrav) this._playerSection?.setAntigravActive(true);
+		if (opts.base) this._playerSection?.setBaseActive(true);
+		if (planet.name) this._currentPlanetName = planet.name;
+		this._currentDirection = planet.direction;
+		this._currentFuelCost  = planet.fuelCost;
+		this._planetaryReview?.updateNav?.(planet.direction, planet.fuelCost);
+	}
+
+	_saveExpedition() {
+		ExpeditionStorage.save({
+			sectors: this._state.getSectors(),
+			players: this._state.getPlayers(),
+			planet: {
+				name:      this._currentPlanetName,
+				direction: this._currentDirection,
+				fuelCost:  this._currentFuelCost
+			},
+			options: {
+				diplomacy: document.body.classList.contains('diplomacy-active'),
+				antigrav:  this._state.isAntigravActive(),
+				base:      this._state.isCentauriActive(),
+				mode:      this._playerSection?._currentMode || 'icarus'
+			}
+		});
 	}
 
 	_onDiplomacyToggle(active) {
@@ -159,6 +206,7 @@ class ExpeditionSimulatorApp {
 
 		this._sectorGrid?.setDiplomacyActive?.(active);
 		this._planetaryReview?.setDiplomacyActive?.(active);
+		this._saveExpedition();
 		this._updateDisplays();
 	}
 
@@ -218,6 +266,11 @@ class ExpeditionSimulatorApp {
 	_onClearSectors() {
 		this._state.clearSectors();
 		this._selectedSectorsComponent.update(this._state.getSectors());
+		this._currentPlanetName = null;
+		this._currentDirection  = 'North';
+		this._currentFuelCost   = 0;
+		this._planetaryReview?.updateNav?.('North', 0);
+		this._updatePlanetaryReview();
 	}
 
 	_getSectorAvailability(sectorName) {
@@ -413,6 +466,7 @@ class ExpeditionSimulatorApp {
 		}
 		this._updateDebounceTimer = setTimeout(() => {
 			this._updateDebounceTimer = null;
+			this._saveExpedition();
 			this._updateDisplays();
 		}, 0);
 	}

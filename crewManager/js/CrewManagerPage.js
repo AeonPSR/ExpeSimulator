@@ -253,6 +253,10 @@ class CrewManagerPage extends Component {
 		return this._detailsSection?.getAvatarAbilities?.(filename) || [];
 	}
 
+	getAvatarHealth(filename) {
+		return this._detailsSection?.getAvatarHealth?.(filename) ?? null;
+	}
+
 	importAvatarAbilities(filename, abilities) {
 		this._detailsSection?.importAvatarAbilities?.(filename, abilities);
 	}
