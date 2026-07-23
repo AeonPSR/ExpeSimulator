@@ -8,6 +8,8 @@ class CrewManagerPage extends Component {
 	constructor(options = {}) {
 		super(options);
 		this._titleRows = null;
+		this._titleSection = null;
+		this._titleVisibilityToggle = null;
 		this._detailsSection = null;
 		this._expertToggle = null;
 		this._cycleToggle = null;
@@ -31,10 +33,10 @@ class CrewManagerPage extends Component {
 		this.element.appendChild(crewSection);
 
 		// Title section
-		const titleSection = this._renderSection('crewmanager.section.title');
+		this._titleSection = this._renderSection('crewmanager.section.title', this._renderTitleVisibilityToggle());
 		this._titleRows = new CrewTitleRows({ onCharacterClick });
-		titleSection.appendChild(this._titleRows.render());
-		this.element.appendChild(titleSection);
+		this._titleSection.appendChild(this._titleRows.render());
+		this.element.appendChild(this._titleSection);
 
 		// Details section
 		const detailsSection = this._renderSection('crewmanager.section.details', [this._renderExpertToggle(), this._renderCycleToggle()]);
@@ -70,6 +72,23 @@ class CrewManagerPage extends Component {
 		}
 		section.appendChild(header);
 		return section;
+	}
+
+	_renderTitleVisibilityToggle() {
+		if (!this._titleVisibilityToggle) {
+			this._titleVisibilityToggle = new ToggleButton({
+				id: 'crew-title-visibility-btn',
+				className: 'diplomacy-toggle-btn',
+				icon: getResourceURL('pictures/ui/visibility.png'),
+				alt: '',
+				activeColor: 'blue',
+				initialState: true,
+				onToggle: (isVisible) => {
+					this._titleSection?.classList.toggle('crew-section--collapsed', !isVisible);
+				}
+			});
+		}
+		return this._titleVisibilityToggle.render();
 	}
 
 	_renderExpertToggle() {
