@@ -1,8 +1,13 @@
 ﻿{
   "manifest_version": 3,
   "name": "Aeon's Lab",
-  "version": "1.3",
+  "version": "1.2",
   "description": "An ensemble of tools designed to simplify and simulate several aspects of eMush's mecanics.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "aeons-lab@aeon_psr"
+    }
+  },
   "permissions": [
     "activeTab"
   ],

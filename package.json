@@ -1,7 +1,7 @@
 {
-  "name": "expedition-simulator",
-  "version": "2.0.0",
-  "description": "Chrome extension for simulating planet expeditions",
+  "name": "aeons-lab",
+  "version": "1.2",
+  "description": "An ensemble of tools designed to simplify and simulate several aspects of eMush's mecanics.",
   "private": true,
   "scripts": {
     "test": "jest",
