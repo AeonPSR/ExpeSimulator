@@ -63,7 +63,17 @@ class Panel extends Component {
 			tongue.appendChild(img);
 		}
 
-		this.addEventListener(tongue, 'click', () => this._forceCollapse());
+		this.addEventListener(tongue, 'click', () => {
+			if (typeof Settings !== 'undefined' && Settings.navmode === 'click') {
+				if (this._pinned) {
+					this._forceCollapse();
+				} else {
+					this._togglePin(this._pinBtn);
+				}
+			} else {
+				this._forceCollapse();
+			}
+		});
 
 		return tongue;
 	}

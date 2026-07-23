@@ -16,10 +16,10 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
 Todo:
 - Add the "Projects" page
-- Add forced click mode for menus
 - Saving the planet and expe staff
 
 Done since last update:
+- Add forced click mode for menus
 - Make the group appartenance (mush/human) colorblind accessible
 - Boutton to reduce the section for the titles
 - Fix the stars stuff

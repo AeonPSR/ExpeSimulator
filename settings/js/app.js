@@ -21,6 +21,16 @@ class SettingsApp {
 		});
 		this._panel.mount(document.body);
 
+		// When switching to click mode, pin the settings panel if it isn't already.
+		// When switching back to hover mode, unpin it.
+		document.addEventListener('settings:navmode-change', (e) => {
+			if (e.detail.navmode === 'click' && !this._panel._pinned) {
+				this._panel._togglePin(this._panel._pinBtn);
+			} else if (e.detail.navmode === 'hover' && this._panel._pinned) {
+				this._panel._togglePin(this._panel._pinBtn);
+			}
+		});
+
 		this._page = new SettingsPage();
 		this._page.mount(this._panel.getContentArea());
 	}

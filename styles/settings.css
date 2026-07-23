@@ -136,3 +136,49 @@
 	border-color: #8e44ad;
 	background: rgba(155, 89, 182, 0.5);
 }
+
+/* Navigation mode */
+
+.settings-navmode-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.settings-navmode-btn {
+	width: 40px;
+	height: 40px;
+	border: 2px solid #3498db;
+	border-radius: 4px;
+	background: rgba(52, 152, 219, 0.3);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.settings-navmode-btn img {
+	width: 30px;
+	height: 30px;
+	opacity: 1;
+}
+
+.settings-navmode-btn:hover {
+	border-color: #2980b9;
+	background: rgba(52, 152, 219, 0.5);
+}
+
+.settings-navmode-btn[data-mode="click"] {
+	border-color: #e67e22;
+	background: rgba(230, 126, 34, 0.3);
+}
+
+.settings-navmode-btn[data-mode="click"]:hover {
+	border-color: #d35400;
+	background: rgba(230, 126, 34, 0.5);
+}

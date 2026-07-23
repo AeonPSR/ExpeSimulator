@@ -19,6 +19,7 @@ class SettingsPage extends Component {
 		this.element.appendChild(this._renderSection('settings.section.language', this._renderLanguageControls()));
 		this.element.appendChild(this._renderSection('settings.section.theme', this._renderThemeControls()));
 		this.element.appendChild(this._renderSection('settings.section.visibility', this._renderVisibilityControls()));
+		this.element.appendChild(this._renderNavmodeSection());
 		this.element.appendChild(this._renderSection('settings.section.devtools', this._renderDevtoolsControls(), 'settings-section--devtools'));
 
 		this.element.appendChild(this._renderInfoTabs());
@@ -131,6 +132,56 @@ class SettingsPage extends Component {
 
 		row.appendChild(btn);
 		return row;
+	}
+
+	// Navmode
+
+	_renderNavmodeSection() {
+		this._navmode = (typeof Settings !== 'undefined' ? Settings.navmode : null) || 'hover';
+
+		const section = this.createElement('div', { className: 'settings-section' });
+
+		const title = this.createElement('h4', {
+			'data-i18n': `settings.section.navmode.${this._navmode}`
+		}, I18n.t(`settings.section.navmode.${this._navmode}`));
+		section.appendChild(title);
+
+		const row = this.createElement('div', { className: 'settings-navmode-row' });
+		const btn = this.createElement('button', {
+			className: 'settings-navmode-btn',
+			dataset: { mode: this._navmode }
+		});
+		const img = this.createElement('img', {
+			src: getResourceURL(this._navmode === 'hover'
+				? 'pictures/abilities/human/observateur.png'
+				: 'pictures/abilities/human/meticuleuse.png'),
+			alt: ''
+		});
+		btn.appendChild(img);
+
+		this.addEventListener(btn, 'click', () => {
+			this._navmode = this._navmode === 'hover' ? 'click' : 'hover';
+			const titleKey = `settings.section.navmode.${this._navmode}`;
+			title.dataset.i18n  = titleKey;
+			title.textContent   = I18n.t(titleKey);
+			btn.dataset.mode    = this._navmode;
+			img.src = getResourceURL(
+				this._navmode === 'hover'
+					? 'pictures/abilities/human/observateur.png'
+					: 'pictures/abilities/human/meticuleuse.png'
+			);
+			Settings.setNavmode(this._navmode);
+		});
+
+		this.addEventListener(document, 'i18n:change', () => {
+			const titleKey = `settings.section.navmode.${this._navmode}`;
+			title.dataset.i18n = titleKey;
+			title.textContent  = I18n.t(titleKey);
+		});
+
+		row.appendChild(btn);
+		section.appendChild(row);
+		return section;
 	}
 
 	// Visibility

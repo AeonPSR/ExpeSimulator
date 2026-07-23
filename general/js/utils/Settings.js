@@ -7,13 +7,16 @@
  *   'settings:theme-change': { detail: { theme } }
  *   'settings:devtools-change': { detail: { devtools } }
  *   'settings:panel-visibility-change': { detail: { panelId, visible } }
+ *   'settings:navmode-change': { detail: { navmode } }
  */
 const Settings = (() => {
 	const THEMES = ['retro', 'default'];
+	const NAVMODES = ['hover', 'click'];
 	const STORAGE = {
 		THEME: 'expe-sim-theme',
 		DEVTOOLS: 'expe-sim-devtools',
-		PANEL_VISIBILITY: 'expe-sim-panel-visibility'
+		PANEL_VISIBILITY: 'expe-sim-panel-visibility',
+		NAVMODE: 'expe-sim-navmode'
 	};
 
 	const _isFirefox = /Firefox\//.test(navigator.userAgent);
@@ -21,6 +24,7 @@ const Settings = (() => {
 	let _theme = _isFirefox ? 'default' : 'retro';
 	let _devtools = false;
 	let _panelVisibility = {};
+	let _navmode = 'hover';
 
 	// Restore persisted values
 	try {
@@ -30,6 +34,8 @@ const Settings = (() => {
 		if (d !== null) _devtools = d === 'true';
 		const panelVisibility = JSON.parse(localStorage.getItem(STORAGE.PANEL_VISIBILITY) || '{}');
 		if (panelVisibility && typeof panelVisibility === 'object') _panelVisibility = panelVisibility;
+		const n = localStorage.getItem(STORAGE.NAVMODE);
+		if (n && NAVMODES.includes(n)) _navmode = n;
 	} catch (_) { /* storage unavailable in some contexts */ }
 
 	function _applyTheme(theme) {
@@ -37,12 +43,18 @@ const Settings = (() => {
 		if (container) container.classList.toggle('aeons-lab', theme === 'retro');
 	}
 
-	// Apply persisted theme immediately on load
+	function _applyNavmode(navmode) {
+		document.body.classList.toggle('panel-click-mode', navmode === 'click');
+	}
+
+	// Apply persisted settings immediately on load
 	_applyTheme(_theme);
+	_applyNavmode(_navmode);
 
 	return {
 		get theme() { return _theme; },
 		get devtools() { return _devtools; },
+		get navmode() { return _navmode; },
 		get themes() { return [...THEMES]; },
 		get isFirefox() { return _isFirefox; },
 
@@ -77,6 +89,18 @@ const Settings = (() => {
 			_panelVisibility[panelId] = !!visible;
 			try { localStorage.setItem(STORAGE.PANEL_VISIBILITY, JSON.stringify(_panelVisibility)); } catch (_) {}
 			document.dispatchEvent(new CustomEvent('settings:panel-visibility-change', { detail: { panelId, visible: _panelVisibility[panelId] } }));
+		},
+
+		/**
+		 * Switches navigation mode, persists, applies body class, and dispatches 'settings:navmode-change'.
+		 * @param {'hover'|'click'} navmode
+		 */
+		setNavmode(navmode) {
+			if (!NAVMODES.includes(navmode)) return;
+			_navmode = navmode;
+			try { localStorage.setItem(STORAGE.NAVMODE, navmode); } catch (_) {}
+			_applyNavmode(navmode);
+			document.dispatchEvent(new CustomEvent('settings:navmode-change', { detail: { navmode } }));
 		}
 	};
 })();
