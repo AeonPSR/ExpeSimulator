@@ -573,15 +573,12 @@ const PlanetReviewScorer = (() => {
 			let config = getSectorConfig(sectorName);
 			if (!config) continue;
 
-			// Diplomacy: strip FIGHT_* events from the pool
+			// Diplomacy: replace FIGHT_* events with NOTHING_TO_REPORT (mass-conserving).
+			// Uses the same EventModifier as ResourceCalculator so both systems agree.
 			if (useDiplomacy && config.explorationEvents) {
-				const filtered = {};
-				for (const [event, weight] of Object.entries(config.explorationEvents)) {
-					if (!event.startsWith('FIGHT_')) {
-						filtered[event] = weight;
-					}
-				}
-				config = { ...config, explorationEvents: filtered };
+				const events = { ...config.explorationEvents };
+				EventModifier.replaceWithNothingByPrefix(events, 'FIGHT_');
+				config = { ...config, explorationEvents: events };
 			}
 
 			const evs = computeSectorEVs(config);
