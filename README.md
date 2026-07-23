@@ -18,8 +18,4 @@ Todo:
 - Add the "Projects" page
 
 Done since last update:
-- Add the "Crew management" Page
-- The expedition simulator now feed itself from the crew manager
-- Sortir l'option de visibilité de la béta
-- Rename the events so it's the proper "Errance" stuff
-- Fix the bug where the ressources gained from fights aren't taken into account in the star rating
+- Fixed the expe simulator that wasn't pulling data from the manager when manually changing character.

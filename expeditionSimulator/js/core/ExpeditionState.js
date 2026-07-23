@@ -230,6 +230,9 @@ class ExpeditionState {
 		const player = this._players.find(p => p.id === playerId);
 		if (player) {
 			player.avatar = avatar;
+			// Re-pull abilities from the crew manager for the newly selected
+			// character, same as when a player is first created.
+			player.abilities = this._getInitialAbilities(avatar);
 			this._notifyChange();
 		}
 	}

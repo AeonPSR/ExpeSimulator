@@ -337,7 +337,12 @@ class ExpeditionSimulatorApp {
 			panelElement: this._panel.element,
 			onSelect: (item) => {
 				this._state.setPlayerAvatar(playerId, item.id);
-				this._playerSection.getPlayerCard(playerId)?.updateAvatar(item.id);
+				const updatedPlayer = this._state.getPlayer(playerId);
+				const card = this._playerSection.getPlayerCard(playerId);
+				card?.updateAvatar(item.id);
+				updatedPlayer?.abilities.forEach((abilityId, slotIndex) => {
+					card?.updateAbility(slotIndex, abilityId);
+				});
 			}
 		}).open();
 	}
