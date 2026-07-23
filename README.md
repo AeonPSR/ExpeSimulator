@@ -16,6 +16,9 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
 Todo:
 - Add the "Projects" page
+- Add forced click mode for menus
+- Fix the stars stuff
 
 Done since last update:
+- Fixed the skills not being imported correctly.
 - Fixed the expe simulator that wasn't pulling data from the manager when manually changing character.
