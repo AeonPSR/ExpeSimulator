@@ -44,9 +44,9 @@ class InfoPanel extends Component {
 
 		this._sections.forEach((section, i) => {
 			const isFirst = i === 0;
-			const wrap = this.createElement('div', {
-				className: isFirst ? 'info-panel-section info-panel-section--first' : 'info-panel-section'
-			});
+			let cls = isFirst ? 'info-panel-section info-panel-section--first' : 'info-panel-section';
+			if (section.className) cls += ' ' + section.className;
+			const wrap = this.createElement('div', { className: cls });
 
 			if (section.title) {
 				wrap.appendChild(

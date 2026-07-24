@@ -244,7 +244,7 @@ class SettingsPage extends Component {
 			const url   = I18n.t('credits.wiki.url');
 			const label = I18n.t('credits.wiki.label');
 			const credits = new InfoPanel({
-				title:    'Aeon\'s Lab - Version 1.2',
+				title:    'Aeon\'s Lab - Version 1.3',
 				subtitle: I18n.t('credits.subtitle'),
 				sections: [
 					{
@@ -268,16 +268,36 @@ class SettingsPage extends Component {
 			const notes = new InfoPanel({
 				sections: [
 					{
-						title:   'Version 1.2',
-						content: `<p>- ${I18n.t('patch_notes.v1_2.line1')}</p><p>- ${I18n.t('patch_notes.v1_2.line2')}</p><p>- ${I18n.t('patch_notes.v1_2.line3')}</p>`
+						title:     'Version 1.3',
+						className: 'info-panel-section--version',
+						content:   ''
 					},
 					{
-						title:   'Version 1.1',
-						content: `<p>- ${I18n.t('patch_notes.v1_1.line1')}</p><p>- ${I18n.t('patch_notes.v1_1.line2')}</p><p>- ${I18n.t('patch_notes.v1_1.line3')}</p>`
+						title:   I18n.t('patch_notes.v1_3.subtitle_crew'),
+						content: `<p>- ${I18n.t('patch_notes.v1_3.crew1')}</p><p>- ${I18n.t('patch_notes.v1_3.crew2')}</p><p>- ${I18n.t('patch_notes.v1_3.crew3')}</p><p>- ${I18n.t('patch_notes.v1_3.crew4')}</p>`
 					},
 					{
-						title:   'Version 1.0',
-						content: `<p>${I18n.t('patch_notes.v1_0.content')}</p>`
+						title:   I18n.t('patch_notes.v1_3.subtitle_planet'),
+						content: `<p>- ${I18n.t('patch_notes.v1_3.planet1')}</p><p>- ${I18n.t('patch_notes.v1_3.planet2')}</p><p>- ${I18n.t('patch_notes.v1_3.planet3')}</p><p>- ${I18n.t('patch_notes.v1_3.planet4')}</p>`
+					},
+					{
+						title:   I18n.t('patch_notes.v1_3.subtitle_settings'),
+						content: `<p>- ${I18n.t('patch_notes.v1_3.settings1')}</p>`
+					},
+					{
+						title:     'Version 1.2',
+						className: 'info-panel-section--version',
+						content:   `<p>- ${I18n.t('patch_notes.v1_2.line1')}</p><p>- ${I18n.t('patch_notes.v1_2.line2')}</p><p>- ${I18n.t('patch_notes.v1_2.line3')}</p>`
+					},
+					{
+						title:     'Version 1.1',
+						className: 'info-panel-section--version',
+						content:   `<p>- ${I18n.t('patch_notes.v1_1.line1')}</p><p>- ${I18n.t('patch_notes.v1_1.line2')}</p><p>- ${I18n.t('patch_notes.v1_1.line3')}</p>`
+					},
+					{
+						title:     'Version 1.0',
+						className: 'info-panel-section--version',
+						content:   `<p>${I18n.t('patch_notes.v1_0.content')}</p>`
 					}
 				]
 			});

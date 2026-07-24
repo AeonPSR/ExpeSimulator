@@ -182,3 +182,29 @@
 	border-color: #d35400;
 	background: rgba(230, 126, 34, 0.5);
 }
+
+/* Patch notes & informations: turn the InfoPanel itself into the scroll
+   viewport (same pattern as .prob-content — the frame stays fixed while
+   its children scroll inside). */
+
+#settings-panel .tab-panel[data-tab-panel="patch_notes"] .info-panel,
+#settings-panel .tab-panel[data-tab-panel="informations"] .info-panel {
+	max-height: 600px;
+	overflow-y: auto;
+}
+
+#settings-panel .tab-panel[data-tab-panel="patch_notes"] .info-panel::-webkit-scrollbar,
+#settings-panel .tab-panel[data-tab-panel="informations"] .info-panel::-webkit-scrollbar {
+	width: 6px;
+}
+
+#settings-panel .tab-panel[data-tab-panel="patch_notes"] .info-panel::-webkit-scrollbar-thumb,
+#settings-panel .tab-panel[data-tab-panel="informations"] .info-panel::-webkit-scrollbar-thumb {
+	background: #3498db;
+	border-radius: 3px;
+}
+
+#panels-container.aeons-lab #settings-panel .tab-panel[data-tab-panel="patch_notes"] .info-panel::-webkit-scrollbar-thumb,
+#panels-container.aeons-lab #settings-panel .tab-panel[data-tab-panel="informations"] .info-panel::-webkit-scrollbar-thumb {
+	border-radius: 0;
+}

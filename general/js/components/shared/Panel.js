@@ -182,6 +182,13 @@ class Panel extends Component {
 			document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('panel-on-top'));
 			this.element.classList.add('panel-on-top');
 		});
+		// In click mode, a click anywhere outside the panel (and outside any modal) closes it
+		this.addEventListener(document, 'click', () => {
+			if (typeof Settings !== 'undefined' && Settings.navmode === 'click'
+					&& this._pinned && !this.element.classList.contains('modal-open')) {
+				this._forceCollapse();
+			}
+		});
 		Panel.repositionTongues();
 	}
 
