@@ -29,10 +29,13 @@ function initializeApp() {
 		// randomization can read crew availability during initial state setup.
 		window.crewManagerApp = new CrewManagerApp();
 		window.expeditionSimulator = new ExpeditionSimulatorApp();
-		// Settings must be created last: Panel.mount() appends to
-		// #panels-container in creation order, and DOM order breaks
-		// z-index ties between tongues. Settings should always be last.
 		window.settingsApp = new SettingsApp();
+
+		// Apply the user's persisted panel order (DOM order breaks z-index
+		// ties between tongues, so this also fixes the visual stacking).
+		if (typeof Panel !== 'undefined' && typeof Settings !== 'undefined') {
+			Panel.applyOrder(Settings.panelOrder);
+		}
 		// console.log('Expedition Simulator initialized');
 
 	} catch (error) {

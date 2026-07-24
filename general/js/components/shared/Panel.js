@@ -185,6 +185,29 @@ class Panel extends Component {
 		Panel.repositionTongues();
 	}
 
+	/**
+	 * Reorders the mounted panels within #panels-container to match the given
+	 * panel id order, then repositions tongues. Only touches the DOM for
+	 * panels that are actually out of place, since reattaching a panel that's
+	 * currently open would reset its hover state and close it.
+	 * @param {string[]} order - panel ids in the desired order
+	 */
+	static applyOrder(order) {
+		const container = document.getElementById('panels-container');
+		if (!container || !Array.isArray(order)) return;
+		let prev = null;
+		order.forEach(id => {
+			const el = document.getElementById(id);
+			if (!el || el.parentElement !== container) return;
+			const inPlace = prev ? el.previousElementSibling === prev : container.firstElementChild === el;
+			if (!inPlace) {
+				container.insertBefore(el, prev ? prev.nextSibling : container.firstChild);
+			}
+			prev = el;
+		});
+		Panel.repositionTongues();
+	}
+
 	static repositionTongues() {
 		const TONGUE_HEIGHT = 60;
 		const GAP = 8;

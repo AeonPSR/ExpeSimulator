@@ -17,7 +17,8 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 Todo:
 - Add the "Projects" page
 - Improve the modal to select musk skills, grouping them like the wiki does
-- Allow to reorder pannels.
+- Easter egg when generating a random char
 
 Done since last update:
+- Allow to reorder pannels.
 - Hiding a module also hide the related import buttons.
