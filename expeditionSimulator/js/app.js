@@ -62,6 +62,16 @@ class ExpeditionSimulatorApp {
 		});
 		this._planetCardInjector.start();
 
+		// Hide the chat/planet-card import buttons in the game UI if it's off in the settings
+		const applyImportButtonsVisibility = () => {
+			const visible = typeof Settings === 'undefined' || Settings.isPanelVisible('expedition-simulator');
+			document.body.classList.toggle('expe-sim-panel-hidden', !visible);
+		};
+		applyImportButtonsVisibility();
+		document.addEventListener('settings:panel-visibility-change', (e) => {
+			if (e.detail.panelId === 'expedition-simulator') applyImportButtonsVisibility();
+		});
+
 		// Initialize worker after all scripts are loaded
 		this._initWorker();
 

@@ -45,6 +45,16 @@ class CrewManagerApp {
 			onImport: (filename, abilities) => this.importAvatarAbilities(filename, abilities)
 		});
 		this._skillCardInjector.start();
+
+		// Hide the crew-skill import buttons in the game UI while this panel is turned off in Settings
+		const applyImportButtonsVisibility = () => {
+			const visible = typeof Settings === 'undefined' || Settings.isPanelVisible('crew-manager-panel');
+			document.body.classList.toggle('crew-manager-panel-hidden', !visible);
+		};
+		applyImportButtonsVisibility();
+		document.addEventListener('settings:panel-visibility-change', (e) => {
+			if (e.detail.panelId === 'crew-manager-panel') applyImportButtonsVisibility();
+		});
 	}
 
 	getAvatarGroups() {

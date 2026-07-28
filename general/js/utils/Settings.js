@@ -7,15 +7,18 @@
  *   'settings:theme-change': { detail: { theme } }
  *   'settings:devtools-change': { detail: { devtools } }
  *   'settings:panel-visibility-change': { detail: { panelId, visible } }
+ *   'settings:panel-order-change': { detail: { order } }
  *   'settings:navmode-change': { detail: { navmode } }
  */
 const Settings = (() => {
 	const THEMES = ['retro', 'default'];
 	const NAVMODES = ['hover', 'click'];
+	const DEFAULT_PANEL_ORDER = ['crew-manager-panel', 'expedition-simulator', 'settings-panel'];
 	const STORAGE = {
 		THEME: 'expe-sim-theme',
 		DEVTOOLS: 'expe-sim-devtools',
 		PANEL_VISIBILITY: 'expe-sim-panel-visibility',
+		PANEL_ORDER: 'expe-sim-panel-order',
 		NAVMODE: 'expe-sim-navmode'
 	};
 
@@ -24,7 +27,14 @@ const Settings = (() => {
 	let _theme = _isFirefox ? 'default' : 'retro';
 	let _devtools = false;
 	let _panelVisibility = {};
+	let _panelOrder = [...DEFAULT_PANEL_ORDER];
 	let _navmode = 'hover';
+
+	function _sanitizePanelOrder(order) {
+		const valid = order.filter(id => DEFAULT_PANEL_ORDER.includes(id));
+		const missing = DEFAULT_PANEL_ORDER.filter(id => !valid.includes(id));
+		return [...valid, ...missing];
+	}
 
 	// Restore persisted values
 	try {
@@ -34,6 +44,8 @@ const Settings = (() => {
 		if (d !== null) _devtools = d === 'true';
 		const panelVisibility = JSON.parse(localStorage.getItem(STORAGE.PANEL_VISIBILITY) || '{}');
 		if (panelVisibility && typeof panelVisibility === 'object') _panelVisibility = panelVisibility;
+		const panelOrder = JSON.parse(localStorage.getItem(STORAGE.PANEL_ORDER) || 'null');
+		if (Array.isArray(panelOrder) && panelOrder.length) _panelOrder = _sanitizePanelOrder(panelOrder);
 		const n = localStorage.getItem(STORAGE.NAVMODE);
 		if (n && NAVMODES.includes(n)) _navmode = n;
 	} catch (_) { /* storage unavailable in some contexts */ }
@@ -57,8 +69,12 @@ const Settings = (() => {
 		get navmode() { return _navmode; },
 		get themes() { return [...THEMES]; },
 		get isFirefox() { return _isFirefox; },
+		get panelOrder() { return [..._panelOrder]; },
 
 		isPanelVisible(panelId) {
+			// The Settings panel can never be hidden, otherwise there'd be no
+			// way to bring it back.
+			if (panelId === 'settings-panel') return true;
 			return _panelVisibility[panelId] !== false;
 		},
 
@@ -86,9 +102,21 @@ const Settings = (() => {
 		},
 
 		setPanelVisible(panelId, visible) {
+			if (panelId === 'settings-panel') return;
 			_panelVisibility[panelId] = !!visible;
 			try { localStorage.setItem(STORAGE.PANEL_VISIBILITY, JSON.stringify(_panelVisibility)); } catch (_) {}
 			document.dispatchEvent(new CustomEvent('settings:panel-visibility-change', { detail: { panelId, visible: _panelVisibility[panelId] } }));
+		},
+
+		/**
+		 * Reorders the draggable panels, persists, and dispatches 'settings:panel-order-change'.
+		 * @param {string[]} order - panel ids in the desired order
+		 */
+		setPanelOrder(order) {
+			if (!Array.isArray(order)) return;
+			_panelOrder = _sanitizePanelOrder(order);
+			try { localStorage.setItem(STORAGE.PANEL_ORDER, JSON.stringify(_panelOrder)); } catch (_) {}
+			document.dispatchEvent(new CustomEvent('settings:panel-order-change', { detail: { order: [..._panelOrder] } }));
 		},
 
 		/**

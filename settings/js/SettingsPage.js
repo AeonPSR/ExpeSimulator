@@ -186,37 +186,252 @@ class SettingsPage extends Component {
 
 	// Visibility
 	_renderVisibilityControls() {
-		const row = this.createElement('div', { className: 'settings-visibility-row' });
-		row.appendChild(this._renderPanelVisibilityButton({
-			panelId: 'expedition-simulator',
-			iconPath: 'pictures/ui/astrophysicist.png'
-		}));
-		row.appendChild(this._renderPanelVisibilityButton({
-			panelId: 'crew-manager-panel',
-			iconPath: 'pictures/abilities/human/psy.png'
-		}));
-		return row;
+		const wrapper = this.createElement('div', { className: 'settings-visibility' });
+
+		this._visibilityIcons = {
+			'expedition-simulator': 'pictures/ui/astrophysicist.png',
+			'crew-manager-panel': 'pictures/abilities/human/psy.png',
+			'settings-panel': 'pictures/abilities/human/creatif.png'
+		};
+		this._visibilityRow = this.createElement('div', { className: 'settings-visibility-row' });
+		this._renderVisibilityButtons();
+		wrapper.appendChild(this._visibilityRow);
+
+		const hint = this.createElement('p', {
+			className: 'settings-visibility-hint',
+			'data-i18n': 'settings.visibility.hint'
+		}, I18n.t('settings.visibility.hint'));
+		wrapper.appendChild(hint);
+
+		return wrapper;
 	}
 
-	_renderPanelVisibilityButton({ panelId, iconPath }) {
+	_renderVisibilityButtons() {
+		this._visibilityRow.innerHTML = '';
+		this._visibilityButtons = {};
+		Settings.panelOrder.forEach(panelId => {
+			const iconPath = this._visibilityIcons[panelId];
+			if (!iconPath) return;
+			const btn = this._renderPanelVisibilityButton({
+				panelId,
+				iconPath,
+				forceActive: panelId === 'settings-panel'
+			});
+			this._visibilityButtons[panelId] = btn;
+			this._visibilityRow.appendChild(btn);
+		});
+	}
+
+	_renderPanelVisibilityButton({ panelId, iconPath, forceActive = false }) {
 		const panel = document.getElementById(panelId);
-		const isVisible = Settings.isPanelVisible(panelId) && !panel?.classList.contains('panel--hidden');
+		const isVisible = forceActive || (Settings.isPanelVisible(panelId) && !panel?.classList.contains('panel--hidden'));
 		const btn = this.createElement('button', {
-			className: 'panel-lang-btn' + (isVisible ? ' panel-lang-btn--active' : ''),
+			className: 'panel-lang-btn' +
+				(isVisible ? ' panel-lang-btn--active' : '') +
+				(forceActive ? ' panel-lang-btn--settings' : ''),
+			dataset: { panelId }
 		});
-		const img = this.createElement('img', {
-			src: getResourceURL(iconPath),
-			alt: ''
-		});
+		const img = this.createElement('img', { src: getResourceURL(iconPath), alt: '' });
 		btn.appendChild(img);
-		this.addEventListener(btn, 'click', () => {
-			const visible = btn.classList.toggle('panel-lang-btn--active');
-			Settings.setPanelVisible(panelId, visible);
-			const panel = document.getElementById(panelId);
-			panel?.classList.toggle('panel--hidden', !visible);
-			Panel.repositionTongues();
-		});
+		this._addPointerHandlers(btn, forceActive);
 		return btn;
+	}
+
+	// Pointer-based drag reordering
+	//
+	// On pointerdown we record where the finger/cursor grabbed the button.
+	// On pointermove the button is lifted out of flow (position:fixed) and
+	// follows the cursor 1-to-1 — no ghost, no binding, no snapping while
+	// moving. On pointerup we find which sibling the button is closest to,
+	// commit that order, and animate the settle with a FLIP.
+	// A move smaller than 4px is treated as a plain click (visibility toggle).
+
+	_addPointerHandlers(btn, forceActive) {
+		const DRAG_THRESHOLD = 4;
+
+		this.addEventListener(btn, 'pointerdown', (e) => {
+			if (e.button !== 0) return;
+			e.preventDefault();
+
+			// Pin the panel open immediately, before any hover state can change.
+			// This is the same mechanism the pin button uses and is the only
+			// reliable way to keep the panel open while the cursor may leave it.
+			const panelEl = btn.closest('.app-panel') || document.getElementById('settings-panel');
+			const wasAlreadyPinned = panelEl?.classList.contains('pinned');
+			if (panelEl && !wasAlreadyPinned) panelEl.classList.add('pinned');
+
+			const startX = e.clientX;
+			const startY = e.clientY;
+			const rect   = btn.getBoundingClientRect();
+			const offsetX = e.clientX - rect.left;
+			const offsetY = e.clientY - rect.top;
+			let dragging = false;
+
+			// Keep a placeholder in the original position to hold layout space
+			const placeholder = this.createElement('div', { className: 'panel-lang-btn panel-lang-btn--drag-placeholder' });
+			placeholder.style.width  = rect.width  + 'px';
+			placeholder.style.height = rect.height + 'px';
+
+			const onMove = (me) => {
+				const dx = me.clientX - startX;
+				const dy = me.clientY - startY;
+
+				if (!dragging && Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD) return;
+
+				if (!dragging) {
+					dragging = true;
+					// Insert placeholder where the button currently sits
+					btn.parentNode.insertBefore(placeholder, btn);
+					// Lift the button out of flow, disable transition so it
+					// tracks the cursor immediately with zero delay.
+					btn.style.transition  = 'none';
+					btn.style.position    = 'fixed';
+					btn.style.zIndex      = '99999';
+					btn.style.width       = rect.width  + 'px';
+					btn.style.height      = rect.height + 'px';
+					btn.style.margin      = '0';
+					btn.style.pointerEvents = 'none';
+					btn.classList.add('panel-lang-btn--dragging');
+				}
+
+				btn.style.left = (me.clientX - offsetX) + 'px';
+				btn.style.top  = (me.clientY - offsetY) + 'px';
+
+				// Move placeholder to the slot the button is hovering over
+				const row = this._visibilityRow;
+				const siblings = Array.from(row.children).filter(c => c !== btn);
+				let target = null;
+				let minDist = Infinity;
+				siblings.forEach(sib => {
+					const sr = sib.getBoundingClientRect();
+					const dist = Math.abs(me.clientX - (sr.left + sr.width / 2));
+					if (dist < minDist) { minDist = dist; target = sib; }
+				});
+				if (target) {
+					const targetRect = target.getBoundingClientRect();
+					if (me.clientX < targetRect.left + targetRect.width / 2) {
+						row.insertBefore(placeholder, target);
+					} else {
+						row.insertBefore(placeholder, target.nextSibling);
+					}
+				}
+			};
+
+			const onUp = (ue) => {
+				document.removeEventListener('pointermove', onMove);
+				document.removeEventListener('pointerup', onUp);
+
+				// Release the pin we took on pointerdown. For a click this is
+				// immediate. For a drag we keep the panel open until the cursor
+				// actually leaves it, so it doesn't snap shut the moment the
+				// button is dropped outside the panel's hover area.
+				const releasePin = () => {
+					if (!wasAlreadyPinned) panelEl?.classList.remove('pinned');
+				};
+
+				if (!dragging) {
+					// It was a click, not a drag
+					if (!forceActive) {
+						const visible = btn.classList.toggle('panel-lang-btn--active');
+						Settings.setPanelVisible(btn.dataset.panelId, visible);
+						const panel = document.getElementById(btn.dataset.panelId);
+						panel?.classList.toggle('panel--hidden', !visible);
+						Panel.repositionTongues();
+					}
+					releasePin();
+					return;
+				}
+
+				// Restore button into the slot the placeholder is holding
+				btn.style.transition = '';
+				btn.style.position = '';
+				btn.style.zIndex   = '';
+				btn.style.width    = '';
+				btn.style.height   = '';
+				btn.style.left     = '';
+				btn.style.top      = '';
+				btn.style.margin   = '';
+				btn.style.pointerEvents = '';
+				btn.classList.remove('panel-lang-btn--dragging');
+
+				// Swap button in for the placeholder
+				const row = this._visibilityRow;
+				row.insertBefore(btn, placeholder);
+				placeholder.remove();
+
+				// Read the new order from the DOM
+				const newOrder = Array.from(row.children).map(c => c.dataset?.panelId).filter(Boolean);
+
+				if (newOrder.join(',') !== Settings.panelOrder.join(',')) {
+					// Commit and reorder the actual panels
+					Settings.setPanelOrder(newOrder);
+					if (typeof Panel !== 'undefined') Panel.applyOrder(newOrder);
+					// Update our internal button map to match the new order
+					newOrder.forEach(id => {
+						if (this._visibilityButtons[id]) {
+							this._visibilityButtons[id] = row.querySelector(`[data-panel-id="${id}"]`);
+						}
+					});
+				}
+
+				// Unpin after the drag. If the cursor is still inside the panel
+				// we keep it open via :hover; if it ended outside, mouseleave
+				// removes the pin once the cursor comes back and then leaves, or
+				// the rAF fallback removes it immediately.
+				if (!wasAlreadyPinned && panelEl) {
+					const unpin = () => {
+						panelEl.classList.remove('pinned');
+						panelEl.removeEventListener('mouseleave', unpin);
+					};
+					panelEl.addEventListener('mouseleave', unpin, { once: true });
+					requestAnimationFrame(() => {
+						if (!panelEl.matches(':hover')) unpin();
+					});
+				}
+			};
+
+			document.addEventListener('pointermove', onMove);
+			document.addEventListener('pointerup', onUp);
+		});
+	}
+
+	/**
+	 * Moves the visibility buttons to match `order`, animating each one from
+	 * its previous screen position to its new one (FLIP technique).
+	 * @param {string[]} order
+	 */
+	_animateVisibilityReorder(order) {
+		const oldRects = {};
+		Object.entries(this._visibilityButtons).forEach(([panelId, btn]) => {
+			oldRects[panelId] = btn.getBoundingClientRect();
+		});
+
+		let prev = null;
+		order.forEach(panelId => {
+			const btn = this._visibilityButtons[panelId];
+			if (!btn) return;
+			const inPlace = prev ? btn.previousElementSibling === prev : this._visibilityRow.firstElementChild === btn;
+			if (!inPlace) {
+				this._visibilityRow.insertBefore(btn, prev ? prev.nextSibling : this._visibilityRow.firstChild);
+			}
+			prev = btn;
+		});
+
+		Object.entries(this._visibilityButtons).forEach(([panelId, btn]) => {
+			const oldRect = oldRects[panelId];
+			const newRect = btn.getBoundingClientRect();
+			const dx = oldRect.left - newRect.left;
+			if (!dx) return;
+			btn.style.transition = 'none';
+			btn.style.transform = `translateX(${dx}px)`;
+			requestAnimationFrame(() => {
+				btn.style.transition = 'transform 0.2s ease';
+				btn.style.transform = '';
+				btn.addEventListener('transitionend', () => {
+					btn.style.transition = '';
+				}, { once: true });
+			});
+		});
 	}
 
 	// Info Tabs

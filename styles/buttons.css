@@ -790,6 +790,15 @@
 	top: 6px;
 }
 
+/* Hide import buttons in the game UI when their target panel is off */
+body.expe-sim-panel-hidden .expe-import-btn:not(.crew-skill-import-btn) {
+	display: none;
+}
+
+body.crew-manager-panel-hidden .crew-skill-import-btn {
+	display: none;
+}
+
 /* ==========================================================================
    Compass Button (direction picker)
    ========================================================================== */
