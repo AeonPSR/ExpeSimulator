@@ -132,6 +132,7 @@ class Panel extends Component {
 			this._pinBtn?.classList.remove('active');
 		}
 		this.element.classList.remove('import-open');
+		this.element.classList.remove('modal-open');
 		this.element.classList.add('force-close');
 		this.element.addEventListener('transitionend', () => {
 			this.element.classList.remove('force-close');
