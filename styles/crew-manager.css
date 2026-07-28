@@ -292,6 +292,12 @@
 	margin: 14px 0;
 }
 
+[data-expe-sim] .crew-mush-skill-modal .selection-divider {
+	border: none;
+	border-top: 2px solid #ff5599;
+	margin: 14px 0;
+}
+
 [data-expe-sim] .crew-timeline-modal {
 	min-width: 388px;
 }

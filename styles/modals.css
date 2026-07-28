@@ -123,6 +123,11 @@
 	width: 556px;
 }
 
+/* Mush skill modal: 6 columns of 60px + 5 gaps */
+[data-expe-sim] .crew-mush-skill-modal .character-grid {
+	width: 410px;
+}
+
 /* ==========================================================================
    Character Grid Section Background (decorative, per-section image)
    ========================================================================== */

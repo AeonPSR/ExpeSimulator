@@ -42,11 +42,30 @@ class CrewSkillSelectionService {
 
 	openMushSkillSelection(options = {}) {
 		const { player, slotIndex, cardInstance, onSelect } = options;
-		const items = AbilityData.getSelectionItems(getResourceURL, AbilityData.mushSkills);
-		items.unshift({ id: null, image: '' });
+
+		const group1 = [
+			'mush/infecteur.png', 'mush/esprit-mycelium.png', 'mush/fertile.png',
+			'mush/cuisine-fongique.png', 'mush/piegeur.png'
+		];
+		const group2 = [
+			'mush/anonymush.png', 'mush/dialoguiste.png', 'mush/doigt-fee.png',
+			'mush/piratage-radio.png', 'mush/resistance-eau.png', 'mush/transfert.png',
+			'mush/phagocytose.png', 'mush/beta-mush.png'
+		];
+		const group3 = AbilityData.mushSkills.filter(
+			s => !group1.includes(s) && !group2.includes(s)
+		);
+
+		const toItems = (list) => AbilityData.getSelectionItems(getResourceURL, list);
+		const g1Items = toItems(group1);
+		g1Items.unshift({ id: null, image: '' });
 
 		new SelectionModal({
-			items: items,
+			sections: [
+				{ items: g1Items },
+				{ items: toItems(group2) },
+				{ items: toItems(group3) }
+			],
 			selectedId: player.mushAbilities[slotIndex],
 			columns: 5,
 			itemSize: 'large',
