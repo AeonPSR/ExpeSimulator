@@ -23,15 +23,62 @@ class ProjectManagerPage extends Component {
 
 		// Details section
 		const detailsSection = this._renderSection('projectmanager.section.details');
-		const extraDrone = ProjectData.find(p => p.name === 'EXTRA_DRONE');
-		if (extraDrone) {
-			detailsSection.appendChild(new ProjectCard({ project: extraDrone }).render());
-		}
+		this._grid = this.createElement('div', { className: 'project-card-aeon-grid' });
+		this._cards = ProjectData
+			.filter(p => p.type === 'neron')
+			.map(project => new ProjectCard({
+				project,
+				onToggleVisibility: () => this._reorderCards()
+			}));
+		this._sortCards();
+		this._cards.forEach(card => this._grid.appendChild(card.render()));
+		detailsSection.appendChild(this._grid);
 		this.element.appendChild(detailsSection);
 
 		this.element.appendChild(this._renderResetButton());
 
 		return this.element;
+	}
+
+	// Visible cards first, then hidden; each sub-list sorted most costly → least.
+	_sortCards() {
+		this._cards.sort((a, b) => {
+			const va = a.isVisible() ? 0 : 1;
+			const vb = b.isVisible() ? 0 : 1;
+			if (va !== vb) return va - vb;
+			return b.project.averageAP_0skill - a.project.averageAP_0skill;
+		});
+	}
+
+	_reorderCards() {
+		const previous = this._cards.map(card => [card.element, card.element.getBoundingClientRect()]);
+		this._sortCards();
+		this._cards.forEach(card => this._grid.appendChild(card.element));
+		this._animateReorder(previous);
+	}
+
+	// FLIP: play each card from its previous position to the new one.
+	_animateReorder(previous) {
+		previous.forEach(([element, prevRect]) => {
+			const nextRect = element.getBoundingClientRect();
+			const deltaX = prevRect.left - nextRect.left;
+			const deltaY = prevRect.top - nextRect.top;
+			if (deltaX === 0 && deltaY === 0) return;
+			element.style.transition = 'none';
+			element.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+		});
+
+		requestAnimationFrame(() => {
+			previous.forEach(([element]) => {
+				if (!element.style.transform) return;
+				element.classList.add('project-card-aeon-moving');
+				element.style.transition = '';
+				element.style.transform = '';
+				element.addEventListener('transitionend', () => {
+					element.classList.remove('project-card-aeon-moving');
+				}, { once: true });
+			});
+		});
 	}
 
 	_renderSection(titleKey, headerButton = null) {

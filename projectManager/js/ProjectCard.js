@@ -12,19 +12,51 @@ class ProjectCard extends Component {
 	constructor(options = {}) {
 		super(options);
 		this._project = options.project;
+		this._visible = options.visible !== false;
+		this._onToggleVisibility = options.onToggleVisibility || null;
+	}
+
+	get project() {
+		return this._project;
+	}
+
+	isVisible() {
+		return this._visible;
 	}
 
 	render() {
 		const card = this.createElement('div', { className: 'project-card-aeon' });
+		card.classList.toggle('project-card-aeon-hidden', !this._visible);
+		this.element = card;
+		card.appendChild(this._renderVisibilityToggle());
 		card.appendChild(this._renderImage());
 		card.appendChild(this._renderSkills());
 		card.appendChild(this._renderEfficiency());
 		card.appendChild(this._renderAP());
-		this.element = card;
 		return card;
 	}
 
-	// ── Sections ──────────────────────────────────────────────────────────────
+	// ── Sections ─────────────────────────────────────────────
+
+	_renderVisibilityToggle() {
+		const btn = this.createElement('button', {
+			className: 'player-toggle-slot player-toggle-slot--overlay visibility-toggle-slot project-card-aeon-visibility',
+			type:      'button',
+			dataset:   { active: this._visible.toString() }
+		});
+		btn.appendChild(this.createElement('img', {
+			src: getResourceURL('pictures/ui/visibility.png'),
+			alt: ''
+		}));
+		this.addEventListener(btn, 'mousedown', (event) => event.preventDefault());
+		this.addEventListener(btn, 'click', () => {
+			this._visible = !this._visible;
+			btn.dataset.active = this._visible.toString();
+			this.element.classList.toggle('project-card-aeon-hidden', !this._visible);
+			this._onToggleVisibility?.(this);
+		});
+		return btn;
+	}
 
 	_renderImage() {
 		const wrapper = this.createElement('div', { className: 'project-card-aeon-image' });

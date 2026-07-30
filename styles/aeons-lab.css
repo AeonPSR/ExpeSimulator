@@ -35,6 +35,7 @@ body:has(#panels-container.aeons-lab) {
 #panels-container.aeons-lab .app-panel .events-table,
 #panels-container.aeons-lab .app-panel .results-content,
 #panels-container.aeons-lab .app-panel .expedition-legend,
+#panels-container.aeons-lab .app-panel .project-card-aeon,
 /* ── Modal (mounted on body, scoped via [data-expe-sim]) ────────────── */
 body:has(#panels-container.aeons-lab) [data-expe-sim] button,
 body:has(#panels-container.aeons-lab) [data-expe-sim] input,
@@ -58,6 +59,7 @@ body:has(#panels-container.aeons-lab) .expe-import-btn,
 #panels-container.aeons-lab .app-panel .events-table,
 #panels-container.aeons-lab .app-panel .results-content,
 #panels-container.aeons-lab .app-panel .expedition-legend,
+#panels-container.aeons-lab .app-panel .project-card-aeon,
 /* Modal elements (mounted on body, scoped via [data-expe-sim]) */
 body:has(#panels-container.aeons-lab) [data-expe-sim] .character-option,
 body:has(#panels-container.aeons-lab) [data-expe-sim] .ability-selection {
