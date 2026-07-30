@@ -99,6 +99,7 @@
         "crewManager/js/CrewManagerPage.js",
         "crewManager/js/app.js",
         "projectManager/js/data/ProjectData.js",
+        "projectManager/js/ProjectCard.js",
         "projectManager/js/ProjectManagerPage.js",
         "projectManager/js/app.js",
         "content.js"
@@ -108,6 +109,7 @@
         "styles/main.css",
         "styles/settings.css",
         "styles/crew-manager.css",
+        "styles/project-manager.css",
         "styles/utilities.css", 
         "styles/buttons.css",
         "styles/sectors.css",

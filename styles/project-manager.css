@@ -1,0 +1,115 @@
+/* ==========================================================================
+   Project Manager Panel
+   ========================================================================== */
+
+/* ── Page layout ─────────────────────────────────────────────────────────── */
+
+.project-manager-page {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 12px 4px;
+}
+
+/* ── Project card ─────────────────────────────────────────────────────────── */
+
+.project-card-aeon {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	width: 80px;
+	background: rgb(44, 62, 80);
+	border: 2px solid #8b949e;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+/* Image */
+.project-card-aeon-image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px;
+	background: rgba(0, 0, 0, 0.25);
+}
+
+/* Shared row */
+.project-card-aeon-row {
+	display: flex;
+	flex-direction: row;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.project-card-aeon-cell {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 5px 2px;
+}
+
+.project-card-aeon-cell + .project-card-aeon-cell {
+	border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Skills row */
+.project-card-aeon-skills {
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.project-card-aeon-skill-icon {
+	width: 25px;
+	height: 25px;
+	object-fit: contain;
+	image-rendering: pixelated;
+	opacity: 0.85;
+}
+
+.project-card-aeon-skill-fallback {
+	font-size: 8px;
+	color: rgba(255, 255, 255, 0.4);
+	text-align: center;
+	word-break: break-all;
+}
+
+/* Efficiency row */
+.project-card-aeon-efficiency-cell {
+	gap: 2px;
+}
+
+.project-card-aeon-pct {
+	font-size: 12px;
+	font-weight: 700;
+	color: #3498db;
+	line-height: 1;
+}
+
+.project-card-aeon-label {
+	font-size: 9px;
+	color: rgba(255, 255, 255, 0.45);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	line-height: 1;
+}
+
+/* AP row */
+.project-card-aeon-ap {
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	padding: 6px 4px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	font-size: 11px;
+	font-weight: 600;
+	color: #e67e22;
+}
+
+.project-card-aeon-ap-icon {
+	width: 14px;
+	height: 14px;
+	object-fit: contain;
+	image-rendering: pixelated;
+}

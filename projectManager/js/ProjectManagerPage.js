@@ -23,6 +23,10 @@ class ProjectManagerPage extends Component {
 
 		// Details section
 		const detailsSection = this._renderSection('projectmanager.section.details');
+		const extraDrone = ProjectData.find(p => p.name === 'EXTRA_DRONE');
+		if (extraDrone) {
+			detailsSection.appendChild(new ProjectCard({ project: extraDrone }).render());
+		}
 		this.element.appendChild(detailsSection);
 
 		this.element.appendChild(this._renderResetButton());
