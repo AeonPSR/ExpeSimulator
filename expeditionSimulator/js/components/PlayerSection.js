@@ -169,7 +169,11 @@ class PlayerSection extends Component {
 		const img = this._modeBtn.querySelector('img');
 		if (img) {
 			const iconName = mode === 'icarus' ? 'icarus_access.png' : 'patrol_ship.png';
-			img.src = this.getResourceURL(`pictures/projects/random_stuff/${iconName}`);(active) {
+			img.src = this.getResourceURL(`pictures/projects/random_stuff/${iconName}`);
+		}
+	}
+
+	setAntigravActive(active) {
 		this._antigravToggle?.setActive(active, true);
 	}
 
