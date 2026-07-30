@@ -99,7 +99,7 @@ class PlayerSection extends Component {
 			dataset: { mode: 'icarus' }
 		});
 		const modeImg = this.createElement('img', {
-			src: this.getResourceURL('pictures/projects/icarus_access.png'),
+			src: this.getResourceURL('pictures/projects/random_stuff/icarus_access.png'),
 			alt: ''
 		});
 		this._modeBtn.appendChild(modeImg);
@@ -109,7 +109,7 @@ class PlayerSection extends Component {
 		this._antigravToggle = new ToggleButton({
 			id: 'antigrav-propeller-btn',
 			className: 'antigrav-propeller-btn',
-			icon: this.getResourceURL('pictures/projects/icarus_antigrav_propeller.png'),
+			icon: this.getResourceURL('pictures/projects/random_stuff/icarus_antigrav_propeller.png'),
 			alt: '',
 			activeColor: 'orange',
 			onToggle: (isActive) => this.onAntigravToggle?.(isActive)
@@ -120,7 +120,7 @@ class PlayerSection extends Component {
 		this._baseToggle = new ToggleButton({
 			id: 'players-toggle-btn',
 			className: 'players-toggle-btn',
-			icon: this.getResourceURL('pictures/projects/base03.png'),
+			icon: this.getResourceURL('pictures/projects/random_stuff/base03.png'),
 			alt: '',
 			activeColor: 'orange',
 			onToggle: (isActive) => this.onBaseToggle?.(isActive)
@@ -154,7 +154,7 @@ class PlayerSection extends Component {
 			const img = this._modeBtn.querySelector('img');
 			if (img) {
 				const iconName = this._currentMode === 'icarus' ? 'icarus_access.png' : 'patrol_ship.png';
-				img.src = this.getResourceURL(`pictures/projects/${iconName}`);
+				img.src = this.getResourceURL(`pictures/projects/random_stuff/${iconName}`);
 			}
 		}
 
@@ -169,11 +169,7 @@ class PlayerSection extends Component {
 		const img = this._modeBtn.querySelector('img');
 		if (img) {
 			const iconName = mode === 'icarus' ? 'icarus_access.png' : 'patrol_ship.png';
-			img.src = this.getResourceURL(`pictures/projects/${iconName}`);
-		}
-	}
-
-	setAntigravActive(active) {
+			img.src = this.getResourceURL(`pictures/projects/random_stuff/${iconName}`);(active) {
 		this._antigravToggle?.setActive(active, true);
 	}
 
