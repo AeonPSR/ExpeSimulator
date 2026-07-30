@@ -29,6 +29,7 @@ function initializeApp() {
 		// randomization can read crew availability during initial state setup.
 		window.crewManagerApp = new CrewManagerApp();
 		window.expeditionSimulator = new ExpeditionSimulatorApp();
+		window.projectManagerApp = new ProjectManagerApp();
 		window.settingsApp = new SettingsApp();
 
 		// Apply the user's persisted panel order (DOM order breaks z-index

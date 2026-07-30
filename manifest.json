@@ -98,6 +98,9 @@
         "crewManager/js/CrewDetailsSection.js",
         "crewManager/js/CrewManagerPage.js",
         "crewManager/js/app.js",
+        "projectManager/js/data/ProjectData.js",
+        "projectManager/js/ProjectManagerPage.js",
+        "projectManager/js/app.js",
         "content.js"
       ],
       "css": [

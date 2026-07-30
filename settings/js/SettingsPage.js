@@ -189,9 +189,10 @@ class SettingsPage extends Component {
 		const wrapper = this.createElement('div', { className: 'settings-visibility' });
 
 		this._visibilityIcons = {
-			'expedition-simulator': 'pictures/ui/astrophysicist.png',
-			'crew-manager-panel': 'pictures/abilities/human/psy.png',
-			'settings-panel': 'pictures/abilities/human/creatif.png'
+			'expedition-simulator':    'pictures/ui/astrophysicist.png',
+			'crew-manager-panel':      'pictures/abilities/human/psy.png',
+			'project-manager-panel':   'pictures/abilities/human/concepteur.png',
+			'settings-panel':          'pictures/abilities/human/creatif.png'
 		};
 		this._visibilityRow = this.createElement('div', { className: 'settings-visibility-row' });
 		this._renderVisibilityButtons();

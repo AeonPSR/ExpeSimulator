@@ -196,6 +196,9 @@ const Translations = {
 		'tag.quad_seismic_activity.desc':    '4 Seismic Activity sectors.',
 		'tag.quad_volcanic_activity.desc':   '4 Volcanic Activity sectors.',
 
+		// Project Manager panel
+		'projectmanager.title':              'Projects Manager',
+
 		// Crew Manager panel
 		'crewmanager.title':                 'Crew Manager',
 		'crewmanager.section.crew':          'Crew summary',
@@ -453,6 +456,9 @@ const Translations = {
 		'tag.quad_seismic_activity.desc':    '4 secteurs Activité sismique.',
 		'tag.quad_volcanic_activity.desc':   '4 secteurs Activité volcanique.',
 
+		// Project Manager panel
+		'projectmanager.title':              'Projects Manager',
+
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestion de l\'Équipage',
 		'crewmanager.section.crew':          'Résumé de l\'équipage',
@@ -709,6 +715,9 @@ const Translations = {
 		'tag.quad_strong_wind.desc':         '4 sectores de Vientos Fuertes.',
 		'tag.quad_seismic_activity.desc':    '4 sectores de Actividad Sísmica.',
 		'tag.quad_volcanic_activity.desc':   '4 sectores de Actividad Volcánica.',
+
+		// Project Manager panel
+		'projectmanager.title':              'Projects Manager',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestión de Tripulación',
