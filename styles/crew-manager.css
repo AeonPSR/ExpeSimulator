@@ -16,61 +16,9 @@
 	padding: 12px 4px;
 }
 
-.crew-section {
-	margin: 0;
-}
-
-.crew-section--collapsed > :not(.sectors-header) {
-	display: none;
-}
-
-#crew-title-visibility-btn img {
-	width: 32px;
-	height: 32px;
-	image-rendering: pixelated;
-}
-
-#crew-cycle-toggle-btn img {
-	width: 32px;
-	height: 32px;
-	image-rendering: pixelated;
-}
-
-.crew-section h4 {
-	margin: 0 0 10px 0;
-	font-size: 16px;
-	color: #3498db;
-	border-bottom: 2px solid #3498db;
-	padding-bottom: 8px;
-	font-weight: 600;
-	text-transform: uppercase;
-}
-
-.crew-reset-row {
-	margin-top: auto;
-	padding-top: 10px;
-	display: flex;
-	justify-content: center;
-}
-
-.crew-reset-btn {
-	padding: 8px 20px;
-	background: rgba(231, 76, 60, 0.15);
-	border: 1px solid #e74c3c;
-	border-radius: 4px;
-	color: #e74c3c;
-	font-size: 13px;
-	cursor: pointer;
-	transition: background 0.2s ease;
-}
-
-.crew-reset-btn:hover {
-	background: rgba(231, 76, 60, 0.3);
-}
-
 /* ── Crew grid ───────────────────────────────────────────────────────────── */
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option {
 	position: relative;
 	overflow: visible;
 	background: rgba(255, 255, 255, 0.1);
@@ -97,7 +45,7 @@
 	object-fit: cover;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .crew-character-side-icons {
+#crew-manager-panel .panel-section [data-expe-sim] .crew-character-side-icons {
 	position: absolute;
 	left: -7px;
 	display: flex;
@@ -107,22 +55,22 @@
 	z-index: 2;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .crew-character-title-icons {
+#crew-manager-panel .panel-section [data-expe-sim] .crew-character-title-icons {
 	top: -7px;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .crew-character-activity-icons {
+#crew-manager-panel .panel-section [data-expe-sim] .crew-character-activity-icons {
 	bottom: -7px;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .crew-character-side-icons img {
+#crew-manager-panel .panel-section [data-expe-sim] .crew-character-side-icons img {
 	width: 16px;
 	height: 16px;
 	object-fit: contain;
 	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75));
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option:hover {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option:hover {
 	background: rgba(52, 152, 219, 0.3);
 	border-color: #3498db;
 	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
@@ -133,42 +81,42 @@
 	opacity: 0.45;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-missing {
 	filter: grayscale(1);
 	opacity: 0.45;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing:hover {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-missing:hover {
 	filter: grayscale(1);
 	opacity: 0.65;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-missing .crew-character-side-icons {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-missing .crew-character-side-icons {
 	display: none;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead {
 	background: #000;
 	border-color: #111;
 	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.35);
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead:hover {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead:hover {
 	background: #050505;
 	border-color: #111;
 	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-side-icons {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead .crew-character-side-icons {
 	display: none;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-sprite {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead .crew-character-sprite {
 	filter: grayscale(1);
 	opacity: 0.45;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead::after {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead::after {
 	content: none;
 }
 
@@ -179,33 +127,33 @@
 	--crew-dead-icon-top: -2px;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-mush {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-mush {
 	border-color: #ff5599;
 	box-shadow: 0 0 0 2px rgba(255, 85, 153, 0.65), 0 5px 15px rgba(255, 85, 153, 0.25);
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-human {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-human {
 	border-color: #3498db;
 	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.65), 0 5px 15px rgba(52, 152, 219, 0.25);
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead {
 	background: #000;
 	border-color: #111;
 	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.75), 0 5px 15px rgba(0, 0, 0, 0.35);
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-character-sprite {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead .crew-character-sprite {
 	filter: grayscale(1);
 	opacity: 0.45;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead.crew-character-mush {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead.crew-character-mush {
 	border-color: #ff5599;
 	box-shadow: 0 0 0 2px rgba(255, 85, 153, 0.65), 0 5px 15px rgba(0, 0, 0, 0.35);
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead.crew-character-human {
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead.crew-character-human {
 	border-color: #3498db;
 	box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.65), 0 5px 15px rgba(0, 0, 0, 0.35);
 }
@@ -627,8 +575,8 @@
 	display: block;
 }
 
-#crew-manager-panel .crew-status-badges-active .crew-section [data-expe-sim] .character-option.crew-character-missing::before,
-#crew-manager-panel .crew-status-badges-active .crew-section [data-expe-sim] .character-option.crew-character-missing::after {
+#crew-manager-panel .crew-status-badges-active .panel-section [data-expe-sim] .character-option.crew-character-missing::before,
+#crew-manager-panel .crew-status-badges-active .panel-section [data-expe-sim] .character-option.crew-character-missing::after {
 	content: '';
 	position: absolute;
 	top: 50%;
@@ -640,11 +588,11 @@
 	z-index: 4;
 }
 
-#crew-manager-panel .crew-status-badges-active .crew-section [data-expe-sim] .character-option.crew-character-missing::before {
+#crew-manager-panel .crew-status-badges-active .panel-section [data-expe-sim] .character-option.crew-character-missing::before {
 	transform: translate(-50%, -50%) rotate(45deg);
 }
 
-#crew-manager-panel .crew-status-badges-active .crew-section [data-expe-sim] .character-option.crew-character-missing::after {
+#crew-manager-panel .crew-status-badges-active .panel-section [data-expe-sim] .character-option.crew-character-missing::after {
 	transform: translate(-50%, -50%) rotate(-45deg);
 }
 
@@ -654,7 +602,7 @@
 	image-rendering: pixelated;
 }
 
-#crew-manager-panel .crew-section [data-expe-sim] .character-option.crew-character-dead .crew-sprite-anchor > .crew-dead-icon,
+#crew-manager-panel .panel-section [data-expe-sim] .character-option.crew-character-dead .crew-sprite-anchor > .crew-dead-icon,
 #crew-manager-panel .crew-details-section .player-profile.player-dead-active .crew-sprite-anchor > .crew-dead-icon {
 	display: block;
 	filter: none;
@@ -760,11 +708,11 @@
 	padding: 12px 4px;
 }
 
-.crew-section {
+.panel-section {
 	margin: 0;
 }
 
-.app-panel .crew-section h4 {
+.app-panel .panel-section h4 {
 	margin: 0 0 10px 0;
 	font-size: 16px;
 	color: #3498db;
@@ -774,14 +722,14 @@
 	text-transform: uppercase;
 }
 
-.crew-reset-row {
+.panel-reset-row {
 	margin-top: auto;
 	padding-top: 10px;
 	display: flex;
 	justify-content: center;
 }
 
-.crew-reset-btn {
+.panel-reset-btn {
 	padding: 8px 20px;
 	background: rgba(231, 76, 60, 0.15);
 	border: 1px solid #e74c3c;
@@ -792,20 +740,20 @@
 	transition: background 0.2s ease;
 }
 
-.crew-reset-btn:hover {
+.panel-reset-btn:hover {
 	background: rgba(231, 76, 60, 0.3);
 }
 
 /* ── Crew grid ───────────────────────────────────────────────────────────── */
 
 /* Ensure grid layout is applied regardless of layer resolution */
-.crew-section [data-expe-sim] .character-grid {
+.panel-section [data-expe-sim] .character-grid {
 	display: grid;
 	grid-template-columns: repeat(6, 1fr);
 	gap: 14px;
 }
 
-.crew-section [data-expe-sim] .character-option {
+.panel-section [data-expe-sim] .character-option {
 	position: relative;
 	overflow: visible;
 	display: flex;
@@ -816,7 +764,7 @@
 	backdrop-filter: blur(10px);
 }
 
-.crew-section [data-expe-sim] .character-option:hover {
+.panel-section [data-expe-sim] .character-option:hover {
 	background: rgba(52, 152, 219, 0.3);
 	border-color: #3498db;
 	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);

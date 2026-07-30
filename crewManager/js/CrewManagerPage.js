@@ -60,7 +60,7 @@ class CrewManagerPage extends Component {
 	}
 
 	_renderSection(titleKey, headerButtons = null) {
-		const section = this.createElement('div', { className: 'crew-section' });
+		const section = this.createElement('div', { className: 'panel-section' });
 		const header = this.createElement('div', { className: 'sectors-header' });
 		const title = this.createElement('h4', { 'data-i18n': titleKey }, I18n.t(titleKey));
 		header.appendChild(title);
@@ -97,13 +97,13 @@ class CrewManagerPage extends Component {
 		if (!this._titleVisibilityToggle) {
 			this._titleVisibilityToggle = new ToggleButton({
 				id: 'crew-title-visibility-btn',
-				className: 'diplomacy-toggle-btn',
+				className: 'section-visibility-btn',
 				icon: getResourceURL('pictures/ui/visibility.png'),
 				alt: '',
 				activeColor: 'blue',
 				initialState: Boolean(this._savedState.options.titleVisible),
 				onToggle: (isVisible) => {
-					this._titleSection?.classList.toggle('crew-section--collapsed', !isVisible);
+					this._titleSection?.classList.toggle('panel-section--collapsed', !isVisible);
 					CrewManagerStorage.saveOptions({ titleVisible: isVisible });
 				}
 			});
@@ -151,13 +151,13 @@ class CrewManagerPage extends Component {
 		this.element?.classList.toggle('crew-expert-active',        Boolean(this._savedState.options.expert));
 		this.element?.classList.toggle('crew-cycle-active',         Boolean(this._savedState.options.cycle));
 		this.element?.classList.toggle('crew-status-badges-active', Boolean(this._savedState.options.statusBadges));
-		this._titleSection?.classList.toggle('crew-section--collapsed', !Boolean(this._savedState.options.titleVisible));
+		this._titleSection?.classList.toggle('panel-section--collapsed', !Boolean(this._savedState.options.titleVisible));
 	}
 
 	_renderResetButton() {
-		const wrapper = this.createElement('div', { className: 'crew-reset-row' });
+		const wrapper = this.createElement('div', { className: 'panel-reset-row' });
 		const btn = this.createElement('button', {
-			className: 'crew-reset-btn',
+			className: 'panel-reset-btn',
 			'data-i18n': 'crewmanager.reset'
 		}, I18n.t('crewmanager.reset'));
 		this.addEventListener(btn, 'click', () => {

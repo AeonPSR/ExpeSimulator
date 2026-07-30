@@ -198,6 +198,10 @@ const Translations = {
 
 		// Project Manager panel
 		'projectmanager.title':              'Projects Manager',
+		'projectmanager.section.active':     'Active Projects',
+		'projectmanager.section.info':       'Informations',
+		'projectmanager.section.details':    'Details',
+		'projectmanager.reset':              'Reset this panel',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Crew Manager',
@@ -458,6 +462,10 @@ const Translations = {
 
 		// Project Manager panel
 		'projectmanager.title':              'Projects Manager',
+		'projectmanager.section.active':     'Projets actifs',
+		'projectmanager.section.info':       'Informations',
+		'projectmanager.section.details':    'Détails',
+		'projectmanager.reset':              'Réinitialiser cette page',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestion de l\'Équipage',
@@ -718,6 +726,10 @@ const Translations = {
 
 		// Project Manager panel
 		'projectmanager.title':              'Projects Manager',
+		'projectmanager.section.active':     'Proyectos activos',
+		'projectmanager.section.info':       'Información',
+		'projectmanager.section.details':    'Detalles',
+		'projectmanager.reset':              'Restablecer este panel',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestión de Tripulación',
