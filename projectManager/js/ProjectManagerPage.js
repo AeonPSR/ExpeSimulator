@@ -8,6 +8,11 @@ class ProjectManagerPage extends Component {
 		super(options);
 		this._infoSection = null;
 		this._infoVisibilityToggle = null;
+		this._expertToggle = null;
+		this._nofToggle = null;
+		this._priorityToggle = null;
+		this._sentinels = [];
+		this._stuckObserver = null;
 	}
 
 	render() {
@@ -22,7 +27,11 @@ class ProjectManagerPage extends Component {
 		this.element.appendChild(this._infoSection);
 
 		// Details section
-		const detailsSection = this._renderSection('projectmanager.section.details');
+		const detailsSection = this._renderSection('projectmanager.section.details', [
+			this._renderNofToggle(),
+			this._renderPriorityToggle(),
+			this._renderExpertToggle()
+		]);
 		this._grid = this.createElement('div', { className: 'project-card-aeon-grid' });
 		this._cards = ProjectData
 			.filter(p => p.type === 'neron')
@@ -81,18 +90,75 @@ class ProjectManagerPage extends Component {
 		});
 	}
 
-	_renderSection(titleKey, headerButton = null) {
+	_renderSection(titleKey, headerButtons = null) {
 		const section = this.createElement('div', { className: 'panel-section' });
-		const header = this.createElement('div', { className: 'sectors-header' });
+		const sentinel = this.createElement('div', { className: 'project-section-sentinel' });
+		const header = this.createElement('div', { className: 'project-section-header' });
 		const title = this.createElement('h4', { 'data-i18n': titleKey }, I18n.t(titleKey));
 		header.appendChild(title);
-		if (headerButton) {
-			const buttonsContainer = this.createElement('div', { className: 'sectors-buttons' });
-			buttonsContainer.appendChild(headerButton);
+		if (headerButtons) {
+			const buttonsContainer = this.createElement('div', { className: 'project-section-buttons' });
+			(Array.isArray(headerButtons) ? headerButtons : [headerButtons]).forEach(button => {
+				buttonsContainer.appendChild(button);
+			});
 			header.appendChild(buttonsContainer);
 		}
+		section.appendChild(sentinel);
 		section.appendChild(header);
+		sentinel._stickyHeader = header;
+		this._sentinels.push(sentinel);
 		return section;
+	}
+
+	_renderExpertToggle() {
+		if (!this._expertToggle) {
+			this._expertToggle = new ToggleButton({
+				id: 'project-expert-toggle-btn',
+				className: 'diplomacy-toggle-btn',
+				icon: getResourceURL('pictures/abilities/human/expert.png'),
+				alt: '',
+				activeColor: 'blue',
+				initialState: false,
+				onToggle: (isActive) => {
+					this.element?.classList.toggle('project-expert-active', isActive);
+				}
+			});
+		}
+		return this._expertToggle.render();
+	}
+
+	_renderNofToggle() {
+		if (!this._nofToggle) {
+			this._nofToggle = new ToggleButton({
+				id: 'project-nof-toggle-btn',
+				className: 'diplomacy-toggle-btn project-expert-extra',
+				icon: getResourceURL('pictures/abilities/human/neron.png'),
+				alt: '',
+				activeColor: 'blue',
+				initialState: false,
+				onToggle: (isActive) => {
+					this._cards.forEach(card => card.setNofMode(isActive));
+				}
+			});
+		}
+		return this._nofToggle.render();
+	}
+
+	_renderPriorityToggle() {
+		if (!this._priorityToggle) {
+			this._priorityToggle = new ToggleButton({
+				id: 'project-priority-toggle-btn',
+				className: 'diplomacy-toggle-btn project-expert-extra',
+				icon: getResourceURL('pictures/abilities/human/panique.png'),
+				alt: '',
+				activeColor: 'blue',
+				initialState: false,
+				onToggle: (isActive) => {
+					this._cards.forEach(card => card.setPriorityMode(isActive));
+				}
+			});
+		}
+		return this._priorityToggle.render();
 	}
 
 	_renderInfoVisibilityToggle() {
@@ -110,6 +176,26 @@ class ProjectManagerPage extends Component {
 			});
 		}
 		return this._infoVisibilityToggle.render();
+	}
+
+	onMount() {
+		const scrollRoot = this.element.closest('.panel-content');
+		if (!scrollRoot || typeof IntersectionObserver === 'undefined') {
+			return;
+		}
+		const padTop = parseFloat(getComputedStyle(scrollRoot).paddingTop) || 0;
+		this._stuckObserver = new IntersectionObserver((entries) => {
+			entries.forEach((entry) => {
+				const header = entry.target._stickyHeader;
+				const stuck = !entry.isIntersecting && entry.boundingClientRect.top <= entry.rootBounds.top;
+				header.classList.toggle('project-section-stuck', stuck);
+			});
+		}, { root: scrollRoot, rootMargin: `-${padTop}px 0px 0px 0px`, threshold: [0, 1] });
+		this._sentinels.forEach((sentinel) => this._stuckObserver.observe(sentinel));
+	}
+
+	onDestroy() {
+		this._stuckObserver?.disconnect();
 	}
 
 	_renderResetButton() {

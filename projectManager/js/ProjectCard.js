@@ -13,6 +13,8 @@ class ProjectCard extends Component {
 		super(options);
 		this._project = options.project;
 		this._visible = options.visible !== false;
+		this._nof = false;
+		this._priority = false;
 		this._onToggleVisibility = options.onToggleVisibility || null;
 	}
 
@@ -39,23 +41,16 @@ class ProjectCard extends Component {
 	// ── Sections ─────────────────────────────────────────────
 
 	_renderVisibilityToggle() {
-		const btn = this.createElement('button', {
-			className: 'player-toggle-slot player-toggle-slot--overlay visibility-toggle-slot project-card-aeon-visibility',
-			type:      'button',
-			dataset:   { active: this._visible.toString() }
+		this._visibilityToggle = new VisibilityToggle({
+			className:       'project-card-aeon-visibility',
+			initialVisible:  this._visible,
+			onToggle: (visible) => {
+				this._visible = visible;
+				this.element.classList.toggle('project-card-aeon-hidden', !visible);
+				this._onToggleVisibility?.(this);
+			}
 		});
-		btn.appendChild(this.createElement('img', {
-			src: getResourceURL('pictures/ui/visibility.png'),
-			alt: ''
-		}));
-		this.addEventListener(btn, 'mousedown', (event) => event.preventDefault());
-		this.addEventListener(btn, 'click', () => {
-			this._visible = !this._visible;
-			btn.dataset.active = this._visible.toString();
-			this.element.classList.toggle('project-card-aeon-hidden', !this._visible);
-			this._onToggleVisibility?.(this);
-		});
-		return btn;
+		return this._visibilityToggle.render();
 	}
 
 	_renderImage() {
@@ -93,7 +88,7 @@ class ProjectCard extends Component {
 	_renderEfficiency() {
 		const row = this.createElement('div', { className: 'project-card-aeon-row project-card-aeon-efficiency' });
 		const min = this._project.efficiency;
-		const max = Math.round(min * 1.5);
+		const max = Math.floor(min * 1.5);
 
 		for (const [value, labelKey] of [[min, 'Min'], [max, 'Max']]) {
 			const cell = this.createElement('div', { className: 'project-card-aeon-cell project-card-aeon-efficiency-cell' });
@@ -104,12 +99,39 @@ class ProjectCard extends Component {
 		return row;
 	}
 
-	_renderAP() {
-		const wrapper = this.createElement('div', { className: 'project-card-aeon-ap-list' });
-		for (let n = 0; n <= 4; n++) {
-			wrapper.appendChild(this._renderAPRow(this._project[`averageAP_${n}skill`]));
+	setNofMode(nof) {
+		this._nof = nof;
+		if (this._apList) {
+			this._fillAPRows();
 		}
-		return wrapper;
+	}
+
+	setPriorityMode(priority) {
+		this._priority = priority;
+		if (this._apList) {
+			this._fillAPRows();
+		}
+	}
+
+	_renderAP() {
+		this._apList = this.createElement('div', { className: 'project-card-aeon-ap-list' });
+		this._fillAPRows();
+		return this._apList;
+	}
+
+	_fillAPRows() {
+		const prefix = this._apFieldPrefix();
+		this._apList.replaceChildren();
+		for (let n = 0; n <= 4; n++) {
+			this._apList.appendChild(this._renderAPRow(this._project[`${prefix}${n}skill`]));
+		}
+	}
+
+	_apFieldPrefix() {
+		if (this._nof && this._priority) return 'nof_priorityAP_';
+		if (this._nof) return 'nofAP_';
+		if (this._priority) return 'priorityAP_';
+		return 'averageAP_';
 	}
 
 	_renderAPRow(value) {

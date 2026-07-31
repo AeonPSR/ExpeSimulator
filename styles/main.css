@@ -393,7 +393,7 @@ body.panel-click-mode .app-panel:not(.pinned):not(.force-close):hover {
 	background: rgba(231, 76, 60, 0.4);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 400px) {
 	.app-panel .panel-close-btn {
 		display: flex;
 	}
@@ -826,7 +826,7 @@ body.panel-click-mode .app-panel:not(.pinned):not(.force-close):hover {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
 	.app-panel {
 		width: 100vw;
 		transform: translateX(-100vw);

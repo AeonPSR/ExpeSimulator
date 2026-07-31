@@ -16,6 +16,57 @@
 	padding: 12px 4px;
 }
 
+.crew-manager-page .crew-section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-direction: row;
+	margin-bottom: 15px;
+}
+
+.crew-manager-page .crew-section-header h4 {
+	margin: 0;
+	font-size: 16px;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 8px;
+	flex: 1;
+	text-transform: none;
+	font-weight: 700;
+}
+
+.crew-manager-page .crew-section-buttons {
+	display: flex;
+	flex-direction: row;
+	gap: 5px;
+	margin-left: 10px;
+}
+
+.crew-manager-page .panel-section--collapsed > .crew-section-header {
+	display: flex;
+}
+
+.crew-manager-page .crew-details-header {
+	position: sticky;
+	top: 0;
+	z-index: 20;
+}
+
+.crew-manager-page .crew-details-header.crew-section-stuck::before {
+	content: '';
+	position: absolute;
+	top: -40px;
+	left: -30px;
+	right: -30px;
+	bottom: 0;
+	background: rgb(44, 62, 80);
+	z-index: -1;
+}
+
+.crew-section-sentinel {
+	height: 0;
+}
+
 /* ── Crew grid ───────────────────────────────────────────────────────────── */
 
 #crew-manager-panel .panel-section [data-expe-sim] .character-option {
@@ -363,6 +414,8 @@
 	background: rgb(44, 62, 80);
 	border-color: #8b949e;
 	transition: none;
+	top: -13px;
+	right: -13px;
 }
 
 #crew-manager-panel .crew-details-section .player-profile.player-mush-active {
@@ -708,18 +761,8 @@
 	padding: 12px 4px;
 }
 
-.panel-section {
+.crew-manager-page .panel-section {
 	margin: 0;
-}
-
-.app-panel .panel-section h4 {
-	margin: 0 0 10px 0;
-	font-size: 16px;
-	color: #3498db;
-	border-bottom: 2px solid #3498db;
-	padding-bottom: 8px;
-	font-weight: 600;
-	text-transform: uppercase;
 }
 
 .panel-reset-row {

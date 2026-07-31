@@ -19,6 +19,8 @@ class CrewManagerPage extends Component {
 		this._hiddenCharacters = new Set();
 		this._titleBlockedCharacters = new Set();
 		this._roleOrder = ['commandant', 'comm', 'admin'];
+		this._detailsHeaderSentinel = null;
+		this._detailsHeaderObserver = null;
 		this._savedState = CrewManagerStorage.load();
 	}
 
@@ -40,7 +42,11 @@ class CrewManagerPage extends Component {
 		this.element.appendChild(this._titleSection);
 
 		// Details section
-		const detailsSection = this._renderSection('crewmanager.section.details', [this._renderExpertToggle(), this._renderCycleToggle()]);
+		const detailsSection = this._renderSection(
+			'crewmanager.section.details',
+			[this._renderExpertToggle(), this._renderCycleToggle()],
+			true
+		);
 		this._detailsSection = new CrewDetailsSection({
 			savedPlayers: this._savedState.players,
 			onVisibilityChange: (filename, visible) => this._setCharacterVisible(filename, visible),
@@ -59,20 +65,44 @@ class CrewManagerPage extends Component {
 		return this.element;
 	}
 
-	_renderSection(titleKey, headerButtons = null) {
+	_renderSection(titleKey, headerButtons = null, sticky = false) {
 		const section = this.createElement('div', { className: 'panel-section' });
-		const header = this.createElement('div', { className: 'sectors-header' });
+		const headerClass = sticky ? 'crew-section-header crew-details-header' : 'crew-section-header';
+		const header = this.createElement('div', { className: headerClass });
 		const title = this.createElement('h4', { 'data-i18n': titleKey }, I18n.t(titleKey));
 		header.appendChild(title);
 		if (headerButtons) {
-			const buttonsContainer = this.createElement('div', { className: 'sectors-buttons' });
+			const buttonsContainer = this.createElement('div', { className: 'crew-section-buttons' });
 			(Array.isArray(headerButtons) ? headerButtons : [headerButtons]).forEach(button => {
 				buttonsContainer.appendChild(button);
 			});
 			header.appendChild(buttonsContainer);
 		}
+		if (sticky) {
+			this._detailsHeaderSentinel = this.createElement('div', { className: 'crew-section-sentinel' });
+			this._detailsHeaderSentinel._stickyHeader = header;
+			section.appendChild(this._detailsHeaderSentinel);
+		}
 		section.appendChild(header);
 		return section;
+	}
+
+	onMount() {
+		const scrollRoot = this.element.closest('.panel-content');
+		if (!scrollRoot || !this._detailsHeaderSentinel || typeof IntersectionObserver === 'undefined') {
+			return;
+		}
+		const padTop = parseFloat(getComputedStyle(scrollRoot).paddingTop) || 0;
+		this._detailsHeaderObserver = new IntersectionObserver(([entry]) => {
+			const header = entry.target._stickyHeader;
+			const stuck = !entry.isIntersecting && entry.boundingClientRect.top <= entry.rootBounds.top;
+			header.classList.toggle('crew-section-stuck', stuck);
+		}, { root: scrollRoot, rootMargin: `-${padTop}px 0px 0px 0px`, threshold: [0, 1] });
+		this._detailsHeaderObserver.observe(this._detailsHeaderSentinel);
+	}
+
+	onDestroy() {
+		this._detailsHeaderObserver?.disconnect();
 	}
 
 	_renderStatusBadgeToggle() {

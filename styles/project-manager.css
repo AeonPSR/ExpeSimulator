@@ -11,6 +11,59 @@
 	padding: 12px 4px;
 }
 
+.project-manager-page:not(.project-expert-active) .project-expert-extra,
+.project-manager-page:not(.project-expert-active) .project-card-aeon-ap-list {
+	display: none;
+}
+
+.project-manager-page .project-section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-direction: row;
+	margin-bottom: 15px;
+	position: sticky;
+	top: 0;
+	z-index: 20;
+}
+
+.project-manager-page .project-section-header h4 {
+	margin: 0;
+	font-size: 16px;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 8px;
+	flex: 1;
+	text-transform: none;
+	font-weight: 700;
+}
+
+.project-manager-page .project-section-buttons {
+	display: flex;
+	flex-direction: row;
+	gap: 5px;
+	margin-left: 10px;
+}
+
+.project-manager-page .panel-section--collapsed > .project-section-header {
+	display: flex;
+}
+
+.project-manager-page .project-section-header.project-section-stuck::before {
+	content: '';
+	position: absolute;
+	top: -40px;
+	left: -30px;
+	right: -30px;
+	bottom: 0;
+	background: rgb(44, 62, 80);
+	z-index: -1;
+}
+
+.project-section-sentinel {
+	height: 0;
+}
+
 /* ── Project card ─────────────────────────────────────────────────────────── */
 
 .project-card-aeon-grid {
@@ -44,6 +97,11 @@
 .app-panel .project-card-aeon .visibility-toggle-slot[data-active="true"] {
 	background: rgb(44, 62, 80);
 	border-color: #8b949e;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-visibility {
+	top: -12px;
+	right: -12px;
 }
 
 /* FLIP slide when re-sorting after a visibility toggle (matches crew speed) */
@@ -100,7 +158,6 @@
 	width: 25px;
 	height: 25px;
 	object-fit: contain;
-	image-rendering: pixelated;
 	opacity: 0.85;
 }
 
