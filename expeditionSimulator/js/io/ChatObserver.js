@@ -12,7 +12,6 @@ class ChatObserver {
 	 */
 	constructor(options = {}) {
 		this._observer = null;
-		this._processedMessages = new WeakSet();
 		this._onImport = options.onImport || null;
 		this._clickListener = null;
 	}
@@ -87,12 +86,24 @@ class ChatObserver {
 
 	/** @private */
 	_processMessage(message) {
-		if (this._processedMessages.has(message)) return;
-		this._processedMessages.add(message);
+		const fingerprint = this._getFingerprint(message);
 
-		if (!this._isExpeditionMessage(message)) return;
+		const existing = message.querySelector('.expe-import-btn');
+		if (existing) {
+			if (existing.dataset.fingerprint === fingerprint) return; // same content, nothing to do
+			existing.remove(); // content changed — replace the stale button
+		}
 
-		this._addImportButton(message);
+		if (!fingerprint || !this._isExpeditionMessage(message)) return;
+
+		this._addImportButton(message, fingerprint);
+	}
+
+	/** @private — a lightweight content key for the message */
+	_getFingerprint(message) {
+		const alts = [...message.querySelectorAll('img')].map(img => img.alt).join('|');
+		const text = message.textContent.trim().slice(0, 200);
+		return alts + '§' + text;
 	}
 
 	/** @private */
@@ -133,7 +144,7 @@ class ChatObserver {
 	}
 
 	/** @private */
-	_addImportButton(message) {
+	_addImportButton(message, fingerprint) {
 		const currentPosition = window.getComputedStyle(message).position;
 		if (currentPosition === 'static') {
 			message.style.position = 'relative';
@@ -141,6 +152,7 @@ class ChatObserver {
 
 		const button = document.createElement('button');
 		button.className = 'expe-import-btn expe-import-btn--overlay';
+		button.dataset.fingerprint = fingerprint;
 		const img = document.createElement('img');
 		img.src = getResourceURL('pictures/ui/import_planet.png');
 		img.alt = 'Import';
