@@ -19,6 +19,7 @@ Todo:
 - Easter egg when generating a random char
 
 Done since last update:
+- Fixing the import button on message going to the wrong place.
 - Allow to reorder pannels.
 - Hiding a module also hide the related import buttons.
 - Fixed the tab not closing proprely 
