@@ -12,25 +12,26 @@ class ProjectCard extends Component {
 	constructor(options = {}) {
 		super(options);
 		this._project = options.project;
-		this._visible = options.visible !== false;
+		this._status = null;
 		this._nof = false;
 		this._priority = false;
-		this._onToggleVisibility = options.onToggleVisibility || null;
+		this._onStatusChange = options.onStatusChange || null;
 	}
 
 	get project() {
 		return this._project;
 	}
 
-	isVisible() {
-		return this._visible;
+	getSortBucket() {
+		if (this._status === 'done') return 1;
+		if (this._status === 'bin') return 2;
+		return 0;
 	}
 
 	render() {
 		const card = this.createElement('div', { className: 'project-card-aeon' });
-		card.classList.toggle('project-card-aeon-hidden', !this._visible);
 		this.element = card;
-		card.appendChild(this._renderVisibilityToggle());
+		card.append(...this._renderStateButtons());
 		card.appendChild(this._renderImage());
 		card.appendChild(this._renderSkills());
 		card.appendChild(this._renderEfficiency());
@@ -40,17 +41,40 @@ class ProjectCard extends Component {
 
 	// ── Sections ─────────────────────────────────────────────
 
-	_renderVisibilityToggle() {
-		this._visibilityToggle = new VisibilityToggle({
-			className:       'project-card-aeon-visibility',
-			initialVisible:  this._visible,
-			onToggle: (visible) => {
-				this._visible = visible;
-				this.element.classList.toggle('project-card-aeon-hidden', !visible);
-				this._onToggleVisibility?.(this);
-			}
+	_renderStateButtons() {
+		this._coreToggle = new VisibilityToggle({
+			iconPath: 'pictures/ui/pa_core.png',
+			className: 'project-card-aeon-state-toggle project-card-aeon-state-toggle--core',
+			initialVisible: false,
+			onToggle: (active) => this._setStatus(active ? 'core' : null)
 		});
-		return this._visibilityToggle.render();
+		this._doneToggle = new VisibilityToggle({
+			iconPath: 'pictures/ui/done.png',
+			className: 'project-card-aeon-state-toggle project-card-aeon-state-toggle--done',
+			initialVisible: false,
+			onToggle: (active) => this._setStatus(active ? 'done' : null)
+		});
+		this._binToggle = new VisibilityToggle({
+			iconPath: 'pictures/ui/bin.png',
+			className: 'project-card-aeon-state-toggle project-card-aeon-state-toggle--bin',
+			initialVisible: false,
+			onToggle: (active) => this._setStatus(active ? 'bin' : null)
+		});
+		return [this._coreToggle.render(), this._doneToggle.render(), this._binToggle.render()];
+	}
+
+	_setStatus(status) {
+		const previousBucket = this.getSortBucket();
+		this._status = status;
+		this._coreToggle.setVisible(status === 'core', true);
+		this._doneToggle.setVisible(status === 'done', true);
+		this._binToggle.setVisible(status === 'bin', true);
+		this.element.classList.toggle('project-card-aeon-core', status === 'core');
+		this.element.classList.toggle('project-card-aeon-done', status === 'done');
+		this.element.classList.toggle('project-card-aeon-hidden', status === 'bin');
+		if (previousBucket !== this.getSortBucket()) {
+			this._onStatusChange?.(this);
+		}
 	}
 
 	_renderImage() {

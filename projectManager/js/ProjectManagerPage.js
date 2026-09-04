@@ -37,7 +37,7 @@ class ProjectManagerPage extends Component {
 			.filter(p => p.type === 'neron')
 			.map(project => new ProjectCard({
 				project,
-				onToggleVisibility: () => this._reorderCards()
+				onStatusChange: () => this._reorderCards()
 			}));
 		this._sortCards();
 		this._cards.forEach(card => this._grid.appendChild(card.render()));
@@ -49,12 +49,11 @@ class ProjectManagerPage extends Component {
 		return this.element;
 	}
 
-	// Visible cards first, then hidden; each sub-list sorted most costly → least.
+	// Unmarked/core first, then done, then bin; each group sorted most costly → least.
 	_sortCards() {
 		this._cards.sort((a, b) => {
-			const va = a.isVisible() ? 0 : 1;
-			const vb = b.isVisible() ? 0 : 1;
-			if (va !== vb) return va - vb;
+			const bucketDifference = a.getSortBucket() - b.getSortBucket();
+			if (bucketDifference !== 0) return bucketDifference;
 			return b.project.averageAP_0skill - a.project.averageAP_0skill;
 		});
 	}

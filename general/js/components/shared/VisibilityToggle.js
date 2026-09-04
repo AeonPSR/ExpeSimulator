@@ -25,6 +25,16 @@ class VisibilityToggle extends Component {
 		return this._visible;
 	}
 
+	setVisible(visible, silent = false) {
+		this._visible = visible;
+		if (this.element) {
+			this.element.dataset.active = visible.toString();
+		}
+		if (!silent) {
+			this._onToggle?.(visible);
+		}
+	}
+
 	render() {
 		const btn = this.createElement('button', {
 			className: `player-toggle-slot player-toggle-slot--overlay visibility-toggle-slot ${this._className}`.trim(),
@@ -37,9 +47,7 @@ class VisibilityToggle extends Component {
 		}));
 		this.addEventListener(btn, 'mousedown', (event) => event.preventDefault());
 		this.addEventListener(btn, 'click', () => {
-			this._visible = !this._visible;
-			btn.dataset.active = this._visible.toString();
-			this._onToggle?.(this._visible);
+			this.setVisible(!this._visible);
 		});
 		this.element = btn;
 		return btn;
