@@ -34,6 +34,10 @@ class ProjectCard extends Component {
 		return this._status === 'core';
 	}
 
+	setStatus(status) {
+		this._setStatus(status);
+	}
+
 	setCoreLimitReached(limitReached) {
 		this._coreToggle?.element?.classList.toggle(
 			'project-card-aeon-state-toggle--unavailable',
@@ -92,7 +96,7 @@ class ProjectCard extends Component {
 		this.element.classList.toggle('project-card-aeon-core', status === 'core');
 		this.element.classList.toggle('project-card-aeon-done', status === 'done');
 		this.element.classList.toggle('project-card-aeon-hidden', status === 'bin');
-		if (previousBucket !== this.getSortBucket()) {
+		if (previousBucket !== this.getSortBucket() || wasCore !== this.isCore()) {
 			this._onStatusChange?.(this);
 		}
 		if (wasCore !== this.isCore()) {

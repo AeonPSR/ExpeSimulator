@@ -20,6 +20,28 @@ class ProjectManagerPage extends Component {
 
 		// Active Projects section
 		const activeSection = this._renderSection('projectmanager.section.active');
+		this._activeGrid = this.createElement('div', {
+			className: 'project-card-aeon-grid project-card-aeon-grid--active'
+		});
+		this._activeSlots = Array.from({ length: 3 }, () => {
+			const slot = this.createElement('div', { className: 'project-card-aeon-active-slot' });
+			slot.appendChild(this._renderEmptyActiveSlot());
+			const finishButton = this.createElement('button', {
+				className: 'project-card-aeon-finish-btn',
+				type: 'button',
+				disabled: true
+			}, 'Finish this project');
+			this.addEventListener(finishButton, 'click', () => {
+				if (slot._activeCard) {
+					this._finishActiveProject(slot._activeCard);
+				}
+			});
+			slot.appendChild(finishButton);
+			slot._finishButton = finishButton;
+			this._activeGrid.appendChild(slot);
+			return slot;
+		});
+		activeSection.appendChild(this._activeGrid);
 		this.element.appendChild(activeSection);
 
 		// Informations section (collapsible)
@@ -32,7 +54,9 @@ class ProjectManagerPage extends Component {
 			this._renderPriorityToggle(),
 			this._renderExpertToggle()
 		]);
-		this._grid = this.createElement('div', { className: 'project-card-aeon-grid' });
+		this._detailsGrid = this.createElement('div', {
+			className: 'project-card-aeon-grid project-card-aeon-grid--details'
+		});
 		this._cards = ProjectData
 			.filter(p => p.type === 'neron')
 			.map(project => new ProjectCard({
@@ -42,8 +66,9 @@ class ProjectManagerPage extends Component {
 				onStatusChange: () => this._reorderCards()
 			}));
 		this._sortCards();
-		this._cards.forEach(card => this._grid.appendChild(card.render()));
-		detailsSection.appendChild(this._grid);
+		this._cards.forEach(card => this._detailsGrid.appendChild(card.render()));
+		this._assignCardZIndexes();
+		detailsSection.appendChild(this._detailsGrid);
 		this.element.appendChild(detailsSection);
 
 		this.element.appendChild(this._renderResetButton());
@@ -68,8 +93,69 @@ class ProjectManagerPage extends Component {
 	_reorderCards() {
 		const previous = this._cards.map(card => [card.element, card.element.getBoundingClientRect()]);
 		this._sortCards();
-		this._cards.forEach(card => this._grid.appendChild(card.element));
+		this._assignCardZIndexes();
+		let activeSlotIndex = 0;
+		this._activeSlots.forEach(slot => {
+			slot._activeCard = null;
+		});
+		this._cards.forEach(card => {
+			if (card.isCore()) {
+				const slot = this._activeSlots[activeSlotIndex++];
+				slot._activeCard = card;
+				slot.insertBefore(card.element, slot._finishButton);
+			} else {
+				this._detailsGrid.appendChild(card.element);
+			}
+		});
+		this._activeSlots.forEach(slot => {
+			slot.classList.toggle('project-card-aeon-active-slot--filled', Boolean(slot._activeCard));
+			slot._finishButton.disabled = !slot._activeCard;
+		});
 		this._animateReorder(previous);
+	}
+
+	_finishActiveProject(completedCard) {
+		const activeCards = this._cards.filter(card => card.isCore());
+		activeCards.forEach(card => {
+			card.setStatus(card === completedCard ? 'done' : 'bin');
+		});
+	}
+
+	_renderEmptyActiveSlot() {
+		const card = this.createElement('div', {
+			className: 'project-card-aeon project-card-aeon--empty',
+			'aria-hidden': 'true'
+		});
+		card.appendChild(this.createElement('div', {
+			className: 'project-card-aeon-image project-card-aeon-image--empty'
+		}));
+
+		const skills = this.createElement('div', {
+			className: 'project-card-aeon-row project-card-aeon-skills'
+		});
+		skills.appendChild(this.createElement('div', { className: 'project-card-aeon-cell' }));
+		skills.appendChild(this.createElement('div', { className: 'project-card-aeon-cell' }));
+		card.appendChild(skills);
+
+		const efficiency = this.createElement('div', {
+			className: 'project-card-aeon-row project-card-aeon-efficiency'
+		});
+		['Min', 'Max'].forEach(label => {
+			const cell = this.createElement('div', {
+				className: 'project-card-aeon-cell project-card-aeon-efficiency-cell'
+			});
+			cell.appendChild(this.createElement('span', { className: 'project-card-aeon-pct' }, 'X%'));
+			cell.appendChild(this.createElement('span', { className: 'project-card-aeon-label' }, label));
+			efficiency.appendChild(cell);
+		});
+		card.appendChild(efficiency);
+		return card;
+	}
+
+	_assignCardZIndexes() {
+		this._cards.forEach((card, index) => {
+			card.element.style.zIndex = 50 - index;
+		});
 	}
 
 	// FLIP: play each card from its previous position to the new one.
