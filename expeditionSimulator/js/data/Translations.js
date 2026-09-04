@@ -462,7 +462,7 @@ const Translations = {
 
 		// Project Manager panel
 		'projectmanager.title':              'Projects Manager',
-		'projectmanager.section.active':     'Projets actifs',
+		'projectmanager.section.active':     'Projets du Nexus',
 		'projectmanager.section.info':       'Informations',
 		'projectmanager.section.details':    'Détails',
 		'projectmanager.reset':              'Réinitialiser cette page',

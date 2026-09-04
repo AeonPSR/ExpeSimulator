@@ -81,6 +81,24 @@ class ProjectManagerPage extends Component {
 		this._cards.forEach(card => card.setCoreLimitReached(limitReached));
 	}
 
+	replaceActiveProjects(projectNames) {
+		const selectedNames = new Set(projectNames);
+		this._cards.filter(card => card.isCore()).forEach(card => card.setStatus(null));
+		this._cards
+			.filter(card => selectedNames.has(card.project.name))
+			.forEach(card => card.setStatus('core'));
+	}
+
+	focusActiveProjects() {
+		this._activeGrid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		this._activeGrid.classList.remove('import-highlight');
+		void this._activeGrid.offsetWidth;
+		this._activeGrid.classList.add('import-highlight');
+		this._activeGrid.addEventListener('animationend', () => {
+			this._activeGrid.classList.remove('import-highlight');
+		}, { once: true });
+	}
+
 	// Unmarked/core first, then done, then bin; each group sorted most costly → least.
 	_sortCards() {
 		this._cards.sort((a, b) => {

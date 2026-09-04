@@ -25,12 +25,15 @@ function initializeApp() {
 			return;
 		}
 
+		window.chatMessageScanner = new ChatMessageScanner();
+
 		// Create the applications. Crew Manager is first so expedition player
 		// randomization can read crew availability during initial state setup.
 		window.crewManagerApp = new CrewManagerApp();
 		window.expeditionSimulator = new ExpeditionSimulatorApp();
 		window.projectManagerApp = new ProjectManagerApp();
 		window.settingsApp = new SettingsApp();
+		window.chatMessageScanner.start();
 
 		// Apply the user's persisted panel order (DOM order breaks z-index
 		// ties between tongues, so this also fixes the visual stacking).

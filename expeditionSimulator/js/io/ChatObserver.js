@@ -11,99 +11,19 @@ class ChatObserver {
 	 *   (sectorIds: string[], planetName: string|null, nav: {direction, fuel}|null) => void
 	 */
 	constructor(options = {}) {
-		this._observer = null;
 		this._onImport = options.onImport || null;
-		this._clickListener = null;
 	}
 
-	/**
-	 * Starts observing the DOM for chat messages.
-	 */
-	start() {
-		this._scanExistingMessages();
-
-		const commsPanel = document.querySelector('.comms-panel') || document.body;
-
-		this._observer = new MutationObserver((mutations) => {
-			for (const mutation of mutations) {
-				for (const node of mutation.addedNodes) {
-					if (node.nodeType === Node.ELEMENT_NODE) {
-						this._checkNode(node);
-					}
-				}
-			}
-		});
-
-		this._observer.observe(commsPanel, {
-			childList: true,
-			subtree: true
-		});
-
-		// Re-scan when the user switches tabs or expands a thread,
-		// since those actions reveal already-present messages without DOM insertions.
-		this._clickListener = (e) => {
-			const target = e.target.closest('.tab, .toggle-children');
-			if (!target) return;
-			setTimeout(() => this._scanExistingMessages(), 150);
-		};
-		commsPanel.addEventListener('click', this._clickListener);
-		this._commsPanel = commsPanel;
-	}
-
-	/**
-	 * Stops observing the DOM.
-	 */
-	stop() {
-		if (this._observer) {
-			this._observer.disconnect();
-			this._observer = null;
+	processMessage(message) {
+		const existing = message.querySelector('.expedition-message-import-btn');
+		const matches = this._isExpeditionMessage(message);
+		if (!matches) {
+			existing?.remove();
+			return;
 		}
-		if (this._clickListener && this._commsPanel) {
-			this._commsPanel.removeEventListener('click', this._clickListener);
-			this._clickListener = null;
-			this._commsPanel = null;
-		}
-	}
+		if (existing) return;
 
-	/** @private */
-	_scanExistingMessages() {
-		const messages = document.querySelectorAll('.message');
-		for (const message of messages) {
-			this._processMessage(message);
-		}
-	}
-
-	/** @private */
-	_checkNode(node) {
-		if (node.classList && node.classList.contains('message')) {
-			this._processMessage(node);
-		}
-		const messages = node.querySelectorAll ? node.querySelectorAll('.message') : [];
-		for (const message of messages) {
-			this._processMessage(message);
-		}
-	}
-
-	/** @private */
-	_processMessage(message) {
-		const fingerprint = this._getFingerprint(message);
-
-		const existing = message.querySelector('.expe-import-btn');
-		if (existing) {
-			if (existing.dataset.fingerprint === fingerprint) return; // same content, nothing to do
-			existing.remove(); // content changed — replace the stale button
-		}
-
-		if (!fingerprint || !this._isExpeditionMessage(message)) return;
-
-		this._addImportButton(message, fingerprint);
-	}
-
-	/** @private — a lightweight content key for the message */
-	_getFingerprint(message) {
-		const alts = [...message.querySelectorAll('img')].map(img => img.alt).join('|');
-		const text = message.textContent.trim().slice(0, 200);
-		return alts + '§' + text;
+		this._addImportButton(message);
 	}
 
 	/** @private */
@@ -144,15 +64,14 @@ class ChatObserver {
 	}
 
 	/** @private */
-	_addImportButton(message, fingerprint) {
+	_addImportButton(message) {
 		const currentPosition = window.getComputedStyle(message).position;
 		if (currentPosition === 'static') {
 			message.style.position = 'relative';
 		}
 
 		const button = document.createElement('button');
-		button.className = 'expe-import-btn expe-import-btn--overlay';
-		button.dataset.fingerprint = fingerprint;
+		button.className = 'expe-import-btn expe-import-btn--overlay expedition-message-import-btn';
 		const img = document.createElement('img');
 		img.src = getResourceURL('pictures/ui/import_planet.png');
 		img.alt = 'Import';

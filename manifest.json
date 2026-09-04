@@ -22,6 +22,7 @@
         "general/js/utils/Settings.js",
         "expeditionSimulator/js/data/Translations.js",
         "general/js/utils/I18n.js",
+    		"general/js/managers/ChatMessageScanner.js",
         "expeditionSimulator/js/utils/EventClassifier.js",
         "expeditionSimulator/js/utils/Hash.js",
         "expeditionSimulator/js/utils/Format.js",
@@ -102,6 +103,7 @@
         "projectManager/js/data/ProjectData.js",
         "projectManager/js/ProjectCard.js",
         "projectManager/js/ProjectManagerPage.js",
+    		"projectManager/js/ProjectMessageInjector.js",
         "projectManager/js/app.js",
         "content.js"
       ],
@@ -124,7 +126,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["pictures/abilities/*", "pictures/abilities/*/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*/*", "pictures/consumables/*", "pictures/gear/*", "*.png", "*.jpg", "*.gif", "font/*"],
+      "resources": ["pictures/abilities/*", "pictures/abilities/*/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*/*", "pictures/consumables/*", "pictures/gear/*", "projectManager/project_names.csv", "*.png", "*.jpg", "*.gif", "font/*"],
       "matches": ["<all_urls>"]
     },
     {
