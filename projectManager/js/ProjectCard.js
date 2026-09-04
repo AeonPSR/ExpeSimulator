@@ -16,6 +16,8 @@ class ProjectCard extends Component {
 		this._nof = false;
 		this._priority = false;
 		this._onStatusChange = options.onStatusChange || null;
+		this._onCoreSelectionChange = options.onCoreSelectionChange || null;
+		this._canActivateCore = options.canActivateCore || (() => true);
 	}
 
 	get project() {
@@ -26,6 +28,17 @@ class ProjectCard extends Component {
 		if (this._status === 'done') return 1;
 		if (this._status === 'bin') return 2;
 		return 0;
+	}
+
+	isCore() {
+		return this._status === 'core';
+	}
+
+	setCoreLimitReached(limitReached) {
+		this._coreToggle?.element?.classList.toggle(
+			'project-card-aeon-state-toggle--unavailable',
+			limitReached && !this.isCore()
+		);
 	}
 
 	render() {
@@ -46,7 +59,13 @@ class ProjectCard extends Component {
 			iconPath: 'pictures/ui/pa_core.png',
 			className: 'project-card-aeon-state-toggle project-card-aeon-state-toggle--core',
 			initialVisible: false,
-			onToggle: (active) => this._setStatus(active ? 'core' : null)
+			onToggle: (active) => {
+				if (active && !this._canActivateCore()) {
+					this._coreToggle.setVisible(false, true);
+					return;
+				}
+				this._setStatus(active ? 'core' : null);
+			}
 		});
 		this._doneToggle = new VisibilityToggle({
 			iconPath: 'pictures/ui/done.png',
@@ -65,6 +84,7 @@ class ProjectCard extends Component {
 
 	_setStatus(status) {
 		const previousBucket = this.getSortBucket();
+		const wasCore = this.isCore();
 		this._status = status;
 		this._coreToggle.setVisible(status === 'core', true);
 		this._doneToggle.setVisible(status === 'done', true);
@@ -74,6 +94,9 @@ class ProjectCard extends Component {
 		this.element.classList.toggle('project-card-aeon-hidden', status === 'bin');
 		if (previousBucket !== this.getSortBucket()) {
 			this._onStatusChange?.(this);
+		}
+		if (wasCore !== this.isCore()) {
+			this._onCoreSelectionChange?.(this);
 		}
 	}
 

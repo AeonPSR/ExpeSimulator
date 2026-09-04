@@ -116,6 +116,11 @@
 	display: none;
 }
 
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--unavailable::before,
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--unavailable::after {
+	display: block;
+}
+
 .app-panel .project-card-aeon .project-card-aeon-state-toggle--core {
 	top: -12px;
 	right: -12px;
@@ -133,12 +138,12 @@
 
 .app-panel .project-card-aeon .project-card-aeon-state-toggle--core[data-active="true"] {
 	border-color: #f39c12;
-	background: rgba(243, 156, 18, 0.35);
+	background: rgb(86, 63, 29);
 }
 
 .app-panel .project-card-aeon .project-card-aeon-state-toggle--done[data-active="true"] {
 	border-color: #3498db;
-	background: rgba(52, 152, 219, 0.35);
+	background: rgb(35, 73, 99);
 }
 
 /* FLIP slide when re-sorting after a visibility toggle (matches crew speed) */

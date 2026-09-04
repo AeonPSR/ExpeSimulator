@@ -37,6 +37,8 @@ class ProjectManagerPage extends Component {
 			.filter(p => p.type === 'neron')
 			.map(project => new ProjectCard({
 				project,
+				canActivateCore: () => this._cards.filter(card => card.isCore()).length < 3,
+				onCoreSelectionChange: () => this._updateCoreAvailability(),
 				onStatusChange: () => this._reorderCards()
 			}));
 		this._sortCards();
@@ -47,6 +49,11 @@ class ProjectManagerPage extends Component {
 		this.element.appendChild(this._renderResetButton());
 
 		return this.element;
+	}
+
+	_updateCoreAvailability() {
+		const limitReached = this._cards.filter(card => card.isCore()).length >= 3;
+		this._cards.forEach(card => card.setCoreLimitReached(limitReached));
 	}
 
 	// Unmarked/core first, then done, then bin; each group sorted most costly → least.
