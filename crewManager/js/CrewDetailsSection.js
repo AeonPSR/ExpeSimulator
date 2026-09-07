@@ -232,7 +232,7 @@ class CrewDetailsSection extends Component {
 		return this._playerByFilename[filename]?.health ?? null;
 	}
 
-	importAvatarAbilities(filename, abilities) {
+	importAvatarAbilities(filename, abilities, mushAbilities = []) {
 		const player = this._playerByFilename[filename];
 		const card = this._cardByFilename[filename];
 		const cardInstance = this._cardInstanceByFilename[filename];
@@ -240,6 +240,15 @@ class CrewDetailsSection extends Component {
 
 		const nextAbilities = Array.from({ length: Constants.ABILITY_SLOTS }, (_, index) => abilities[index] || null);
 		nextAbilities.forEach((ability, index) => cardInstance.updateAbility(index, ability));
+		if (mushAbilities.length > 0) {
+			const nextMushAbilities = Array.from({ length: 5 }, (_, index) => mushAbilities[index] || null);
+			nextMushAbilities.forEach((ability, index) => cardInstance.updateMushAbility(index, ability));
+			player.mush = true;
+			player.human = false;
+			cardInstance.setToggleState('mush', true);
+			cardInstance.setToggleState('human', false);
+			this.onStatusChange?.(filename, 'mush');
+		}
 		CrewDetailSkillAvailability.update(card, player);
 		this._notifyPlayerChange();
 	}
