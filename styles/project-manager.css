@@ -39,7 +39,7 @@
 	margin-bottom: 15px;
 	position: sticky;
 	top: 0;
-	z-index: 20;
+	z-index: 800;
 }
 
 .project-manager-page .project-section-header h4 {
@@ -194,6 +194,10 @@
 .app-panel .project-card-aeon .project-card-aeon-state-toggle[data-active="true"] {
 	background: rgb(44, 62, 80);
 	border-color: #8b949e;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle img {
+	opacity: 1;
 }
 
 .app-panel .project-card-aeon .project-card-aeon-state-toggle::before,

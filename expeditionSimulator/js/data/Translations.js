@@ -202,6 +202,9 @@ const Translations = {
 		'projectmanager.section.info':       'Informations',
 		'projectmanager.section.details':    'Details',
 		'projectmanager.reset':              'Reset this panel',
+		'projectmanager.reset.confirm':      'Are you sure ?',
+		'projectmanager.reset.yes':          'Yes',
+		'projectmanager.reset.no':           'No',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Crew Manager',
@@ -466,6 +469,9 @@ const Translations = {
 		'projectmanager.section.info':       'Informations',
 		'projectmanager.section.details':    'Détails',
 		'projectmanager.reset':              'Réinitialiser cette page',
+		'projectmanager.reset.confirm':      'Êtes-vous sûr ?',
+		'projectmanager.reset.yes':          'Oui',
+		'projectmanager.reset.no':           'Non',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestion de l\'Équipage',
@@ -730,6 +736,9 @@ const Translations = {
 		'projectmanager.section.info':       'Información',
 		'projectmanager.section.details':    'Detalles',
 		'projectmanager.reset':              'Restablecer este panel',
+		'projectmanager.reset.confirm':      '¿Estás seguro?',
+		'projectmanager.reset.yes':          'Sí',
+		'projectmanager.reset.no':           'No',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestión de Tripulación',

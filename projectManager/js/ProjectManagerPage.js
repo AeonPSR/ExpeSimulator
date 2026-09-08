@@ -328,8 +328,21 @@ class ProjectManagerPage extends Component {
 			className: 'panel-reset-btn',
 			'data-i18n': 'projectmanager.reset'
 		}, I18n.t('projectmanager.reset'));
+		this.addEventListener(btn, 'click', () => {
+			new ConfirmationModal({
+				title: I18n.t('projectmanager.reset.confirm'),
+				confirmLabel: I18n.t('projectmanager.reset.yes'),
+				cancelLabel: I18n.t('projectmanager.reset.no'),
+				panelElement: this.element?.closest('.app-panel'),
+				onConfirm: () => this._resetProjects()
+			}).open();
+		});
 		wrapper.appendChild(btn);
 		return wrapper;
+	}
+
+	_resetProjects() {
+		this._cards.forEach(card => card.setStatus(null));
 	}
 }
 
