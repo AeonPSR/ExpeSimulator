@@ -234,6 +234,14 @@ const Translations = {
 		'crewmanager.timeline.neither':      'Neither',
 		'crewmanager.timeline.day_short':    'D',
 		'crewmanager.timeline.cycle_short':  'C',
+		'crewmanager.controls.apply_all':    'Apply to all',
+		'crewmanager.controls.apply_confirm':'Apply these settings to all crew members?',
+		'crewmanager.controls.apply':        'Apply',
+		'crewmanager.controls.cancel':       'Cancel',
+		'crewmanager.new_day':               'New day (-1 PMO +1 PV)',
+		'crewmanager.new_day.confirm':       'Start a new day for all living crew members?',
+		'crewmanager.new_day.yes':           'Yes',
+		'crewmanager.new_day.no':            'No',
 
 		// Settings panel
 		'settings.title':                    'Settings',
@@ -514,6 +522,14 @@ const Translations = {
 		'crewmanager.timeline.neither':      'Ni l\'un ni l\'autre',
 		'crewmanager.timeline.day_short':    'J',
 		'crewmanager.timeline.cycle_short':  'C',
+		'crewmanager.controls.apply_all':    'Appliquer à tous',
+		'crewmanager.controls.apply_confirm':'Appliquer ces réglages à tous les membres de l\'équipage ?',
+		'crewmanager.controls.apply':        'Appliquer',
+		'crewmanager.controls.cancel':       'Annuler',
+		'crewmanager.new_day':               'Nouveau jour (-1 PMO +1 PV)',
+		'crewmanager.new_day.confirm':       'Commencer un nouveau jour pour tous les membres d\'équipage vivants ?',
+		'crewmanager.new_day.yes':           'Oui',
+		'crewmanager.new_day.no':            'Non',
 
 		// Settings panel
 		'settings.title':                    'Réglages',
@@ -794,6 +810,14 @@ const Translations = {
 		'crewmanager.timeline.neither':      'Ninguno',
 		'crewmanager.timeline.day_short':    'D',
 		'crewmanager.timeline.cycle_short':  'C',
+		'crewmanager.controls.apply_all':    'Aplicar a todos',
+		'crewmanager.controls.apply_confirm':'¿Aplicar estos ajustes a todos los tripulantes?',
+		'crewmanager.controls.apply':        'Aplicar',
+		'crewmanager.controls.cancel':       'Cancelar',
+		'crewmanager.new_day':               'Nuevo día (-1 PMO +1 PV)',
+		'crewmanager.new_day.confirm':       '¿Empezar un nuevo día para todos los tripulantes vivos?',
+		'crewmanager.new_day.yes':           'Sí',
+		'crewmanager.new_day.no':            'No',
 
 		// Settings panel
 		'settings.title':                    'Ajustes',

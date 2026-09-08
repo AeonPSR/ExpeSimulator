@@ -44,7 +44,7 @@ class CrewManagerPage extends Component {
 		// Details section
 		const detailsSection = this._renderSection(
 			'crewmanager.section.details',
-			[this._renderExpertToggle(), this._renderCycleToggle()],
+			[this._renderNewDayButton(), this._renderExpertToggle(), this._renderCycleToggle()],
 			true
 		);
 		this._detailsSection = new CrewDetailsSection({
@@ -152,11 +152,40 @@ class CrewManagerPage extends Component {
 				initialState: Boolean(this._savedState.options.expert),
 				onToggle: (isActive) => {
 					this.element?.classList.toggle('crew-expert-active', isActive);
+					this._updateControlsCardVisibility();
 					CrewManagerStorage.saveOptions({ expert: isActive });
 				}
 			});
 		}
 		return this._expertToggle.render();
+	}
+
+	_renderNewDayButton() {
+		const button = this.createElement('button', {
+			className: 'crew-new-day-btn',
+			type: 'button',
+			'aria-label': I18n.t('crewmanager.new_day')
+		});
+		const label = this.createElement('span', {
+			className: 'crew-new-day-label',
+			'data-i18n': 'crewmanager.new_day'
+		}, I18n.t('crewmanager.new_day'));
+		const icon = this.createElement('img', {
+			src: getResourceURL('pictures/ui/calendar.png'),
+			alt: ''
+		});
+		button.appendChild(label);
+		button.appendChild(icon);
+		this.addEventListener(button, 'click', () => {
+			new ConfirmationModal({
+				title: I18n.t('crewmanager.new_day.confirm'),
+				confirmLabel: I18n.t('crewmanager.new_day.yes'),
+				cancelLabel: I18n.t('crewmanager.new_day.no'),
+				panelElement: this.element?.closest('.app-panel'),
+				onConfirm: () => this._detailsSection?.applyNewDay()
+			}).open();
+		});
+		return button;
 	}
 
 	_renderCycleToggle() {
@@ -170,6 +199,7 @@ class CrewManagerPage extends Component {
 				initialState: Boolean(this._savedState.options.cycle),
 				onToggle: (isActive) => {
 					this.element?.classList.toggle('crew-cycle-active', isActive);
+					this._updateControlsCardVisibility();
 					CrewManagerStorage.saveOptions({ cycle: isActive });
 				}
 			});
@@ -182,6 +212,12 @@ class CrewManagerPage extends Component {
 		this.element?.classList.toggle('crew-cycle-active',         Boolean(this._savedState.options.cycle));
 		this.element?.classList.toggle('crew-status-badges-active', Boolean(this._savedState.options.statusBadges));
 		this._titleSection?.classList.toggle('panel-section--collapsed', !Boolean(this._savedState.options.titleVisible));
+		this._updateControlsCardVisibility();
+	}
+
+	_updateControlsCardVisibility() {
+		const visible = Boolean(this._expertToggle?.getActive() || this._cycleToggle?.getActive());
+		this._detailsSection?.setControlsVisible(visible);
 	}
 
 	_renderResetButton() {

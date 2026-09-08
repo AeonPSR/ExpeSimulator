@@ -42,6 +42,55 @@
 	margin-left: 10px;
 }
 
+#crew-manager-panel .crew-new-day-btn {
+	width: 40px;
+	height: 40px;
+	padding: 3px;
+	border: 2px solid #3498db;
+	border-radius: 4px;
+	background: rgba(52, 152, 219, 0.3);
+	color: #ecf0f1;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 6px;
+	overflow: hidden;
+	cursor: pointer;
+	transition: width 0.25s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+#crew-manager-panel .crew-new-day-btn:hover,
+#crew-manager-panel .crew-new-day-btn:focus-visible {
+	width: 155px;
+	border-color: #2980b9;
+	background: rgba(52, 152, 219, 0.5);
+}
+
+#crew-manager-panel .crew-new-day-btn img {
+	width: 30px;
+	height: 30px;
+	flex: 0 0 30px;
+	image-rendering: pixelated;
+}
+
+#crew-manager-panel .crew-new-day-label {
+	max-width: 0;
+	opacity: 0;
+	overflow: hidden;
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 12px;
+	text-align: center;
+	white-space: normal;
+	transition: max-width 0.25s ease, opacity 0.15s ease;
+}
+
+#crew-manager-panel .crew-new-day-btn:hover .crew-new-day-label,
+#crew-manager-panel .crew-new-day-btn:focus-visible .crew-new-day-label {
+	max-width: 110px;
+	opacity: 1;
+}
+
 .crew-manager-page .panel-section--collapsed > .crew-section-header {
 	display: flex;
 }
@@ -127,7 +176,7 @@
 	box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-#crew-manager-panel .crew-details-section .player-profile:not(.player-visible-active) {
+#crew-manager-panel .crew-details-section .player-profile[data-filename]:not(.player-visible-active) {
 	filter: grayscale(1);
 	opacity: 0.45;
 }
@@ -404,6 +453,71 @@
 	border-color: #8b949e;
 }
 
+#crew-manager-panel .crew-details-section .crew-controls-card {
+	min-height: 64px;
+	background: rgba(52, 152, 219, 0.3);
+	border-color: #3498db;
+}
+
+#crew-manager-panel .crew-details-section .crew-controls-card[hidden] {
+	display: none;
+}
+
+#crew-manager-panel .crew-controls-card .crew-controls-row {
+	justify-content: flex-end;
+}
+
+#crew-manager-panel .crew-controls-card .crew-controls-actions {
+	justify-content: flex-start;
+}
+
+#crew-manager-panel .crew-controls-card .crew-control-resource[data-active="false"] {
+	border-color: #95a5a6;
+	background: rgba(149, 165, 166, 0.3);
+	color: #95a5a6;
+}
+
+#crew-manager-panel .crew-controls-card .crew-control-resource[data-active="false"] img {
+	opacity: 0.4;
+}
+
+#crew-manager-panel .crew-controls-card .crew-control-resource[hidden] {
+	display: none;
+}
+
+#crew-manager-panel .crew-controls-card .crew-apply-all-btn {
+	padding: 5px 12px;
+	border: 2px solid #95a5a6;
+	border-radius: 4px;
+	background: rgba(149, 165, 166, 0.3);
+	color: #95a5a6;
+	cursor: default;
+}
+
+#crew-manager-panel .crew-controls-card .crew-apply-all-btn[data-active="true"] {
+	border-color: #e67e22;
+	background: rgba(230, 126, 34, 0.3);
+	color: #fff;
+	cursor: pointer;
+}
+
+#crew-manager-panel .crew-controls-card .crew-apply-all-btn[data-active="true"]:hover {
+	border-color: #d35400;
+	background: rgba(230, 126, 34, 0.5);
+}
+
+#crew-manager-panel .crew-controls-card .crew-timeline-parameter,
+#crew-manager-panel .crew-controls-card .crew-timeline-stepper-btn {
+	opacity: 0.4;
+}
+
+#crew-manager-panel .crew-controls-card .crew-timeline-stepper[data-cycle-set="true"] .crew-timeline-stepper-btn,
+#crew-manager-panel .crew-controls-card .crew-timeline-stepper[data-day-set="true"] .crew-timeline-stepper-btn,
+#crew-manager-panel .crew-controls-card .crew-timeline-stepper[data-cycle-set="true"] .crew-timeline-parameter--cycle,
+#crew-manager-panel .crew-controls-card .crew-timeline-stepper[data-day-set="true"] .crew-timeline-parameter--day {
+	opacity: 1;
+}
+
 #crew-manager-panel .crew-details-section .player-avatar {
 	border-color: #8b949e;
 }
@@ -522,6 +636,40 @@
 
 #crew-manager-panel .crew-details-section .crew-timeline-stepper-btn:hover,
 #crew-manager-panel .crew-details-section .crew-timeline-stepper-display:hover {
+	background: rgba(230, 126, 34, 0.22);
+}
+
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper {
+	border-color: #95a5a6;
+	background: rgba(149, 165, 166, 0.3);
+}
+
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper-display {
+	border-left-color: rgba(149, 165, 166, 0.55);
+	border-right-color: rgba(149, 165, 166, 0.55);
+}
+
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper-btn:hover,
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper-display:hover {
+	background: rgba(149, 165, 166, 0.22);
+}
+
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper[data-cycle-set="true"],
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper[data-day-set="true"] {
+	border-color: #e67e22;
+	background: rgba(230, 126, 34, 0.3);
+}
+
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper[data-cycle-set="true"] .crew-timeline-stepper-display,
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper[data-day-set="true"] .crew-timeline-stepper-display {
+	border-left-color: rgba(230, 126, 34, 0.55);
+	border-right-color: rgba(230, 126, 34, 0.55);
+}
+
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper[data-cycle-set="true"] .crew-timeline-stepper-btn:hover,
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper[data-cycle-set="true"] .crew-timeline-stepper-display:hover,
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper[data-day-set="true"] .crew-timeline-stepper-btn:hover,
+#crew-manager-panel .crew-details-section .crew-controls-card .crew-timeline-stepper[data-day-set="true"] .crew-timeline-stepper-display:hover {
 	background: rgba(230, 126, 34, 0.22);
 }
 
