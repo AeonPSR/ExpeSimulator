@@ -13,6 +13,8 @@ class ProjectManagerPage extends Component {
 		this._priorityToggle = null;
 		this._sentinels = [];
 		this._stuckObserver = null;
+		this._savedState = ProjectManagerStorage.load();
+		this._restoringState = false;
 	}
 
 	render() {
@@ -68,22 +70,39 @@ class ProjectManagerPage extends Component {
 			this._renderPriorityToggle(),
 			this._renderExpertToggle()
 		]);
-		this._detailsGrid = this.createElement('div', {
-			className: 'project-card-aeon-grid project-card-aeon-grid--details'
-		});
 		this._cards = ProjectData
 			.filter(p => p.type === 'neron')
 			.map(project => new ProjectCard({
 				project,
 				canActivateCore: () => this._cards.filter(card => card.isCore()).length < 3,
 				onCoreSelectionChange: () => this._updateCoreAvailability(),
-				onStatusChange: () => this._reorderCards()
+				onStatusChange: () => {
+					this._reorderCards();
+					this._saveState();
+				}
 			}));
 		this._sortCards();
-		this._cards.forEach(card => this._detailsGrid.appendChild(card.render()));
+		this._detailsList = this.createElement('div', { className: 'project-card-aeon-details-list' });
+		this._detailsGridByEfficiency = new Map();
+		[...new Set(this._cards.map(card => card.project.efficiency))]
+			.sort((a, b) => a - b)
+			.forEach(efficiency => {
+				const group = this.createElement('div', { className: 'project-card-aeon-efficiency-group' });
+				const grid = this.createElement('div', {
+					className: 'project-card-aeon-grid project-card-aeon-grid--details'
+				});
+				group.appendChild(grid);
+				this._detailsList.appendChild(group);
+				this._detailsGridByEfficiency.set(efficiency, grid);
+			});
+		this._cards.forEach(card => {
+			card.render();
+			this._detailsGridByEfficiency.get(card.project.efficiency).appendChild(card.element);
+		});
 		this._assignCardZIndexes();
-		detailsSection.appendChild(this._detailsGrid);
+		detailsSection.appendChild(this._detailsList);
 		this.element.appendChild(detailsSection);
+		this._restoreStatuses();
 
 		this.element.appendChild(this._renderResetButton());
 
@@ -136,7 +155,7 @@ class ProjectManagerPage extends Component {
 				slot._activeCard = card;
 				slot.insertBefore(card.element, slot._finishButton);
 			} else {
-				this._detailsGrid.appendChild(card.element);
+				this._detailsGridByEfficiency.get(card.project.efficiency).appendChild(card.element);
 			}
 		});
 		this._activeSlots.forEach(slot => {
@@ -242,9 +261,10 @@ class ProjectManagerPage extends Component {
 				icon: getResourceURL('pictures/abilities/human/expert.png'),
 				alt: '',
 				activeColor: 'blue',
-				initialState: false,
+				initialState: this._savedState.options.expert,
 				onToggle: (isActive) => {
 					this.element?.classList.toggle('project-expert-active', isActive);
+					this._saveState();
 				}
 			});
 		}
@@ -259,9 +279,10 @@ class ProjectManagerPage extends Component {
 				icon: getResourceURL('pictures/abilities/human/neron.png'),
 				alt: '',
 				activeColor: 'blue',
-				initialState: false,
+				initialState: this._savedState.options.nof,
 				onToggle: (isActive) => {
 					this._cards.forEach(card => card.setNofMode(isActive));
+					this._saveState();
 				}
 			});
 		}
@@ -276,9 +297,10 @@ class ProjectManagerPage extends Component {
 				icon: getResourceURL('pictures/abilities/human/panique.png'),
 				alt: '',
 				activeColor: 'blue',
-				initialState: false,
+				initialState: this._savedState.options.priority,
 				onToggle: (isActive) => {
 					this._cards.forEach(card => card.setPriorityMode(isActive));
+					this._saveState();
 				}
 			});
 		}
@@ -293,9 +315,10 @@ class ProjectManagerPage extends Component {
 				icon: getResourceURL('pictures/ui/visibility.png'),
 				alt: '',
 				activeColor: 'blue',
-				initialState: true,
+				initialState: this._savedState.options.infoVisible,
 				onToggle: (isVisible) => {
 					this._infoSection?.classList.toggle('panel-section--collapsed', !isVisible);
+					this._saveState();
 				}
 			});
 		}
@@ -343,6 +366,36 @@ class ProjectManagerPage extends Component {
 
 	_resetProjects() {
 		this._cards.forEach(card => card.setStatus(null));
+	}
+
+	_restoreStatuses() {
+		this._restoringState = true;
+		this._cards.forEach(card => card.setStatus(this._savedState.statuses[card.project.name] || null));
+		this._restoringState = false;
+		this._reorderCards();
+		this.element.classList.toggle('project-expert-active', this._savedState.options.expert);
+		this._infoSection.classList.toggle('panel-section--collapsed', !this._savedState.options.infoVisible);
+		this._cards.forEach(card => {
+			card.setNofMode(this._savedState.options.nof);
+			card.setPriorityMode(this._savedState.options.priority);
+		});
+	}
+
+	_saveState() {
+		if (this._restoringState || !this._cards) return;
+		const statuses = {};
+		this._cards.forEach(card => {
+			if (card.getStatus()) statuses[card.project.name] = card.getStatus();
+		});
+		ProjectManagerStorage.save({
+			options: {
+				expert: this._expertToggle?.getActive() || false,
+				nof: this._nofToggle?.getActive() || false,
+				priority: this._priorityToggle?.getActive() || false,
+				infoVisible: this._infoVisibilityToggle?.getActive() !== false
+			},
+			statuses
+		});
 	}
 }
 

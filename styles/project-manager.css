@@ -140,6 +140,29 @@
 	column-gap: 5px;
 }
 
+.project-card-aeon-efficiency-group {
+	position: relative;
+	padding-top: 15px;
+}
+
+.project-card-aeon-efficiency-group:first-child {
+	padding-top: 0;
+}
+
+.project-card-aeon-efficiency-group:not(:first-child)::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 12px;
+	right: 12px;
+	height: 1px;
+	background: #6f7b83;
+}
+
+.project-card-aeon-efficiency-group + .project-card-aeon-efficiency-group {
+	margin-top: 12px;
+}
+
 .project-card-aeon {
 	display: flex;
 	flex-direction: column;

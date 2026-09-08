@@ -107,6 +107,7 @@
         "crewManager/js/CrewManagerPage.js",
         "crewManager/js/app.js",
         "projectManager/js/data/ProjectData.js",
+    		"projectManager/js/services/ProjectManagerStorage.js",
         "projectManager/js/ProjectCard.js",
         "projectManager/js/ProjectManagerPage.js",
     		"projectManager/js/ProjectMessageInjector.js",

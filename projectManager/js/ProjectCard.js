@@ -24,6 +24,10 @@ class ProjectCard extends Component {
 		return this._project;
 	}
 
+	getStatus() {
+		return this._status;
+	}
+
 	getSortBucket() {
 		if (this._status === 'done') return 1;
 		if (this._status === 'bin') return 2;

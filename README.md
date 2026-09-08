@@ -16,6 +16,8 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
 Todo:
 - Add the "Projects" page
+- Improving the handle of expert mode for the crew manager, it's really not handy
+- Changing starting pmo to in-game starting values
 - Easter egg when generating a random char
 
 Done since last update:
