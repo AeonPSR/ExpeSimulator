@@ -145,10 +145,16 @@ class ProjectCard extends Component {
 		const min = this._project.efficiency;
 		const max = Math.floor(min * 1.5);
 
-		for (const [value, labelKey] of [[min, 'Min'], [max, 'Max']]) {
+		for (const [value, labelKey] of [
+			[min, 'projectmanager.efficiency.min'],
+			[max, 'projectmanager.efficiency.max']
+		]) {
 			const cell = this.createElement('div', { className: 'project-card-aeon-cell project-card-aeon-efficiency-cell' });
 			cell.appendChild(this.createElement('span', { className: 'project-card-aeon-pct'   }, `${value}%`));
-			cell.appendChild(this.createElement('span', { className: 'project-card-aeon-label' }, labelKey));
+			cell.appendChild(this.createElement('span', {
+				className: 'project-card-aeon-label',
+				'data-i18n': labelKey
+			}, I18n.t(labelKey)));
 			row.appendChild(cell);
 		}
 		return row;

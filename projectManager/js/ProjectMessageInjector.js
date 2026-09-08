@@ -93,7 +93,7 @@ class ProjectMessageInjector {
 		const overlay = document.createElement('img');
 		overlay.className = 'project-message-import-overlay';
 		overlay.src = getResourceURL('pictures/ui/import_empty.png');
-		overlay.alt = 'Import';
+		overlay.alt = I18n.t('projectmanager.import');
 		icon.appendChild(overlay);
 
 		return icon;

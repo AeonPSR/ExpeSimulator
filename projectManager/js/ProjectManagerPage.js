@@ -31,8 +31,9 @@ class ProjectManagerPage extends Component {
 			const finishButton = this.createElement('button', {
 				className: 'project-card-aeon-finish-btn',
 				type: 'button',
-				disabled: true
-			}, 'Finish this project');
+				disabled: true,
+				'data-i18n': 'projectmanager.finish'
+			}, I18n.t('projectmanager.finish'));
 			this.addEventListener(finishButton, 'click', () => {
 				if (slot._activeCard) {
 					this._finishActiveProject(slot._activeCard);
@@ -48,20 +49,15 @@ class ProjectManagerPage extends Component {
 
 		// Informations section (collapsible)
 		this._infoSection = this._renderSection('projectmanager.section.info', this._renderInfoVisibilityToggle());
-		this._infoSection.appendChild(new InfoPanel({
+		this._infoPanel = new InfoPanel({
 			className: 'project-manager-info-panel',
-			content: `
-				<p>The <img src="${getResourceURL('pictures/abilities/human/expert.png')}" alt=""> button toggles the estimation of how many AP are necessary to finish a project.</p>
-				<p>These estimations assumes that two crewmembers are relaying it. Each row depends on the number of relevant skills this duo posses while working on it:</p>
-				<p>1: They don't have a relevant skill.</p>
-				<p>2: One of them has one relevant skill.</p>
-				<p>3: They both have one, or one of them has two.</p>
-				<p>4: They both have the two relevant skills.</p>
-				<p></p>
-				<p class="project-manager-info-line"><img src="${getResourceURL('pictures/abilities/human/neron.png')}" alt="">Activate the effect of Neron's Only Friend.</p>
-				<p class="project-manager-info-line"><img src="${getResourceURL('pictures/abilities/human/panique.png')}" alt="">Activate the Priority on projects.</p>
-			`
-		}).render());
+			content: this._renderInfoContent()
+		});
+		this._infoSection.appendChild(this._infoPanel.render());
+		this.addEventListener(document, 'i18n:change', () => {
+			const body = this._infoPanel.element?.querySelector('.info-panel-body');
+			if (body) body.innerHTML = this._renderInfoContent();
+		});
 		this.element.appendChild(this._infoSection);
 
 		// Details section
@@ -191,12 +187,18 @@ class ProjectManagerPage extends Component {
 		const efficiency = this.createElement('div', {
 			className: 'project-card-aeon-row project-card-aeon-efficiency'
 		});
-		['Min', 'Max'].forEach(label => {
+		[
+			['projectmanager.efficiency.min', I18n.t('projectmanager.efficiency.min')],
+			['projectmanager.efficiency.max', I18n.t('projectmanager.efficiency.max')]
+		].forEach(([labelKey, label]) => {
 			const cell = this.createElement('div', {
 				className: 'project-card-aeon-cell project-card-aeon-efficiency-cell'
 			});
 			cell.appendChild(this.createElement('span', { className: 'project-card-aeon-pct' }, 'X%'));
-			cell.appendChild(this.createElement('span', { className: 'project-card-aeon-label' }, label));
+			cell.appendChild(this.createElement('span', {
+				className: 'project-card-aeon-label',
+				'data-i18n': labelKey
+			}, label));
 			efficiency.appendChild(cell);
 		});
 		card.appendChild(efficiency);
@@ -251,6 +253,20 @@ class ProjectManagerPage extends Component {
 		sentinel._stickyHeader = header;
 		this._sentinels.push(sentinel);
 		return section;
+	}
+
+	_renderInfoContent() {
+		return `
+			<p>${I18n.t('projectmanager.info.expert.before')} <img src="${getResourceURL('pictures/abilities/human/expert.png')}" alt=""> ${I18n.t('projectmanager.info.expert.after')}</p>
+			<p>${I18n.t('projectmanager.info.relay')}</p>
+			<p>${I18n.t('projectmanager.info.skills.none')}</p>
+			<p>${I18n.t('projectmanager.info.skills.one')}</p>
+			<p>${I18n.t('projectmanager.info.skills.two')}</p>
+			<p>${I18n.t('projectmanager.info.skills.four')}</p>
+			<p></p>
+			<p class="project-manager-info-line"><img src="${getResourceURL('pictures/abilities/human/neron.png')}" alt="">${I18n.t('projectmanager.info.nof')}</p>
+			<p class="project-manager-info-line"><img src="${getResourceURL('pictures/abilities/human/panique.png')}" alt="">${I18n.t('projectmanager.info.priority')}</p>
+		`;
 	}
 
 	_renderExpertToggle() {

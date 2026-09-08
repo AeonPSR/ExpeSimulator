@@ -197,7 +197,7 @@ const Translations = {
 		'tag.quad_volcanic_activity.desc':   '4 Volcanic Activity sectors.',
 
 		// Project Manager panel
-		'projectmanager.title':              'Projects Manager',
+		'projectmanager.title':              'Project Manager',
 		'projectmanager.section.active':     'Active Projects',
 		'projectmanager.section.info':       'Informations',
 		'projectmanager.section.details':    'Details',
@@ -205,6 +205,19 @@ const Translations = {
 		'projectmanager.reset.confirm':      'Are you sure ?',
 		'projectmanager.reset.yes':          'Yes',
 		'projectmanager.reset.no':           'No',
+		'projectmanager.finish':             'Finish this project',
+		'projectmanager.import':             'Import',
+		'projectmanager.efficiency.min':     'Min',
+		'projectmanager.efficiency.max':     'Max',
+		'projectmanager.info.expert.before': 'The',
+		'projectmanager.info.expert.after':  'button toggles the estimated AP required to finish a project.',
+		'projectmanager.info.relay':         'These estimates assume that two crewmembers take turns working on the project. Each row depends on how many relevant skills the pair has:',
+		'projectmanager.info.skills.none':   '1: Neither crewmember has a relevant skill.',
+		'projectmanager.info.skills.one':    '2: One crewmember has one relevant skill.',
+		'projectmanager.info.skills.two':    '3: Both have one relevant skill, or one has two.',
+		'projectmanager.info.skills.four':   '4: Both have both relevant skills.',
+		'projectmanager.info.nof':           'Activate the effect of NERON\'s Only Friend.',
+		'projectmanager.info.priority':      'Activate project Priority.',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Crew Manager',
@@ -464,7 +477,7 @@ const Translations = {
 		'tag.quad_volcanic_activity.desc':   '4 secteurs Activité volcanique.',
 
 		// Project Manager panel
-		'projectmanager.title':              'Projects Manager',
+		'projectmanager.title':              'Gestionnaire de projets',
 		'projectmanager.section.active':     'Projets du Nexus',
 		'projectmanager.section.info':       'Informations',
 		'projectmanager.section.details':    'Détails',
@@ -472,6 +485,19 @@ const Translations = {
 		'projectmanager.reset.confirm':      'Êtes-vous sûr ?',
 		'projectmanager.reset.yes':          'Oui',
 		'projectmanager.reset.no':           'Non',
+		'projectmanager.finish':             'Terminer ce projet',
+		'projectmanager.import':             'Importer',
+		'projectmanager.efficiency.min':     'Min',
+		'projectmanager.efficiency.max':     'Max',
+		'projectmanager.info.expert.before': 'Le bouton',
+		'projectmanager.info.expert.after':  'affiche une estimation des PA nécessaires pour terminer un projet.',
+		'projectmanager.info.relay':         'Ces estimations supposent que deux membres de l\'équipage travaillent à tour de rôle sur le projet. Chaque ligne correspond au nombre de compétences pertinentes que possède ce duo :',
+		'projectmanager.info.skills.none':   '1 : Aucun des deux membres ne possède de compétence pertinente.',
+		'projectmanager.info.skills.one':    '2 : Un membre possède une compétence pertinente.',
+		'projectmanager.info.skills.two':    '3 : Les deux en possèdent une, ou l\'un des deux en possède deux.',
+		'projectmanager.info.skills.four':   '4 : Les deux possèdent les deux compétences pertinentes.',
+		'projectmanager.info.nof':           'Active l\'effet Ami de NERON.',
+		'projectmanager.info.priority':      'Active la Priorité sur les projets.',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestion de l\'Équipage',
@@ -731,7 +757,7 @@ const Translations = {
 		'tag.quad_volcanic_activity.desc':   '4 sectores de Actividad Volcánica.',
 
 		// Project Manager panel
-		'projectmanager.title':              'Projects Manager',
+		'projectmanager.title':              'Gestor de proyectos',
 		'projectmanager.section.active':     'Proyectos activos',
 		'projectmanager.section.info':       'Información',
 		'projectmanager.section.details':    'Detalles',
@@ -739,6 +765,19 @@ const Translations = {
 		'projectmanager.reset.confirm':      '¿Estás seguro?',
 		'projectmanager.reset.yes':          'Sí',
 		'projectmanager.reset.no':           'No',
+		'projectmanager.finish':             'Terminar este proyecto',
+		'projectmanager.import':             'Importar',
+		'projectmanager.efficiency.min':     'Mín',
+		'projectmanager.efficiency.max':     'Máx',
+		'projectmanager.info.expert.before': 'El botón',
+		'projectmanager.info.expert.after':  'muestra una estimación de los PA necesarios para terminar un proyecto.',
+		'projectmanager.info.relay':         'Estas estimaciones suponen que dos tripulantes se turnan para trabajar en el proyecto. Cada línea depende del número de habilidades relevantes que tenga la pareja:',
+		'projectmanager.info.skills.none':   '1: Ninguno de los tripulantes tiene una habilidad relevante.',
+		'projectmanager.info.skills.one':    '2: Un tripulante tiene una habilidad relevante.',
+		'projectmanager.info.skills.two':    '3: Ambos tienen una, o uno de ellos tiene dos.',
+		'projectmanager.info.skills.four':   '4: Ambos tienen las dos habilidades relevantes.',
+		'projectmanager.info.nof':           'Activar el efecto Amigo de NERON.',
+		'projectmanager.info.priority':      'Activar la Prioridad en los proyectos.',
 
 		// Crew Manager panel
 		'crewmanager.title':                 'Gestión de Tripulación',
