@@ -246,7 +246,7 @@ const Translations = {
 		'settings.tab.patch_notes':          'Patch Notes',
 
 		// Credits subtitle
-		'credits.subtitle':                  'Up to date with eMush V0.31',
+		'credits.subtitle':                  'Up to date with eMush V0.37',
 
 		// Patch notes
 		'patch_notes.v1_3.subtitle_crew':    'Crew Manager',
@@ -510,7 +510,7 @@ const Translations = {
 		'settings.tab.patch_notes':          'Notes de mise à jour',
 
 		// Credits subtitle
-		'credits.subtitle':                  'À jour avec eMush V0.31',
+		'credits.subtitle':                  'À jour avec eMush V0.37',
 
 		// Patch notes
 		'patch_notes.v1_3.subtitle_crew':    'Gestion d\'équipage',
@@ -774,7 +774,7 @@ const Translations = {
 		'settings.tab.patch_notes':          'Notas de actualización',
 
 		// Credits subtitle
-		'credits.subtitle':                  'Actualizado con eMush V0.31',
+		'credits.subtitle':                  'Actualizado con eMush V0.37',
 
 		// Patch notes
 		'patch_notes.v1_3.subtitle_crew':    'Gestor de tripulación',

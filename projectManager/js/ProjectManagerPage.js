@@ -49,12 +49,13 @@ class ProjectManagerPage extends Component {
 		this._infoSection.appendChild(new InfoPanel({
 			className: 'project-manager-info-panel',
 			content: `
-				<p>The <img src="${getResourceURL('pictures/abilities/human/expert.png')}" alt=""> button allow to see the estimation of how many AP are necessary to finish a project.</p>
+				<p>The <img src="${getResourceURL('pictures/abilities/human/expert.png')}" alt=""> button toggles the estimation of how many AP are necessary to finish a project.</p>
 				<p>These estimations assumes that two crewmembers are relaying it. Each row depends on the number of relevant skills this duo posses while working on it:</p>
 				<p>1: They don't have a relevant skill.</p>
 				<p>2: One of them has one relevant skill.</p>
 				<p>3: They both have one, or one of them has two.</p>
 				<p>4: They both have the two relevant skills.</p>
+				<p></p>
 				<p class="project-manager-info-line"><img src="${getResourceURL('pictures/abilities/human/neron.png')}" alt="">Activate the effect of Neron's Only Friend.</p>
 				<p class="project-manager-info-line"><img src="${getResourceURL('pictures/abilities/human/panique.png')}" alt="">Activate the Priority on projects.</p>
 			`

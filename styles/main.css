@@ -294,6 +294,11 @@ body.panel-click-mode .app-panel:not(.pinned):not(.force-close):hover {
 	margin-bottom: 0;
 }
 
+.info-panel-body img {
+	width: 25px;
+	height: auto;
+}
+
 .info-panel-section {
 	margin-top: 12px;
 	padding-top: 10px;

@@ -5,9 +5,7 @@
 }
 
 .project-manager-info-line img {
-	width: 24px;
-	height: 24px;
-	flex: 0 0 24px;
+	flex: 0 0 25px;
 	image-rendering: pixelated;
 }
 
