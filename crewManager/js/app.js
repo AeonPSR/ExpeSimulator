@@ -69,6 +69,14 @@ class CrewManagerApp {
 		return this._page?.getAvatarHealth?.(filename) ?? null;
 	}
 
+	setActive(active) {
+		if (active) {
+			this._skillCardInjector?.start();
+		} else {
+			this._skillCardInjector?.stop();
+		}
+	}
+
 	importAvatarAbilities(filename, abilities, mushAbilities) {
 		this._page?.importAvatarAbilities?.(filename, abilities, mushAbilities);
 		const panel = this._panel.element;

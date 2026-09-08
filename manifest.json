@@ -13,7 +13,13 @@
   ],
   "content_scripts": [
     {
-      "matches": ["https://emush.eternaltwin.org/game*"],
+      "matches": ["https://emush.eternaltwin.org/*"],
+      "js": ["general/js/managers/RouteChangeBridge.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://emush.eternaltwin.org/*"],
       "js": [
         "config.js",
         "general/js/utils/constants.js",

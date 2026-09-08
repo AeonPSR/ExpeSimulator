@@ -19,6 +19,7 @@ Todo:
 - Easter egg when generating a random char
 
 Done since last update:
+- Fixed the extension not loading proprely in some cases
 - Fixed the crew manager import that wasn't importing mush skills.
 - Fixing the import button on message going to the wrong place.
 - Allow to reorder pannels.

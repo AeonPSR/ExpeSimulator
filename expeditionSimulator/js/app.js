@@ -735,6 +735,13 @@ class ExpeditionSimulatorApp {
 	getSelectedSectors() { return this._state.getSectors(); }
 	getPlayers() { return this._state.getPlayers(); }
 	getPanel() { return this._panel; }
+	setActive(active) {
+		if (active) {
+			this._planetCardInjector?.start();
+		} else {
+			this._planetCardInjector?.stop();
+		}
+	}
 
 	// ========================================
 	// Web Worker
