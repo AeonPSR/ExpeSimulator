@@ -242,6 +242,10 @@ const Translations = {
 		'crewmanager.new_day.confirm':       'Start a new day for all living crew members?',
 		'crewmanager.new_day.yes':           'Yes',
 		'crewmanager.new_day.no':            'No',
+		'crewmanager.death':                 'Death (-1PMO)',
+		'crewmanager.death.confirm':         'Register a death for all living crew members?',
+		'crewmanager.death.yes':             'Yes',
+		'crewmanager.death.no':              'No',
 
 		// Settings panel
 		'settings.title':                    'Settings',
@@ -530,6 +534,10 @@ const Translations = {
 		'crewmanager.new_day.confirm':       'Commencer un nouveau jour pour tous les membres d\'équipage vivants ?',
 		'crewmanager.new_day.yes':           'Oui',
 		'crewmanager.new_day.no':            'Non',
+		'crewmanager.death':                 'Mort (-1PMO)',
+		'crewmanager.death.confirm':         'Enregistrer une mort pour tous les membres d\'équipage vivants ?',
+		'crewmanager.death.yes':             'Oui',
+		'crewmanager.death.no':              'Non',
 
 		// Settings panel
 		'settings.title':                    'Réglages',
@@ -818,6 +826,10 @@ const Translations = {
 		'crewmanager.new_day.confirm':       '¿Empezar un nuevo día para todos los tripulantes vivos?',
 		'crewmanager.new_day.yes':           'Sí',
 		'crewmanager.new_day.no':            'No',
+		'crewmanager.death':                 'Muerte (-1PMO)',
+		'crewmanager.death.confirm':         '¿Registrar una muerte para todos los tripulantes vivos?',
+		'crewmanager.death.yes':             'Sí',
+		'crewmanager.death.no':              'No',
 
 		// Settings panel
 		'settings.title':                    'Ajustes',

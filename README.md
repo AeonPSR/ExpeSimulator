@@ -16,11 +16,12 @@ Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
 Todo:
 - Easter egg when generating a random char
-- Add a "death" button ?
+
 
 Done since last update:
 - Improved the expert mode of the crew manager to have global modificators.
 - Added a new day button
+- Added a new death button
 - Added the Project module.
 - Crew manager: Changed the starting PMO count to 6 instead of 14.
 - Fixed the extension not loading proprely in some cases

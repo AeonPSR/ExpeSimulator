@@ -44,7 +44,7 @@ class CrewManagerPage extends Component {
 		// Details section
 		const detailsSection = this._renderSection(
 			'crewmanager.section.details',
-			[this._renderNewDayButton(), this._renderExpertToggle(), this._renderCycleToggle()],
+			[this._renderNewDayButton(), this._renderDeathButton(), this._renderExpertToggle(), this._renderCycleToggle()],
 			true
 		);
 		this._detailsSection = new CrewDetailsSection({
@@ -183,6 +183,34 @@ class CrewManagerPage extends Component {
 				cancelLabel: I18n.t('crewmanager.new_day.no'),
 				panelElement: this.element?.closest('.app-panel'),
 				onConfirm: () => this._detailsSection?.applyNewDay()
+			}).open();
+		});
+		return button;
+	}
+
+	_renderDeathButton() {
+		const button = this.createElement('button', {
+			className: 'crew-death-btn',
+			type: 'button',
+			'aria-label': I18n.t('crewmanager.death')
+		});
+		const label = this.createElement('span', {
+			className: 'crew-death-label',
+			'data-i18n': 'crewmanager.death'
+		}, I18n.t('crewmanager.death'));
+		const icon = this.createElement('img', {
+			src: getResourceURL('pictures/ui/dead.png'),
+			alt: ''
+		});
+		button.appendChild(label);
+		button.appendChild(icon);
+		this.addEventListener(button, 'click', () => {
+			new ConfirmationModal({
+				title: I18n.t('crewmanager.death.confirm'),
+				confirmLabel: I18n.t('crewmanager.death.yes'),
+				cancelLabel: I18n.t('crewmanager.death.no'),
+				panelElement: this.element?.closest('.app-panel'),
+				onConfirm: () => this._detailsSection?.applyDeath()
 			}).open();
 		});
 		return button;

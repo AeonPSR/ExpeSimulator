@@ -117,6 +117,16 @@ class CrewDetailsSection extends Component {
 		this._notifyPlayerChange();
 	}
 
+	applyDeath() {
+		Object.entries(this._playerByFilename).forEach(([filename, player]) => {
+			if (CrewCharacterState.isDead(player)) return;
+			player.morale = Math.max(0, player.morale - 1);
+			this._cardInstanceByFilename[filename]?.updateSlotValue('morale', player.morale);
+			this._syncDeathState(filename);
+		});
+		this._notifyPlayerChange();
+	}
+
 	_renderControlsCard() {
 		const card = this.createElement('div', {
 			className: 'player-profile crew-controls-card',
