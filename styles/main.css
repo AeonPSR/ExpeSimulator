@@ -294,6 +294,11 @@ body.panel-click-mode .app-panel:not(.pinned):not(.force-close):hover {
 	margin-bottom: 0;
 }
 
+.info-panel-body img {
+	width: 25px;
+	height: auto;
+}
+
 .info-panel-section {
 	margin-top: 12px;
 	padding-top: 10px;
@@ -393,7 +398,7 @@ body.panel-click-mode .app-panel:not(.pinned):not(.force-close):hover {
 	background: rgba(231, 76, 60, 0.4);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 400px) {
 	.app-panel .panel-close-btn {
 		display: flex;
 	}
@@ -826,7 +831,7 @@ body.panel-click-mode .app-panel:not(.pinned):not(.force-close):hover {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
 	.app-panel {
 		width: 100vw;
 		transform: translateX(-100vw);

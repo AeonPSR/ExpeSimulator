@@ -45,9 +45,9 @@ class CrewSkillCardInjector {
 			event.stopPropagation();
 			const filename = this._parseCharacterFilename(skillsRow.closest('.mate'));
 			if (!filename) return;
-			const abilities = this._parseAbilities(skillsRow, filename);
-			if (abilities.length > 0) {
-				this._onImport?.(filename, abilities);
+			const { abilities, mushAbilities } = this._parseAbilities(skillsRow, filename);
+			if (abilities.length > 0 || mushAbilities.length > 0) {
+				this._onImport?.(filename, abilities, mushAbilities);
 			}
 		});
 
@@ -92,10 +92,15 @@ class CrewSkillCardInjector {
 	}
 
 	_parseAbilities(skillsRow, filename) {
-		return [...skillsRow.querySelectorAll('.skill-image')]
+		const imported = [...skillsRow.querySelectorAll('.skill-image')]
 			.map(img => this._mapSkillImage(img, filename))
 			.filter(Boolean)
 			.filter((ability, index, abilities) => abilities.indexOf(ability) === index);
+
+		return {
+			abilities: imported.filter(ability => ability.startsWith('human/')),
+			mushAbilities: imported.filter(ability => ability.startsWith('mush/'))
+		};
 	}
 
 	_mapSkillImage(img, filename) {
@@ -109,7 +114,10 @@ class CrewSkillCardInjector {
 	}
 
 	_getSkillByKey(value) {
-		return CrewSkillCardInjector.SKILL_MAP[this._normalize(value)] || null;
+		const key = this._normalize(value);
+		return CrewSkillCardInjector.SKILL_MAP[key]
+			|| CrewSkillCardInjector.MUSH_SKILL_MAP[key]
+			|| null;
 	}
 
 	_isOwnedSkill(filename, ability) {
@@ -200,6 +208,36 @@ CrewSkillCardInjector.SKILL_MAP = {
 	torturer:          'human/bourreau.png',
 	unconcerned:       'human/detache.png',
 	wrestler:          'human/lutteur.png'
+};
+
+// Keys = exact raw filenames the eMush game serves (from App/src/assets/images/skills/mush/).
+// Values = our internal Mush skill IDs.
+CrewSkillCardInjector.MUSH_SKILL_MAP = {
+	anonymous:             'mush/anonymush.png',
+	bacterial_contact:     'mush/bacterophilie.png',
+	beta_mush:             'mush/beta-mush.png',
+	defacer:               'mush/dialoguiste.png',
+	disheartening_contact: 'mush/contact-deprimant.png',
+	doorman:               'mush/portier.png',
+	electro_slime:         'mush/gelee-verte.png',
+	fertile:               'mush/fertile.png',
+	fungus_cook:           'mush/cuisine-fongique.png',
+	massggedon:            'mush/moisification-masse.png',
+	mycellium_spirit:      'mush/esprit-mycelium.png',
+	neron_access:          'mush/conspirateur.png',
+	nerondepress:          'mush/depression-neron.png',
+	nightmare:             'mush/cauchemardesque.png',
+	nimble_fingers:        'mush/doigt-fee.png',
+	ninja:                 'mush/ninja.png',
+	phagocytosis:          'mush/phagocytose.png',
+	pyromane:              'mush/pyromane.png',
+	sapper:                'mush/saboteur.png',
+	slimetrap:             'mush/piege-moisi.png',
+	tough:                 'mush/dur-a-cuir.png',
+	traitor:               'mush/traitre.png',
+	trapper:               'mush/piegeur.png',
+	transfert:             'mush/transfert.png',
+	water_resistant:       'mush/resistance-eau.png'
 };
 
 var _global = typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : {};

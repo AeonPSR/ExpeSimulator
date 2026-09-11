@@ -4,6 +4,56 @@
    ========================================================================== */
 
 /* ==========================================================================
+   Panel Sections
+   Shared section layout used by Crew Manager, Project Manager, etc.
+   ========================================================================== */
+
+.panel-section {
+	margin: 0;
+}
+
+.panel-section--collapsed > :not(.sectors-header) {
+	display: none;
+}
+
+.panel-section h4 {
+	margin: 0 0 10px 0;
+	font-size: 16px;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 8px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Panel Reset Button
+   Shared destructive-action button used at the bottom of panels.
+   ========================================================================== */
+
+.panel-reset-row {
+	margin-top: auto;
+	padding-top: 10px;
+	display: flex;
+	justify-content: center;
+}
+
+.panel-reset-btn {
+	padding: 8px 20px;
+	background: rgba(231, 76, 60, 0.15);
+	border: 1px solid #e74c3c;
+	border-radius: 4px;
+	color: #e74c3c;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.panel-reset-btn:hover {
+	background: rgba(231, 76, 60, 0.3);
+}
+
+/* ==========================================================================
    Status Colors
    ========================================================================== */
 

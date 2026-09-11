@@ -51,11 +51,11 @@ class ExpeditionSimulatorApp {
 		this._panel.mount(document.body);
 		this._createSections();
 
-		// Start watching chat for expedition messages
+		// Register expedition messages with the shared chat scanner.
 		this._chatDetector = new ChatObserver({
 			onImport: (sectors, planetName, nav) => this._onImportSectors(sectors, planetName, nav)
 		});
-		this._chatDetector.start();
+		window.chatMessageScanner.register(this._chatDetector);
 
 		this._planetCardInjector = new PlanetCardInjector({
 			onImport: (sectors, planetName, nav) => this._onImportSectors(sectors, planetName, nav)
@@ -735,6 +735,13 @@ class ExpeditionSimulatorApp {
 	getSelectedSectors() { return this._state.getSectors(); }
 	getPlayers() { return this._state.getPlayers(); }
 	getPanel() { return this._panel; }
+	setActive(active) {
+		if (active) {
+			this._planetCardInjector?.start();
+		} else {
+			this._planetCardInjector?.stop();
+		}
+	}
 
 	// ========================================
 	// Web Worker

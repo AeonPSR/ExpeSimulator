@@ -15,10 +15,16 @@ npm test      # run the Jest test suite
 Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
 Todo:
-- Add the "Projects" page
-- Easter egg when generating a random char
 
 Done since last update:
+- Improved the expert mode of the crew manager to have global modificators.
+- Added a new day button
+- Added a new death button
+- Added the Project module.
+- Crew manager: Changed the starting PMO count to 6 instead of 14.
+- Fixed the extension not loading proprely in some cases
+- Fixed the crew manager import that wasn't importing mush skills.
+- Fixing the import button on message going to the wrong place.
 - Allow to reorder pannels.
 - Hiding a module also hide the related import buttons.
 - Fixed the tab not closing proprely 

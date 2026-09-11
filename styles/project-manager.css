@@ -1,0 +1,364 @@
+.project-manager-info-line {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.project-manager-info-line img {
+	flex: 0 0 25px;
+	image-rendering: pixelated;
+}
+
+.project-card-aeon-grid--active.import-highlight {
+	animation: import-highlight 1.5s ease-in-out;
+}
+
+/* ==========================================================================
+   Project Manager Panel
+   ========================================================================== */
+
+/* ── Page layout ─────────────────────────────────────────────────────────── */
+
+.project-manager-page {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 12px 4px;
+}
+
+.project-manager-page:not(.project-expert-active) .project-expert-extra,
+.project-manager-page:not(.project-expert-active) .project-card-aeon-ap-list {
+	display: none;
+}
+
+.project-manager-page .project-section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-direction: row;
+	margin-bottom: 15px;
+	position: sticky;
+	top: 0;
+	z-index: 800;
+}
+
+.project-manager-page .project-section-header h4 {
+	margin: 0;
+	font-size: 16px;
+	color: #3498db;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 8px;
+	flex: 1;
+	text-transform: none;
+	font-weight: 700;
+}
+
+.project-manager-page .project-section-buttons {
+	display: flex;
+	flex-direction: row;
+	gap: 5px;
+	margin-left: 10px;
+}
+
+.project-manager-page .panel-section--collapsed > .project-section-header {
+	display: flex;
+}
+
+.project-manager-page .panel-section--collapsed > .project-section-sentinel {
+	display: block;
+}
+
+.project-manager-page .project-section-header.project-section-stuck::before {
+	content: '';
+	position: absolute;
+	top: -40px;
+	left: -4px;
+	right: -4px;
+	bottom: 0;
+	background: rgb(44, 62, 80);
+	z-index: -1;
+}
+
+.project-section-sentinel {
+	height: 0;
+}
+
+/* ── Project card ─────────────────────────────────────────────────────────── */
+
+.project-card-aeon-grid {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.project-card-aeon-grid--active {
+	gap: 50px;
+}
+
+.project-card-aeon-active-slot {
+	position: relative;
+}
+
+.project-card-aeon-active-slot > .project-card-aeon--empty {
+	position: relative;
+	z-index: 0;
+}
+
+.project-card-aeon-active-slot--filled > .project-card-aeon--empty {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.project-card-aeon-finish-btn {
+	display: block;
+	width: 80px;
+	margin-top: 8px;
+	padding: 6px 4px;
+	border: 2px solid #6f7b83;
+	border-radius: 4px;
+	background: rgb(61, 72, 80);
+	color: #95a5a6;
+	font-size: 10px;
+	font-weight: 700;
+	cursor: not-allowed;
+}
+
+.project-card-aeon-active-slot--filled > .project-card-aeon-finish-btn {
+	border-color: #3498db;
+	background: rgb(35, 73, 99);
+	color: #fff;
+	cursor: pointer;
+}
+
+.project-card-aeon-finish-btn:not(:disabled):hover {
+	background: rgb(43, 91, 124);
+}
+
+.project-card-aeon-grid--details {
+	row-gap: 10px;
+	column-gap: 5px;
+}
+
+.project-card-aeon-efficiency-group {
+	position: relative;
+	padding-top: 15px;
+}
+
+.project-card-aeon-efficiency-group:first-child {
+	padding-top: 0;
+}
+
+.project-card-aeon-efficiency-group:not(:first-child)::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 12px;
+	right: 12px;
+	height: 1px;
+	background: #6f7b83;
+}
+
+.project-card-aeon-efficiency-group + .project-card-aeon-efficiency-group {
+	margin-top: 12px;
+}
+
+.project-card-aeon {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	width: 80px;
+	background: rgb(44, 62, 80);
+	border: 2px solid #8b949e;
+	border-radius: 8px;
+	position: relative;
+}
+
+.project-card-aeon--empty {
+	border-color: #6f7b83;
+	background: rgb(61, 72, 80);
+	filter: grayscale(1);
+	opacity: 0.65;
+}
+
+.project-card-aeon-image--empty {
+	height: 75px;
+	min-height: 75px;
+	box-sizing: content-box;
+	flex-shrink: 0;
+}
+
+.project-card-aeon--empty .project-card-aeon-skills {
+	min-height: 35px;
+}
+
+.project-card-aeon--empty .project-card-aeon-pct {
+	color: #95a5a6;
+}
+
+.project-card-aeon-core {
+	border-color: #f39c12;
+	background: rgb(86, 63, 29);
+}
+
+.project-card-aeon-done {
+	border-color: #3498db;
+	background: rgb(35, 73, 99);
+}
+
+/* Bin state — slides to the bottom of the grid. */
+.project-card-aeon-hidden {
+	filter: grayscale(1);
+	opacity: 0.45;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle,
+.app-panel .project-card-aeon .project-card-aeon-state-toggle:hover,
+.app-panel .project-card-aeon .project-card-aeon-state-toggle[data-active="true"] {
+	background: rgb(44, 62, 80);
+	border-color: #8b949e;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle img {
+	opacity: 1;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle::before,
+.app-panel .project-card-aeon .project-card-aeon-state-toggle::after {
+	display: none;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--unavailable::before,
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--unavailable::after {
+	display: block;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--core {
+	top: -12px;
+	right: -12px;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--done {
+	top: 14px;
+	right: -12px;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--bin {
+	top: 40px;
+	right: -12px;
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--core[data-active="true"] {
+	border-color: #f39c12;
+	background: rgb(86, 63, 29);
+}
+
+.app-panel .project-card-aeon .project-card-aeon-state-toggle--done[data-active="true"] {
+	border-color: #3498db;
+	background: rgb(35, 73, 99);
+}
+
+/* FLIP slide when re-sorting after a visibility toggle (matches crew speed) */
+.project-card-aeon-moving {
+	position: relative;
+	z-index: 30;
+	transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Image */
+.project-card-aeon-image {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px;
+	background: rgba(0, 0, 0, 0.25);
+	overflow: hidden;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+}
+
+.project-card-aeon-image img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+
+/* Shared row */
+.project-card-aeon-row {
+	display: flex;
+	flex-direction: row;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.project-card-aeon-cell {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 5px 2px;
+}
+
+.project-card-aeon-cell + .project-card-aeon-cell {
+	border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Skills row */
+.project-card-aeon-skills {
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.project-card-aeon-skill-icon {
+	width: 25px;
+	height: 25px;
+	object-fit: contain;
+	opacity: 0.85;
+}
+
+.project-card-aeon-skill-fallback {
+	font-size: 8px;
+	color: rgba(255, 255, 255, 0.4);
+	text-align: center;
+	word-break: break-all;
+}
+
+/* Efficiency row */
+.project-card-aeon-efficiency-cell {
+	gap: 2px;
+}
+
+.project-card-aeon-pct {
+	font-size: 12px;
+	font-weight: 700;
+	color: #3498db;
+	line-height: 1;
+}
+
+.project-card-aeon-label {
+	font-size: 9px;
+	color: rgba(255, 255, 255, 0.45);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	line-height: 1;
+}
+
+/* AP row */
+.project-card-aeon-ap {
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	padding: 6px 4px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	font-size: 11px;
+	font-weight: 600;
+	color: #e67e22;
+}
+
+.project-card-aeon-ap-icon {
+	width: 14px;
+	height: 14px;
+	object-fit: contain;
+	image-rendering: pixelated;
+}

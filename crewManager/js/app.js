@@ -42,7 +42,7 @@ class CrewManagerApp {
 		]);
 
 		this._skillCardInjector = new CrewSkillCardInjector({
-			onImport: (filename, abilities) => this.importAvatarAbilities(filename, abilities)
+			onImport: (filename, abilities, mushAbilities) => this.importAvatarAbilities(filename, abilities, mushAbilities)
 		});
 		this._skillCardInjector.start();
 
@@ -69,8 +69,16 @@ class CrewManagerApp {
 		return this._page?.getAvatarHealth?.(filename) ?? null;
 	}
 
-	importAvatarAbilities(filename, abilities) {
-		this._page?.importAvatarAbilities?.(filename, abilities);
+	setActive(active) {
+		if (active) {
+			this._skillCardInjector?.start();
+		} else {
+			this._skillCardInjector?.stop();
+		}
+	}
+
+	importAvatarAbilities(filename, abilities, mushAbilities) {
+		this._page?.importAvatarAbilities?.(filename, abilities, mushAbilities);
 		const panel = this._panel.element;
 		const wasAlreadyOpen = panel.getBoundingClientRect().left >= 0;
 		panel.classList.add('import-open');

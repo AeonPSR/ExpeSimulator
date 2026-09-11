@@ -16,6 +16,7 @@ class CrewDetailCardOrganizer {
 	appendSorted(container, filename, card) {
 		const cardName = this._getCharacterName(filename);
 		const nextCard = Array.from(container.children).find(child => {
+			if (!child.dataset.filename) return false;
 			return this._getCharacterName(child.dataset.filename).localeCompare(cardName) > 0;
 		});
 		container.insertBefore(card, nextCard || null);

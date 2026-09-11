@@ -19,6 +19,8 @@ class CrewManagerPage extends Component {
 		this._hiddenCharacters = new Set();
 		this._titleBlockedCharacters = new Set();
 		this._roleOrder = ['commandant', 'comm', 'admin'];
+		this._detailsHeaderSentinel = null;
+		this._detailsHeaderObserver = null;
 		this._savedState = CrewManagerStorage.load();
 	}
 
@@ -40,7 +42,11 @@ class CrewManagerPage extends Component {
 		this.element.appendChild(this._titleSection);
 
 		// Details section
-		const detailsSection = this._renderSection('crewmanager.section.details', [this._renderExpertToggle(), this._renderCycleToggle()]);
+		const detailsSection = this._renderSection(
+			'crewmanager.section.details',
+			[this._renderNewDayButton(), this._renderDeathButton(), this._renderExpertToggle(), this._renderCycleToggle()],
+			true
+		);
 		this._detailsSection = new CrewDetailsSection({
 			savedPlayers: this._savedState.players,
 			onVisibilityChange: (filename, visible) => this._setCharacterVisible(filename, visible),
@@ -59,20 +65,44 @@ class CrewManagerPage extends Component {
 		return this.element;
 	}
 
-	_renderSection(titleKey, headerButtons = null) {
-		const section = this.createElement('div', { className: 'crew-section' });
-		const header = this.createElement('div', { className: 'sectors-header' });
+	_renderSection(titleKey, headerButtons = null, sticky = false) {
+		const section = this.createElement('div', { className: 'panel-section' });
+		const headerClass = sticky ? 'crew-section-header crew-details-header' : 'crew-section-header';
+		const header = this.createElement('div', { className: headerClass });
 		const title = this.createElement('h4', { 'data-i18n': titleKey }, I18n.t(titleKey));
 		header.appendChild(title);
 		if (headerButtons) {
-			const buttonsContainer = this.createElement('div', { className: 'sectors-buttons' });
+			const buttonsContainer = this.createElement('div', { className: 'crew-section-buttons' });
 			(Array.isArray(headerButtons) ? headerButtons : [headerButtons]).forEach(button => {
 				buttonsContainer.appendChild(button);
 			});
 			header.appendChild(buttonsContainer);
 		}
+		if (sticky) {
+			this._detailsHeaderSentinel = this.createElement('div', { className: 'crew-section-sentinel' });
+			this._detailsHeaderSentinel._stickyHeader = header;
+			section.appendChild(this._detailsHeaderSentinel);
+		}
 		section.appendChild(header);
 		return section;
+	}
+
+	onMount() {
+		const scrollRoot = this.element.closest('.panel-content');
+		if (!scrollRoot || !this._detailsHeaderSentinel || typeof IntersectionObserver === 'undefined') {
+			return;
+		}
+		const padTop = parseFloat(getComputedStyle(scrollRoot).paddingTop) || 0;
+		this._detailsHeaderObserver = new IntersectionObserver(([entry]) => {
+			const header = entry.target._stickyHeader;
+			const stuck = !entry.isIntersecting && entry.boundingClientRect.top <= entry.rootBounds.top;
+			header.classList.toggle('crew-section-stuck', stuck);
+		}, { root: scrollRoot, rootMargin: `-${padTop}px 0px 0px 0px`, threshold: [0, 1] });
+		this._detailsHeaderObserver.observe(this._detailsHeaderSentinel);
+	}
+
+	onDestroy() {
+		this._detailsHeaderObserver?.disconnect();
 	}
 
 	_renderStatusBadgeToggle() {
@@ -97,13 +127,13 @@ class CrewManagerPage extends Component {
 		if (!this._titleVisibilityToggle) {
 			this._titleVisibilityToggle = new ToggleButton({
 				id: 'crew-title-visibility-btn',
-				className: 'diplomacy-toggle-btn',
+				className: 'section-visibility-btn',
 				icon: getResourceURL('pictures/ui/visibility.png'),
 				alt: '',
 				activeColor: 'blue',
 				initialState: Boolean(this._savedState.options.titleVisible),
 				onToggle: (isVisible) => {
-					this._titleSection?.classList.toggle('crew-section--collapsed', !isVisible);
+					this._titleSection?.classList.toggle('panel-section--collapsed', !isVisible);
 					CrewManagerStorage.saveOptions({ titleVisible: isVisible });
 				}
 			});
@@ -122,11 +152,68 @@ class CrewManagerPage extends Component {
 				initialState: Boolean(this._savedState.options.expert),
 				onToggle: (isActive) => {
 					this.element?.classList.toggle('crew-expert-active', isActive);
+					this._updateControlsCardVisibility();
 					CrewManagerStorage.saveOptions({ expert: isActive });
 				}
 			});
 		}
 		return this._expertToggle.render();
+	}
+
+	_renderNewDayButton() {
+		const button = this.createElement('button', {
+			className: 'crew-new-day-btn',
+			type: 'button',
+			'aria-label': I18n.t('crewmanager.new_day')
+		});
+		const label = this.createElement('span', {
+			className: 'crew-new-day-label',
+			'data-i18n': 'crewmanager.new_day'
+		}, I18n.t('crewmanager.new_day'));
+		const icon = this.createElement('img', {
+			src: getResourceURL('pictures/ui/calendar.png'),
+			alt: ''
+		});
+		button.appendChild(label);
+		button.appendChild(icon);
+		this.addEventListener(button, 'click', () => {
+			new ConfirmationModal({
+				title: I18n.t('crewmanager.new_day.confirm'),
+				confirmLabel: I18n.t('crewmanager.new_day.yes'),
+				cancelLabel: I18n.t('crewmanager.new_day.no'),
+				panelElement: this.element?.closest('.app-panel'),
+				onConfirm: () => this._detailsSection?.applyNewDay()
+			}).open();
+		});
+		return button;
+	}
+
+	_renderDeathButton() {
+		const button = this.createElement('button', {
+			className: 'crew-death-btn',
+			type: 'button',
+			'aria-label': I18n.t('crewmanager.death')
+		});
+		const label = this.createElement('span', {
+			className: 'crew-death-label',
+			'data-i18n': 'crewmanager.death'
+		}, I18n.t('crewmanager.death'));
+		const icon = this.createElement('img', {
+			src: getResourceURL('pictures/ui/dead.png'),
+			alt: ''
+		});
+		button.appendChild(label);
+		button.appendChild(icon);
+		this.addEventListener(button, 'click', () => {
+			new ConfirmationModal({
+				title: I18n.t('crewmanager.death.confirm'),
+				confirmLabel: I18n.t('crewmanager.death.yes'),
+				cancelLabel: I18n.t('crewmanager.death.no'),
+				panelElement: this.element?.closest('.app-panel'),
+				onConfirm: () => this._detailsSection?.applyDeath()
+			}).open();
+		});
+		return button;
 	}
 
 	_renderCycleToggle() {
@@ -140,6 +227,7 @@ class CrewManagerPage extends Component {
 				initialState: Boolean(this._savedState.options.cycle),
 				onToggle: (isActive) => {
 					this.element?.classList.toggle('crew-cycle-active', isActive);
+					this._updateControlsCardVisibility();
 					CrewManagerStorage.saveOptions({ cycle: isActive });
 				}
 			});
@@ -151,13 +239,19 @@ class CrewManagerPage extends Component {
 		this.element?.classList.toggle('crew-expert-active',        Boolean(this._savedState.options.expert));
 		this.element?.classList.toggle('crew-cycle-active',         Boolean(this._savedState.options.cycle));
 		this.element?.classList.toggle('crew-status-badges-active', Boolean(this._savedState.options.statusBadges));
-		this._titleSection?.classList.toggle('crew-section--collapsed', !Boolean(this._savedState.options.titleVisible));
+		this._titleSection?.classList.toggle('panel-section--collapsed', !Boolean(this._savedState.options.titleVisible));
+		this._updateControlsCardVisibility();
+	}
+
+	_updateControlsCardVisibility() {
+		const visible = Boolean(this._expertToggle?.getActive() || this._cycleToggle?.getActive());
+		this._detailsSection?.setControlsVisible(visible);
 	}
 
 	_renderResetButton() {
-		const wrapper = this.createElement('div', { className: 'crew-reset-row' });
+		const wrapper = this.createElement('div', { className: 'panel-reset-row' });
 		const btn = this.createElement('button', {
-			className: 'crew-reset-btn',
+			className: 'panel-reset-btn',
 			'data-i18n': 'crewmanager.reset'
 		}, I18n.t('crewmanager.reset'));
 		this.addEventListener(btn, 'click', () => {
@@ -257,8 +351,8 @@ class CrewManagerPage extends Component {
 		return this._detailsSection?.getAvatarHealth?.(filename) ?? null;
 	}
 
-	importAvatarAbilities(filename, abilities) {
-		this._detailsSection?.importAvatarAbilities?.(filename, abilities);
+	importAvatarAbilities(filename, abilities, mushAbilities) {
+		this._detailsSection?.importAvatarAbilities?.(filename, abilities, mushAbilities);
 	}
 
 	scrollAndHighlight(filename) {

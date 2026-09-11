@@ -28,7 +28,7 @@ class CrewCharacterState {
 	static getResetValues(startsHuman = false) {
 		return {
 			health:    Constants.DEFAULT_HEALTH,
-			morale:    14,
+			morale:    6,
 			spore:     0,
 			pa:        0,
 			pm:        0,

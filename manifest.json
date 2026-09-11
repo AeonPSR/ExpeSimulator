@@ -1,7 +1,7 @@
 ﻿{
   "manifest_version": 3,
   "name": "Aeon's Lab",
-  "version": "1.3",
+  "version": "1.4",
   "description": "An ensemble of tools designed to simplify and simulate several aspects of eMush's mecanics.",
   "browser_specific_settings": {
     "gecko": {
@@ -13,7 +13,13 @@
   ],
   "content_scripts": [
     {
-      "matches": ["https://emush.eternaltwin.org/game*"],
+      "matches": ["https://emush.eternaltwin.org/*"],
+      "js": ["general/js/managers/RouteChangeBridge.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://emush.eternaltwin.org/*"],
       "js": [
         "config.js",
         "general/js/utils/constants.js",
@@ -22,6 +28,7 @@
         "general/js/utils/Settings.js",
         "expeditionSimulator/js/data/Translations.js",
         "general/js/utils/I18n.js",
+    		"general/js/managers/ChatMessageScanner.js",
         "expeditionSimulator/js/utils/EventClassifier.js",
         "expeditionSimulator/js/utils/Hash.js",
         "expeditionSimulator/js/utils/Format.js",
@@ -35,6 +42,7 @@
         "general/js/core/Component.js",
         "expeditionSimulator/js/core/ExpeditionState.js",
         "general/js/components/shared/ToggleButton.js",
+        "general/js/components/shared/VisibilityToggle.js",
         "general/js/components/shared/Modal.js",
         "general/js/components/shared/ConfirmationModal.js",
         "general/js/components/shared/SelectionModal.js",
@@ -98,6 +106,12 @@
         "crewManager/js/CrewDetailsSection.js",
         "crewManager/js/CrewManagerPage.js",
         "crewManager/js/app.js",
+        "projectManager/js/data/ProjectData.js",
+    		"projectManager/js/services/ProjectManagerStorage.js",
+        "projectManager/js/ProjectCard.js",
+        "projectManager/js/ProjectManagerPage.js",
+    		"projectManager/js/ProjectMessageInjector.js",
+        "projectManager/js/app.js",
         "content.js"
       ],
       "css": [
@@ -105,6 +119,7 @@
         "styles/main.css",
         "styles/settings.css",
         "styles/crew-manager.css",
+        "styles/project-manager.css",
         "styles/utilities.css", 
         "styles/buttons.css",
         "styles/sectors.css",
@@ -118,7 +133,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["pictures/abilities/*", "pictures/abilities/*/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*/*", "pictures/consumables/*", "pictures/gear/*", "*.png", "*.jpg", "*.gif", "font/*"],
+      "resources": ["pictures/abilities/*", "pictures/abilities/*/*", "pictures/characters/*", "pictures/sectors/*", "pictures/planets/*", "pictures/ui/*", "pictures/projects/*/*", "pictures/consumables/*", "pictures/gear/*", "projectManager/project_names.csv", "*.png", "*.jpg", "*.gif", "font/*"],
       "matches": ["<all_urls>"]
     },
     {

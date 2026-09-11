@@ -13,7 +13,7 @@
 const Settings = (() => {
 	const THEMES = ['retro', 'default'];
 	const NAVMODES = ['hover', 'click'];
-	const DEFAULT_PANEL_ORDER = ['crew-manager-panel', 'expedition-simulator', 'settings-panel'];
+	const DEFAULT_PANEL_ORDER = ['crew-manager-panel', 'project-manager-panel', 'expedition-simulator', 'settings-panel'];
 	const STORAGE = {
 		THEME: 'expe-sim-theme',
 		DEVTOOLS: 'expe-sim-devtools',

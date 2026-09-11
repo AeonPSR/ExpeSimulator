@@ -1,9 +1,12 @@
 /**
  * Content Script Entry Point
  * 
- * This is loaded by the Chrome extension into the target page.
- * Initializes the Expedition Simulator when the page loads.
+ * This is loaded by the Chrome extension into eMush pages.
+ * Initializes the application on /game and pauses DOM observers elsewhere.
  */
+
+let appInitialized = false;
+let appActive = false;
 
 // Global error handler for extension context invalidation
 window.addEventListener('error', (event) => {
@@ -18,6 +21,8 @@ window.addEventListener('error', (event) => {
  * Initialize the application
  */
 function initializeApp() {
+	if (appInitialized) return;
+
 	try {
 		// Check if extension context is valid
 		if (!isExtensionContextValid()) {
@@ -25,11 +30,17 @@ function initializeApp() {
 			return;
 		}
 
+		window.chatMessageScanner = new ChatMessageScanner();
+
 		// Create the applications. Crew Manager is first so expedition player
 		// randomization can read crew availability during initial state setup.
 		window.crewManagerApp = new CrewManagerApp();
 		window.expeditionSimulator = new ExpeditionSimulatorApp();
+		window.projectManagerApp = new ProjectManagerApp();
 		window.settingsApp = new SettingsApp();
+		window.chatMessageScanner.start();
+		appInitialized = true;
+		appActive = true;
 
 		// Apply the user's persisted panel order (DOM order breaks z-index
 		// ties between tongues, so this also fixes the visual stacking).
@@ -43,9 +54,31 @@ function initializeApp() {
 	}
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-	initializeApp();
+function isGameRoute() {
+	return window.location.pathname === '/game' || window.location.pathname.startsWith('/game/');
 }
+
+function applyRouteState() {
+	const shouldBeActive = isGameRoute();
+	if (shouldBeActive && !appInitialized) {
+		if (document.readyState === 'loading') return;
+		initializeApp();
+		return;
+	}
+	if (!appInitialized || shouldBeActive === appActive) return;
+
+	appActive = shouldBeActive;
+	const panelsContainer = document.getElementById('panels-container');
+	if (panelsContainer) panelsContainer.hidden = !shouldBeActive;
+	window.crewManagerApp?.setActive(shouldBeActive);
+	window.expeditionSimulator?.setActive(shouldBeActive);
+	if (shouldBeActive) {
+		window.chatMessageScanner?.start();
+	} else {
+		window.chatMessageScanner?.stop();
+	}
+}
+
+window.addEventListener('aeons-lab:route-change', applyRouteState);
+document.addEventListener('DOMContentLoaded', applyRouteState, { once: true });
+applyRouteState();
