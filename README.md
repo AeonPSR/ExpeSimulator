@@ -15,8 +15,6 @@ npm test      # run the Jest test suite
 Supports `https://emush.eternaltwin.org/game*` and `http://localhost/*`.
 
 Todo:
-- Easter egg when generating a random char
-
 
 Done since last update:
 - Improved the expert mode of the crew manager to have global modificators.

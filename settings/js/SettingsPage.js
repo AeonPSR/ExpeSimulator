@@ -460,7 +460,7 @@ class SettingsPage extends Component {
 			const url   = I18n.t('credits.wiki.url');
 			const label = I18n.t('credits.wiki.label');
 			const credits = new InfoPanel({
-				title:    'Aeon\'s Lab - Version 1.3',
+				title:    'Aeon\'s Lab - Version 1.4',
 				subtitle: I18n.t('credits.subtitle'),
 				sections: [
 					{
@@ -483,6 +483,23 @@ class SettingsPage extends Component {
 		const rebuild = () => {
 			const notes = new InfoPanel({
 				sections: [
+					{
+						title:     'Version 1.4',
+						className: 'info-panel-section--version',
+						content:   ''
+					},
+					{
+						title:   I18n.t('patch_notes.v1_4.subtitle_crew'),
+						content: `<p>- ${I18n.t('patch_notes.v1_4.crew1')}</p><p>- ${I18n.t('patch_notes.v1_4.crew2')}</p><p>- ${I18n.t('patch_notes.v1_4.crew3')}</p><p>- ${I18n.t('patch_notes.v1_4.crew4')}</p><p>- ${I18n.t('patch_notes.v1_4.crew5')}</p><p>- ${I18n.t('patch_notes.v1_4.crew6')}</p>`
+					},
+					{
+						title:   I18n.t('patch_notes.v1_4.subtitle_project'),
+						content: `<p>- ${I18n.t('patch_notes.v1_4.project1')}</p>`
+					},
+					{
+						title:   I18n.t('patch_notes.v1_4.subtitle_general'),
+						content: `<p>- ${I18n.t('patch_notes.v1_4.general1')}</p><p>- ${I18n.t('patch_notes.v1_4.general2')}</p><p>- ${I18n.t('patch_notes.v1_4.general3')}</p><p>- ${I18n.t('patch_notes.v1_4.general4')}</p><p>- ${I18n.t('patch_notes.v1_4.general5')}</p>`
+					},
 					{
 						title:     'Version 1.3',
 						className: 'info-panel-section--version',
